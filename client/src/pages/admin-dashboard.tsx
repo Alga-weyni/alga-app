@@ -1,0 +1,597 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { type User, type Property } from "@shared/schema";
+import { 
+  Users, 
+  Home, 
+  FileCheck, 
+  UserCheck, 
+  ShieldCheck, 
+  Activity,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Eye,
+  UserX
+} from "lucide-react";
+
+interface VerificationDocument {
+  id: number;
+  userId: string;
+  documentType: string;
+  documentUrl: string;
+  status: string;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AdminStats {
+  totalUsers: number;
+  newUsersThisMonth: number;
+  activeProperties: number;
+  pendingProperties: number;
+  pendingDocuments: number;
+  totalRevenue: number;
+  monthlyRevenue: number;
+}
+
+export default function AdminDashboard() {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
+  const { toast } = useToast();
+
+  // Fetch users for management
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ['/api/admin/users'],
+  });
+
+  // Fetch properties for verification
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
+    queryKey: ['/api/admin/properties'],
+  });
+
+  // Fetch verification documents
+  const { data: documents = [], isLoading: documentsLoading } = useQuery<VerificationDocument[]>({
+    queryKey: ['/api/admin/verification-documents'],
+  });
+
+  // Fetch system statistics
+  const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
+    queryKey: ['/api/admin/stats'],
+  });
+
+  // Update user role mutation
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      return await apiRequest('PATCH', `/api/admin/users/${userId}/role`, { role });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User Role Updated",
+        description: "User role has been successfully updated",
+      });
+    },
+  });
+
+  // Update user status mutation
+  const updateUserStatusMutation = useMutation({
+    mutationFn: async ({ userId, status }: { userId: string; status: string }) => {
+      return await apiRequest('PATCH', `/api/admin/users/${userId}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User Status Updated",
+        description: "User status has been successfully updated",
+      });
+    },
+  });
+
+  // Verify property mutation
+  const verifyPropertyMutation = useMutation({
+    mutationFn: async ({ propertyId, status, reason }: { propertyId: number; status: string; reason?: string }) => {
+      return await apiRequest('PATCH', `/api/admin/properties/${propertyId}/verify`, { status, rejectionReason: reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/properties'] });
+      toast({
+        title: "Property Verification Updated",
+        description: "Property verification status has been updated",
+      });
+    },
+  });
+
+  // Verify document mutation
+  const verifyDocumentMutation = useMutation({
+    mutationFn: async ({ documentId, status, reason }: { documentId: number; status: string; reason?: string }) => {
+      return await apiRequest('PATCH', `/api/admin/documents/${documentId}/verify`, { status, rejectionReason: reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/verification-documents'] });
+      toast({
+        title: "Document Verification Updated",
+        description: "Document verification status has been updated",
+      });
+    },
+  });
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'destructive';
+      case 'operator': return 'secondary';
+      case 'guesthouse_owner': return 'default';
+      case 'tenant': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'default';
+      case 'suspended': return 'destructive';
+      case 'pending': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
+  const getVerificationBadgeColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'default';
+      case 'rejected': return 'destructive';
+      case 'pending': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
+  return (
+    <div className="container mx-auto py-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Manage users, properties, and system operations
+          </p>
+        </div>
+      </div>
+
+      {/* System Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              +{stats?.newUsersThisMonth || 0} this month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Properties</CardTitle>
+            <Home className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.activeProperties || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats?.pendingProperties || 0} pending approval
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Verifications</CardTitle>
+            <FileCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.pendingDocuments || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Documents awaiting review
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalRevenue || 0} ETB</div>
+            <p className="text-xs text-muted-foreground">
+              +{stats?.monthlyRevenue || 0} ETB this month
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Dashboard Tabs */}
+      <Tabs defaultValue="users" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="users">User Management</TabsTrigger>
+          <TabsTrigger value="properties">Property Verification</TabsTrigger>
+          <TabsTrigger value="documents">ID Verification</TabsTrigger>
+          <TabsTrigger value="operators">Operator Panel</TabsTrigger>
+        </TabsList>
+
+        {/* User Management Tab */}
+        <TabsContent value="users">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Management</CardTitle>
+              <CardDescription>
+                Manage user roles, status, and permissions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Verified</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user: any) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={user.profileImageUrl || '/placeholder-avatar.png'}
+                            alt={user.firstName}
+                            className="h-8 w-8 rounded-full"
+                          />
+                          <div>
+                            <div className="font-medium">{user.firstName} {user.lastName}</div>
+                            <div className="text-sm text-muted-foreground">{user.email}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeColor(user.role)}>
+                          {user.role.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeColor(user.status)}>
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          {user.phoneVerified && (
+                            <Badge variant="outline" className="text-green-600">
+                              Phone
+                            </Badge>
+                          )}
+                          {user.idVerified && (
+                            <Badge variant="outline" className="text-green-600">
+                              ID
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Select
+                            value={user.role}
+                            onValueChange={(role) => 
+                              updateUserRoleMutation.mutate({ userId: user.id, role })
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tenant">Tenant</SelectItem>
+                              <SelectItem value="guesthouse_owner">Host</SelectItem>
+                              <SelectItem value="operator">Operator</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          
+                          <Button
+                            variant={user.status === 'active' ? 'destructive' : 'default'}
+                            size="sm"
+                            onClick={() => 
+                              updateUserStatusMutation.mutate({ 
+                                userId: user.id, 
+                                status: user.status === 'active' ? 'suspended' : 'active' 
+                              })
+                            }
+                          >
+                            {user.status === 'active' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Property Verification Tab */}
+        <TabsContent value="properties">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Verification</CardTitle>
+              <CardDescription>
+                Review and approve property listings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Property</TableHead>
+                    <TableHead>Host</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {properties.map((property: any) => (
+                    <TableRow key={property.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={property.images?.[0] || '/placeholder-property.png'}
+                            alt={property.title}
+                            className="h-12 w-12 rounded object-cover"
+                          />
+                          <div>
+                            <div className="font-medium">{property.title}</div>
+                            <div className="text-sm text-muted-foreground">{property.type}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{property.host?.firstName} {property.host?.lastName}</TableCell>
+                      <TableCell>{property.city}, {property.region}</TableCell>
+                      <TableCell>
+                        <Badge variant={getVerificationBadgeColor(property.status)}>
+                          {property.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedProperty(property)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          {property.status === 'pending' && (
+                            <>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => 
+                                  verifyPropertyMutation.mutate({ 
+                                    propertyId: property.id, 
+                                    status: 'approved' 
+                                  })
+                                }
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setSelectedProperty(property)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ID Verification Tab */}
+        <TabsContent value="documents">
+          <Card>
+            <CardHeader>
+              <CardTitle>ID Verification</CardTitle>
+              <CardDescription>
+                Review user identification documents
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Document Type</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {documents.map((doc: any) => (
+                    <TableRow key={doc.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{doc.user?.firstName} {doc.user?.lastName}</div>
+                          <div className="text-sm text-muted-foreground">{doc.user?.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {doc.documentType.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(doc.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getVerificationBadgeColor(doc.status)}>
+                          {doc.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedDocument(doc)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          {doc.status === 'pending' && (
+                            <>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => 
+                                  verifyDocumentMutation.mutate({ 
+                                    documentId: doc.id, 
+                                    status: 'approved' 
+                                  })
+                                }
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setSelectedDocument(doc)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Operator Panel Tab */}
+        <TabsContent value="operators">
+          <Card>
+            <CardHeader>
+              <CardTitle>Operator Panel</CardTitle>
+              <CardDescription>
+                Specialized tools for property verification operators
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                <ShieldCheck className="h-12 w-12 mx-auto mb-4" />
+                <p>Operator-specific verification tools and workflows</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Document Review Dialog */}
+      {selectedDocument && (
+        <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Review Document</DialogTitle>
+              <DialogDescription>
+                {selectedDocument.documentType.replace('_', ' ')} - User ID: {selectedDocument.userId}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <img
+                  src={selectedDocument.documentUrl}
+                  alt="Document"
+                  className="w-full max-h-96 object-contain rounded border"
+                />
+              </div>
+              
+              {selectedDocument.status === 'pending' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="rejection-reason">Rejection Reason (Optional)</Label>
+                    <Textarea
+                      id="rejection-reason"
+                      placeholder="Provide reason if rejecting..."
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        const reason = (document.getElementById('rejection-reason') as HTMLTextAreaElement)?.value;
+                        verifyDocumentMutation.mutate({
+                          documentId: selectedDocument.id,
+                          status: 'rejected',
+                          reason
+                        });
+                        setSelectedDocument(null);
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        verifyDocumentMutation.mutate({
+                          documentId: selectedDocument.id,
+                          status: 'approved'
+                        });
+                        setSelectedDocument(null);
+                      }}
+                    >
+                      Approve
+                    </Button>
+                  </DialogFooter>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}

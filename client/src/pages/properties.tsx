@@ -1,0 +1,284 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import Header from "@/components/header";
+import PropertyCard from "@/components/property-card";
+import SearchBanner from "@/components/search-banner";
+import Footer from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Filter, SlidersHorizontal } from "lucide-react";
+import { PROPERTY_TYPES, ETHIOPIAN_CITIES } from "@/lib/constants";
+import type { Property } from "@shared/schema";
+
+interface Filters {
+  city?: string;
+  type?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  maxGuests?: number;
+  checkIn?: string;
+  checkOut?: string;
+}
+
+export default function Properties() {
+  const [location] = useLocation();
+  const [filters, setFilters] = useState<Filters>({});
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Parse URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1] || '');
+    const urlFilters: Filters = {};
+    
+    if (params.get('destination')) urlFilters.city = params.get('destination')!;
+    if (params.get('city')) urlFilters.city = params.get('city')!;
+    if (params.get('type')) urlFilters.type = params.get('type')!;
+    if (params.get('minPrice')) urlFilters.minPrice = parseInt(params.get('minPrice')!);
+    if (params.get('maxPrice')) urlFilters.maxPrice = parseInt(params.get('maxPrice')!);
+    if (params.get('guests')) urlFilters.maxGuests = parseInt(params.get('guests')!);
+    if (params.get('checkIn')) urlFilters.checkIn = params.get('checkIn')!;
+    if (params.get('checkOut')) urlFilters.checkOut = params.get('checkOut')!;
+    
+    setFilters(urlFilters);
+  }, [location]);
+
+  const { data: properties = [], isLoading } = useQuery<Property[]>({
+    queryKey: ["/api/properties", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined) {
+          params.append(key, value.toString());
+        }
+      });
+      
+      const response = await fetch(`/api/properties?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch properties');
+      return response.json();
+    },
+  });
+
+  const { data: favorites = [] } = useQuery<Property[]>({
+    queryKey: ["/api/favorites"],
+  });
+
+  const favoriteIds = new Set(favorites.map(fav => fav.id));
+
+  const updateFilter = (key: keyof Filters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({});
+  };
+
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+
+  return (
+    <div className="min-h-screen bg-neutral-light">
+      <Header />
+      
+      <SearchBanner 
+        onSearch={(searchFilters) => {
+          setFilters({
+            city: searchFilters.destination,
+            maxGuests: parseInt(searchFilters.guests),
+            checkIn: searchFilters.checkIn,
+            checkOut: searchFilters.checkOut,
+          });
+        }}
+        initialFilters={{
+          destination: filters.city || "",
+          guests: filters.maxGuests?.toString() || "1",
+          checkIn: filters.checkIn || "",
+          checkOut: filters.checkOut || "",
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <Card className="sticky top-24">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">Filters</h3>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters}>
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  {/* Location */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Location</Label>
+                    <Select value={filters.city || ""} onValueChange={(value) => updateFilter("city", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose city..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All cities</SelectItem>
+                        {ETHIOPIAN_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Separator />
+
+                  {/* Property Type */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Property Type</Label>
+                    <Select value={filters.type || ""} onValueChange={(value) => updateFilter("type", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All types..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All types</SelectItem>
+                        {PROPERTY_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Separator />
+
+                  {/* Price Range */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Price Range (ETB/night)</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="minPrice" className="text-xs text-gray-500">Min</Label>
+                        <Input
+                          id="minPrice"
+                          type="number"
+                          placeholder="0"
+                          value={filters.minPrice || ""}
+                          onChange={(e) => updateFilter("minPrice", e.target.value ? parseInt(e.target.value) : undefined)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="maxPrice" className="text-xs text-gray-500">Max</Label>
+                        <Input
+                          id="maxPrice"
+                          type="number"
+                          placeholder="10000"
+                          value={filters.maxPrice || ""}
+                          onChange={(e) => updateFilter("maxPrice", e.target.value ? parseInt(e.target.value) : undefined)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Guests */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Guests</Label>
+                    <Select 
+                      value={filters.maxGuests?.toString() || ""} 
+                      onValueChange={(value) => updateFilter("maxGuests", value ? parseInt(value) : undefined)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Any number..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Any number</SelectItem>
+                        <SelectItem value="1">1 guest</SelectItem>
+                        <SelectItem value="2">2 guests</SelectItem>
+                        <SelectItem value="3">3 guests</SelectItem>
+                        <SelectItem value="4">4 guests</SelectItem>
+                        <SelectItem value="5">5+ guests</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-dark">
+                  {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
+                </h2>
+                <p className="text-gray-600">
+                  {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary">
+                    {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
+                  </Badge>
+                )}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="lg:hidden"
+                >
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-80"></div>
+                ))}
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="text-center py-12">
+                <Filter className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your search criteria or remove some filters.
+                </p>
+                <Button onClick={clearFilters}>Clear all filters</Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {properties.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                    isFavorite={favoriteIds.has(property.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}

@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 5%; /* Deep Black Background */
+  --foreground: 45 100% 65%; /* Rich Golden Text */
+  --muted: 0 0% 15%; /* Dark Muted */
+  --muted-foreground: 43 85% 55%; /* Golden Muted */
+  --popover: 0 0% 8%; /* Rich Black Popover */
+  --popover-foreground: 45 100% 65%; /* Rich Golden */
+  --card: 0 0% 10%; /* Card Background - Slightly Lighter Black */
+  --card-foreground: 45 100% 65%; /* Rich Golden Text */
+  --border: 43 96% 56%; /* Bright Golden Border */
+  --input: 0 0% 12%; /* Input Background */
+  --primary: 43 96% 56%; /* Bright Luxury Gold */
+  --primary-foreground: 0 0% 5%; /* Black Text on Gold */
+  --secondary: 0 0% 15%; /* Dark Secondary */
+  --secondary-foreground: 45 100% 65%; /* Rich Golden Text */
+  --accent: 38 92% 50%; /* Deep Gold Accent */
+  --accent-foreground: 0 0% 5%; /* Black Text on Accent */
+  --destructive: 0 84% 45%; /* Darker Red for Better Contrast */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 96% 56%; /* Gold Ring */
+  --radius: 0.5rem;
+  
+  /* Luxury Gold & Black Palette */
+  --luxury-gold: 43 96% 56%; /* #F5C842 - Bright Gold */
+  --luxury-dark-gold: 38 92% 50%; /* #D4A506 - Deep Gold */
+  --luxury-rich-gold: 45 100% 65%; /* #FFD633 - Rich Golden Text */
+  --luxury-black: 0 0% 5%; /* #0D0D0D - Deep Black */
+  --luxury-charcoal: 0 0% 15%; /* #262626 - Charcoal */
+  --luxury-bright-gold: 51 100% 50%; /* #FFD700 - Pure Gold */
+}
+
+.dark {
+  --background: 0 0% 3%; /* Deeper Black for Dark Mode */
+  --foreground: 45 100% 65%; /* Rich Golden Text */
+  --muted: 0 0% 12%; /* Dark Muted */
+  --muted-foreground: 43 85% 55%; /* Golden Muted */
+  --popover: 0 0% 5%; /* Rich Black Popover */
+  --popover-foreground: 45 100% 65%; /* Rich Golden */
+  --card: 0 0% 8%; /* Card Background */
+  --card-foreground: 45 100% 65%; /* Rich Golden Text */
+  --border: 43 96% 56%; /* Bright Golden Border */
+  --input: 0 0% 10%; /* Input Background */
+  --primary: 43 96% 56%; /* Bright Luxury Gold */
+  --primary-foreground: 0 0% 5%; /* Black Text on Gold */
+  --secondary: 0 0% 12%; /* Dark Secondary */
+  --secondary-foreground: 45 100% 65%; /* Rich Golden Text */
+  --accent: 38 92% 50%; /* Deep Gold Accent */
+  --accent-foreground: 0 0% 5%; /* Black Text on Accent */
+  --destructive: 0 84% 45%; /* Darker Red for Better Contrast */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 96% 56%; /* Gold Ring */
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .luxury-gold {
+    color: hsl(var(--luxury-gold));
+  }
+  
+  .bg-luxury-gold {
+    background-color: hsl(var(--luxury-gold));
+  }
+  
+  .luxury-dark-gold {
+    color: hsl(var(--luxury-dark-gold));
+  }
+  
+  .bg-luxury-dark-gold {
+    background-color: hsl(var(--luxury-dark-gold));
+  }
+  
+  .luxury-rich-gold {
+    color: hsl(var(--luxury-rich-gold));
+  }
+  
+  .bg-luxury-rich-gold {
+    background-color: hsl(var(--luxury-rich-gold));
+  }
+  
+  .luxury-bright-gold {
+    color: hsl(var(--luxury-bright-gold));
+  }
+  
+  .bg-luxury-bright-gold {
+    background-color: hsl(var(--luxury-bright-gold));
+  }
+  
+  .luxury-black {
+    color: hsl(var(--luxury-black));
+  }
+  
+  .bg-luxury-black {
+    background-color: hsl(var(--luxury-black));
+  }
+  
+  .bg-luxury-charcoal {
+    background-color: hsl(var(--luxury-charcoal));
+  }
+  
+  /* Gold gradient for luxury effects */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--luxury-gold)) 0%, hsl(var(--luxury-dark-gold)) 100%);
+  }
+  
+  /* Shimmer effect for luxury look */
+  .gold-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--luxury-dark-gold)) 0%,
+      hsl(var(--luxury-gold)) 50%,
+      hsl(var(--luxury-dark-gold)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
