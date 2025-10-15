@@ -56,6 +56,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
     },
   });
 
+  // Reset forms when mode changes
+  const switchMode = (newMode: "login" | "register") => {
+    setMode(newMode);
+    loginForm.reset();
+    registerForm.reset();
+  };
+
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
       return await apiRequest("POST", "/api/login", data);
@@ -287,7 +294,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
           <p className="text-sm text-muted-foreground">
             {mode === "login" ? "Don't have an account? " : "Already have an account? "}
             <button
-              onClick={() => setMode(mode === "login" ? "register" : "login")}
+              onClick={() => switchMode(mode === "login" ? "register" : "login")}
               className="text-eth-orange hover:underline font-medium"
               data-testid="button-toggle-mode"
             >
