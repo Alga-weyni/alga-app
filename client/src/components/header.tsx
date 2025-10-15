@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,10 +12,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Home, Menu, Globe, User } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import AuthDialog from "@/components/auth-dialog";
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("GET", "/api/logout");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      navigate("/");
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+    },
+  });
 
   return (
     <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border">
@@ -91,19 +112,31 @@ export default function Header() {
                     <Link href="/host/dashboard">Host Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <a href="/api/logout">Sign Out</a>
+                  <DropdownMenuItem 
+                    onClick={() => logoutMutation.mutate()}
+                    data-testid="button-logout"
+                  >
+                    Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild>
-                <a href="/api/login">Sign In</a>
+              <Button 
+                onClick={() => setAuthDialogOpen(true)}
+                data-testid="button-signin-header"
+              >
+                Sign In
               </Button>
             )}
           </div>
         </div>
       </div>
+      
+      <AuthDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen}
+        defaultMode="login"
+      />
     </header>
   );
 }

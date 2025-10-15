@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
+import AuthDialog from "@/components/auth-dialog";
 import { Star, CheckCircle, Home } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
@@ -10,6 +12,14 @@ import boutiqueHotelImg from "@assets/stock_images/luxury_boutique_hote_429d7d7d
 import lakesideRetreatImg from "@assets/stock_images/lakeside_resort_peac_aa065d79.jpg";
 
 export default function Landing() {
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+
+  const openAuthDialog = (mode: "login" | "register") => {
+    setAuthMode(mode);
+    setAuthDialogOpen(true);
+  };
+
   return (
     <div className="flex min-h-screen bg-eth-warm-tan">
       {/* Ethiopian Pattern Sidebar */}
@@ -43,8 +53,12 @@ export default function Landing() {
                 <a href="#host" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
                   CONTACT
                 </a>
-                <Button asChild className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-6 py-2 font-bold">
-                  <a href="/api/login">SIGN IN</a>
+                <Button 
+                  onClick={() => openAuthDialog("login")} 
+                  className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-6 py-2 font-bold"
+                  data-testid="button-signin"
+                >
+                  SIGN IN
                 </Button>
               </nav>
             </div>
@@ -158,8 +172,13 @@ export default function Landing() {
             </div>
 
             <div className="text-center">
-              <Button asChild size="lg" className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-8 py-3 font-bold">
-                <a href="/api/login">View All Properties</a>
+              <Button 
+                onClick={() => openAuthDialog("login")} 
+                size="lg" 
+                className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-8 py-3 font-bold"
+                data-testid="button-view-properties"
+              >
+                View All Properties
               </Button>
             </div>
           </div>
@@ -191,8 +210,13 @@ export default function Landing() {
                 </li>
               </ul>
               <div>
-                <Button asChild size="lg" className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg">
-                  <a href="/api/login">START HOSTING</a>
+                <Button 
+                  onClick={() => openAuthDialog("register")} 
+                  size="lg" 
+                  className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg"
+                  data-testid="button-start-hosting"
+                >
+                  START HOSTING
                 </Button>
               </div>
             </div>
@@ -201,6 +225,12 @@ export default function Landing() {
 
         <Footer />
       </div>
+      
+      <AuthDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen}
+        defaultMode={authMode}
+      />
     </div>
   );
 }
