@@ -27,15 +27,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("tenant"), // admin, operator, guesthouse_owner, tenant
+  role: varchar("role").notNull().default("guest"), // admin, host, guest
   phoneNumber: varchar("phone_number"),
   phoneVerified: boolean("phone_verified").default(false),
   idVerified: boolean("id_verified").default(false),
@@ -202,8 +201,24 @@ export const favoritesRelations = relations(favorites, ({ one }) => ({
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
+  phoneVerified: true,
+  idVerified: true,
+  status: true,
+});
+
+export const registerUserSchema = insertUserSchema.extend({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
+export const loginUserSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const insertPropertySchema = createInsertSchema(properties).omit({
@@ -234,6 +249,8 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
+export type LoginUser = z.infer<typeof loginUserSchema>;
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 export type Property = typeof properties.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
