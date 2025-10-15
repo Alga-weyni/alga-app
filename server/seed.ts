@@ -1,0 +1,169 @@
+import { db } from "./db";
+import { users, properties } from "@shared/schema";
+import { sql } from "drizzle-orm";
+
+async function seed() {
+  console.log("Seeding database...");
+
+  // Create sample host user
+  const [host] = await db
+    .insert(users)
+    .values({
+      id: "host-ethiopia-1",
+      email: "host@ethiopiastays.et",
+      firstName: "Abebe",
+      lastName: "Tadesse",
+      role: "guesthouse_owner",
+      phoneNumber: "+251911234567",
+      phoneVerified: true,
+      idVerified: true,
+      status: "active",
+    })
+    .onConflictDoNothing()
+    .returning();
+
+  console.log("Created host user");
+
+  // Sample Ethiopian properties
+  const sampleProperties = [
+    {
+      hostId: "host-ethiopia-1",
+      title: "Simien Mountain Lodge",
+      description: "Experience breathtaking mountain views in the heart of Simien Mountains National Park. This traditional lodge offers authentic Ethiopian hospitality with modern comfort.",
+      type: "traditional_home",
+      status: "approved",
+      location: "Debark",
+      city: "Gondar",
+      region: "Amhara",
+      address: "Simien Mountains National Park, Debark, Gondar",
+      pricePerNight: "1200.00",
+      currency: "ETB",
+      maxGuests: 4,
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ["Mountain View", "Hiking Trails", "Traditional Breakfast", "Fire Place", "Hot Water"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.8",
+      reviewCount: 24,
+    },
+    {
+      hostId: "host-ethiopia-1",
+      title: "Addis View Hotel",
+      description: "Modern boutique hotel in the heart of Addis Ababa's Bole district. Perfect for business and leisure travelers with rooftop restaurant and stunning city views.",
+      type: "hotel",
+      status: "approved",
+      location: "Bole",
+      city: "Addis Ababa",
+      region: "Addis Ababa",
+      address: "Bole Road, Near Edna Mall, Addis Ababa",
+      pricePerNight: "2500.00",
+      currency: "ETB",
+      maxGuests: 2,
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ["WiFi", "Restaurant", "Bar", "Airport Shuttle", "Gym", "Rooftop Terrace"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.9",
+      reviewCount: 156,
+    },
+    {
+      hostId: "host-ethiopia-1",
+      title: "Blue Nile Retreat",
+      description: "Peaceful lakeside guesthouse on the shores of Lake Tana. Wake up to stunning sunrises and enjoy fresh fish from the lake.",
+      type: "guesthouse",
+      status: "approved",
+      location: "Lake Shore",
+      city: "Bahir Dar",
+      region: "Amhara",
+      address: "Lake Tana Shore, Bahir Dar",
+      pricePerNight: "980.00",
+      currency: "ETB",
+      maxGuests: 3,
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ["Lake View", "Boat Tours", "Fresh Fish", "Garden", "Traditional Coffee Ceremony"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.7",
+      reviewCount: 89,
+    },
+    {
+      hostId: "host-ethiopia-1",
+      title: "Lalibela Rock Heritage House",
+      description: "Stay in a traditional stone house near the famous rock-hewn churches of Lalibela. Experience authentic Ethiopian culture and spirituality.",
+      type: "traditional_home",
+      status: "approved",
+      location: "Old Town",
+      city: "Lalibela",
+      region: "Amhara",
+      address: "Near Beta Giyorgis Church, Lalibela",
+      pricePerNight: "1500.00",
+      currency: "ETB",
+      maxGuests: 4,
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ["Historic Location", "Church Tours", "Traditional Meals", "Cultural Guide", "Hot Water"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.9",
+      reviewCount: 132,
+    },
+    {
+      hostId: "host-ethiopia-1",
+      title: "Hawassa Lakeside Villa",
+      description: "Luxurious villa with private lake access in Hawassa. Perfect for families and groups seeking relaxation and water activities.",
+      type: "guesthouse",
+      status: "approved",
+      location: "Lakeside",
+      city: "Hawassa",
+      region: "SNNPR",
+      address: "Hawassa Lake Shore, Hawassa",
+      pricePerNight: "3200.00",
+      currency: "ETB",
+      maxGuests: 6,
+      bedrooms: 3,
+      bathrooms: 2,
+      amenities: ["Private Beach", "Swimming", "Boat Rental", "BBQ Area", "WiFi", "Kitchen"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.8",
+      reviewCount: 67,
+    },
+    {
+      hostId: "host-ethiopia-1",
+      title: "Harar Cultural Guesthouse",
+      description: "Experience the ancient walled city of Harar in this beautifully restored traditional house. Close to the famous Hyena Man feeding site.",
+      type: "traditional_home",
+      status: "approved",
+      location: "Old City",
+      city: "Harar",
+      region: "Harari",
+      address: "Jugol, Old Walled City, Harar",
+      pricePerNight: "850.00",
+      currency: "ETB",
+      maxGuests: 3,
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ["Historic Architecture", "City Tours", "Coffee Ceremony", "Hyena Feeding Tour", "Traditional Breakfast"],
+      images: ["/api/placeholder/800/600"],
+      isActive: true,
+      rating: "4.6",
+      reviewCount: 45,
+    },
+  ];
+
+  for (const property of sampleProperties) {
+    await db.insert(properties).values(property).onConflictDoNothing();
+  }
+
+  console.log("✅ Seeded", sampleProperties.length, "properties");
+  console.log("Database seeding complete!");
+  process.exit(0);
+}
+
+seed().catch((error) => {
+  console.error("Error seeding database:", error);
+  process.exit(1);
+});

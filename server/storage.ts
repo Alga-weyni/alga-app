@@ -123,7 +123,7 @@ export class DatabaseStorage implements IStorage {
     checkIn?: Date;
     checkOut?: Date;
   }): Promise<Property[]> {
-    const conditions = [eq(properties.isActive, true)];
+    const conditions = [eq(properties.isActive, true), eq(properties.status, 'approved')];
 
     if (filters) {
       if (filters.city) {
@@ -135,11 +135,11 @@ export class DatabaseStorage implements IStorage {
       }
       
       if (filters.minPrice) {
-        conditions.push(gte(properties.pricePerNight, filters.minPrice.toString()));
+        conditions.push(sql`CAST(${properties.pricePerNight} AS NUMERIC) >= ${filters.minPrice}`);
       }
       
       if (filters.maxPrice) {
-        conditions.push(lte(properties.pricePerNight, filters.maxPrice.toString()));
+        conditions.push(sql`CAST(${properties.pricePerNight} AS NUMERIC) <= ${filters.maxPrice}`);
       }
       
       if (filters.maxGuests) {
@@ -147,6 +147,69 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    // Handle date filtering - exclude properties with conflicting confirmed bookings
+    if (filters?.checkIn && filters?.checkOut) {
+      // Validate date range
+      if (filters.checkIn >= filters.checkOut) {
+        return []; // Invalid date range, return empty results
+      }
+
+      // Use SQL to exclude properties with conflicting confirmed bookings
+      const availableProperties = await db
+        .select({
+          id: properties.id,
+          hostId: properties.hostId,
+          title: properties.title,
+          description: properties.description,
+          type: properties.type,
+          status: properties.status,
+          verifiedBy: properties.verifiedBy,
+          verifiedAt: properties.verifiedAt,
+          rejectionReason: properties.rejectionReason,
+          latitude: properties.latitude,
+          longitude: properties.longitude,
+          address: properties.address,
+          location: properties.location,
+          city: properties.city,
+          region: properties.region,
+          pricePerNight: properties.pricePerNight,
+          currency: properties.currency,
+          maxGuests: properties.maxGuests,
+          bedrooms: properties.bedrooms,
+          bathrooms: properties.bathrooms,
+          amenities: properties.amenities,
+          images: properties.images,
+          isActive: properties.isActive,
+          rating: properties.rating,
+          reviewCount: properties.reviewCount,
+          createdAt: properties.createdAt,
+          updatedAt: properties.updatedAt,
+        })
+        .from(properties)
+        .leftJoin(
+          bookings,
+          and(
+            eq(bookings.propertyId, properties.id),
+            eq(bookings.status, 'confirmed'),
+            // Check for date overlap: booking checkIn < requested checkOut AND booking checkOut > requested checkIn
+            // Use strict inequalities to allow adjacent stays (checkout on same day as next checkin)
+            sql`${bookings.checkIn} < ${filters.checkOut}`,
+            sql`${bookings.checkOut} > ${filters.checkIn}`
+          )
+        )
+        .where(
+          and(
+            ...conditions,
+            // Only include properties where there's NO conflicting booking (bookings.id is NULL)
+            sql`${bookings.id} IS NULL`
+          )
+        )
+        .orderBy(desc(properties.rating));
+
+      return availableProperties;
+    }
+
+    // No date filter - return all matching properties
     return await db
       .select()
       .from(properties)
