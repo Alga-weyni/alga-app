@@ -16,60 +16,55 @@ export default function Header() {
   const [location] = useLocation();
 
   return (
-    <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="bg-eth-warm-tan shadow-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center space-x-3 cursor-pointer">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Home className="text-primary-foreground text-lg" />
-              </div>
-              <h1 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
+            <div className="flex items-center space-x-4 cursor-pointer">
+              <h1 className="text-4xl font-bold text-eth-brown tracking-wide" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", letterSpacing: '0.08em' }}>
+                ETHIOPIA STAYS
+              </h1>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-10">
             <Link href="/properties">
-              <a className={`transition-colors ${
+              <a className={`hover:opacity-70 transition-opacity font-medium text-lg ${
                 location === '/properties' 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
+                  ? 'text-eth-orange' 
+                  : 'text-eth-brown'
               }`}>
-                Explore
+                EXPLORE
               </a>
             </Link>
             {isAuthenticated && (
               <Link href="/host/dashboard">
-                <a className={`transition-colors ${
+                <a className={`hover:opacity-70 transition-opacity font-medium text-lg ${
                   location === '/host/dashboard' 
-                    ? 'text-primary font-medium' 
-                    : 'text-foreground hover:text-primary'
+                    ? 'text-eth-orange' 
+                    : 'text-eth-brown'
                 }`}>
-                  Host Your Property
+                  HOST
                 </a>
               </Link>
             )}
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
-              About Ethiopia
+            <a href="#" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
+              ABOUT
             </a>
           </nav>
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Globe className="h-5 w-5" />
-            </Button>
-
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="flex items-center space-x-2 bg-secondary rounded-full p-2 hover:bg-secondary/80 transition-colors cursor-pointer">
-                    <Menu className="h-4 w-4 text-foreground" />
+                  <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-full p-2 hover:bg-white/80 transition-colors cursor-pointer border border-eth-brown/20">
+                    <Menu className="h-4 w-4 text-eth-brown" />
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={user?.profileImageUrl || ""} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                      <AvatarFallback className="bg-eth-orange text-white">
                         <User className="h-4 w-4" />
                       </AvatarFallback>
                     </Avatar>
@@ -97,8 +92,8 @@ export default function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild>
-                <a href="/api/login">Sign In</a>
+              <Button asChild className="bg-eth-orange hover:opacity-90 text-white border-0 rounded-xl px-6 py-2 font-bold">
+                <a href="/api/login">SIGN IN</a>
               </Button>
             )}
           </div>

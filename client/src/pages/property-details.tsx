@@ -140,8 +140,10 @@ export default function PropertyDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light">
-        <Header />
+      <div className="flex min-h-screen bg-eth-warm-tan">
+        <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
+        <div className="flex-1 lg:ml-20">
+          <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-96 bg-gray-200 rounded-xl mb-8"></div>
@@ -155,14 +157,17 @@ export default function PropertyDetails() {
             </div>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-neutral-light">
-        <Header />
+      <div className="flex min-h-screen bg-eth-warm-tan">
+        <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
+        <div className="flex-1 lg:ml-20">
+          <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card>
             <CardContent className="p-8 text-center">
@@ -175,6 +180,7 @@ export default function PropertyDetails() {
               </Button>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     );
@@ -197,8 +203,10 @@ export default function PropertyDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-light">
-      <Header />
+    <div className="flex min-h-screen bg-eth-warm-tan">
+      <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
+      <div className="flex-1 lg:ml-20">
+        <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Image Gallery */}
@@ -509,6 +517,7 @@ export default function PropertyDetails() {
       </div>
 
       <Footer />
+      </div>
     </div>
   );
 }

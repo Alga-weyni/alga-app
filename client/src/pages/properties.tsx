@@ -87,36 +87,41 @@ export default function Properties() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-neutral-light">
-      <Header />
+    <div className="flex min-h-screen bg-eth-warm-tan">
+      {/* Ethiopian Pattern Sidebar */}
+      <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
       
-      <SearchBanner 
-        onSearch={(searchFilters) => {
-          setFilters({
-            city: searchFilters.destination,
-            maxGuests: parseInt(searchFilters.guests),
-            checkIn: searchFilters.checkIn,
-            checkOut: searchFilters.checkOut,
-          });
-        }}
-        initialFilters={{
-          destination: filters.city || "",
-          guests: filters.maxGuests?.toString() || "1",
-          checkIn: filters.checkIn || "",
-          checkOut: filters.checkOut || "",
-        }}
-      />
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-20">
+        <Header />
+        
+        <SearchBanner 
+          onSearch={(searchFilters) => {
+            setFilters({
+              city: searchFilters.destination,
+              maxGuests: parseInt(searchFilters.guests),
+              checkIn: searchFilters.checkIn,
+              checkOut: searchFilters.checkOut,
+            });
+          }}
+          initialFilters={{
+            destination: filters.city || "",
+            guests: filters.maxGuests?.toString() || "1",
+            checkIn: filters.checkIn || "",
+            checkOut: filters.checkOut || "",
+          }}
+        />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="sticky top-24">
+            <Card className="sticky top-24 bg-white/60 backdrop-blur-sm border-eth-brown/20">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <h3 className="text-lg font-semibold text-eth-brown">Filters</h3>
                   {activeFilterCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-eth-brown hover:bg-eth-brown/10">
                       Clear all
                     </Button>
                   )}
@@ -221,10 +226,10 @@ export default function Properties() {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-neutral-dark">
+                <h2 className="text-3xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-eth-brown">
                   {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
                 </p>
               </div>
@@ -255,13 +260,13 @@ export default function Properties() {
                 ))}
               </div>
             ) : properties.length === 0 ? (
-              <div className="text-center py-12">
-                <Filter className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
-                <p className="text-gray-600 mb-6">
+              <div className="text-center py-12 bg-white/60 backdrop-blur-sm rounded-3xl">
+                <Filter className="mx-auto h-12 w-12 text-eth-brown mb-4" />
+                <h3 className="text-lg font-medium text-eth-brown mb-2">No properties found</h3>
+                <p className="text-eth-brown mb-6">
                   Try adjusting your search criteria or remove some filters.
                 </p>
-                <Button onClick={clearFilters}>Clear all filters</Button>
+                <Button onClick={clearFilters} className="bg-eth-orange hover:opacity-90 text-white">Clear all filters</Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -276,9 +281,10 @@ export default function Properties() {
             )}
           </div>
         </div>
-      </div>
+        </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

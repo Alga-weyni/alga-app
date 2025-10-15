@@ -61,6 +61,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "eth-warm-tan": "#f5eee6",
+        "eth-light-tan": "#faf6f1",
+        "eth-brown": "#3d2817",
+        "eth-orange": "#fb470b",
+        "eth-gold": "#fca12b",
+        "eth-green": "#228B22",
+        "eth-red": "#DC143C",
+        "eth-yellow": "#FFD700",
+        "neutral-light": "#f9fafb",
+        "neutral-dark": "#1f2937",
       },
       keyframes: {
         "accordion-down": {
