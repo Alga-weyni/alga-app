@@ -19,7 +19,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, Users, Home, CreditCard, FileText, XCircle, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, Users, Home, CreditCard, FileText, XCircle, ArrowLeft, Star } from "lucide-react";
+import { ReviewDialog } from "@/components/review-dialog";
 
 export default function BookingDetails() {
   const { id } = useParams();
@@ -279,6 +280,27 @@ export default function BookingDetails() {
           )}
 
           {/* Actions */}
+          {booking.status === "completed" && booking.propertyId && (
+            <Card data-testid="card-write-review">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Share Your Experience</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Write a review to help other travelers
+                    </p>
+                  </div>
+                  <ReviewDialog propertyId={booking.propertyId} bookingId={booking.id}>
+                    <Button data-testid="button-write-review">
+                      <Star className="mr-2 h-4 w-4" />
+                      Write Review
+                    </Button>
+                  </ReviewDialog>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {canCancel && (
             <Card>
               <CardContent className="p-6">
