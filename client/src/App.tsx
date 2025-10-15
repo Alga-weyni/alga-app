@@ -9,6 +9,8 @@ import Home from "@/pages/home";
 import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
 import HostDashboard from "@/pages/host-dashboard";
+import Bookings from "@/pages/bookings";
+import BookingDetails from "@/pages/booking-details";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +25,8 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/properties" component={Properties} />
           <Route path="/properties/:id" component={PropertyDetails} />
+          <Route path="/bookings" component={Bookings} />
+          <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/host/dashboard" component={HostDashboard} />
         </>
       )}
