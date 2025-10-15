@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
-import { Star, CheckCircle } from "lucide-react";
+import { Star, CheckCircle, Home } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
 import boutiqueHotelImg from "@assets/stock_images/luxury_boutique_hote_429d7d7d.jpg";
@@ -22,6 +22,9 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
             <div className="flex justify-between items-center h-20">
               <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                  <Home className="text-primary-foreground text-xl" />
+                </div>
                 <h1 className="text-4xl font-bold text-eth-brown tracking-wide" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", letterSpacing: '0.08em' }}>
                   ETHIOPIA STAYS
                 </h1>
