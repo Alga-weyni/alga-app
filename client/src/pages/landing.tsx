@@ -43,6 +43,9 @@ export default function Landing() {
                 <a href="#host" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
                   CONTACT
                 </a>
+                <Button asChild className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-6 py-2 font-bold">
+                  <a href="/api/login">SIGN IN</a>
+                </Button>
               </nav>
             </div>
           </div>
