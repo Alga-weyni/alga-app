@@ -71,7 +71,9 @@ import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
 
-const propertyFormSchema = insertPropertySchema.extend({
+const propertyFormSchema = insertPropertySchema.omit({
+  hostId: true,
+}).extend({
   amenities: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
 });
