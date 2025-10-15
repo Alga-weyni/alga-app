@@ -173,9 +173,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/verification-documents/:userId', async (req, res) => {
+  app.get('/api/verification-documents/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
+      const requestingUserId = req.user.claims.sub;
+      const userRole = req.user.claims.role || 'tenant';
+      
+      // Only allow access to own documents or if admin/operator
+      if (userId !== requestingUserId && !['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Unauthorized to access these documents" });
+      }
+      
       const documents = await storage.getVerificationDocumentsByUser(userId);
       res.json(documents);
     } catch (error) {
