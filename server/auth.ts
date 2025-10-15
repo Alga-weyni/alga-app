@@ -15,8 +15,12 @@ export function getSession() {
     ttl: sessionTtl / 1000,
     tableName: "sessions",
   });
+  if (!process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET environment variable is required");
+  }
+
   return session({
-    secret: process.env.SESSION_SECRET || "ethiopia-stays-secret-key",
+    secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -49,7 +53,7 @@ export async function setupAuth(app: Express) {
         password: hashedPassword,
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
-        role: validatedData.role || "guest",
+        role: "guest",
         phoneNumber: validatedData.phoneNumber,
         profileImageUrl: validatedData.profileImageUrl,
         bio: validatedData.bio,

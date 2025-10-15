@@ -1,3 +1,6 @@
+// DEPRECATED: This file is no longer used. The app now uses custom email/password authentication.
+// See server/auth.ts for the new authentication implementation.
+
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 

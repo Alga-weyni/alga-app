@@ -22,7 +22,6 @@ const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["guest", "host", "admin"]).default("guest"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -54,7 +53,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
       password: "",
       firstName: "",
       lastName: "",
-      role: "guest",
     },
   });
 
@@ -264,28 +262,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
                         data-testid="input-register-password"
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={registerForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>I want to</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-role">
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="guest" data-testid="select-role-guest">Book accommodations (Guest)</SelectItem>
-                        <SelectItem value="host" data-testid="select-role-host">List my property (Host)</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
