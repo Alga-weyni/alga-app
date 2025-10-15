@@ -81,13 +81,13 @@ export default function Landing() {
         </section>
 
         {/* Featured Properties Preview */}
-        <section className="py-16" style={{ background: 'linear-gradient(180deg, #804d1a 0%, #6b3410 100%)' }}>
+        <section className="py-16 bg-eth-warm-tan">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
             <div className="text-center mb-12">
-              <h3 className="text-4xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: '#f5e6d3' }}>
+              <h3 className="text-4xl font-bold text-eth-brown mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                 Authentic Ethiopian Accommodations
               </h3>
-              <p className="max-w-2xl mx-auto text-lg" style={{ color: '#f5e6d3' }}>
+              <p className="text-eth-brown max-w-2xl mx-auto text-lg">
                 From traditional lodges in the Simien Mountains to modern hotels in Addis Ababa, 
                 discover unique stays that showcase Ethiopia's rich culture and hospitality.
               </p>
