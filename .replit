@@ -40,16 +40,16 @@ localPort = 38235
 externalPort = 3000
 
 [[ports]]
-localPort = 39103
-externalPort = 3003
-
-[[ports]]
 localPort = 40283
 externalPort = 3001
 
 [[ports]]
 localPort = 45007
 externalPort = 3002
+
+[[ports]]
+localPort = 46369
+externalPort = 3003
 
 [agent]
 integrations = ["javascript_log_in_with_replit:1.0.0"]
