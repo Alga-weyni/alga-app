@@ -44,12 +44,12 @@ localPort = 40283
 externalPort = 3001
 
 [[ports]]
-localPort = 45007
-externalPort = 3002
+localPort = 44395
+externalPort = 3003
 
 [[ports]]
-localPort = 46369
-externalPort = 3003
+localPort = 45007
+externalPort = 3002
 
 [agent]
 integrations = ["javascript_log_in_with_replit:1.0.0"]

@@ -81,13 +81,13 @@ export default function Landing() {
         </section>
 
         {/* Featured Properties Preview */}
-        <section className="py-16 bg-eth-light-tan">
+        <section className="py-16" style={{ backgroundColor: '#804d1a' }}>
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
             <div className="text-center mb-12">
-              <h3 className="text-4xl font-bold text-eth-brown mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+              <h3 className="text-4xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: '#d4a574' }}>
                 Authentic Ethiopian Accommodations
               </h3>
-              <p className="text-eth-brown max-w-2xl mx-auto text-lg">
+              <p className="max-w-2xl mx-auto text-lg" style={{ color: '#d4a574' }}>
                 From traditional lodges in the Simien Mountains to modern hotels in Addis Ababa, 
                 discover unique stays that showcase Ethiopia's rich culture and hospitality.
               </p>
@@ -120,7 +120,7 @@ export default function Landing() {
                   rating: 4.7,
                 },
               ].map((property) => (
-                <Card key={property.title} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <Card key={property.title} className="overflow-hidden hover:shadow-xl transition-shadow duration-300" style={{ backgroundColor: '#d4a574' }}>
                   <img
                     src={property.image}
                     alt={property.title}
@@ -128,22 +128,22 @@ export default function Landing() {
                   />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-muted-foreground">{property.type}</span>
+                      <span className="text-sm" style={{ color: '#523419' }}>{property.type}</span>
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 fill-primary text-primary" />
-                        <span className="text-sm font-medium text-foreground">{property.rating}</span>
+                        <span className="text-sm font-medium" style={{ color: '#523419' }}>{property.rating}</span>
                       </div>
                     </div>
-                    <h4 className="font-semibold text-lg text-eth-brown mb-2">
+                    <h4 className="font-semibold text-lg mb-2" style={{ color: '#523419' }}>
                       {property.title}
                     </h4>
-                    <p className="text-muted-foreground text-sm mb-3">{property.location}</p>
+                    <p className="text-sm mb-3" style={{ color: '#523419' }}>{property.location}</p>
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-lg font-bold" style={{ color: '#fb470b' }}>
                           {property.price} ETB
                         </span>
-                        <span className="text-sm text-muted-foreground">/night</span>
+                        <span className="text-sm" style={{ color: '#523419' }}>/night</span>
                       </div>
                     </div>
                   </CardContent>
