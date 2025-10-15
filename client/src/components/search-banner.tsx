@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 import { ETHIOPIAN_CITIES } from "@/lib/constants";
 
 interface SearchFilters {
@@ -40,7 +40,6 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
     if (onSearch) {
       onSearch(filters);
     } else {
-      // Navigate to properties page with search params
       const params = new URLSearchParams();
       if (filters.destination) params.set("destination", filters.destination);
       if (filters.checkIn) params.set("checkIn", filters.checkIn);
@@ -56,45 +55,39 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
   };
 
   return (
-    <section className="bg-gradient-to-r from-background to-luxury-charcoal text-foreground py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 bg-eth-warm-tan">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 luxury-rich-gold">
-            Discover Ethiopia's Hidden Gems
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+            Welcome to Ethiopia Stays
           </h2>
-          <p className="text-lg opacity-90 text-foreground">
-            From ancient castles in Gondar to lakeside retreats in Bahir Dar
+          <p className="text-lg text-eth-brown">
+            Discover the beauty of Ethiopian hospitality
           </p>
         </div>
 
-        {/* Search Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-6 max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Destination */}
-            <div className="md:col-span-1">
-              <Label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
+        <form onSubmit={handleSubmit} className="bg-gradient-to-r from-[#f6bd89] to-[#fca12b] rounded-2xl shadow-2xl p-4 max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-end gap-3">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="destination" className="block text-sm font-medium text-eth-brown mb-2">
                 Where
               </Label>
-              <div className="relative">
-                <Select value={filters.destination} onValueChange={(value) => updateFilter("destination", value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose destination..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ETHIOPIAN_CITIES.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
-              </div>
+              <Select value={filters.destination} onValueChange={(value) => updateFilter("destination", value)}>
+                <SelectTrigger className="w-full bg-white border-0 text-eth-brown">
+                  <SelectValue placeholder="Choose..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {ETHIOPIAN_CITIES.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Check-in */}
-            <div>
-              <Label htmlFor="checkIn" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="checkIn" className="block text-sm font-medium text-eth-brown mb-2">
                 Check-in
               </Label>
               <Input
@@ -102,14 +95,14 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 type="date"
                 value={filters.checkIn}
                 onChange={(e) => updateFilter("checkIn", e.target.value)}
-                className="w-full"
+                className="w-full bg-white border-0 text-eth-brown"
+                placeholder="mm/dd/yyyy"
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
 
-            {/* Check-out */}
-            <div>
-              <Label htmlFor="checkOut" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="checkOut" className="block text-sm font-medium text-eth-brown mb-2">
                 Check-out
               </Label>
               <Input
@@ -117,18 +110,18 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 type="date"
                 value={filters.checkOut}
                 onChange={(e) => updateFilter("checkOut", e.target.value)}
-                className="w-full"
+                className="w-full bg-white border-0 text-eth-brown"
+                placeholder="mm/dd/yyyy"
                 min={filters.checkIn || new Date().toISOString().split('T')[0]}
               />
             </div>
 
-            {/* Guests */}
-            <div>
-              <Label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex-1 min-w-0">
+              <Label htmlFor="guests" className="block text-sm font-medium text-eth-brown mb-2">
                 Guests
               </Label>
               <Select value={filters.guests} onValueChange={(value) => updateFilter("guests", value)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white border-0 text-eth-brown">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,17 +133,15 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full md:w-auto mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 font-semibold"
-            size="lg"
-            data-testid="button-search-properties"
-          >
-            <Search className="mr-2 h-4 w-4" />
-            Search Properties
-          </Button>
+            <Button
+              type="submit"
+              className="bg-eth-orange hover:opacity-90 text-white px-8 py-6 rounded-full font-bold border-0 flex items-center gap-2"
+              data-testid="button-search-properties"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+          </div>
         </form>
       </div>
     </section>
