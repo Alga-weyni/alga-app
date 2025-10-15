@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 35 47% 68%; /* Warm Tan Background #d4a574 */
+  --foreground: 25 50% 20%; /* Darker Brown Text for better contrast */
+  --muted: 35 35% 58%; /* Muted Tan */
+  --muted-foreground: 25 45% 25%; /* Darker Muted Brown */
+  --popover: 35 50% 72%; /* Light Tan Popover */
+  --popover-foreground: 25 50% 20%; /* Darker Brown */
+  --card: 35 50% 75%; /* Card Background - Light Tan */
+  --card-foreground: 25 50% 20%; /* Darker Brown Text */
+  --border: 27 80% 55%; /* Orange Border */
+  --input: 0 0% 100%; /* White Input */
+  --primary: 27 98% 51%; /* Orange #fb470b */
+  --primary-foreground: 0 0% 100%; /* White Text on Orange */
+  --secondary: 35 35% 58%; /* Tan Secondary */
+  --secondary-foreground: 25 50% 20%; /* Darker Brown Text */
+  --accent: 38 95% 58%; /* Golden Accent */
+  --accent-foreground: 25 50% 20%; /* Darker Brown Text on Accent */
+  --destructive: 0 84% 45%; /* Red for Better Contrast */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 27 98% 51%; /* Orange Ring */
+  --radius: 0.5rem;
+  
+  /* Ethiopian Warm Palette */
+  --eth-warm-tan: 35 47% 68%; /* #d4a574 - Main Background */
+  --eth-brown: 25 50% 20%; /* #523419 - Darker Ethiopian Brown for better contrast */
+  --eth-dark-brown: 25 65% 15%; /* #3d1f0a - Very Dark Brown Pattern */
+  --eth-orange: 27 98% 51%; /* #fb470b - Accent Orange */
+  --eth-gold: 38 95% 58%; /* #fca12b - Golden Accent */
+  --eth-light-tan: 35 50% 75%; /* Lighter Tan */
+}
+
+.dark {
+  --background: 0 0% 3%; /* Deeper Black for Dark Mode */
+  --foreground: 45 100% 65%; /* Rich Golden Text */
+  --muted: 0 0% 12%; /* Dark Muted */
+  --muted-foreground: 43 85% 55%; /* Golden Muted */
+  --popover: 0 0% 5%; /* Rich Black Popover */
+  --popover-foreground: 45 100% 65%; /* Rich Golden */
+  --card: 0 0% 8%; /* Card Background */
+  --card-foreground: 45 100% 65%; /* Rich Golden Text */
+  --border: 43 96% 56%; /* Bright Golden Border */
+  --input: 0 0% 10%; /* Input Background */
+  --primary: 43 96% 56%; /* Bright Luxury Gold */
+  --primary-foreground: 0 0% 5%; /* Black Text on Gold */
+  --secondary: 0 0% 12%; /* Dark Secondary */
+  --secondary-foreground: 45 100% 65%; /* Rich Golden Text */
+  --accent: 38 92% 50%; /* Deep Gold Accent */
+  --accent-foreground: 0 0% 5%; /* Black Text on Accent */
+  --destructive: 0 84% 45%; /* Darker Red for Better Contrast */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 96% 56%; /* Gold Ring */
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .luxury-gold {
+    color: hsl(var(--luxury-gold));
+  }
+  
+  .bg-luxury-gold {
+    background-color: hsl(var(--luxury-gold));
+  }
+  
+  .luxury-dark-gold {
+    color: hsl(var(--luxury-dark-gold));
+  }
+  
+  .bg-luxury-dark-gold {
+    background-color: hsl(var(--luxury-dark-gold));
+  }
+  
+  .luxury-rich-gold {
+    color: hsl(var(--luxury-rich-gold));
+  }
+  
+  .bg-luxury-rich-gold {
+    background-color: hsl(var(--luxury-rich-gold));
+  }
+  
+  .luxury-bright-gold {
+    color: hsl(var(--luxury-bright-gold));
+  }
+  
+  .bg-luxury-bright-gold {
+    background-color: hsl(var(--luxury-bright-gold));
+  }
+  
+  .luxury-black {
+    color: hsl(var(--luxury-black));
+  }
+  
+  .bg-luxury-black {
+    background-color: hsl(var(--luxury-black));
+  }
+  
+  .bg-luxury-charcoal {
+    background-color: hsl(var(--luxury-charcoal));
+  }
+  
+  .luxury-orange-glow {
+    background: linear-gradient(135deg, #f6bd89 0%, #fb470b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .bg-luxury-orange-glow {
+    background: linear-gradient(135deg, #f6bd89 0%, #fca12b 100%);
+  }
+  
+  /* Gold gradient for luxury effects */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--luxury-gold)) 0%, hsl(var(--luxury-dark-gold)) 100%);
+  }
+  
+  /* Shimmer effect for luxury look */
+  .gold-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--luxury-dark-gold)) 0%,
+      hsl(var(--luxury-gold)) 50%,
+      hsl(var(--luxury-dark-gold)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* Ethiopian Pattern Sidebar */
+  .ethiopian-pattern-sidebar {
+    background: linear-gradient(180deg, #804d1a 0%, #6b3410 100%);
+    position: relative;
+    width: 80px;
+    min-height: 100vh;
+  }
+  
+  .ethiopian-pattern-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      /* Zigzag pattern */
+      repeating-linear-gradient(135deg, transparent 0px, transparent 10px, rgba(212, 165, 116, 0.4) 10px, rgba(212, 165, 116, 0.4) 12px),
+      repeating-linear-gradient(-135deg, transparent 0px, transparent 10px, rgba(212, 165, 116, 0.4) 10px, rgba(212, 165, 116, 0.4) 12px),
+      /* Diamond pattern */
+      repeating-linear-gradient(45deg, transparent 0px, transparent 20px, rgba(212, 165, 116, 0.3) 20px, rgba(212, 165, 116, 0.3) 22px),
+      repeating-linear-gradient(-45deg, transparent 0px, transparent 20px, rgba(212, 165, 116, 0.3) 20px, rgba(212, 165, 116, 0.3) 22px);
+    background-size: 40px 40px;
+  }
+  
+  .ethiopian-pattern-sidebar::after {
+    content: '✤ ⟡ ✦ ⟐ ✤ ⟡ ✦ ⟐ ✤ ⟡ ✦ ⟐ ✤ ⟡ ✦ ⟐ ✤ ⟡ ✦ ⟐';
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(212, 165, 116, 0.7);
+    font-size: 20px;
+    writing-mode: vertical-rl;
+    letter-spacing: 25px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  
+  /* Warm tan utilities */
+  .bg-eth-warm-tan {
+    background-color: hsl(var(--eth-warm-tan));
+  }
+  
+  .bg-eth-brown {
+    background-color: hsl(var(--eth-brown));
+  }
+  
+  .text-eth-brown {
+    color: hsl(var(--eth-brown));
+  }
+  
+  .bg-eth-orange {
+    background: linear-gradient(90deg, #fb470b, #fca12b);
+  }
+}
