@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema } from "@shared/schema";
 import { smsService } from "./smsService";
 
@@ -12,9 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      res.json(req.user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -67,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes for user role management
   app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (userRole !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -82,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/users/:userId/role', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (userRole !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -100,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/users/:userId/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (userRole !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -119,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin property verification routes
   app.get('/api/admin/properties', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (!['admin', 'operator'].includes(userRole)) {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
@@ -134,14 +132,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/properties/:propertyId/verify', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (!['admin', 'operator'].includes(userRole)) {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
       
       const { propertyId } = req.params;
       const { status, rejectionReason } = req.body;
-      const verifierId = req.user.claims.sub;
+      const verifierId = req.user.id;
       
       const updatedProperty = await storage.verifyProperty(parseInt(propertyId), status, verifierId, rejectionReason);
       res.json(updatedProperty);
@@ -176,8 +174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/verification-documents/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const requestingUserId = req.user.claims.sub;
-      const userRole = req.user.claims.role || 'tenant';
+      const requestingUserId = req.user.id;
+      const userRole = req.user.role || 'guest';
       
       // Only allow access to own documents or if admin/operator
       if (userId !== requestingUserId && !['admin', 'operator'].includes(userRole)) {
@@ -194,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/verification-documents', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (!['admin', 'operator'].includes(userRole)) {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
@@ -209,14 +207,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/documents/:documentId/verify', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (!['admin', 'operator'].includes(userRole)) {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
       
       const { documentId } = req.params;
       const { status, rejectionReason } = req.body;
-      const verifierId = req.user.claims.sub;
+      const verifierId = req.user.id;
       
       const updatedDocument = await storage.verifyDocument(parseInt(documentId), status, verifierId, rejectionReason);
       res.json(updatedDocument);
@@ -229,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin statistics
   app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userRole = req.user.claims.role || 'tenant';
+      const userRole = req.user.role || 'guest';
       if (userRole !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -282,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/properties', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const propertyData = insertPropertySchema.parse({ ...req.body, hostId: userId });
       
       const property = await storage.createProperty(propertyData);
@@ -296,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/properties/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user owns the property
       const property = await storage.getProperty(id);
@@ -316,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/properties/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user owns the property
       const property = await storage.getProperty(id);
@@ -335,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Host dashboard routes
   app.get('/api/host/properties', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const properties = await storage.getPropertiesByHost(userId);
       res.json(properties);
     } catch (error) {
@@ -347,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/host/properties/:id/stats', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user owns the property
       const property = await storage.getProperty(id);
@@ -366,7 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Booking routes
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const bookingData = insertBookingSchema.parse({ ...req.body, guestId: userId });
       
       const booking = await storage.createBooking(bookingData);
@@ -379,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const bookings = await storage.getBookingsByGuest(userId);
       res.json(bookings);
     } catch (error) {
@@ -391,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bookings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const booking = await storage.getBooking(id);
       if (!booking || booking.guestId !== userId) {
@@ -435,7 +433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/properties/:propertyId/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const propertyId = parseInt(req.params.propertyId);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const reviewData = insertReviewSchema.parse({
         ...req.body,
@@ -465,7 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Favorites routes
   app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const favoriteData = insertFavoriteSchema.parse({ ...req.body, userId });
       
       const favorite = await storage.addToFavorites(favoriteData);
@@ -479,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/favorites/:propertyId', isAuthenticated, async (req: any, res) => {
     try {
       const propertyId = parseInt(req.params.propertyId);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       await storage.removeFromFavorites(userId, propertyId);
       res.status(204).send();
@@ -491,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const favorites = await storage.getUserFavorites(userId);
       res.json(favorites);
     } catch (error) {
