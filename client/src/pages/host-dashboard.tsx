@@ -85,6 +85,8 @@ export default function HostDashboard() {
   const [showAddPropertyDialog, setShowAddPropertyDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState("");
 
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
@@ -122,6 +124,7 @@ export default function HostDashboard() {
       const response = await apiRequest("POST", "/api/properties", {
         ...data,
         amenities: selectedAmenities,
+        images: imageUrls,
       });
       return response.json();
     },
@@ -134,6 +137,8 @@ export default function HostDashboard() {
       setShowAddPropertyDialog(false);
       form.reset();
       setSelectedAmenities([]);
+      setImageUrls([]);
+      setNewImageUrl("");
     },
     onError: () => {
       toast({
@@ -150,6 +155,7 @@ export default function HostDashboard() {
       const response = await apiRequest("PUT", `/api/properties/${id}`, {
         ...data,
         amenities: selectedAmenities,
+        images: imageUrls,
       });
       return response.json();
     },
@@ -162,6 +168,8 @@ export default function HostDashboard() {
       setEditingProperty(null);
       form.reset();
       setSelectedAmenities([]);
+      setImageUrls([]);
+      setNewImageUrl("");
     },
     onError: () => {
       toast({
@@ -204,6 +212,7 @@ export default function HostDashboard() {
   const handleEdit = (property: Property) => {
     setEditingProperty(property);
     setSelectedAmenities(property.amenities || []);
+    setImageUrls(property.images || []);
     form.reset({
       title: property.title,
       description: property.description,
@@ -226,6 +235,8 @@ export default function HostDashboard() {
   const handleAddNew = () => {
     setEditingProperty(null);
     setSelectedAmenities([]);
+    setImageUrls([]);
+    setNewImageUrl("");
     form.reset();
     setShowAddPropertyDialog(true);
   };
@@ -236,6 +247,17 @@ export default function HostDashboard() {
         ? prev.filter(a => a !== amenity)
         : [...prev, amenity]
     );
+  };
+
+  const addImageUrl = () => {
+    if (newImageUrl.trim() && !imageUrls.includes(newImageUrl.trim())) {
+      setImageUrls([...imageUrls, newImageUrl.trim()]);
+      setNewImageUrl("");
+    }
+  };
+
+  const removeImageUrl = (url: string) => {
+    setImageUrls(imageUrls.filter(img => img !== url));
   };
 
   const formatPrice = (price: string) => {
@@ -716,6 +738,67 @@ export default function HostDashboard() {
                   </FormItem>
                 )}
               />
+
+              {/* Property Images */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Property Images</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addImageUrl();
+                      }
+                    }}
+                    data-testid="input-image-url"
+                  />
+                  <Button
+                    type="button"
+                    onClick={addImageUrl}
+                    variant="outline"
+                    className="whitespace-nowrap"
+                    data-testid="button-add-image"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Image
+                  </Button>
+                </div>
+                {imageUrls.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {imageUrls.map((url, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <img 
+                          src={url} 
+                          alt={`Property ${index + 1}`}
+                          className="w-16 h-16 object-cover rounded"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=100&h=100&fit=crop";
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-600 truncate">{url}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeImageUrl(url)}
+                          className="text-red-500 hover:text-red-700"
+                          data-testid={`button-remove-image-${index}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500">
+                  Add URLs of property images. The first image will be used as the main display image.
+                </p>
+              </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <FormField
