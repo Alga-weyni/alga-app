@@ -8,6 +8,22 @@ Ethiopia Stays is a property rental platform specifically designed for the Ethio
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### October 15, 2025 - Custom Authentication Implementation
+- **Replaced Replit Auth** with custom email/password authentication system
+- **Security**: All passwords hashed with bcrypt (10 salt rounds)
+- **Role System**: 
+  - Guest (default for new registrations)
+  - Host (can list properties)
+  - Admin (full system access - must be assigned by existing admin)
+- **Features**:
+  - Registration with email/password (auto-assigned "guest" role)
+  - Login with email/password
+  - Role-based redirects after authentication (admin → /admin/dashboard, host → /host/dashboard, guest → /)
+  - Session-based authentication with PostgreSQL storage
+  - Secure logout with session destruction
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -32,10 +48,16 @@ Preferred communication style: Simple, everyday language.
 - **Migrations**: Drizzle Kit for database schema migrations and version control
 
 ### Authentication & Authorization
-- **Provider**: Replit Auth integration using OpenID Connect (OIDC)
-- **Strategy**: Passport.js with OpenID Connect strategy for secure authentication
-- **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
-- **User Management**: Role-based access control (admin, operator, guesthouse_owner, tenant)
+- **Provider**: Custom email/password authentication with bcrypt hashing
+- **Session Management**: Express sessions with PostgreSQL storage (connect-pg-simple)
+- **Security**: 
+  - Bcrypt password hashing (salt rounds: 10)
+  - Secure session cookies (httpOnly, secure in production)
+  - SESSION_SECRET environment variable required (fails fast if missing)
+- **User Management**: Role-based access control (admin, host, guest)
+  - New registrations: Forced to "guest" role (no self-service privilege escalation)
+  - Role promotion: Admin-only through /api/admin/users/:userId/role endpoint
+  - Protected routes: isAuthenticated middleware validates session and loads user
 
 ### Key Features Architecture
 - **Property Management**: Full CRUD operations for property listings with image uploads and detailed descriptions
