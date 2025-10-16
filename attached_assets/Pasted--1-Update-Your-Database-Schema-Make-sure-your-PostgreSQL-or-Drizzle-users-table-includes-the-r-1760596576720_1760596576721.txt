@@ -1,0 +1,184 @@
+⚙️ 1. Update Your Database Schema
+
+Make sure your PostgreSQL (or Drizzle) users table includes the role column and follows this format:
+
+ALTER TABLE users 
+ADD COLUMN role VARCHAR(20) CHECK (role IN ('admin', 'operator', 'guesthouse_owner', 'tenant'));
+
+
+When registering users, set their roles accordingly:
+
+Role	Example account	Redirect	Privileges
+Admin	admin@alga.et
+	/admin/dashboard	Full access, manage users & configurations
+Operator	operator@alga.et
+	/operator/dashboard	Verify guesthouse owners and documentation
+Guesthouse Owner	host@alga.et
+	/owner/dashboard	Manage property listings and pricing
+Tenant	tenant@alga.et
+	/tenant/home	Browse and book stays
+🔑 2. Include Role in Authentication Response
+
+If you’re using NextAuth.js, ensure the authorize function includes the user’s role:
+
+authorize: async (credentials) => {
+  const user = await db.user.findFirst({
+    where: { email: credentials.email },
+  });
+  if (!user || user.password !== credentials.password) return null;
+  
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role, // include this line
+  };
+}
+
+
+This makes the role available throughout your app in session.user.role.
+
+🧭 3. Redirect Users Based on Their Role
+
+Immediately after successful login, route users to the page that matches their privileges.
+
+Add this to your /pages/auth/signin.js after signIn() succeeds:
+
+import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+  const result = await signIn("credentials", {
+    redirect: false,
+    email,
+    password,
+  });
+
+  if (result.ok) {
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    const role = session.user.role;
+
+    switch (role) {
+      case "admin":
+        router.push("/admin/dashboard");
+        break;
+      case "operator":
+        router.push("/operator/dashboard");
+        break;
+      case "guesthouse_owner":
+        router.push("/owner/dashboard");
+        break;
+      case "tenant":
+        router.push("/tenant/home");
+        break;
+      default:
+        router.push("/");
+    }
+  } else {
+    alert("Invalid email or password");
+  }
+};
+
+
+✅ Outcome:
+Each role lands on a separate dashboard or page the moment they sign in.
+
+🔒 4. Protect Pages by Privilege
+
+Use session-based role checks on each protected page.
+
+Example:
+
+/pages/admin/dashboard.js
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+
+export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  if (status === "loading") return <p>Loading...</p>;
+  if (!session) {
+    router.push("/auth/signin");
+    return null;
+  }
+  if (session.user.role !== "admin") {
+    router.push("/unauthorized");
+    return null;
+  }
+
+  return <h1>Welcome Admin, you have full system access.</h1>;
+}
+
+
+Repeat similar role checks for /operator/dashboard, /owner/dashboard, and /tenant/home.
+
+⚙️ 5. Automate Protection Using Middleware
+
+To centralize all access control, create a file called /middleware.js:
+
+import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+
+export async function middleware(req) {
+  const token = await getToken({ req });
+  const url = req.nextUrl.pathname;
+
+  // Admin
+  if (url.startsWith("/admin") && token?.role !== "admin") {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
+  // Operator
+  if (url.startsWith("/operator") && token?.role !== "operator") {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
+  // Guesthouse Owner
+  if (url.startsWith("/owner") && token?.role !== "guesthouse_owner") {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
+  // Tenant
+  if (url.startsWith("/tenant") && token?.role !== "tenant") {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
+  return NextResponse.next();
+}
+
+
+✅ Result:
+
+Admin routes are accessible only to admins.
+
+Operators can only verify properties.
+
+Owners can only manage their listings.
+
+Tenants can only browse and book.
+
+🧩 6. Optional — Role Assignment on Registration
+
+If you’re allowing self-registration, you can default all new users to tenant:
+
+await db.user.create({
+  data: {
+    email: credentials.email,
+    password: credentials.password,
+    role: "tenant",
+  },
+});
+
+
+Then only Admins can promote a user to operator or guesthouse_owner.
+
+🧠 Summary of Implementation
+Feature	Implementation
+Role storage	users.role column
+Login verification	Include role in session
+Redirect on login	switch (role) logic
+Access protection	Role-based checks or middleware
+Default user type	Tenant (safe default)
+Admin promotion	Admin dashboard control
