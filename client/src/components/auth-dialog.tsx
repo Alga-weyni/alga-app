@@ -67,22 +67,27 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
     mutationFn: async (data: LoginFormData) => {
       return await apiRequest("POST", "/api/login", data);
     },
-    onSuccess: (user: any) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    onSuccess: async (user: any) => {
+      // Wait for auth query to update before redirecting
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+      
       toast({
         title: "Welcome back!",
         description: `Logged in as ${user.firstName} ${user.lastName}`,
       });
       onOpenChange(false);
       
-      // Role-based redirect
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "host") {
-        navigate("/host/dashboard");
-      } else {
-        navigate("/");
-      }
+      // Role-based redirect - use setTimeout to ensure state is updated
+      setTimeout(() => {
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "host") {
+          navigate("/host/dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 100);
     },
     onError: (error: any) => {
       toast({
@@ -97,22 +102,27 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
     mutationFn: async (data: RegisterFormData) => {
       return await apiRequest("POST", "/api/register", data);
     },
-    onSuccess: (user: any) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    onSuccess: async (user: any) => {
+      // Wait for auth query to update before redirecting
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+      
       toast({
         title: "Account created!",
         description: `Welcome to Ethiopia Stays, ${user.firstName}!`,
       });
       onOpenChange(false);
       
-      // Role-based redirect
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "host") {
-        navigate("/host/dashboard");
-      } else {
-        navigate("/");
-      }
+      // Role-based redirect - use setTimeout to ensure state is updated
+      setTimeout(() => {
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "host") {
+          navigate("/host/dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 100);
     },
     onError: (error: any) => {
       toast({
