@@ -41,47 +41,49 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/">
-            <a className="flex items-center space-x-3 cursor-pointer">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Home className="text-primary-foreground text-lg" />
-              </div>
-              <h1 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
-            </a>
+          <Link href="/" className="flex items-center space-x-3 cursor-pointer">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Home className="text-primary-foreground text-lg" />
+            </div>
+            <h1 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/properties">
-              <a className={`transition-colors ${
+            <Link 
+              href="/properties"
+              className={`transition-colors ${
                 location === '/properties' 
                   ? 'text-primary font-medium' 
                   : 'text-foreground hover:text-primary'
-              }`}>
-                Explore
-              </a>
+              }`}
+            >
+              Explore
             </Link>
             
             {/* Show different links based on auth status */}
             {isAuthenticated ? (
-              <Link href="/host/dashboard">
-                <a className={`transition-colors ${
+              <Link 
+                href="/host/dashboard"
+                className={`transition-colors ${
                   location === '/host/dashboard' 
                     ? 'text-primary font-medium' 
                     : 'text-foreground hover:text-primary'
-                }`}>
-                  Host Your Property
-                </a>
+                }`}
+              >
+                Host Your Property
               </Link>
             ) : (
-              <Link href="/start-hosting">
-                <a className={`transition-colors font-medium ${
+              <Link 
+                href="/start-hosting"
+                className={`transition-colors font-medium ${
                   location === '/start-hosting' 
                     ? 'text-primary' 
                     : 'text-eth-orange hover:text-eth-orange/80'
-                }`} data-testid="link-start-hosting">
-                  Start Hosting
-                </a>
+                }`}
+                data-testid="link-start-hosting"
+              >
+                Start Hosting
               </Link>
             )}
             

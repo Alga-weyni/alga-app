@@ -53,11 +53,18 @@ export default function StartHosting() {
       
       toast({
         title: "Welcome to Ethiopia Stays!",
-        description: `Your account has been created successfully, ${user.firstName}!`,
+        description: `Your account has been created successfully, ${user.firstName}! An admin will review your account to enable hosting privileges.`,
       });
       
-      // Redirect to host dashboard
-      navigate("/host/dashboard");
+      // Redirect based on role (new registrations are "guest" by default)
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else if (user.role === "host") {
+        navigate("/host/dashboard");
+      } else {
+        // Guest/Tenant goes to home page
+        navigate("/");
+      }
       
       // Update auth state
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
