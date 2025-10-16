@@ -86,6 +86,8 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      console.log("Login - Raw user from DB:", JSON.stringify(user));
+
       const passwordMatch = await bcrypt.compare(validatedData.password, user.password);
       if (!passwordMatch) {
         return res.status(401).json({ message: "Invalid email or password" });
@@ -98,7 +100,7 @@ export async function setupAuth(app: Express) {
       (req.session as any).userId = user.id;
       (req.session as any).userRole = user.role;
 
-      res.json({
+      const responseData = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
@@ -108,7 +110,11 @@ export async function setupAuth(app: Express) {
         idVerified: user.idVerified,
         status: user.status,
         profileImageUrl: user.profileImageUrl,
-      });
+      };
+
+      console.log("Login - Response data:", JSON.stringify(responseData));
+      
+      res.json(responseData);
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(400).json({ 
