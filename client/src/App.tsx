@@ -10,6 +10,7 @@ import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import StartHosting from "@/pages/start-hosting";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
 import NotFound from "@/pages/not-found";
@@ -19,6 +20,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public routes - accessible to everyone */}
+      <Route path="/start-hosting" component={StartHosting} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

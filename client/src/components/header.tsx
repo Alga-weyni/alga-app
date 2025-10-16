@@ -61,7 +61,9 @@ export default function Header() {
                 Explore
               </a>
             </Link>
-            {isAuthenticated && (
+            
+            {/* Show different links based on auth status */}
+            {isAuthenticated ? (
               <Link href="/host/dashboard">
                 <a className={`transition-colors ${
                   location === '/host/dashboard' 
@@ -71,7 +73,18 @@ export default function Header() {
                   Host Your Property
                 </a>
               </Link>
+            ) : (
+              <Link href="/start-hosting">
+                <a className={`transition-colors font-medium ${
+                  location === '/start-hosting' 
+                    ? 'text-primary' 
+                    : 'text-eth-orange hover:text-eth-orange/80'
+                }`} data-testid="link-start-hosting">
+                  Start Hosting
+                </a>
+              </Link>
             )}
+            
             <a href="#" className="text-foreground hover:text-primary transition-colors">
               About Ethiopia
             </a>
