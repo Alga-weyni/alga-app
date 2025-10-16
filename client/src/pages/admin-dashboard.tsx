@@ -24,7 +24,8 @@ import {
   XCircle,
   Clock,
   Eye,
-  UserX
+  UserX,
+  Settings
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -136,9 +137,19 @@ export default function AdminDashboard() {
     switch (role) {
       case 'admin': return 'destructive';
       case 'operator': return 'secondary';
-      case 'guesthouse_owner': return 'default';
-      case 'tenant': return 'outline';
+      case 'host': return 'default';
+      case 'guest': return 'outline';
       default: return 'outline';
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'operator': return 'Operator';
+      case 'host': return 'Guesthouse Owner';
+      case 'guest': return 'Tenant';
+      default: return role;
     }
   };
 
@@ -227,13 +238,139 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">System Overview</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="properties">Property Verification</TabsTrigger>
           <TabsTrigger value="documents">ID Verification</TabsTrigger>
-          <TabsTrigger value="operators">Operator Panel</TabsTrigger>
+          <TabsTrigger value="config">System Config</TabsTrigger>
         </TabsList>
+
+        {/* System Overview Tab */}
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ShieldCheck className="h-5 w-5 mr-2 text-eth-red" />
+                  Admin Control Center
+                </CardTitle>
+                <CardDescription>
+                  Overarching system control and monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-5 w-5 text-eth-green" />
+                      <div>
+                        <p className="font-medium">Total System Users</p>
+                        <p className="text-sm text-gray-600">All registered accounts</p>
+                      </div>
+                    </div>
+                    <span className="text-2xl font-bold">{stats?.totalUsers || 0}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Home className="h-5 w-5 text-eth-yellow" />
+                      <div>
+                        <p className="font-medium">Total Properties</p>
+                        <p className="text-sm text-gray-600">All listings in system</p>
+                      </div>
+                    </div>
+                    <span className="text-2xl font-bold">{stats?.activeProperties || 0}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <FileCheck className="h-5 w-5 text-eth-red" />
+                      <div>
+                        <p className="font-medium">Pending Verifications</p>
+                        <p className="text-sm text-gray-600">Awaiting admin approval</p>
+                      </div>
+                    </div>
+                    <span className="text-2xl font-bold text-eth-red">{stats?.pendingDocuments || 0}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Activity className="h-5 w-5 mr-2 text-eth-green" />
+                  System Activity
+                </CardTitle>
+                <CardDescription>
+                  Real-time platform monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">New Users (This Month)</span>
+                    <span className="font-bold text-eth-green">+{stats?.newUsersThisMonth || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Properties Pending Review</span>
+                    <span className="font-bold text-eth-yellow">{stats?.pendingProperties || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Total Platform Revenue</span>
+                    <span className="font-bold text-eth-green">{stats?.totalRevenue || 0} ETB</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Monthly Revenue</span>
+                    <span className="font-bold text-eth-green">{stats?.monthlyRevenue || 0} ETB</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <UserCheck className="h-5 w-5 mr-2 text-eth-yellow" />
+                  Role Distribution
+                </CardTitle>
+                <CardDescription>
+                  User roles across the platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Admins</p>
+                    <p className="text-3xl font-bold text-eth-red">
+                      {users.filter((u: any) => u.role === 'admin').length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Operators</p>
+                    <p className="text-3xl font-bold text-eth-yellow">
+                      {users.filter((u: any) => u.role === 'operator').length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Guesthouse Owners</p>
+                    <p className="text-3xl font-bold text-eth-green">
+                      {users.filter((u: any) => u.role === 'host').length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Tenants</p>
+                    <p className="text-3xl font-bold text-blue-600">
+                      {users.filter((u: any) => u.role === 'guest').length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         {/* User Management Tab */}
         <TabsContent value="users">
@@ -273,7 +410,7 @@ export default function AdminDashboard() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={getRoleBadgeColor(user.role)}>
-                          {user.role.replace('_', ' ')}
+                          {getRoleDisplayName(user.role)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -303,12 +440,12 @@ export default function AdminDashboard() {
                               updateUserRoleMutation.mutate({ userId: user.id, role })
                             }
                           >
-                            <SelectTrigger className="w-32">
+                            <SelectTrigger className="w-[180px]" data-testid={`select-role-${user.id}`}>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="tenant">Tenant</SelectItem>
-                              <SelectItem value="guesthouse_owner">Host</SelectItem>
+                              <SelectItem value="guest">Tenant</SelectItem>
+                              <SelectItem value="host">Guesthouse Owner</SelectItem>
                               <SelectItem value="operator">Operator</SelectItem>
                               <SelectItem value="admin">Admin</SelectItem>
                             </SelectContent>
@@ -509,22 +646,163 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        {/* Operator Panel Tab */}
-        <TabsContent value="operators">
-          <Card>
-            <CardHeader>
-              <CardTitle>Operator Panel</CardTitle>
-              <CardDescription>
-                Specialized tools for property verification operators
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <ShieldCheck className="h-12 w-12 mx-auto mb-4" />
-                <p>Operator-specific verification tools and workflows</p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* System Configuration Tab */}
+        <TabsContent value="config">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  System Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure platform-wide settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-medium">Property Approval Required</p>
+                        <p className="text-sm text-gray-600">New properties need admin approval before listing</p>
+                      </div>
+                      <Badge variant="default">Enabled</Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-medium">ID Verification Required</p>
+                        <p className="text-sm text-gray-600">Users must verify ID to make bookings</p>
+                      </div>
+                      <Badge variant="default">Enabled</Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-medium">Auto-assign Operators</p>
+                        <p className="text-sm text-gray-600">Automatically assign verifications to operators</p>
+                      </div>
+                      <Badge variant="secondary">Disabled</Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-medium">Platform Commission</p>
+                        <p className="text-sm text-gray-600">Commission rate for bookings</p>
+                      </div>
+                      <span className="font-bold">15%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <UserCheck className="h-5 w-5 mr-2" />
+                  Operator Management
+                </CardTitle>
+                <CardDescription>
+                  Manage verification operators
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Operators review and verify guesthouse owner details, ensuring all documentation and specifications are met before properties are listed.
+                  </p>
+                  
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="font-medium mb-1">Active Operators</p>
+                    <p className="text-3xl font-bold text-eth-yellow">
+                      {users.filter((u: any) => u.role === 'operator').length}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {users.filter((u: any) => u.role === 'operator').length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No operators assigned yet. Promote users from User Management tab.</p>
+                    ) : (
+                      users
+                        .filter((u: any) => u.role === 'operator')
+                        .map((operator: any) => (
+                          <div key={operator.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={operator.profileImageUrl || '/placeholder-avatar.png'}
+                                alt={operator.firstName}
+                                className="h-8 w-8 rounded-full"
+                              />
+                              <div>
+                                <p className="font-medium">{operator.firstName} {operator.lastName}</p>
+                                <p className="text-xs text-gray-600">{operator.email}</p>
+                              </div>
+                            </div>
+                            <Badge variant="secondary">Operator</Badge>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Admin Privileges Summary</CardTitle>
+                <CardDescription>
+                  Full system control and capabilities
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 border-l-4 border-eth-red bg-red-50">
+                    <h4 className="font-semibold text-eth-red mb-2">User Management</h4>
+                    <ul className="text-sm space-y-1 text-gray-700">
+                      <li>• Change user roles (Admin, Operator, Guesthouse Owner, Tenant)</li>
+                      <li>• Suspend or activate user accounts</li>
+                      <li>• View all user verification status</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 border-l-4 border-eth-yellow bg-yellow-50">
+                    <h4 className="font-semibold text-eth-yellow mb-2">Property Verification</h4>
+                    <ul className="text-sm space-y-1 text-gray-700">
+                      <li>• Approve or reject property listings</li>
+                      <li>• Review property documentation</li>
+                      <li>• Ensure compliance with platform standards</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 border-l-4 border-eth-green bg-green-50">
+                    <h4 className="font-semibold text-eth-green mb-2">Document Verification</h4>
+                    <ul className="text-sm space-y-1 text-gray-700">
+                      <li>• Review ID verification documents</li>
+                      <li>• Approve or reject verification requests</li>
+                      <li>• Maintain platform integrity and trustworthiness</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 border-l-4 border-blue-600 bg-blue-50">
+                    <h4 className="font-semibold text-blue-600 mb-2">System Configuration</h4>
+                    <ul className="text-sm space-y-1 text-gray-700">
+                      <li>• Configure platform-wide settings</li>
+                      <li>• Manage operator assignments</li>
+                      <li>• Oversee all platform activities</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
