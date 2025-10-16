@@ -61,19 +61,23 @@ export default function Header() {
               Explore
             </Link>
             
-            {/* Show different links based on auth status */}
+            {/* Show different links based on auth status and role */}
             {isAuthenticated ? (
-              <Link 
-                href="/host/dashboard"
-                className={`transition-colors ${
-                  location === '/host/dashboard' 
-                    ? 'text-primary font-medium' 
-                    : 'text-foreground hover:text-primary'
-                }`}
-              >
-                Host Your Property
-              </Link>
+              // Only show "Host Your Property" if user is a host
+              user?.role === 'host' && (
+                <Link 
+                  href="/host/dashboard"
+                  className={`transition-colors ${
+                    location === '/host/dashboard' 
+                      ? 'text-primary font-medium' 
+                      : 'text-foreground hover:text-primary'
+                  }`}
+                >
+                  Host Your Property
+                </Link>
+              )
             ) : (
+              // Show "Start Hosting" for non-authenticated users
               <Link 
                 href="/start-hosting"
                 className={`transition-colors font-medium ${
@@ -115,17 +119,46 @@ export default function Header() {
                   <div className="px-3 py-2">
                     <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
+                    <p className="text-xs text-eth-orange font-medium mt-1 capitalize">{user?.role}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/bookings">My Bookings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/favorites">My Favorites</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/host/dashboard">Host Dashboard</Link>
-                  </DropdownMenuItem>
+                  
+                  {/* Tenant/Guest options */}
+                  {(user?.role === 'guest' || user?.role === 'host') && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/bookings">My Bookings</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/favorites">My Favorites</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Host-specific option */}
+                  {user?.role === 'host' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/host/dashboard">Host Dashboard</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Admin option */}
+                  {user?.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/dashboard">Admin Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {/* Operator option - coming soon */}
+                  {user?.role === 'operator' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/operator/dashboard">Operator Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
+                  
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={() => logoutMutation.mutate()}
