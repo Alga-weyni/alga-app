@@ -25,7 +25,8 @@ import {
   Clock,
   Eye,
   UserX,
-  Settings
+  Settings,
+  LogOut
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -56,6 +57,28 @@ export default function AdminDashboard() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
   const { toast } = useToast();
+
+  // Sign out mutation
+  const signOutMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("GET", "/api/logout");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out",
+      });
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast({
+        title: "Sign out failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch users for management
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -180,6 +203,15 @@ export default function AdminDashboard() {
             Manage users, properties, and system operations
           </p>
         </div>
+        <Button 
+          variant="outline" 
+          onClick={() => signOutMutation.mutate()}
+          disabled={signOutMutation.isPending}
+          data-testid="button-signout-admin"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          {signOutMutation.isPending ? "Signing out..." : "Sign Out"}
+        </Button>
       </div>
 
       {/* System Statistics */}
