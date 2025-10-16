@@ -84,13 +84,10 @@ export default function Home() {
             ) : properties.length === 0 ? (
               <div className="text-center py-12 bg-white/60 backdrop-blur-sm rounded-3xl">
                 <Database className="mx-auto h-12 w-12 text-eth-brown mb-4" />
-                <h4 className="text-lg font-medium text-eth-brown mb-2">No properties yet</h4>
-                <p className="text-eth-brown mb-6">
-                  Be the first to add a property to Ethiopia Stays!
+                <h4 className="text-lg font-medium text-eth-brown mb-2">No properties available yet</h4>
+                <p className="text-eth-brown">
+                  New properties are coming soon. Check back later!
                 </p>
-                <Link href="/host/dashboard">
-                  <Button className="bg-eth-orange hover:opacity-90 text-white">Add Your Property</Button>
-                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
