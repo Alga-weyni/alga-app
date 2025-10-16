@@ -10,6 +10,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### October 16, 2025 - Admin Dashboard & Start Hosting Page
+- **Admin Dashboard Enhancements**:
+  - Added 5-tab admin interface: System Overview, User Management, Property Verification, ID Verification, System Config
+  - System statistics and role distribution dashboard
+  - Admin-specific sign out button
+  - Operator management panel
+  - Platform settings control
+- **Start Hosting Page** (`/start-hosting`):
+  - Dedicated onboarding page for first-time hosts
+  - Host account registration form with validation
+  - Benefits showcase for potential hosts
+  - "Start Hosting" link in header (visible to non-authenticated users)
+  - Automatic redirect to host dashboard after registration
+
 ### October 15, 2025 - Custom Authentication Implementation
 - **Replaced Replit Auth** with custom email/password authentication system
 - **Security**: All passwords hashed with bcrypt (10 salt rounds)
@@ -17,6 +31,7 @@ Preferred communication style: Simple, everyday language.
   - Guest (default for new registrations)
   - Host (can list properties)
   - Admin (full system access - must be assigned by existing admin)
+  - Operator (property verification)
 - **Features**:
   - Registration with email/password (auto-assigned "guest" role)
   - Login with email/password
