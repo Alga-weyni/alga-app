@@ -31,7 +31,7 @@ export default function Landing() {
       <div className="flex-1 lg:ml-20">
         {/* Header */}
         <header className="bg-eth-warm-tan shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="flex justify-between items-center h-20">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
