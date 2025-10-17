@@ -11,6 +11,7 @@ import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
 import boutiqueHotelImg from "@assets/stock_images/luxury_boutique_hote_429d7d7d.jpg";
 import lakesideRetreatImg from "@assets/stock_images/lakeside_resort_peac_aa065d79.jpg";
+import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
 
 export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -188,36 +189,62 @@ export default function Landing() {
         {/* Host Banner */}
         <section className="py-20 bg-eth-warm-tan" id="host">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="max-w-3xl mx-auto text-center bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl">
-              <h3 className="text-4xl font-bold text-eth-brown mb-6" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-                Share Your Ethiopian Home
-              </h3>
-              <p className="text-lg text-eth-brown mb-8">
-                Join thousands of hosts earning extra income by welcoming travelers to 
-                experience authentic Ethiopian hospitality.
-              </p>
-              <ul className="space-y-4 mb-10 text-left inline-block">
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                  <span className="text-eth-brown text-lg">Free listing and professional photography</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                  <span className="text-eth-brown text-lg">Secure payments in Ethiopian Birr</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                  <span className="text-eth-brown text-lg">24/7 host support in Amharic and English</span>
-                </li>
-              </ul>
-              <div>
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Left Side - Text Content */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl">
+                <h3 className="text-4xl font-bold text-eth-brown mb-6" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                  Share Your Ethiopian Home
+                </h3>
+                <p className="text-lg text-eth-brown mb-8">
+                  Join thousands of hosts earning extra income by welcoming travelers to 
+                  experience authentic Ethiopian hospitality.
+                </p>
+                <ul className="space-y-4 mb-10">
+                  <li className="flex items-center space-x-3">
+                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
+                    <span className="text-eth-brown text-lg">Free listing and professional photography</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
+                    <span className="text-eth-brown text-lg">Secure payments in Ethiopian Birr</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
+                    <span className="text-eth-brown text-lg">24/7 host support in Amharic and English</span>
+                  </li>
+                </ul>
+                <div>
+                  <Button 
+                    onClick={() => openAuthDialog("register")} 
+                    size="lg" 
+                    className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg"
+                    data-testid="button-start-hosting"
+                  >
+                    START HOSTING
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right Side - iPhone Mockup */}
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="relative w-full flex justify-center">
+                  <img 
+                    src={mobileAppMockup}
+                    alt="Ethiopia Stays Mobile App"
+                    className="w-full max-w-[300px] h-auto drop-shadow-2xl"
+                    data-testid="img-mobile-mockup"
+                  />
+                </div>
+                
+                {/* Download App Button */}
                 <Button 
-                  onClick={() => openAuthDialog("register")} 
-                  size="lg" 
-                  className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg"
-                  data-testid="button-start-hosting"
+                  className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6"
+                  data-testid="button-download-app"
+                  onClick={() => {
+                    window.open('#', '_blank');
+                  }}
                 >
-                  START HOSTING
+                  Download the App
                 </Button>
               </div>
             </div>
