@@ -180,7 +180,7 @@ export default function OperatorDashboard() {
     <div className="min-h-screen bg-eth-warm-tan flex flex-col">
       <Header hideNavigation={true} />
       
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-12 mb-16">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-eth-brown mb-2" data-testid="text-operator-title">
             Operator Dashboard
