@@ -1,89 +1,24 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import AuthDialog from "@/components/auth-dialog";
+import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
-import { CheckCircle, Home } from "lucide-react";
-
-const hostRegisterSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  phoneNumber: z.string().min(10, "Valid phone number is required"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type HostRegisterFormData = z.infer<typeof hostRegisterSchema>;
+import { CheckCircle, Home, Users, Shield, TrendingUp } from "lucide-react";
 
 export default function StartHosting() {
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
-  const { toast } = useToast();
 
-  const form = useForm<HostRegisterFormData>({
-    resolver: zodResolver(hostRegisterSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      phoneNumber: "",
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (data: HostRegisterFormData) => {
-      const { confirmPassword, ...registerData } = data;
-      return await apiRequest("POST", "/api/register", registerData);
-    },
-    onSuccess: (user: any) => {
-      console.log("Host registration success - user data:", user);
-      
-      toast({
-        title: "Welcome to Ethiopia Stays!",
-        description: `Your account has been created successfully, ${user.firstName}! An admin will review your account to enable hosting privileges.`,
-      });
-      
-      // Redirect based on role (new registrations are "guest" by default)
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "operator") {
-        navigate("/operator/dashboard");
-      } else if (user.role === "host") {
-        navigate("/host/dashboard");
-      } else {
-        // Guest/Tenant goes to home page
-        navigate("/");
-      }
-      
-      // Update auth state
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Registration failed",
-        description: error.message || "Unable to create account",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = (data: HostRegisterFormData) => {
-    registerMutation.mutate(data);
-  };
+  // If already authenticated as a host, redirect to host dashboard
+  if (isAuthenticated && user?.role === "host") {
+    navigate("/host/dashboard");
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-eth-warm-tan">
@@ -94,6 +29,7 @@ export default function StartHosting() {
           <div className="mb-6">
             <BackButton />
           </div>
+          
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-eth-brown mb-4">
@@ -123,16 +59,16 @@ export default function StartHosting() {
                 <div className="flex items-start space-x-3">
                   <CheckCircle className="h-6 w-6 text-eth-yellow mt-1 flex-shrink-0" />
                   <div>
-                    <h3 className="font-semibold text-eth-brown">Full Control</h3>
-                    <p className="text-gray-600">Set your own prices, availability, and house rules</p>
+                    <h3 className="font-semibold text-eth-brown">Verified Guests</h3>
+                    <p className="text-gray-600">All guests are verified with Ethiopian ID or passport</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
                   <CheckCircle className="h-6 w-6 text-eth-red mt-1 flex-shrink-0" />
                   <div>
-                    <h3 className="font-semibold text-eth-brown">Verified Guests</h3>
-                    <p className="text-gray-600">All guests are ID-verified for your safety and peace of mind</p>
+                    <h3 className="font-semibold text-eth-brown">Secure Payments</h3>
+                    <p className="text-gray-600">Get paid safely through Ethiopian banks and mobile money</p>
                   </div>
                 </div>
                 
@@ -140,206 +76,138 @@ export default function StartHosting() {
                   <CheckCircle className="h-6 w-6 text-eth-green mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold text-eth-brown">24/7 Support</h3>
-                    <p className="text-gray-600">Get help anytime in Amharic or English</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-eth-yellow mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-eth-brown">Easy Payment</h3>
-                    <p className="text-gray-600">Receive payments via Telebirr, CBE Birr, or bank transfer</p>
+                    <p className="text-gray-600">Our team is always ready to help you succeed</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Registration Form */}
-            <Card className="bg-white">
+            {/* CTA Section */}
+            <Card className="bg-gradient-to-br from-eth-brown to-[#654321] text-white">
               <CardHeader>
-                <CardTitle className="text-2xl text-eth-brown">Create Your Host Account</CardTitle>
-                <CardDescription>Fill in your details to get started</CardDescription>
+                <CardTitle className="text-2xl">Ready to Get Started?</CardTitle>
+                <CardDescription className="text-white/80">
+                  {isAuthenticated 
+                    ? "Apply to become a host and start listing your properties" 
+                    : "Create your host account in just a few steps"}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter your first name" 
-                                {...field}
-                                data-testid="input-firstname-host"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter your last name" 
-                                {...field}
-                                data-testid="input-lastname-host"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+              <CardContent className="space-y-6">
+                {isAuthenticated ? (
+                  <>
+                    <p className="text-white/90">
+                      You're currently logged in as a guest. To start hosting, an admin will need to upgrade your account to a host account.
+                    </p>
+                    <div className="bg-white/10 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2">Next Steps:</h4>
+                      <ol className="list-decimal list-inside space-y-1 text-sm">
+                        <li>Contact our support team</li>
+                        <li>Provide property verification documents</li>
+                        <li>Wait for admin approval</li>
+                        <li>Start listing your properties!</li>
+                      </ol>
                     </div>
-
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <Input 
-                            type="email" 
-                            placeholder="your@email.com"
-                            autoComplete="off"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                            data-testid="input-email-host"
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="tel" 
-                              placeholder="+251 9XX XXX XXX" 
-                              {...field}
-                              data-testid="input-phone-host"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Minimum 8 characters" 
-                              {...field}
-                              data-testid="input-password-host"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Re-enter your password" 
-                              {...field}
-                              data-testid="input-confirmpassword-host"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-5 w-5" />
+                        <span>Quick registration process</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Shield className="h-5 w-5" />
+                        <span>Secure account verification</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="h-5 w-5" />
+                        <span>Start earning immediately</span>
+                      </div>
+                    </div>
+                    
                     <Button 
-                      type="submit" 
-                      className="w-full bg-eth-orange hover:opacity-90 text-white"
-                      disabled={registerMutation.isPending}
-                      data-testid="button-create-host-account"
+                      onClick={() => setAuthDialogOpen(true)}
+                      className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white font-semibold py-6 text-lg"
+                      data-testid="button-become-host"
                     >
-                      {registerMutation.isPending ? "Creating Account..." : "Create Host Account"}
+                      <Home className="h-5 w-5 mr-2" />
+                      Become a Host
                     </Button>
-
-                    <p className="text-sm text-gray-600 text-center">
+                    
+                    <p className="text-sm text-white/70 text-center">
                       Already have an account?{" "}
                       <button
-                        type="button"
-                        onClick={() => navigate("/")}
-                        className="text-eth-orange hover:underline font-medium"
+                        onClick={() => setAuthDialogOpen(true)}
+                        className="underline hover:text-white"
+                        data-testid="link-sign-in"
                       >
                         Sign in here
                       </button>
                     </p>
-                  </form>
-                </Form>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Additional Info Section */}
-          <div className="mt-12 bg-white rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-eth-brown mb-6 text-center">
-              How It Works
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-eth-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl font-bold text-eth-green">1</span>
-                </div>
-                <h3 className="font-semibold text-eth-brown mb-2">Create Your Account</h3>
-                <p className="text-gray-600">Sign up and verify your identity</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-eth-yellow/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl font-bold text-eth-yellow">2</span>
-                </div>
-                <h3 className="font-semibold text-eth-brown mb-2">List Your Property</h3>
-                <p className="text-gray-600">Add photos, set prices, and describe your space</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-eth-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl font-bold text-eth-red">3</span>
-                </div>
-                <h3 className="font-semibold text-eth-brown mb-2">Welcome Guests</h3>
-                <p className="text-gray-600">Start earning and hosting travelers</p>
-              </div>
+          {/* How It Works Section */}
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-eth-brown text-center mb-8">How It Works</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-white">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-eth-green/10 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-green">1</span>
+                  </div>
+                  <CardTitle className="text-eth-brown">Create Your Account</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Sign up with your phone number or email. Verify your identity with Ethiopian ID or passport.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-eth-yellow/10 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-yellow">2</span>
+                  </div>
+                  <CardTitle className="text-eth-brown">List Your Property</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Add photos, descriptions, and pricing. Our team will verify your listing within 24 hours.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-eth-red/10 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-red">3</span>
+                  </div>
+                  <CardTitle className="text-eth-brown">Start Earning</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Welcome guests and receive payments directly to your bank account or mobile money.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </main>
-
+      
       <Footer />
+
+      <AuthDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen}
+        defaultMode="register"
+        redirectAfterAuth="/"
+      />
     </div>
   );
 }

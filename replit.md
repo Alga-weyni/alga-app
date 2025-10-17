@@ -90,7 +90,7 @@ Preferred communication style: Simple, everyday language.
 - **Security**: 
   - All passwords hashed with bcrypt (10 salt rounds)
   - OTP stored in database with expiry timestamp
-  - Phone numbers and emails are unique identifiers
+  - Phone numbers and emails are unique identifiers (nullable - users can have either email OR phone)
 - **Role System**: 
   - Guest (default for new registrations)
   - Host (can list properties)
@@ -101,12 +101,19 @@ Preferred communication style: Simple, everyday language.
   - Production mode: Ready for Twilio or Ethiopian Telecom SMS API integration
   - Note: User dismissed Twilio integration setup - credentials can be added as secrets later
 - **Frontend**: 
+  - Unified AuthDialog component used across entire site
   - Dual-tab auth dialog (Phone/Email tabs)
   - Separate forms for phone and email authentication
   - OTP verification screen for phone auth
   - Role-based redirects after authentication (admin → /admin/dashboard, operator → /operator/dashboard, host → /host/dashboard, guest → /)
+  - Custom redirect support: Pages can specify redirect path via `redirectAfterAuth` prop
+  - Start Hosting page now uses unified AuthDialog (consistent behavior)
   - Session-based authentication with PostgreSQL storage
   - Secure logout with session destruction
+- **Database Fixes**:
+  - Added OTP columns (otp, otp_expiry) to users table via SQL
+  - Made email column nullable to support phone-only registration
+  - Fixed favorites page to correctly display favorited properties
 
 ## System Architecture
 
