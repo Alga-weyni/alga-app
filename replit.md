@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
     - `/api/operator/properties/:id/reject` - Reject with reason
   - Added storage methods: `getPendingVerificationDocuments()`, `getPendingProperties()`
   - Operator privilege: Review and verify guesthouse owner details and ensure documentation/specifications are met before property listing
+  - Fixed login redirect: Operators now automatically redirected to `/operator/dashboard` (no longer see guest home page)
   
 - **Admin Dashboard Enhancements**:
   - Added 5-tab admin interface: System Overview, User Management, Property Verification, ID Verification, System Config
