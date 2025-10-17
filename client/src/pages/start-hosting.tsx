@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { BackButton } from "@/components/back-button";
 import { CheckCircle, Home } from "lucide-react";
 
 const hostRegisterSchema = z.object({
@@ -90,6 +91,9 @@ export default function StartHosting() {
       
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+            <BackButton />
+          </div>
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-eth-brown mb-4">

@@ -4,6 +4,7 @@ import { type Booking, type Property } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
+import { BackButton } from "@/components/back-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,15 +132,9 @@ export default function BookingDetails() {
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => setLocation("/bookings")}
-          className="mb-6"
-          data-testid="button-back-to-bookings"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Bookings
-        </Button>
+        <div className="mb-6">
+          <BackButton />
+        </div>
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">

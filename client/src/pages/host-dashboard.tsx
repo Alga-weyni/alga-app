@@ -67,6 +67,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { BackButton } from "@/components/back-button";
 import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
@@ -291,6 +292,10 @@ export default function HostDashboard() {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+        
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-neutral-dark">Host Dashboard</h1>

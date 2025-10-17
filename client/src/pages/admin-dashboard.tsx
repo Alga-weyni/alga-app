@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type User, type Property } from "@shared/schema";
+import { BackButton } from "@/components/back-button";
 import { 
   Users, 
   Home, 
@@ -196,6 +197,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      <div className="mb-6">
+        <BackButton />
+      </div>
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
