@@ -308,11 +308,19 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
         ) : (
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-eth-light-tan">
-              <TabsTrigger value="phone" className="data-[state=active]:bg-eth-orange data-[state=active]:text-white" data-testid="tab-phone">
+              <TabsTrigger 
+                value="phone" 
+                className="text-eth-orange data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/10" 
+                data-testid="tab-phone"
+              >
                 <Phone className="h-4 w-4 mr-2" />
                 Phone
               </TabsTrigger>
-              <TabsTrigger value="email" className="data-[state=active]:bg-eth-orange data-[state=active]:text-white" data-testid="tab-email">
+              <TabsTrigger 
+                value="email" 
+                className="text-eth-orange data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/10" 
+                data-testid="tab-email"
+              >
                 <Mail className="h-4 w-4 mr-2" />
                 Email
               </TabsTrigger>
