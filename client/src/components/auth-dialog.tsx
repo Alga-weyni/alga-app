@@ -312,8 +312,21 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
                         <FormItem>
                           <FormLabel className="text-eth-brown">Phone Number</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="+251912345678" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-phone-login" />
+                            <Input 
+                              {...field} 
+                              placeholder="+251912345678" 
+                              className="bg-white border-eth-brown/20 text-eth-brown" 
+                              data-testid="input-phone-login"
+                              onChange={(e) => {
+                                let value = e.target.value;
+                                if (value && !value.startsWith('+')) {
+                                  value = '+' + value;
+                                }
+                                field.onChange(value);
+                              }}
+                            />
                           </FormControl>
+                          <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -374,8 +387,21 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
                         <FormItem>
                           <FormLabel className="text-eth-brown">Phone Number</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="+251912345678" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-phone-register" />
+                            <Input 
+                              {...field} 
+                              placeholder="+251912345678" 
+                              className="bg-white border-eth-brown/20 text-eth-brown" 
+                              data-testid="input-phone-register"
+                              onChange={(e) => {
+                                let value = e.target.value;
+                                if (value && !value.startsWith('+')) {
+                                  value = '+' + value;
+                                }
+                                field.onChange(value);
+                              }}
+                            />
                           </FormControl>
+                          <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
                           <FormMessage />
                         </FormItem>
                       )}
