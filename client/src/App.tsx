@@ -23,14 +23,14 @@ function Router() {
     <Switch>
       {/* Public routes - accessible to everyone */}
       <Route path="/start-hosting" component={StartHosting} />
+      <Route path="/properties" component={Properties} />
+      <Route path="/properties/:id" component={PropertyDetails} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Home} />
-          <Route path="/properties" component={Properties} />
-          <Route path="/properties/:id" component={PropertyDetails} />
           <Route path="/bookings" component={Bookings} />
           <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/host/dashboard" component={HostDashboard} />
