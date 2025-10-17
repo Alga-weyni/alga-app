@@ -136,12 +136,12 @@ export default function Properties() {
                   {/* Location */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Location</Label>
-                    <Select value={filters.city || ""} onValueChange={(value) => updateFilter("city", value)}>
+                    <Select value={filters.city || "all"} onValueChange={(value) => updateFilter("city", value === "all" ? undefined : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Choose city..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All cities</SelectItem>
+                        <SelectItem value="all">All cities</SelectItem>
                         {ETHIOPIAN_CITIES.map((city) => (
                           <SelectItem key={city} value={city}>
                             {city}
@@ -156,12 +156,12 @@ export default function Properties() {
                   {/* Property Type */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Property Type</Label>
-                    <Select value={filters.type || ""} onValueChange={(value) => updateFilter("type", value)}>
+                    <Select value={filters.type || "all"} onValueChange={(value) => updateFilter("type", value === "all" ? undefined : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="All types..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All types</SelectItem>
+                        <SelectItem value="all">All types</SelectItem>
                         {PROPERTY_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -206,14 +206,14 @@ export default function Properties() {
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Guests</Label>
                     <Select 
-                      value={filters.maxGuests?.toString() || ""} 
-                      onValueChange={(value) => updateFilter("maxGuests", value ? parseInt(value) : undefined)}
+                      value={filters.maxGuests?.toString() || "all"} 
+                      onValueChange={(value) => updateFilter("maxGuests", value === "all" ? undefined : parseInt(value))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Any number..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any number</SelectItem>
+                        <SelectItem value="all">Any number</SelectItem>
                         <SelectItem value="1">1 guest</SelectItem>
                         <SelectItem value="2">2 guests</SelectItem>
                         <SelectItem value="3">3 guests</SelectItem>
