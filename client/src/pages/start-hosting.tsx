@@ -201,14 +201,17 @@ export default function StartHosting() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="your@email.com" 
-                              {...field}
-                              data-testid="input-email-host"
-                            />
-                          </FormControl>
+                          <Input 
+                            type="email" 
+                            placeholder="your@email.com"
+                            autoComplete="off"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                            data-testid="input-email-host"
+                          />
                           <FormMessage />
                         </FormItem>
                       )}
