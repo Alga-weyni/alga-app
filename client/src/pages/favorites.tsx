@@ -42,8 +42,8 @@ export default function Favorites() {
               </div>
             ) : favorites && favorites.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {favorites.map((fav: any) => (
-                  <PropertyCard key={fav.id} property={fav.property} />
+                {favorites.map((property: any) => (
+                  <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
             ) : (
