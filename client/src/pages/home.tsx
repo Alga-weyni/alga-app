@@ -9,7 +9,7 @@ import { Link } from "wouter";
 import { Star, TrendingUp, Database, Activity } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import type { Property } from "@shared/schema";
-import mobileAppMockup from "@assets/ethiopia-stays-mobile-mockup.png";
+import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
 
 export default function Home() {
   const { data: properties = [], isLoading } = useQuery<Property[]>({
@@ -107,7 +107,7 @@ export default function Home() {
         {/* Mobile App Section */}
         <section className="py-16 bg-eth-warm-tan">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Side - Text Content */}
               <div className="space-y-6">
                 <h3 className="text-4xl md:text-5xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
@@ -143,11 +143,11 @@ export default function Home() {
 
               {/* Right Side - iPhone Mockup */}
               <div className="flex flex-col items-center justify-center space-y-6">
-                <div className="relative">
+                <div className="relative w-full flex justify-center">
                   <img 
                     src={mobileAppMockup}
                     alt="Ethiopia Stays Mobile App"
-                    className="w-full max-w-sm mx-auto drop-shadow-2xl"
+                    className="w-full max-w-[300px] h-auto drop-shadow-2xl"
                     data-testid="img-mobile-mockup"
                   />
                 </div>
