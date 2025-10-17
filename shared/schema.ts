@@ -29,15 +29,17 @@ export const sessions = pgTable(
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique().notNull(),
-  password: varchar("password").notNull(),
+  email: varchar("email").unique(),
+  password: varchar("password"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("guest"), // admin, host, guest
-  phoneNumber: varchar("phone_number"),
+  role: varchar("role").notNull().default("guest"), // admin, operator, host, guest
+  phoneNumber: varchar("phone_number").unique(),
   phoneVerified: boolean("phone_verified").default(false),
   idVerified: boolean("id_verified").default(false),
+  otp: varchar("otp", { length: 4 }),
+  otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
   bio: text("bio"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -209,16 +211,38 @@ export const insertUserSchema = createInsertSchema(users).omit({
   status: true,
 });
 
-export const registerUserSchema = insertUserSchema.extend({
+// Phone registration schema
+export const registerPhoneUserSchema = z.object({
+  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone number must be in format +251XXXXXXXXX"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
+// Email registration schema
+export const registerEmailUserSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-}).omit({ role: true });
+});
 
-export const loginUserSchema = z.object({
+// Phone login schema
+export const loginPhoneUserSchema = z.object({
+  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone number must be in format +251XXXXXXXXX"),
+  password: z.string().min(1, "Password is required"),
+});
+
+// Email login schema
+export const loginEmailUserSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+});
+
+// OTP verification schema
+export const verifyOtpSchema = z.object({
+  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone number must be in format +251XXXXXXXXX"),
+  otp: z.string().length(4, "OTP must be 4 digits"),
 });
 
 export const insertPropertySchema = createInsertSchema(properties).omit({
@@ -249,8 +273,11 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
-export type RegisterUser = z.infer<typeof registerUserSchema>;
-export type LoginUser = z.infer<typeof loginUserSchema>;
+export type RegisterPhoneUser = z.infer<typeof registerPhoneUserSchema>;
+export type RegisterEmailUser = z.infer<typeof registerEmailUserSchema>;
+export type LoginPhoneUser = z.infer<typeof loginPhoneUserSchema>;
+export type LoginEmailUser = z.infer<typeof loginEmailUserSchema>;
+export type VerifyOtp = z.infer<typeof verifyOtpSchema>;
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 export type Property = typeof properties.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
