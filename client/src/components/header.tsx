@@ -16,7 +16,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog";
 
-export default function Header() {
+interface HeaderProps {
+  hideNavigation?: boolean;
+}
+
+export default function Header({ hideNavigation = false }: HeaderProps) {
   const { user, isAuthenticated } = useAuth();
   const [location, navigate] = useLocation();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -48,53 +52,55 @@ export default function Header() {
             <h1 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/properties"
-              className={`transition-colors ${
-                location === '/properties' 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Explore
-            </Link>
-            
-            {/* Show different links based on auth status and role */}
-            {isAuthenticated ? (
-              // Only show "Host Your Property" if user is a host
-              user?.role === 'host' && (
-                <Link 
-                  href="/host/dashboard"
-                  className={`transition-colors ${
-                    location === '/host/dashboard' 
-                      ? 'text-primary font-medium' 
-                      : 'text-foreground hover:text-primary'
-                  }`}
-                >
-                  Host Your Property
-                </Link>
-              )
-            ) : (
-              // Show "Start Hosting" for non-authenticated users
+          {/* Desktop Navigation - Hidden for operator/admin dashboards */}
+          {!hideNavigation && (
+            <nav className="hidden md:flex items-center space-x-8">
               <Link 
-                href="/start-hosting"
-                className={`transition-colors font-medium ${
-                  location === '/start-hosting' 
-                    ? 'text-primary' 
-                    : 'text-eth-orange hover:text-eth-orange/80'
+                href="/properties"
+                className={`transition-colors ${
+                  location === '/properties' 
+                    ? 'text-primary font-medium' 
+                    : 'text-foreground hover:text-primary'
                 }`}
-                data-testid="link-start-hosting"
               >
-                Start Hosting
+                Explore
               </Link>
-            )}
-            
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
-              About Ethiopia
-            </a>
-          </nav>
+              
+              {/* Show different links based on auth status and role */}
+              {isAuthenticated ? (
+                // Only show "Host Your Property" if user is a host
+                user?.role === 'host' && (
+                  <Link 
+                    href="/host/dashboard"
+                    className={`transition-colors ${
+                      location === '/host/dashboard' 
+                        ? 'text-primary font-medium' 
+                        : 'text-foreground hover:text-primary'
+                    }`}
+                  >
+                    Host Your Property
+                  </Link>
+                )
+              ) : (
+                // Show "Start Hosting" for non-authenticated users
+                <Link 
+                  href="/start-hosting"
+                  className={`transition-colors font-medium ${
+                    location === '/start-hosting' 
+                      ? 'text-primary' 
+                      : 'text-eth-orange hover:text-eth-orange/80'
+                  }`}
+                  data-testid="link-start-hosting"
+                >
+                  Start Hosting
+                </Link>
+              )}
+              
+              <a href="#" className="text-foreground hover:text-primary transition-colors">
+                About Ethiopia
+              </a>
+            </nav>
+          )}
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">

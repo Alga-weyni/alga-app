@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { CheckCircle, XCircle, FileText, Home, User, Clock, MapPin, Bed, Users } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
@@ -176,10 +177,10 @@ export default function OperatorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-eth-warm-tan">
-      <Header />
+    <div className="min-h-screen bg-eth-warm-tan flex flex-col">
+      <Header hideNavigation={true} />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-eth-brown mb-2" data-testid="text-operator-title">
             Operator Dashboard
@@ -439,6 +440,8 @@ export default function OperatorDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+      
+      <Footer />
     </div>
   );
 }
