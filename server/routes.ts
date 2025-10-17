@@ -240,6 +240,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Operator-specific routes for verification
+  app.get('/api/operator/pending-documents', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const documents = await storage.getPendingVerificationDocuments();
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching pending documents:", error);
+      res.status(500).json({ message: "Failed to fetch pending documents" });
+    }
+  });
+
+  app.get('/api/operator/pending-properties', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const properties = await storage.getPendingProperties();
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching pending properties:", error);
+      res.status(500).json({ message: "Failed to fetch pending properties" });
+    }
+  });
+
+  app.post('/api/operator/documents/:documentId/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const { documentId } = req.params;
+      const verifierId = req.user.id;
+      
+      const updatedDocument = await storage.verifyDocument(parseInt(documentId), 'approved', verifierId);
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error("Error approving document:", error);
+      res.status(500).json({ message: "Failed to approve document" });
+    }
+  });
+
+  app.post('/api/operator/documents/:documentId/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const { documentId } = req.params;
+      const { reason } = req.body;
+      const verifierId = req.user.id;
+      
+      const updatedDocument = await storage.verifyDocument(parseInt(documentId), 'rejected', verifierId, reason);
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error("Error rejecting document:", error);
+      res.status(500).json({ message: "Failed to reject document" });
+    }
+  });
+
+  app.post('/api/operator/properties/:propertyId/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const { propertyId } = req.params;
+      const verifierId = req.user.id;
+      
+      const updatedProperty = await storage.verifyProperty(parseInt(propertyId), 'approved', verifierId);
+      res.json(updatedProperty);
+    } catch (error) {
+      console.error("Error approving property:", error);
+      res.status(500).json({ message: "Failed to approve property" });
+    }
+  });
+
+  app.post('/api/operator/properties/:propertyId/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Operator access required" });
+      }
+      
+      const { propertyId } = req.params;
+      const { reason } = req.body;
+      const verifierId = req.user.id;
+      
+      const updatedProperty = await storage.verifyProperty(parseInt(propertyId), 'rejected', verifierId, reason);
+      res.json(updatedProperty);
+    } catch (error) {
+      console.error("Error rejecting property:", error);
+      res.status(500).json({ message: "Failed to reject property" });
+    }
+  });
+
   // Property routes
   app.get('/api/properties', async (req, res) => {
     try {

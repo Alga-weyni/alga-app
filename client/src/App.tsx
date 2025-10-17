@@ -10,6 +10,7 @@ import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import OperatorDashboard from "@/pages/operator-dashboard";
 import StartHosting from "@/pages/start-hosting";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/host/dashboard" component={HostDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/operator/dashboard" component={OperatorDashboard} />
         </>
       )}
       <Route component={NotFound} />
