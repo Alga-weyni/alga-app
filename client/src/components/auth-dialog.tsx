@@ -54,9 +54,10 @@ interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultMode?: "login" | "register";
+  redirectAfterAuth?: string; // Optional redirect path after successful auth
 }
 
-export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }: AuthDialogProps) {
+export default function AuthDialog({ open, onOpenChange, defaultMode = "login", redirectAfterAuth }: AuthDialogProps) {
   const [mode, setMode] = useState<"login" | "register">(defaultMode);
   const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -119,7 +120,23 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
 
   const handleAuthSuccess = (data: any) => {
     const user = data.user || data;
-    const redirectPath = data.redirect || (user.role === "admin" ? "/admin/dashboard" : user.role === "operator" ? "/operator/dashboard" : user.role === "host" ? "/host/dashboard" : "/");
+    
+    // Use custom redirect if provided, otherwise use role-based redirect
+    let redirectPath;
+    if (redirectAfterAuth) {
+      redirectPath = redirectAfterAuth;
+    } else {
+      // Role-based redirect
+      if (user.role === "admin") {
+        redirectPath = "/admin/dashboard";
+      } else if (user.role === "operator") {
+        redirectPath = "/operator/dashboard";
+      } else if (user.role === "host") {
+        redirectPath = "/host/dashboard";
+      } else {
+        redirectPath = "/";
+      }
+    }
     
     toast({
       title: mode === "login" ? "Welcome back!" : "Account created!",
