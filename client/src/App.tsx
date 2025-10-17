@@ -14,6 +14,7 @@ import OperatorDashboard from "@/pages/operator-dashboard";
 import StartHosting from "@/pages/start-hosting";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
+import Favorites from "@/pages/favorites";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/bookings" component={Bookings} />
           <Route path="/bookings/:id" component={BookingDetails} />
+          <Route path="/favorites" component={Favorites} />
           <Route path="/host/dashboard" component={HostDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/operator/dashboard" component={OperatorDashboard} />
