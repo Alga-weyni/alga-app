@@ -257,7 +257,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
                       <Input 
                         type="email"
                         placeholder="your.email@example.com" 
-                        autoComplete="email"
+                        autoComplete="off"
                         {...field} 
                         data-testid="input-register-email"
                       />
