@@ -2,8 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema } from "@shared/schema";
+import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema } from "@shared/schema";
 import { smsService } from "./smsService";
+import bcrypt from "bcrypt";
+import { randomBytes } from "crypto";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -16,6 +18,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Phone Registration - Step 1: Register with password
+  app.post('/api/auth/register/phone', async (req, res) => {
+    try {
+      const validatedData = registerPhoneUserSchema.parse(req.body);
+      
+      // Check if phone number already exists
+      const existingUser = await storage.getUserByPhoneNumber(validatedData.phoneNumber);
+      if (existingUser) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      
+      // Generate 4-digit OTP
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Create user
+      const userId = randomBytes(16).toString('hex');
+      await storage.createUser({
+        id: userId,
+        phoneNumber: validatedData.phoneNumber,
+        password: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        role: 'guest',
+      });
+      
+      // Save OTP
+      await storage.saveOtp(validatedData.phoneNumber, otp, 10);
+      
+      // Log OTP for development (in production, send via SMS)
+      console.log(`[AUTH] OTP for ${validatedData.phoneNumber}: ${otp}`);
+      
+      res.json({ 
+        message: "Registration successful. OTP sent to your phone.",
+        phoneNumber: validatedData.phoneNumber,
+        requiresOtp: true,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error registering phone user:", error);
+      res.status(400).json({ message: error.message || "Failed to register" });
+    }
+  });
+
+  // Phone Registration - Step 2: Verify OTP
+  app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+      const validatedData = verifyOtpSchema.parse(req.body);
+      
+      const isValid = await storage.verifyOtp(validatedData.phoneNumber, validatedData.otp);
+      
+      if (!isValid) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+      
+      // Mark phone as verified
+      const user = await storage.markPhoneVerified(validatedData.phoneNumber);
+      
+      // Log in user
+      (req as any).login(user, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to log in after verification" });
+        }
+        res.json({ 
+          message: "Phone verified successfully",
+          user,
+          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/'
+        });
+      });
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+      res.status(400).json({ message: error.message || "Failed to verify OTP" });
+    }
+  });
+
+  // Phone Login - Step 1: Login with password
+  app.post('/api/auth/login/phone', async (req, res) => {
+    try {
+      const validatedData = loginPhoneUserSchema.parse(req.body);
+      
+      const user = await storage.getUserByPhoneNumber(validatedData.phoneNumber);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid phone number or password" });
+      }
+
+      const isValidPassword = await bcrypt.compare(validatedData.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid phone number or password" });
+      }
+
+      // Generate and send OTP
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      await storage.saveOtp(validatedData.phoneNumber, otp, 10);
+      
+      // Log OTP for development (in production, send via SMS)
+      console.log(`[AUTH] Login OTP for ${validatedData.phoneNumber}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your phone",
+        phoneNumber: validatedData.phoneNumber,
+        requiresOtp: true,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error logging in with phone:", error);
+      res.status(400).json({ message: error.message || "Failed to log in" });
+    }
+  });
+
+  // Email Registration
+  app.post('/api/auth/register/email', async (req, res) => {
+    try {
+      const validatedData = registerEmailUserSchema.parse(req.body);
+      
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      
+      // Create user
+      const userId = randomBytes(16).toString('hex');
+      const user = await storage.createUser({
+        id: userId,
+        email: validatedData.email,
+        password: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        role: 'guest',
+      });
+      
+      // Log in user
+      (req as any).login(user, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to log in after registration" });
+        }
+        res.json({ 
+          message: "Registration successful",
+          user,
+          redirect: '/'
+        });
+      });
+    } catch (error: any) {
+      console.error("Error registering email user:", error);
+      res.status(400).json({ message: error.message || "Failed to register" });
+    }
+  });
+
+  // Email Login
+  app.post('/api/auth/login/email', async (req, res) => {
+    try {
+      const validatedData = loginEmailUserSchema.parse(req.body);
+      
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isValidPassword = await bcrypt.compare(validatedData.password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Log in user
+      (req as any).login(user, (err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Failed to log in" });
+        }
+        res.json({ 
+          message: "Login successful",
+          user,
+          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/'
+        });
+      });
+    } catch (error: any) {
+      console.error("Error logging in with email:", error);
+      res.status(400).json({ message: error.message || "Failed to log in" });
     }
   });
 
