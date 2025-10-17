@@ -8,24 +8,47 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Loader2, Phone, Mail } from "lucide-react";
 
-const loginSchema = z.object({
+// Phone schemas
+const loginPhoneSchema = z.object({
+  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone must be in format +251XXXXXXXXX"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const registerPhoneSchema = z.object({
+  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone must be in format +251XXXXXXXXX"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
+const verifyOtpSchema = z.object({
+  phoneNumber: z.string(),
+  otp: z.string().length(4, "OTP must be 4 digits"),
+});
+
+// Email schemas
+const loginEmailSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
-const registerSchema = z.object({
+const registerEmailSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
-type RegisterFormData = z.infer<typeof registerSchema>;
+type LoginPhoneData = z.infer<typeof loginPhoneSchema>;
+type RegisterPhoneData = z.infer<typeof registerPhoneSchema>;
+type VerifyOtpData = z.infer<typeof verifyOtpSchema>;
+type LoginEmailData = z.infer<typeof loginEmailSchema>;
+type RegisterEmailData = z.infer<typeof registerEmailSchema>;
 
 interface AuthDialogProps {
   open: boolean;
@@ -35,69 +58,163 @@ interface AuthDialogProps {
 
 export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }: AuthDialogProps) {
   const [mode, setMode] = useState<"login" | "register">(defaultMode);
+  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [pendingPhoneNumber, setPendingPhoneNumber] = useState("");
+  const [devOtp, setDevOtp] = useState<string | undefined>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  const loginForm = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  // Phone forms
+  const loginPhoneForm = useForm<LoginPhoneData>({
+    resolver: zodResolver(loginPhoneSchema),
+    defaultValues: { phoneNumber: "", password: "" },
   });
 
-  const registerForm = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-    },
+  const registerPhoneForm = useForm<RegisterPhoneData>({
+    resolver: zodResolver(registerPhoneSchema),
+    defaultValues: { phoneNumber: "", password: "", firstName: "", lastName: "" },
   });
 
-  // Reset forms when dialog opens or closes
+  const otpForm = useForm<VerifyOtpData>({
+    resolver: zodResolver(verifyOtpSchema),
+    defaultValues: { phoneNumber: "", otp: "" },
+  });
+
+  // Email forms
+  const loginEmailForm = useForm<LoginEmailData>({
+    resolver: zodResolver(loginEmailSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const registerEmailForm = useForm<RegisterEmailData>({
+    resolver: zodResolver(registerEmailSchema),
+    defaultValues: { email: "", password: "", firstName: "", lastName: "" },
+  });
+
   useEffect(() => {
     if (open) {
-      loginForm.reset();
-      registerForm.reset();
+      loginPhoneForm.reset();
+      registerPhoneForm.reset();
+      loginEmailForm.reset();
+      registerEmailForm.reset();
+      otpForm.reset();
+      setShowOtpInput(false);
+      setPendingPhoneNumber("");
+      setDevOtp(undefined);
     }
   }, [open]);
 
-  // Reset forms when mode changes
   const switchMode = (newMode: "login" | "register") => {
     setMode(newMode);
-    loginForm.reset();
-    registerForm.reset();
+    setShowOtpInput(false);
+    setPendingPhoneNumber("");
+    setDevOtp(undefined);
+    loginPhoneForm.reset();
+    registerPhoneForm.reset();
+    loginEmailForm.reset();
+    registerEmailForm.reset();
+    otpForm.reset();
   };
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginFormData) => {
-      return await apiRequest("POST", "/api/login", data);
+  const handleAuthSuccess = (data: any) => {
+    const user = data.user || data;
+    const redirectPath = data.redirect || (user.role === "admin" ? "/admin/dashboard" : user.role === "operator" ? "/operator/dashboard" : user.role === "host" ? "/host/dashboard" : "/");
+    
+    toast({
+      title: mode === "login" ? "Welcome back!" : "Account created!",
+      description: mode === "login" ? `Logged in as ${user.firstName} ${user.lastName}` : `Welcome to Ethiopia Stays, ${user.firstName}!`,
+    });
+
+    navigate(redirectPath);
+    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    onOpenChange(false);
+  };
+
+  // Phone registration mutation
+  const registerPhoneMutation = useMutation({
+    mutationFn: async (data: RegisterPhoneData) => {
+      return await apiRequest("POST", "/api/auth/register/phone", data);
     },
-    onSuccess: (user: any) => {
-      console.log("Login success - user data:", user);
-      
+    onSuccess: (data: any) => {
+      setPendingPhoneNumber(data.phoneNumber);
+      setShowOtpInput(true);
+      setDevOtp(data.devOtp);
+      otpForm.setValue("phoneNumber", data.phoneNumber);
       toast({
-        title: "Welcome back!",
-        description: `Logged in as ${user.firstName} ${user.lastName}`,
+        title: "OTP Sent",
+        description: data.devOtp ? `Development OTP: ${data.devOtp}` : "Check your phone for the verification code",
       });
-      
-      // Redirect FIRST based on role
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "operator") {
-        navigate("/operator/dashboard");
-      } else if (user.role === "host") {
-        navigate("/host/dashboard");
-      } else {
-        navigate("/");
-      }
-      
-      // Then update auth state and close dialog
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      onOpenChange(false);
     },
+    onError: (error: any) => {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Failed to register",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Phone login mutation
+  const loginPhoneMutation = useMutation({
+    mutationFn: async (data: LoginPhoneData) => {
+      return await apiRequest("POST", "/api/auth/login/phone", data);
+    },
+    onSuccess: (data: any) => {
+      setPendingPhoneNumber(data.phoneNumber);
+      setShowOtpInput(true);
+      setDevOtp(data.devOtp);
+      otpForm.setValue("phoneNumber", data.phoneNumber);
+      toast({
+        title: "OTP Sent",
+        description: data.devOtp ? `Development OTP: ${data.devOtp}` : "Check your phone for the verification code",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid phone number or password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // OTP verification mutation
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (data: VerifyOtpData) => {
+      return await apiRequest("POST", "/api/auth/verify-otp", data);
+    },
+    onSuccess: handleAuthSuccess,
+    onError: (error: any) => {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired OTP",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Email registration mutation
+  const registerEmailMutation = useMutation({
+    mutationFn: async (data: RegisterEmailData) => {
+      return await apiRequest("POST", "/api/auth/register/email", data);
+    },
+    onSuccess: handleAuthSuccess,
+    onError: (error: any) => {
+      toast({
+        title: "Registration failed",
+        description: error.message || "Failed to register",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Email login mutation
+  const loginEmailMutation = useMutation({
+    mutationFn: async (data: LoginEmailData) => {
+      return await apiRequest("POST", "/api/auth/login/email", data);
+    },
+    onSuccess: handleAuthSuccess,
     onError: (error: any) => {
       toast({
         title: "Login failed",
@@ -107,223 +224,299 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: async (data: RegisterFormData) => {
-      return await apiRequest("POST", "/api/register", data);
-    },
-    onSuccess: (user: any) => {
-      console.log("Register success - user data:", user);
-      
-      toast({
-        title: "Account created!",
-        description: `Welcome to Ethiopia Stays, ${user.firstName}!`,
-      });
-      
-      // Redirect FIRST based on role
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (user.role === "operator") {
-        navigate("/operator/dashboard");
-      } else if (user.role === "host") {
-        navigate("/host/dashboard");
-      } else {
-        navigate("/");
-      }
-      
-      // Then update auth state and close dialog
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      onOpenChange(false);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Registration failed",
-        description: error.message || "Unable to create account",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleLoginSubmit = (data: LoginFormData) => {
-    loginMutation.mutate(data);
-  };
-
-  const handleRegisterSubmit = (data: RegisterFormData) => {
-    registerMutation.mutate(data);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[500px] bg-eth-warm-tan border-eth-brown/20">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-eth-brown">
-            {mode === "login" ? "Sign In" : "Create Account"}
+            {showOtpInput ? "Verify OTP" : mode === "login" ? "Sign In" : "Create Account"}
           </DialogTitle>
-          <DialogDescription>
-            {mode === "login" 
-              ? "Welcome back to Ethiopia Stays"
-              : "Join our community of travelers and hosts"
-            }
+          <DialogDescription className="text-eth-brown/70">
+            {showOtpInput ? "Enter the 4-digit code sent to your phone" : mode === "login" ? "Welcome back to Ethiopia Stays" : "Join our community"}
           </DialogDescription>
         </DialogHeader>
 
-        {mode === "login" ? (
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
+        {showOtpInput ? (
+          <Form {...otpForm}>
+            <form onSubmit={otpForm.handleSubmit((data) => verifyOtpMutation.mutate(data))} className="space-y-4">
               <FormField
-                control={loginForm.control}
-                name="email"
+                control={otpForm.control}
+                name="otp"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-eth-brown">4-Digit OTP</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="email"
-                        placeholder="your.email@example.com" 
-                        autoComplete="email"
-                        {...field} 
-                        data-testid="input-email"
+                      <Input
+                        {...field}
+                        placeholder="1234"
+                        maxLength={4}
+                        className="bg-white border-eth-brown/20 text-eth-brown"
+                        data-testid="input-otp"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="••••••••" 
-                        {...field} 
-                        data-testid="input-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit" 
-                className="w-full bg-eth-orange hover:opacity-90" 
-                disabled={loginMutation.isPending}
-                data-testid="button-login"
-              >
-                {loginMutation.isPending ? "Signing in..." : "Sign In"}
-              </Button>
+              {devOtp && (
+                <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
+                  <p className="text-sm text-yellow-800">Development Mode - OTP: <strong>{devOtp}</strong></p>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowOtpInput(false);
+                    setPendingPhoneNumber("");
+                    setDevOtp(undefined);
+                  }}
+                  className="flex-1 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
+                  data-testid="button-back"
+                >
+                  Back
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={verifyOtpMutation.isPending}
+                  className="flex-1 bg-eth-orange hover:bg-eth-orange/90 text-white"
+                  data-testid="button-verify-otp"
+                >
+                  {verifyOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
+                </Button>
+              </div>
             </form>
           </Form>
         ) : (
-          <Form {...registerForm}>
-            <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={registerForm.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="John" 
-                          {...field} 
-                          data-testid="input-firstname"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-eth-light-tan">
+              <TabsTrigger value="phone" className="data-[state=active]:bg-eth-orange data-[state=active]:text-white" data-testid="tab-phone">
+                <Phone className="h-4 w-4 mr-2" />
+                Phone
+              </TabsTrigger>
+              <TabsTrigger value="email" className="data-[state=active]:bg-eth-orange data-[state=active]:text-white" data-testid="tab-email">
+                <Mail className="h-4 w-4 mr-2" />
+                Email
+              </TabsTrigger>
+            </TabsList>
 
-                <FormField
-                  control={registerForm.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Doe" 
-                          {...field} 
-                          data-testid="input-lastname"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={registerForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <Input 
-                      type="email"
-                      placeholder="your.email@example.com" 
-                      autoComplete="new-email"
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                      data-testid="input-register-email"
+            <TabsContent value="phone" className="mt-6">
+              {mode === "login" ? (
+                <Form {...loginPhoneForm}>
+                  <form onSubmit={loginPhoneForm.handleSubmit((data) => loginPhoneMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={loginPhoneForm.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Phone Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="+251912345678" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-phone-login" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={registerForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Minimum 8 characters" 
-                        {...field} 
-                        data-testid="input-register-password"
+                    <FormField
+                      control={loginPhoneForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-login" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={loginPhoneMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-phone-login">
+                      {loginPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
+                    </Button>
+                  </form>
+                </Form>
+              ) : (
+                <Form {...registerPhoneForm}>
+                  <form onSubmit={registerPhoneForm.handleSubmit((data) => registerPhoneMutation.mutate(data))} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerPhoneForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-eth-brown">First Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-firstname-register" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormField
+                        control={registerPhoneForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-eth-brown">Last Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-lastname-register" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={registerPhoneForm.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Phone Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="+251912345678" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-phone-register" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerPhoneForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-register" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={registerPhoneMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-phone-register">
+                      {registerPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
+                    </Button>
+                  </form>
+                </Form>
+              )}
+            </TabsContent>
 
-              <Button 
-                type="submit" 
-                className="w-full bg-eth-orange hover:opacity-90" 
-                disabled={registerMutation.isPending}
-                data-testid="button-register"
-              >
-                {registerMutation.isPending ? "Creating account..." : "Create Account"}
-              </Button>
-            </form>
-          </Form>
+            <TabsContent value="email" className="mt-6">
+              {mode === "login" ? (
+                <Form {...loginEmailForm}>
+                  <form onSubmit={loginEmailForm.handleSubmit((data) => loginEmailMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={loginEmailForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-login" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={loginEmailForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-email-login" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={loginEmailMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-email-login">
+                      {loginEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
+                    </Button>
+                  </form>
+                </Form>
+              ) : (
+                <Form {...registerEmailForm}>
+                  <form onSubmit={registerEmailForm.handleSubmit((data) => registerEmailMutation.mutate(data))} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={registerEmailForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-eth-brown">First Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-firstname-email-register" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerEmailForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-eth-brown">Last Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-lastname-email-register" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={registerEmailForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-register" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerEmailForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-email-register" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={registerEmailMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-email-register">
+                      {registerEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
+                    </Button>
+                  </form>
+                </Form>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
 
-        <div className="text-center pt-4 border-t">
-          <p className="text-sm text-muted-foreground">
-            {mode === "login" ? "Don't have an account? " : "Already have an account? "}
-            <button
-              onClick={() => switchMode(mode === "login" ? "register" : "login")}
-              className="text-eth-orange hover:underline font-medium"
-              data-testid="button-toggle-mode"
-            >
-              {mode === "login" ? "Sign up" : "Sign in"}
-            </button>
-          </p>
-        </div>
+        {!showOtpInput && (
+          <div className="mt-4 text-center">
+            <p className="text-sm text-eth-brown/70">
+              {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+              <button
+                onClick={() => switchMode(mode === "login" ? "register" : "login")}
+                className="text-eth-orange hover:underline font-medium"
+                data-testid="button-switch-mode"
+              >
+                {mode === "login" ? "Sign Up" : "Sign In"}
+              </button>
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
