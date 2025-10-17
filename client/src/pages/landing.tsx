@@ -69,10 +69,6 @@ export default function Landing() {
         {/* Search Banner */}
         <SearchBanner />
 
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 mt-6">
-          <BackButton />
-        </div>
-
         {/* Featured Destinations */}
         <section className="py-16 bg-eth-warm-tan" id="explore">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
