@@ -57,7 +57,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
 
   return (
     <section className="bg-eth-warm-tan text-eth-brown py-12">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
         <div className="text-center mb-8">
           <h2 className="text-5xl md:text-6xl font-bold mb-6 text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
             Welcome to Ethiopia Stays
