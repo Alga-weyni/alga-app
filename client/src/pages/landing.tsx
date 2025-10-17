@@ -72,7 +72,7 @@ export default function Landing() {
 
         {/* Featured Destinations */}
         <section className="py-16 bg-eth-warm-tan" id="explore">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <h3 className="text-4xl font-bold text-eth-brown mb-12" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
               Explore Ethiopian Destinations
             </h3>
@@ -104,7 +104,7 @@ export default function Landing() {
 
         {/* Featured Properties Preview */}
         <section className="py-16 bg-eth-warm-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="text-center mb-12">
               <h3 className="text-4xl font-bold text-eth-brown mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                 Authentic Ethiopian Accommodations
@@ -188,7 +188,7 @@ export default function Landing() {
 
         {/* Host Banner */}
         <section className="py-20 bg-eth-warm-tan" id="host">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Side - Text Content */}
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl">

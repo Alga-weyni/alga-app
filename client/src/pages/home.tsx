@@ -34,7 +34,7 @@ export default function Home() {
 
         {/* Featured Destinations */}
         <section className="py-16 bg-eth-light-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <h3 className="text-4xl font-bold text-eth-brown mb-12" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
               Explore Ethiopian Destinations
             </h3>
@@ -68,7 +68,7 @@ export default function Home() {
 
         {/* Featured Properties */}
         <section className="py-16 bg-eth-warm-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-4xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>Featured Stays</h3>
               <Link href="/properties">
@@ -106,7 +106,7 @@ export default function Home() {
 
         {/* Mobile App Section */}
         <section className="py-16 bg-eth-warm-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Side - Text Content */}
               <div className="space-y-6">
@@ -169,7 +169,7 @@ export default function Home() {
 
         {/* Quick Stats */}
         <section className="py-16 bg-eth-light-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-white/60 backdrop-blur-sm border-eth-brown/20">
                 <CardContent className="p-6 text-center">
