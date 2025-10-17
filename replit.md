@@ -75,18 +75,36 @@ Preferred communication style: Simple, everyday language.
   - Benefits showcase for potential hosts
   - Automatic redirect based on role after registration
 
-### October 15, 2025 - Custom Authentication Implementation
-- **Replaced Replit Auth** with custom email/password authentication system
-- **Security**: All passwords hashed with bcrypt (10 salt rounds)
+### October 17, 2025 - Dual Authentication System Implementation
+- **Authentication Methods**:
+  1. **Phone + Password + OTP**: Ethiopian phone number (+251XXXXXXXXX) with password and 4-digit SMS OTP verification
+  2. **Email + Password**: Traditional email/password authentication (no OTP required)
+- **Phone Authentication Flow**:
+  - Registration: User provides phone (+251XXXXXXXXX), password, name → Receives 4-digit OTP → Verifies OTP → Account created and logged in
+  - Login: User provides phone and password → Receives 4-digit OTP → Verifies OTP → Logged in
+  - OTP expires after 10 minutes
+  - Phone number must be verified before account is fully activated
+- **Email Authentication Flow**:
+  - Registration: User provides email, password, name → Account created and logged in immediately (no OTP)
+  - Login: User provides email and password → Logged in immediately
+- **Security**: 
+  - All passwords hashed with bcrypt (10 salt rounds)
+  - OTP stored in database with expiry timestamp
+  - Phone numbers and emails are unique identifiers
 - **Role System**: 
   - Guest (default for new registrations)
   - Host (can list properties)
   - Admin (full system access - must be assigned by existing admin)
   - Operator (property verification)
-- **Features**:
-  - Registration with email/password (auto-assigned "guest" role)
-  - Login with email/password
-  - Role-based redirects after authentication (admin → /admin/dashboard, host → /host/dashboard, guest → /)
+- **SMS Integration**: 
+  - Development mode: OTP displayed in console and returned in API response
+  - Production mode: Ready for Twilio or Ethiopian Telecom SMS API integration
+  - Note: User dismissed Twilio integration setup - credentials can be added as secrets later
+- **Frontend**: 
+  - Dual-tab auth dialog (Phone/Email tabs)
+  - Separate forms for phone and email authentication
+  - OTP verification screen for phone auth
+  - Role-based redirects after authentication (admin → /admin/dashboard, operator → /operator/dashboard, host → /host/dashboard, guest → /)
   - Session-based authentication with PostgreSQL storage
   - Secure logout with session destruction
 
