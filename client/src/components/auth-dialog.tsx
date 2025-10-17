@@ -307,10 +307,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           </Form>
         ) : (
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-eth-light-tan">
+            <TabsList className="grid w-full grid-cols-2 bg-eth-light-tan gap-2 p-1">
               <TabsTrigger 
                 value="phone" 
-                className="text-eth-orange data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/10" 
+                className="bg-eth-orange text-white data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/90" 
                 data-testid="tab-phone"
               >
                 <Phone className="h-4 w-4 mr-2" />
@@ -318,7 +318,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </TabsTrigger>
               <TabsTrigger 
                 value="email" 
-                className="text-eth-orange data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/10" 
+                className="bg-eth-orange text-white data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/90" 
                 data-testid="tab-email"
               >
                 <Mail className="h-4 w-4 mr-2" />
