@@ -77,10 +77,12 @@ export interface IStorage {
   createVerificationDocument(document: any): Promise<any>;
   getVerificationDocumentsByUser(userId: string): Promise<any[]>;
   getAllVerificationDocuments(): Promise<any[]>;
+  getPendingVerificationDocuments(): Promise<any[]>;
   verifyDocument(documentId: number, status: string, verifierId: string, rejectionReason?: string): Promise<any>;
   
   // Admin operations
   getAllPropertiesForVerification(): Promise<Property[]>;
+  getPendingProperties(): Promise<Property[]>;
   verifyProperty(propertyId: number, status: string, verifierId: string, rejectionReason?: string): Promise<Property>;
   getAdminStats(): Promise<{
     totalUsers: number;
@@ -483,6 +485,29 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(verificationDocuments.createdAt));
   }
 
+  async getPendingVerificationDocuments(): Promise<any[]> {
+    return await db
+      .select({
+        id: verificationDocuments.id,
+        userId: verificationDocuments.userId,
+        documentType: verificationDocuments.documentType,
+        documentUrl: verificationDocuments.documentUrl,
+        status: verificationDocuments.status,
+        createdAt: verificationDocuments.createdAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          phoneNumber: users.phoneNumber
+        }
+      })
+      .from(verificationDocuments)
+      .leftJoin(users, eq(verificationDocuments.userId, users.id))
+      .where(eq(verificationDocuments.status, 'pending'))
+      .orderBy(desc(verificationDocuments.createdAt));
+  }
+
   async verifyDocument(documentId: number, status: string, verifierId: string, rejectionReason?: string): Promise<any> {
     const [updatedDocument] = await db
       .update(verificationDocuments)
@@ -503,6 +528,38 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(properties)
+      .orderBy(desc(properties.createdAt));
+  }
+
+  async getPendingProperties(): Promise<any[]> {
+    return await db
+      .select({
+        id: properties.id,
+        hostId: properties.hostId,
+        title: properties.title,
+        description: properties.description,
+        type: properties.type,
+        status: properties.status,
+        location: properties.location,
+        city: properties.city,
+        region: properties.region,
+        pricePerNight: properties.pricePerNight,
+        maxGuests: properties.maxGuests,
+        bedrooms: properties.bedrooms,
+        bathrooms: properties.bathrooms,
+        images: properties.images,
+        createdAt: properties.createdAt,
+        host: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          phoneNumber: users.phoneNumber
+        }
+      })
+      .from(properties)
+      .leftJoin(users, eq(properties.hostId, users.id))
+      .where(eq(properties.status, 'pending'))
       .orderBy(desc(properties.createdAt));
   }
 

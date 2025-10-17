@@ -21,9 +21,35 @@ Preferred communication style: Simple, everyday language.
     - Guest/Tenant: My Bookings, My Favorites
     - Host: My Bookings, My Favorites, Host Dashboard
     - Admin: Admin Dashboard
-    - Operator: Operator Dashboard (coming soon)
+    - Operator: Operator Dashboard
   - Role badge displayed in user dropdown menu
   - Removed host-specific features from guest home page
+
+### October 17, 2025 - Operator Dashboard Implementation
+- **Operator Dashboard**:
+  - Created comprehensive operator dashboard at `/operator/dashboard`
+  - Two main tabs: Host Verification and Property Verification
+  - Host Verification tab:
+    - View pending verification documents (ID, passport, property deed, business license)
+    - Preview documents with external link
+    - Approve or reject documents with rejection reasons
+    - Shows host details (name, email, phone)
+  - Property Verification tab:
+    - View pending properties awaiting approval
+    - Review property details (type, location, pricing, capacity)
+    - Preview property images
+    - Approve properties to list them live
+    - Reject properties with detailed feedback to host
+  - Real-time counts of pending items in tab headers
+  - Backend API routes for operators:
+    - `/api/operator/pending-documents` - Get pending verification docs
+    - `/api/operator/pending-properties` - Get pending properties
+    - `/api/operator/documents/:id/approve` - Approve document
+    - `/api/operator/documents/:id/reject` - Reject with reason
+    - `/api/operator/properties/:id/approve` - Approve property
+    - `/api/operator/properties/:id/reject` - Reject with reason
+  - Added storage methods: `getPendingVerificationDocuments()`, `getPendingProperties()`
+  - Operator privilege: Review and verify guesthouse owner details and ensure documentation/specifications are met before property listing
   
 - **Admin Dashboard Enhancements**:
   - Added 5-tab admin interface: System Overview, User Management, Property Verification, ID Verification, System Config

@@ -152,7 +152,7 @@ export default function Header() {
                     </DropdownMenuItem>
                   )}
                   
-                  {/* Operator option - coming soon */}
+                  {/* Operator option */}
                   {user?.role === 'operator' && (
                     <DropdownMenuItem asChild>
                       <Link href="/operator/dashboard">Operator Dashboard</Link>
