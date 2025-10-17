@@ -1,10 +1,8 @@
-import bcrypt from "bcrypt";
 import type { Express, RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
-import { registerUserSchema, loginUserSchema, type User } from "@shared/schema";
-import { randomUUID } from "crypto";
+import type { User } from "@shared/schema";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -36,91 +34,16 @@ export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
 
-  app.post("/api/register", async (req, res) => {
-    try {
-      const validatedData = registerUserSchema.parse(req.body);
-      
-      const existingUser = await storage.getUserByEmail(validatedData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "Email already registered" });
-      }
-
-      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-
-      const user = await storage.createUser({
-        id: randomUUID(),
-        email: validatedData.email,
-        password: hashedPassword,
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-        role: "guest",
-        phoneNumber: validatedData.phoneNumber,
-        profileImageUrl: validatedData.profileImageUrl,
-        bio: validatedData.bio,
-      });
-
+  // Enable passport-style login
+  app.use((req, res, next) => {
+    (req as any).login = (user: User, callback: (err?: any) => void) => {
       (req.session as any).userId = user.id;
       (req.session as any).userRole = user.role;
-
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
+      req.session.save((err) => {
+        callback(err);
       });
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      res.status(400).json({ 
-        message: error.errors ? error.errors[0].message : "Registration failed" 
-      });
-    }
-  });
-
-  app.post("/api/login", async (req, res) => {
-    try {
-      const validatedData = loginUserSchema.parse(req.body);
-      
-      const user = await storage.getUserByEmail(validatedData.email);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
-
-      console.log("Login - Raw user from DB:", JSON.stringify(user));
-
-      const passwordMatch = await bcrypt.compare(validatedData.password, user.password);
-      if (!passwordMatch) {
-        return res.status(401).json({ message: "Invalid email or password" });
-      }
-
-      if (user.status !== "active") {
-        return res.status(403).json({ message: "Account is not active" });
-      }
-
-      (req.session as any).userId = user.id;
-      (req.session as any).userRole = user.role;
-
-      const responseData = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        phoneVerified: user.phoneVerified,
-        idVerified: user.idVerified,
-        status: user.status,
-        profileImageUrl: user.profileImageUrl,
-      };
-
-      console.log("Login - Response data:", JSON.stringify(responseData));
-      
-      res.json(responseData);
-    } catch (error: any) {
-      console.error("Login error:", error);
-      res.status(400).json({ 
-        message: error.errors ? error.errors[0].message : "Login failed" 
-      });
-    }
+    };
+    next();
   });
 
   app.get("/api/logout", (req, res) => {
