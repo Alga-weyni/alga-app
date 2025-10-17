@@ -42,7 +42,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
     } else {
       // Navigate to properties page with search params
       const params = new URLSearchParams();
-      if (filters.destination) params.set("destination", filters.destination);
+      if (filters.destination) params.set("city", filters.destination);
       if (filters.checkIn) params.set("checkIn", filters.checkIn);
       if (filters.checkOut) params.set("checkOut", filters.checkOut);
       if (filters.guests) params.set("guests", filters.guests);
