@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### October 17, 2025 - Mobile App Showcase Section
+- **Home Page Enhancement**:
+  - Added "Share Your Ethiopian Home" section with two-column layout
+  - Left column: Host benefits and "Become a Host" call-to-action
+  - Right column: iPhone mockup displaying Ethiopia Stays mobile app
+  - "Download the App" button placed below mockup
+  - Section positioned between Featured Properties and Quick Stats
+  - Ethiopian-themed design with flag colors for bullet points
+  - Responsive grid layout for mobile and desktop views
+
 ### October 16, 2025 - Role-Based UI Separation & Admin Dashboard
 - **Role-Based Navigation System**:
   - Completely separated Guest/Tenant UI from Host UI

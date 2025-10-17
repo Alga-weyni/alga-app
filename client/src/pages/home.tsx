@@ -103,6 +103,69 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Mobile App Section */}
+        <section className="py-16 bg-eth-warm-tan">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Side - Text Content */}
+              <div className="space-y-6">
+                <h3 className="text-4xl md:text-5xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                  Share Your Ethiopian Home
+                </h3>
+                <p className="text-lg text-eth-brown">
+                  Open your doors to travelers from around the world and share the beauty of Ethiopian hospitality. 
+                  Earn income while showcasing your property and culture.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-eth-orange rounded-full mt-2"></div>
+                    <p className="text-eth-brown">Easy property listing and management</p>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-eth-gold rounded-full mt-2"></div>
+                    <p className="text-eth-brown">Secure payments via Telebirr and CBE Birr</p>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-eth-green rounded-full mt-2"></div>
+                    <p className="text-eth-brown">24/7 support in Amharic and English</p>
+                  </div>
+                </div>
+                <Link href="/start-hosting">
+                  <Button 
+                    className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6 mt-4"
+                    data-testid="button-start-hosting-home"
+                  >
+                    Become a Host
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Right Side - iPhone Mockup */}
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="relative">
+                  <img 
+                    src="/attached_assets/ChatGPT Image Oct 14, 2025, 11_55_51 AM_1760690116573.png"
+                    alt="Ethiopia Stays Mobile App"
+                    className="w-full max-w-sm mx-auto drop-shadow-2xl"
+                    data-testid="img-mobile-mockup"
+                  />
+                </div>
+                
+                {/* Download App Button */}
+                <Button 
+                  className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6"
+                  data-testid="button-download-app"
+                  onClick={() => {
+                    window.open('#', '_blank');
+                  }}
+                >
+                  Download the App
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Quick Stats */}
         <section className="py-16 bg-eth-light-tan">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
