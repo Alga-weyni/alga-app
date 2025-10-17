@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import { Star, TrendingUp, Database, Activity } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import type { Property } from "@shared/schema";
+import mobileAppMockup from "@assets/ethiopia-stays-mobile-mockup.png";
 
 export default function Home() {
   const { data: properties = [], isLoading } = useQuery<Property[]>({
@@ -144,7 +145,7 @@ export default function Home() {
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="relative">
                   <img 
-                    src="/attached_assets/ChatGPT Image Oct 14, 2025, 11_55_51 AM_1760690116573.png"
+                    src={mobileAppMockup}
                     alt="Ethiopia Stays Mobile App"
                     className="w-full max-w-sm mx-auto drop-shadow-2xl"
                     data-testid="img-mobile-mockup"
