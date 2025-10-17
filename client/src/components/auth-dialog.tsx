@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,6 +55,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
       lastName: "",
     },
   });
+
+  // Reset forms when dialog opens or closes
+  useEffect(() => {
+    if (open) {
+      loginForm.reset();
+      registerForm.reset();
+    }
+  }, [open]);
 
   // Reset forms when mode changes
   const switchMode = (newMode: "login" | "register") => {
