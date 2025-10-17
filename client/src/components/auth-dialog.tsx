@@ -86,6 +86,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
       // Redirect FIRST based on role
       if (user.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (user.role === "operator") {
+        navigate("/operator/dashboard");
       } else if (user.role === "host") {
         navigate("/host/dashboard");
       } else {
@@ -120,6 +122,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
       // Redirect FIRST based on role
       if (user.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (user.role === "operator") {
+        navigate("/operator/dashboard");
       } else if (user.role === "host") {
         navigate("/host/dashboard");
       } else {

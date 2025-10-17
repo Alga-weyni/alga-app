@@ -59,6 +59,8 @@ export default function StartHosting() {
       // Redirect based on role (new registrations are "guest" by default)
       if (user.role === "admin") {
         navigate("/admin/dashboard");
+      } else if (user.role === "operator") {
+        navigate("/operator/dashboard");
       } else if (user.role === "host") {
         navigate("/host/dashboard");
       } else {
