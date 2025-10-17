@@ -261,15 +261,17 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login" }
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="email"
-                        placeholder="your.email@example.com" 
-                        autoComplete="off"
-                        {...field} 
-                        data-testid="input-register-email"
-                      />
-                    </FormControl>
+                    <Input 
+                      type="email"
+                      placeholder="your.email@example.com" 
+                      autoComplete="new-email"
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                      data-testid="input-register-email"
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
