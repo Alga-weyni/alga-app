@@ -3,6 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -209,6 +210,10 @@ export default function PropertyDetails() {
         <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+        
         {/* Image Gallery */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
           <div className="lg:col-span-3">

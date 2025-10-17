@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
 import AuthDialog from "@/components/auth-dialog";
+import { BackButton } from "@/components/back-button";
 import { Star, CheckCircle, Home } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
@@ -67,6 +68,10 @@ export default function Landing() {
 
         {/* Search Banner */}
         <SearchBanner />
+
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 mt-6">
+          <BackButton />
+        </div>
 
         {/* Featured Destinations */}
         <section className="py-16 bg-eth-warm-tan" id="explore">

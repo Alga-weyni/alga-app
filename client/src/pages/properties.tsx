@@ -5,6 +5,7 @@ import Header from "@/components/header";
 import PropertyCard from "@/components/property-card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
+import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,6 +114,10 @@ export default function Properties() {
         />
 
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+          <div className="mb-6">
+            <BackButton />
+          </div>
+          
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>

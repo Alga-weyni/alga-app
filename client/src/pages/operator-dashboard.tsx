@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { BackButton } from "@/components/back-button";
 import { CheckCircle, XCircle, FileText, Home, User, Clock, MapPin, Bed, Users } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
@@ -181,6 +182,10 @@ export default function OperatorDashboard() {
       <Header hideNavigation={true} />
       
       <main className="flex-1 container mx-auto px-4 py-12 mb-16">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-eth-brown mb-2" data-testid="text-operator-title">
             Operator Dashboard

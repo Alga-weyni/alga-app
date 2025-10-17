@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { BackButton } from "@/components/back-button";
 import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
@@ -6,6 +7,9 @@ export default function NotFound() {
     <div className="flex min-h-screen bg-eth-warm-tan">
       <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
       <div className="flex-1 lg:ml-20 flex items-center justify-center">
+        <div className="absolute top-8 left-24 lg:left-32">
+          <BackButton />
+        </div>
         <Card className="w-full max-w-md mx-4 bg-white/60 backdrop-blur-sm border-eth-brown/20">
           <CardContent className="pt-6">
             <div className="flex mb-4 gap-2">

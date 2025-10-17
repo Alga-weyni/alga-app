@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { type Booking } from "@shared/schema";
 import Header from "@/components/header";
+import { BackButton } from "@/components/back-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,10 @@ export default function Bookings() {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <BackButton />
+        </div>
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">My Bookings</h1>
           <p className="text-muted-foreground">View and manage your accommodation bookings</p>
