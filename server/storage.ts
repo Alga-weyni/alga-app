@@ -24,8 +24,14 @@ export interface IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // OTP operations
+  saveOtp(phoneNumber: string, otp: string, expiryMinutes?: number): Promise<void>;
+  verifyOtp(phoneNumber: string, otp: string): Promise<boolean>;
+  markPhoneVerified(phoneNumber: string): Promise<User>;
   
   // Admin user management
   getAllUsers(): Promise<User[]>;
@@ -104,6 +110,56 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phoneNumber, phoneNumber));
+    return user;
+  }
+
+  async saveOtp(phoneNumber: string, otp: string, expiryMinutes: number = 10): Promise<void> {
+    const expiryDate = new Date();
+    expiryDate.setMinutes(expiryDate.getMinutes() + expiryMinutes);
+    
+    await db
+      .update(users)
+      .set({
+        otp,
+        otpExpiry: expiryDate,
+      })
+      .where(eq(users.phoneNumber, phoneNumber));
+  }
+
+  async verifyOtp(phoneNumber: string, otp: string): Promise<boolean> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.phoneNumber, phoneNumber));
+
+    if (!user || !user.otp || !user.otpExpiry) {
+      return false;
+    }
+
+    const now = new Date();
+    if (now > user.otpExpiry) {
+      // OTP expired
+      return false;
+    }
+
+    return user.otp === otp;
+  }
+
+  async markPhoneVerified(phoneNumber: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        phoneVerified: true,
+        otp: null,
+        otpExpiry: null,
+      })
+      .where(eq(users.phoneNumber, phoneNumber))
+      .returning();
     return user;
   }
 
