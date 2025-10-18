@@ -307,10 +307,27 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           </Form>
         ) : (
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-eth-light-tan gap-2 p-1">
+            <TabsList className="grid w-full grid-cols-2 bg-transparent gap-3 p-0">
               <TabsTrigger 
                 value="phone" 
-                className="bg-eth-orange text-white data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/90" 
+                className="
+                  relative px-6 py-3 rounded-lg font-medium
+                  transition-all duration-200 ease-in-out
+                  border-2
+                  data-[state=inactive]:bg-gradient-to-br data-[state=inactive]:from-eth-light-tan/30 data-[state=inactive]:to-eth-warm-tan/30
+                  data-[state=inactive]:border-eth-brown/20
+                  data-[state=inactive]:text-eth-brown/70
+                  data-[state=inactive]:hover:border-eth-brown/30
+                  data-[state=inactive]:hover:text-eth-brown
+                  data-[state=inactive]:hover:shadow-sm
+                  data-[state=inactive]:hover:scale-[1.02]
+                  data-[state=active]:bg-eth-orange
+                  data-[state=active]:border-transparent
+                  data-[state=active]:text-white
+                  data-[state=active]:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
+                  data-[state=active]:shadow-eth-orange/40
+                  focus:outline-none focus:ring-2 focus:ring-eth-orange/50 focus:ring-offset-2
+                " 
                 data-testid="tab-phone"
               >
                 <Phone className="h-4 w-4 mr-2" />
@@ -318,7 +335,24 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </TabsTrigger>
               <TabsTrigger 
                 value="email" 
-                className="bg-eth-orange text-white data-[state=active]:bg-eth-orange data-[state=active]:text-white hover:bg-eth-orange/90" 
+                className="
+                  relative px-6 py-3 rounded-lg font-medium
+                  transition-all duration-200 ease-in-out
+                  border-2
+                  data-[state=inactive]:bg-gradient-to-br data-[state=inactive]:from-eth-light-tan/30 data-[state=inactive]:to-eth-warm-tan/30
+                  data-[state=inactive]:border-eth-brown/20
+                  data-[state=inactive]:text-eth-brown/70
+                  data-[state=inactive]:hover:border-eth-brown/30
+                  data-[state=inactive]:hover:text-eth-brown
+                  data-[state=inactive]:hover:shadow-sm
+                  data-[state=inactive]:hover:scale-[1.02]
+                  data-[state=active]:bg-eth-orange
+                  data-[state=active]:border-transparent
+                  data-[state=active]:text-white
+                  data-[state=active]:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
+                  data-[state=active]:shadow-eth-orange/40
+                  focus:outline-none focus:ring-2 focus:ring-eth-orange/50 focus:ring-offset-2
+                " 
                 data-testid="tab-email"
               >
                 <Mail className="h-4 w-4 mr-2" />
