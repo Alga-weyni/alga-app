@@ -805,6 +805,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dedicated search endpoint (alias for /api/properties with search parameters)
+  app.get('/api/properties/search', async (req, res) => {
+    try {
+      const { city, type, minPrice, maxPrice, maxGuests, checkIn, checkOut, q, sort } = req.query;
+      
+      const filters: any = {};
+      if (city) filters.city = city as string;
+      if (type) filters.type = type as string;
+      if (minPrice) filters.minPrice = parseFloat(minPrice as string);
+      if (maxPrice) filters.maxPrice = parseFloat(maxPrice as string);
+      if (maxGuests) filters.maxGuests = parseInt(maxGuests as string);
+      if (checkIn) filters.checkIn = new Date(checkIn as string);
+      if (checkOut) filters.checkOut = new Date(checkOut as string);
+      if (q) filters.q = q as string;
+      if (sort) filters.sort = sort as string;
+
+      const properties = await storage.getProperties(filters);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
