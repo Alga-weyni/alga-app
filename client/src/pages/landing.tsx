@@ -74,55 +74,55 @@ export default function Landing() {
         </header>
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[#f6bd89] via-[#fb9547] to-[#fb470b] py-16 md:py-24">
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] py-20 md:py-28">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               {/* Left Side - Text and CTAs */}
               <div className="space-y-8 animate-fade-in-up">
                 {/* Title */}
-                <div className="space-y-4">
-                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                <div className="space-y-6">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#2d1405] leading-tight" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                     Welcome to Alga
                   </h1>
-                  <p className="text-2xl md:text-3xl text-white/95 font-medium">
+                  <p className="text-lg md:text-xl text-[#5a4a42] max-w-lg leading-relaxed">
                     Experience Ethiopian stays — authentic, local, and easy to book.
                   </p>
-                  <p className="text-lg md:text-xl text-white/90 max-w-xl">
+                  <p className="text-base text-[#5a4a42]/80 max-w-xl">
                     Built for travelers, hosts, and the diaspora who believe home is where Ethiopia beats.
                   </p>
                 </div>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Button 
                     size="lg"
-                    className="bg-eth-brown hover:bg-eth-brown/90 text-white rounded-xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                    className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-8 py-6 text-base font-medium shadow-md hover:shadow-lg transition-all duration-200"
                     onClick={() => {
                       toast({
-                        title: "📱 Mobile App Coming Soon!",
-                        description: "The Alga mobile app will be available on the App Store and Google Play soon. For now, book directly through our website!",
-                        duration: 5000,
+                        title: "Coming Soon",
+                        description: "The Alga mobile app will be available shortly.",
+                        duration: 3000,
                       });
                     }}
                     data-testid="button-download-app-hero"
                   >
-                    Download the Alga App
+                    Download the App
                   </Button>
                   <Button 
                     size="lg"
                     variant="outline"
-                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white rounded-xl px-8 py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="border-[#d4c4b8] text-[#2d1405] hover:bg-[#2d1405] hover:text-white hover:border-[#2d1405] rounded-lg px-8 py-6 text-base font-medium transition-all duration-200"
                     onClick={() => openAuthDialog("login")}
                     data-testid="button-explore-stays-hero"
                   >
-                    Explore Stays <ArrowRight className="ml-2 h-5 w-5" />
+                    Explore Stays <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* Reassurance Line */}
-                <div className="flex items-center space-x-3 text-white/95">
-                  <Shield className="h-6 w-6" />
-                  <p className="text-lg font-semibold">
+                <div className="flex items-center space-x-2 text-[#5a4a42]">
+                  <Shield className="h-5 w-5" />
+                  <p className="text-sm font-medium">
                     Secure Telebirr Payments • 100% Ethiopian
                   </p>
                 </div>
@@ -144,20 +144,30 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Closing Line */}
-          <div className="mt-16 text-center">
-            <p className="text-xl md:text-2xl text-white/95 font-medium italic px-6">
+          {/* Closing Line - Artistic Italian Tagline */}
+          <div className="mt-20 text-center">
+            <p 
+              className="text-2xl md:text-3xl lg:text-4xl text-[#5a4a42] font-light italic px-6 leading-relaxed tracking-wide"
+              style={{ 
+                fontFamily: "'Playfair Display', 'Georgia', serif",
+                fontStyle: 'italic',
+                letterSpacing: '0.02em'
+              }}
+            >
               From Axum to Arba Minch — your next stay is just a tap away.
             </p>
           </div>
         </section>
 
         {/* Featured Destinations */}
-        <section className="py-16 bg-eth-warm-tan" id="explore">
+        <section className="py-20 bg-[#faf5f0]" id="explore">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <h3 className="text-4xl font-bold text-eth-brown mb-12" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-              Top Ethiopian Destinations
-            </h3>
+            <div className="mb-12">
+              <h3 className="text-3xl md:text-4xl font-bold text-[#2d1405] mb-2" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                Top Ethiopian Destinations
+              </h3>
+              <p className="text-sm text-[#5a4a42]">Explore Ethiopia's most beautiful cities</p>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {FEATURED_DESTINATIONS.map((destination) => (
@@ -185,13 +195,13 @@ export default function Landing() {
         </section>
 
         {/* Featured Properties Preview */}
-        <section className="py-16 bg-eth-warm-tan">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="text-center mb-12">
-              <h3 className="text-4xl font-bold text-eth-brown mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+              <h3 className="text-3xl md:text-4xl font-bold text-[#2d1405] mb-3" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                 Authentic Ethiopian Accommodations
               </h3>
-              <p className="text-eth-brown max-w-2xl mx-auto text-lg">
+              <p className="text-[#5a4a42] max-w-2xl mx-auto text-base">
                 From traditional lodges in the Simien Mountains to modern hotels in Addis Ababa.
               </p>
             </div>
