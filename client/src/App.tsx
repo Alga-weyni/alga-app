@@ -17,6 +17,7 @@ import BookingDetails from "@/pages/booking-details";
 import BookingSuccess from "@/pages/booking-success";
 import BookingCancelled from "@/pages/booking-cancelled";
 import Favorites from "@/pages/favorites";
+import TestIDScanner from "@/pages/test-id-scanner";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/properties/:id" component={PropertyDetails} />
       <Route path="/booking/success" component={BookingSuccess} />
       <Route path="/booking/cancelled" component={BookingCancelled} />
+      <Route path="/test-id-scanner" component={TestIDScanner} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
