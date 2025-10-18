@@ -536,9 +536,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No scan data provided" });
       }
       
-      // Log scan for audit trail
-      console.log(`[ID SCAN] User ${userId} scanned ID via ${scanMethod} at ${timestamp}`);
-      console.log(`[ID SCAN] Data preview: ${scanData.substring(0, 100)}...`);
       
       let idNumber: string | null = null;
       let fullName: string | null = null;
@@ -616,8 +613,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: "No ID number detected",
         });
       }
-      
-      console.log(`[ID SCAN] Extracted - Type: ${documentType}, ID: ${idNumber}, Name: ${fullName || 'Not extracted'}`);
       
       // Update user with verified ID information
       const user = await storage.getUser(userId);
@@ -1144,66 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mock banking integration endpoints
-  app.post('/api/payments/cbe', isAuthenticated, async (req, res) => {
-    try {
-      // Mock Commercial Bank of Ethiopia payment
-      const { amount, bookingId } = req.body;
-      
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      res.json({
-        success: true,
-        transactionId: `CBE${Date.now()}`,
-        amount,
-        currency: 'ETB',
-        status: 'completed'
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Payment processing failed" });
-    }
-  });
-
-  app.post('/api/payments/dashen', isAuthenticated, async (req, res) => {
-    try {
-      // Mock Dashen Bank payment
-      const { amount, bookingId } = req.body;
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      res.json({
-        success: true,
-        transactionId: `DASH${Date.now()}`,
-        amount,
-        currency: 'ETB',
-        status: 'completed'
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Payment processing failed" });
-    }
-  });
-
-  app.post('/api/payments/m-birr', isAuthenticated, async (req, res) => {
-    try {
-      // Mock M-Birr mobile payment
-      const { amount, bookingId, phoneNumber } = req.body;
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      res.json({
-        success: true,
-        transactionId: `MBIRR${Date.now()}`,
-        amount,
-        currency: 'ETB',
-        status: 'completed'
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Mobile payment failed" });
-    }
-  });
-
-  // Real payment integration (Telebirr & PayPal)
+  // Payment integration (Telebirr & PayPal)
   // Public payment status endpoint
   app.get('/api/payment/status/telebirr', (req, res) => {
     const telebirrService = require('./services/telebirr.service').createTelebirrService();
