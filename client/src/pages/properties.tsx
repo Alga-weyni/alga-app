@@ -240,31 +240,27 @@ export default function Properties() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 gap-3">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-2xl sm:text-3xl font-bold text-eth-brown truncate" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-                  {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
-                </h2>
-                <p className="text-sm text-eth-brown/60 mt-0.5">
-                  {properties.length} {properties.length === 1 ? 'property' : 'properties'}
-                </p>
-              </div>
+            <div className="flex items-center justify-between mb-4 gap-3">
+              <p className="text-xs text-eth-brown/40 uppercase tracking-wider">
+                {properties.length} {properties.length === 1 ? 'stay' : 'stays'}
+                {filters.city && ` in ${filters.city}`}
+              </p>
 
               <div className="flex items-center gap-2 flex-shrink-0">
                 {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="text-xs px-2.5 py-0.5 bg-eth-orange/10 text-eth-brown border-0">
-                    {activeFilterCount} active
-                  </Badge>
+                  <span className="text-xs text-eth-brown/50">
+                    {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
+                  </span>
                 )}
                 
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5"
+                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5 h-8 text-xs"
                   data-testid="button-toggle-filters"
                 >
-                  <SlidersHorizontal className="h-4 w-4 mr-1.5" />
+                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
                   Filters
                 </Button>
               </div>
