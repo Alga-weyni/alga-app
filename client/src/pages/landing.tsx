@@ -421,7 +421,7 @@ export default function Landing() {
               </div>
 
               {/* Right Side - iPhone Mockup */}
-              <div className="flex flex-col items-center justify-center space-y-6">
+              <div className="flex justify-center items-center">
                 <div className="relative w-full flex justify-center">
                   <img 
                     src={mobileAppMockup}
@@ -430,17 +430,6 @@ export default function Landing() {
                     data-testid="img-mobile-mockup"
                   />
                 </div>
-                
-                {/* Download App Button */}
-                <Button 
-                  className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6"
-                  data-testid="button-download-app"
-                  onClick={() => {
-                    window.open('#', '_blank');
-                  }}
-                >
-                  Download the App
-                </Button>
               </div>
             </div>
           </div>
