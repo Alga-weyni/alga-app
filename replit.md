@@ -2,217 +2,74 @@
 
 ## Overview
 
-Alga ("bed" in Amharic) is a full-stack web application designed for the Ethiopian property rental market. It connects property owners with travelers seeking authentic Ethiopian accommodations, from traditional homes to modern hotels. The platform emphasizes local culture, safety, and supports multiple Ethiopian cities and regions, aiming to provide a secure and culturally rich rental experience. It includes robust features for host and property verification, diverse payment options, and role-based access for guests, hosts, operators, and administrators.
+Alga ("bed" in Amharic) is a full-stack web application for the Ethiopian property rental market. It connects property owners with travelers seeking authentic accommodations, from traditional homes to modern hotels, emphasizing local culture, safety, and supporting multiple Ethiopian cities. The platform provides a secure and culturally rich rental experience with robust features for host/property verification, diverse payment options, and role-based access for guests, hosts, operators, and administrators. Its business vision is to become the leading platform for Ethiopian hospitality, offering unique cultural immersion and economic opportunities for locals.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Design System (Updated Oct 18, 2025)
-
-### Color Palette - Clean & Minimal Aesthetic
-- **Primary Dark Brown**: `#2d1405` - Headlines, buttons, icons, primary text
-- **Medium Brown**: `#5a4a42` - Body text, secondary elements
-- **Cream Backgrounds**: `#faf5f0`, `#f5ece3`, `#faf8f6` - Section backgrounds
-- **Card Borders**: `#e5ddd5` - Subtle cream borders for cards
-- **White**: `#ffffff` - Card backgrounds, header background
-
-### Typography
-- **Headings**: Playfair Display (serif) - elegant, classic Italian style
-- **Italic Usage**: Artistic taglines (e.g., "From Axum to Arba Minch")
-- **Body Text**: System fonts for readability
-- **Transitions**: 200ms standard for all hover effects
-
-### UI Principles
-- Minimal design with subtle shadows (no heavy glows)
-- Clean white header with subtle border
-- Dark brown buttons throughout (no bright orange)
-- Cream/white card backgrounds with refined borders
-- Soft, sophisticated color transitions
-
 ## System Architecture
 
+### UI/UX Design
+
+The platform employs a clean and minimal aesthetic with a primary dark brown (`#2d1405`) for headlines and actions, medium brown (`#5a4a42`) for body text, and cream backgrounds (`#faf5f0`, `#f5ece3`, `#faf8f6`). Typography uses Playfair Display for headings and system fonts for body text. UI principles include minimal design with subtle shadows, a clean white header, dark brown buttons, and soft color transitions. All dashboards are fully responsive and mobile-optimized.
+
 ### Frontend Architecture
-- **Framework**: React with TypeScript, using Vite.
-- **Routing**: Wouter for client-side routing.
-- **UI Components**: Shadcn/ui built on Radix UI primitives.
-- **Styling**: Tailwind CSS with an Ethiopian-themed color palette.
-- **State Management**: React Query for server state management.
+
+- **Framework**: React with TypeScript (Vite).
+- **Routing**: Wouter.
+- **UI Components**: Shadcn/ui built on Radix UI.
+- **Styling**: Tailwind CSS with an Ethiopian-themed palette.
+- **State Management**: React Query for server state.
 - **Forms**: React Hook Form with Zod for validation.
-- **Mobile Optimization**: All dashboards (Host, Admin, Operator) fully responsive with:
-    - Responsive headers and stat grids (2-column layout on mobile)
-    - Compact tab navigation with abbreviated labels
-    - Mobile-first padding and spacing
-    - Touch-friendly button sizing
-- **UI/UX Decisions**: Incorporates Shadcn/ui tabs, responsive grid layouts, modal-based checkouts, and a dual-tab authentication dialog. Features like the "Share Your Ethiopian Home" section with an iPhone app mockup and Ethiopian-themed design elements are integrated into the home page.
+- **UI/UX Decisions**: Responsive grid layouts, modal-based checkouts, dual-tab authentication, and Ethiopian-themed design elements.
 
 ### Backend Architecture
+
 - **Runtime**: Node.js with Express.js.
 - **Language**: TypeScript with ES modules.
 - **API Design**: RESTful API.
 - **Session Management**: Express sessions with PostgreSQL storage.
 
 ### Database Design
+
 - **Database**: PostgreSQL with Neon serverless hosting.
-- **ORM**: Drizzle ORM for type-safe operations.
+- **ORM**: Drizzle ORM.
 - **Schema**: Comprehensive schema for users, properties, bookings, reviews, favorites, and verification.
-- **Migrations**: Drizzle Kit for schema management.
+- **Migrations**: Drizzle Kit.
 
 ### Authentication & Authorization
-- **Authentication Methods**:
-    1. Phone + Password + 4-digit SMS OTP (for Ethiopian numbers).
-    2. Email + Password.
+
+- **Methods**: Phone + Password + 4-digit SMS OTP (Ethiopian numbers), Email + Password.
 - **Security**: Bcrypt password hashing (10 salt rounds), secure session cookies, OTP with expiry.
-- **Role-Based Access Control**: Guest (default), Host, Admin, Operator roles with specific dashboards and access rights.
-- **Session Management**: PostgreSQL storage for sessions.
+- **Roles**: Guest (default), Host, Admin, Operator with role-based access control.
+- **Session Management**: PostgreSQL storage.
 
-### Security Implementation (Oct 18, 2025)
-- **Web Application Security**:
-    - **Helmet.js**: Comprehensive security headers (HSTS, X-Frame-Options, CSP, etc.)
-    - **CORS Protection**: Configured with credentials support and origin validation
-    - **Rate Limiting**: 
-        - Authentication endpoints: 100 requests per 15 minutes
-        - General endpoints: 500 requests per 15 minutes
-    - **Request Size Limits**: 10MB body, 50MB file uploads (DoS prevention)
-- **Cryptographic Security**:
-    - **Secure OTP Generation**: Uses `crypto.randomInt()` instead of Math.random()
-    - **Session Security**: Custom session name, httpOnly cookies, sameSite protection
-    - **Password Hashing**: Bcrypt with 10 salt rounds
-- **Input Validation & Sanitization**:
-    - Zod schema validation on all API endpoints
-    - File upload validation with size and type restrictions
-    - User authorization checks on document uploads
-- **Error Handling**: 
-    - Production mode hides stack traces to prevent information leakage
-    - Secure error messages without exposing internal details
+### Security Implementation
 
-### Key Features Architecture
-- **Property Management**: CRUD for listings, including image uploads.
-- **Advanced Property Search**: Multi-parameter search API with:
-    - **Keyword Search**: Full-text search across title, description, location, and address fields
-    - **Filters**: City, property type, price range (min/max), guest capacity, availability dates
-    - **Sorting Options**: 
-        - `recommended` - Highest rated properties first (default)
-        - `price_asc` - Lowest to highest price
-        - `price_desc` - Highest to lowest price
-        - `rating_desc` - Highest rated properties
-    - **Performance**: Limited to 50 results per query for optimal performance
+- **Web Application Security**: Helmet.js for security headers, CORS protection, rate limiting (100 req/15 min for auth, 500 req/15 min general), request size limits (10MB body, 50MB files).
+- **Cryptographic Security**: Secure OTP generation (`crypto.randomInt`), secure session cookies (httpOnly, sameSite), Bcrypt password hashing.
+- **Input Validation**: Zod schema validation, file upload validation, user authorization checks.
+- **Error Handling**: Production mode hides stack traces and provides secure, generalized error messages.
+
+### Key Features
+
+- **Property Management**: CRUD operations for listings, including image uploads.
+- **Advanced Property Search**: Multi-parameter search API with keyword search, filters (city, type, price, capacity, dates), and sorting (recommended, price, rating). Limited to 50 results per query.
 - **Booking System**: Full workflow with date validation and conflict prevention.
-- **6-Digit Access Code System**: Automated property access management
-    - **Auto-Generation**: Codes automatically created when payment is confirmed (Telebirr, Stripe, PayPal)
-    - **Format**: 6-digit numeric codes for easy entry
-    - **Validity Period**: Active from check-in to check-out dates
-    - **Status Tracking**: Active, expired, or revoked states
-    - **Guest Display**: Prominently shown on booking success page with validity dates
-    - **API Access**: Routes for retrieving codes by booking ID or all guest codes
-- **Advanced Weighted Review System (ALGA Review Engine)**: 
-    - **Time-Decay Algorithm**: Recent reviews weighted more heavily with 3-month decay curve
-    - **Weight Formula**: `weight = 1 / (1 + ageDays / 90)` 
-    - **Auto-Recalculation**: Property ratings recalculate automatically after each new review
-    - **Rating Categories**: 6 categories (overall, cleanliness, communication, accuracy, location, value)
-    - **Display**: Shows both weighted average and total review count
-- **Universal ID Verification System** (REQUIRED FOR ALL USERS):
-    - **Ethiopian Citizens**: Digital ID QR code scanning via `qr-scanner` library (`/scan-id` page)
-    - **Foreign Visitors**: Photo upload (passport, driver's license, national ID) with OCR via Tesseract.js
-    - **Document Types Supported**: 
-        - `ethiopian_id` - Ethiopian Digital ID (QR scan)
-        - `passport` - International passports (photo OCR)
-        - `drivers_license` - Driver's licenses (photo OCR)
-        - `other` - Other government-issued IDs (photo OCR)
-    - **Universal Scanner Component**: `UniversalIDScanner` with tabbed interface for QR scan vs photo upload
-    - **Automatic Data Extraction**: System automatically extracts and displays:
-        - First Name (required)
-        - Middle Name (optional) - extracted when available from 3+ word names
-        - Last Name (required)
-        - Date of Birth
-        - ID Number
-        - Expiry Date (when applicable)
-    - **Database Tracking**: `idVerified`, `idNumber`, `idFullName`, `idDocumentType`, `idExpiryDate`, `idCountry` fields in users table
-    - **Verification Check Component**: `IDVerificationCheck` for enforcing requirements and showing verification status
-    - **Operator Dashboard**: Dedicated dashboard (`/operator/dashboard`) for operators to review and approve/reject host verification documents and property listings.
-    - Phone verification readiness for Ethiopian Telecom SMS.
-    - Multi-stage verification process for all user types.
-- **Payment Gateway**: Integration with Stripe for global credit/debit card payments (supporting 135+ currencies, Alipay, WeChat Pay), Telebirr for local Ethiopian payments, and PayPal for international users. Includes dedicated success/cancellation pages and webhook handling.
-- **Commission & Tax System (ERCA Compliant)**: Automated financial breakdown system
-    - **12% Alga Commission**: Platform service fee on all bookings
-    - **15% VAT**: Value-added tax on commission (remitted to ERCA)
-    - **2% Withholding Tax**: Deducted from host earnings (remitted to ERCA)
-    - **Automatic Calculation**: All bookings automatically calculate breakdown on creation
-    - **Host Dashboard**: Transparent earnings display showing gross revenue, deductions, and net payout
-    - **Admin Reports**: Financial reports for ERCA tax compliance with date range filtering
-    - **Example**: Guest pays 10,000 ETB → Alga commission 1,200 ETB → VAT 180 ETB → Host withholding 176 ETB → **Host receives 8,624 ETB**
-- **International Support**: Multi-language support (Amharic, English) and localization.
+- **6-Digit Access Code System**: Automated, auto-generated codes for property access upon payment confirmation, valid from check-in to check-out.
+- **Advanced Weighted Review System (ALGA Review Engine)**: Time-decay algorithm (recent reviews weighted more), auto-recalculation of property ratings, 6 rating categories (overall, cleanliness, communication, accuracy, location, value).
+- **Universal ID Verification System**: Required for all users. Ethiopian citizens use QR code scanning, foreign visitors use photo upload with OCR (passport, driver's license, national ID). Extracts name, DOB, ID number, expiry, and document type. Operator dashboard for manual review and approval.
+- **Payment Gateway**: Integration with Stripe, Telebirr, and PayPal. Includes success/cancellation pages and webhooks.
+- **Commission & Tax System (ERCA Compliant)**: Automated calculation of 12% Alga commission, 15% VAT on commission, and 2% withholding tax from host earnings. Transparent display in host dashboard and admin financial reports. Automated ERCA-compliant invoice generation in PDF format.
+- **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
 
 ## External Dependencies
 
-- **Payment Processors**:
-    - Stripe (for global credit/debit cards, Alipay, WeChat Pay)
-    - PayPal SDK (for international payments)
-    - Telebirr (for local Ethiopian payments)
-- **Communication Services**:
-    - Ethiopian Telecom SMS (ready for integration for phone verification)
-- **Database & Hosting**:
-    - Neon Database (serverless PostgreSQL)
-- **Identity Verification**:
-    - `html5-qrcode` (for QR code scanning)
-    - `tesseract.js` (for OCR on ID documents)
-- **UI & Design**:
-    - Radix UI
-    - Lucide Icons
-    - Custom Fonts
-- **Utility Libraries**:
-    - `date-fns` (for date handling)
-    - `clsx`, `tailwind-merge` (for styling utilities)
-    - `memoizee` (for performance optimization)
-
-## Recent Updates (Oct 18, 2025)
-
-### Production Readiness Enhancements
-- **Deployment Configuration**: Configured autoscale deployment with build and start scripts
-- **Sample Data**: Added 12 diverse Ethiopian properties spanning:
-    - Addis Ababa (modern hotels)
-    - Lalibela (rock-hewn church heritage homes)
-    - Gondar (mountain lodges)
-    - Bahir Dar (lakeside retreats)
-    - Hawassa (luxury villas)
-    - Harar (cultural guesthouses)
-    - Axum (heritage palaces - Tigray)
-    - Dire Dawa (railway station inns)
-    - Arba Minch (paradise lodges with twin lake views)
-    - Jinka (tribal experience houses)
-    - Bishoftu (resort & spa - Oromia)
-    - Goba (Bale Mountain eco-lodges - Oromia)
-
-### SEO & Performance
-- **SEO Meta Tags**: Added comprehensive SEO support with dynamic titles and descriptions
-- **Open Graph Tags**: Social media sharing optimization (Facebook, Twitter, LinkedIn)
-- **Loading States**: Implemented PropertyGridSkeleton for better perceived performance
-- **Error Boundaries**: React error boundaries for graceful error handling and recovery
-
-### UI/UX Improvements (Latest - Oct 18, 2025)
-- **Featured Properties Section**: Curated top-rated Ethiopian stays showcased on homepage
-- **Property Cards Enhancement**: Added amenity icons (WiFi, Restaurant, Parking) with better visual hierarchy
-- **Testimonials Section**: Real guest experiences with ratings and authentic reviews
-- **Trust Section**: Security features display (Verified Properties, ID Verification, Secure Payments, 24/7 Support)
-- **How It Works Section**: 4-step visual guide explaining the booking process
-- **Loading Skeletons**: Smooth loading transitions with animated placeholders
-- **Error Handling**: User-friendly error messages with recovery options
-- **Page Titles**: Dynamic page titles based on content (e.g., "Addis Ababa Stays - Alga")
-- **Meta Descriptions**: Search engine optimized descriptions for all major pages
-- **Enhanced Footer**: Comprehensive footer with trust badges, social media links, and additional navigation
-
-### Financial System Implementation (Oct 18, 2025)
-- **Database Schema**: Added commission and tax fields to bookings table (algaCommission, vat, withholding, hostPayout)
-- **Calculation Utility**: Created booking breakdown calculator (`server/utils/booking.ts`) with Ethiopian tax rates
-- **Automated Booking Processing**: All new bookings automatically calculate and store financial breakdown
-- **Host Earnings Dashboard**: New "Earnings" tab in host dashboard with:
-    - Summary cards (total bookings, gross revenue, net payout)
-    - Detailed breakdown table showing all deductions
-    - ERCA compliance notice explaining tax deductions
-    - Calculation example for transparency
-- **Admin Financial Reports**: New `/api/admin/financial-reports` endpoint for:
-    - Monthly/custom date range summaries
-    - Total commission, VAT, and withholding calculations
-    - Export-ready data for accountant reporting
-    - ERCA tax filing preparation
+- **Payment Processors**: Stripe, PayPal SDK, Telebirr.
+- **Communication Services**: Ethiopian Telecom SMS (for phone verification).
+- **Database & Hosting**: Neon Database (serverless PostgreSQL).
+- **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
+- **UI & Design**: Radix UI, Lucide Icons.
+- **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
