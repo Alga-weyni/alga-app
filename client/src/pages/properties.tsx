@@ -241,8 +241,8 @@ export default function Properties() {
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1 gap-1">
-              <p className="text-[8px] text-eth-brown/40 uppercase tracking-wide">
-                {properties.length} {properties.length === 1 ? 'stay' : 'stays'}
+              <p className="text-[8px] text-eth-brown/40 uppercase tracking-wide font-bold">
+                ⚡ {properties.length} {properties.length === 1 ? 'stay' : 'stays'}
               </p>
 
               <Button
