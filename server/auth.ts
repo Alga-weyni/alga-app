@@ -22,10 +22,13 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: 'sessionId', // Security: Don't use default 'connect.sid'
     cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      httpOnly: true, // Security: Prevent XSS
+      secure: process.env.NODE_ENV === "production", // Security: HTTPS only in production
+      sameSite: 'lax', // Security: CSRF protection
       maxAge: sessionTtl,
+      path: '/',
     },
   });
 }
@@ -51,7 +54,8 @@ export async function setupAuth(app: Express) {
       if (err) {
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.clearCookie("connect.sid");
+      // Security: Clear session cookie with matching name
+      res.clearCookie("sessionId");
       res.json({ message: "Logged out successfully" });
     });
   });
