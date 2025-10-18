@@ -427,6 +427,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Ethiopian ID data extraction from OCR text
+  function extractEthiopianIDData(ocrText: string) {
+    // Remove extra symbols and spaces
+    const cleanText = ocrText.replace(/\s+/g, " ").trim();
+
+    // ID Number — 12 digits
+    const idMatch = cleanText.match(/\b\d{12}\b/);
+    const idNumber = idMatch ? idMatch[0] : null;
+
+    // Name — looks for words near Name/ስም
+    const nameMatch = cleanText.match(/(?:Name|ስም)[:\-]?\s*([A-Za-zአ-ዐ\s]+)/);
+    const fullName = nameMatch ? nameMatch[1].trim() : "Not detected";
+
+    // Expiry date — e.g., 2032/06/17 GC
+    const expiryMatch = cleanText.match(/20\d{2}\/\d{2}\/\d{2}/);
+    const expiryDate = expiryMatch ? expiryMatch[0] : null;
+
+    // Location — find "Addis Ababa" or region names
+    const locationMatch = cleanText.match(/Addis Ababa|Tigray|Oromia|Amhara|Sidama|Afar|Somali|SNNPR|Dire Dawa|Harar/i);
+    const location = locationMatch ? locationMatch[0] : "Unknown";
+
+    return { idNumber, fullName, expiryDate, location };
+  }
+
   // ID Scanning endpoint with Ethiopian ID validation
   app.post('/api/id-scan', isAuthenticated, async (req: any, res) => {
     try {
@@ -445,6 +469,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idRegex = /^[0-9]{12}$/;
       let idNumber: string | null = null;
       let fullName: string | null = null;
+      let expiryDate: string | null = null;
+      let location: string | null = null;
       
       // Parse data based on scan method
       if (scanMethod === "qr") {
@@ -466,16 +492,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       } else if (scanMethod === "photo") {
-        // OCR text - extract 12-digit ID number
-        const match = scanData.match(idRegex);
-        idNumber = match ? match[0] : null;
-        
-        // Try to extract name (common patterns in Ethiopian IDs)
-        // Look for "Name:" or "ስም:" followed by text
-        const nameMatch = scanData.match(/(?:Name|ስም):\s*([A-Za-z\u1200-\u137F\s]+)/i);
-        if (nameMatch) {
-          fullName = nameMatch[1].trim();
-        }
+        // OCR text - use enhanced extraction function
+        const extractedData = extractEthiopianIDData(scanData);
+        idNumber = extractedData.idNumber;
+        fullName = extractedData.fullName !== "Not detected" ? extractedData.fullName : null;
+        expiryDate = extractedData.expiryDate;
+        location = extractedData.location !== "Unknown" ? extractedData.location : null;
       }
       
       // Validate ID number format
@@ -506,6 +528,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: true,
         idNumber,
         fullName,
+        expiryDate,
+        location,
         scanMethod,
         timestamp,
       });
