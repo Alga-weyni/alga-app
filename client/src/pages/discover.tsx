@@ -121,7 +121,7 @@ export default function DiscoverPage() {
             bootstrapURLKeys={{ key: GOOGLE_MAPS_KEY }}
             center={mapCenter}
             zoom={mapZoom}
-            onChange={(obj) => {
+            onChange={(obj: any) => {
               setBounds(obj.bounds);
               setMapCenter(obj.center);
               setMapZoom(obj.zoom);
