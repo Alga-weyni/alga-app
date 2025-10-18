@@ -6,13 +6,14 @@ import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
 import AuthDialog from "@/components/auth-dialog";
 import { BackButton } from "@/components/back-button";
-import { Star, CheckCircle, Home, ArrowRight, Shield } from "lucide-react";
+import { Star, CheckCircle, Home, ArrowRight, Shield, Bell, Zap, Gift, QrCode, Smartphone, Download } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
 import boutiqueHotelImg from "@assets/stock_images/luxury_boutique_hote_429d7d7d.jpg";
 import lakesideRetreatImg from "@assets/stock_images/lakeside_resort_peac_aa065d79.jpg";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
 import algaMobileHero from "@assets/alga mobile app image _1760805527089.jpeg";
+import algaAppDownload from "@assets/alga mobile app image _1760806950707.jpeg";
 
 export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -253,6 +254,128 @@ export default function Landing() {
               >
                 View All Properties
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Download App Section */}
+        <section className="py-20 bg-gradient-to-br from-eth-orange to-[#fca12b] relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Side - Phone Mockup */}
+              <div className="flex justify-center lg:justify-start order-2 lg:order-1">
+                <div className="relative">
+                  <img 
+                    src={algaAppDownload}
+                    alt="Alga Mobile App"
+                    className="w-full max-w-sm h-auto drop-shadow-2xl animate-float"
+                    data-testid="img-app-download-mockup"
+                  />
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent blur-2xl -z-10"></div>
+                </div>
+              </div>
+
+              {/* Right Side - Content */}
+              <div className="space-y-8 text-white order-1 lg:order-2">
+                <div className="space-y-4">
+                  <h2 className="text-5xl md:text-6xl font-bold leading-tight" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                    Book Faster with the Alga App
+                  </h2>
+                  <p className="text-xl md:text-2xl text-white/95">
+                    Your Ethiopian adventure, now in your pocket
+                  </p>
+                </div>
+
+                {/* App Features */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Bell className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">Instant Notifications</h4>
+                      <p className="text-sm text-white/80">Get real-time booking updates</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Zap className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">Quick Booking</h4>
+                      <p className="text-sm text-white/80">Book in just 3 taps</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Gift className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">Exclusive Deals</h4>
+                      <p className="text-sm text-white/80">App-only discounts</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <QrCode className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">Easy Access</h4>
+                      <p className="text-sm text-white/80">Digital access codes</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Download Buttons */}
+                <div className="space-y-4">
+                  <p className="text-lg font-semibold">Download Now:</p>
+                  <div className="flex flex-wrap gap-4">
+                    {/* App Store Badge */}
+                    <a 
+                      href="#" 
+                      className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+                      data-testid="link-app-store"
+                    >
+                      <Download className="h-6 w-6" />
+                      <div className="text-left">
+                        <div className="text-xs">Download on the</div>
+                        <div className="text-lg font-bold">App Store</div>
+                      </div>
+                    </a>
+
+                    {/* Google Play Badge */}
+                    <a 
+                      href="#" 
+                      className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+                      data-testid="link-google-play"
+                    >
+                      <Smartphone className="h-6 w-6" />
+                      <div className="text-left">
+                        <div className="text-xs">GET IT ON</div>
+                        <div className="text-lg font-bold">Google Play</div>
+                      </div>
+                    </a>
+                  </div>
+
+                  {/* QR Code Option */}
+                  <div className="pt-4 border-t border-white/20">
+                    <p className="text-sm text-white/80 flex items-center space-x-2">
+                      <QrCode className="h-4 w-4" />
+                      <span>Or scan QR code from your phone to download instantly</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
