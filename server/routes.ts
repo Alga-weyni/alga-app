@@ -439,6 +439,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Name — looks for words near Name/ስም
     const nameMatch = cleanText.match(/(?:Name|ስም)[:\-]?\s*([A-Za-zአ-ዐ\s]+)/);
     const fullName = nameMatch ? nameMatch[1].trim() : "Not detected";
+    
+    // Split name into first, middle, and last
+    let firstName = null;
+    let middleName = null;
+    let lastName = null;
+    if (fullName && fullName !== "Not detected") {
+      const nameParts = fullName.trim().split(/\s+/);
+      if (nameParts.length >= 3) {
+        firstName = nameParts[0];
+        middleName = nameParts.slice(1, -1).join(' ');
+        lastName = nameParts[nameParts.length - 1];
+      } else if (nameParts.length === 2) {
+        firstName = nameParts[0];
+        lastName = nameParts[1];
+      }
+    }
+    
+    // Date of Birth — e.g., DOB: 1985/03/15 or Birth: ...
+    const dobMatch = cleanText.match(/(?:DOB|Birth|የትውልድ ቀን)[:\-]?\s*(\d{4}\/\d{2}\/\d{2})/i);
+    const dateOfBirth = dobMatch ? dobMatch[1] : null;
 
     // Expiry date — e.g., 2032/06/17 GC
     const expiryMatch = cleanText.match(/20\d{2}\/\d{2}\/\d{2}/);
@@ -448,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locationMatch = cleanText.match(/Addis Ababa|Tigray|Oromia|Amhara|Sidama|Afar|Somali|SNNPR|Dire Dawa|Harar/i);
     const location = locationMatch ? locationMatch[0] : "Unknown";
 
-    return { idNumber, fullName, expiryDate, location, documentType: 'ethiopian_id' };
+    return { idNumber, fullName, firstName, middleName, lastName, dateOfBirth, expiryDate, location, documentType: 'ethiopian_id' };
   }
 
   // Extract data from foreign documents (passport, driver's license, etc.)
@@ -539,6 +559,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let idNumber: string | null = null;
       let fullName: string | null = null;
+      let firstName: string | null = null;
+      let middleName: string | null = null;
+      let lastName: string | null = null;
+      let dateOfBirth: string | null = null;
       let expiryDate: string | null = null;
       let location: string | null = null;
       let documentType: string = 'other';
@@ -553,6 +577,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const decoded = JSON.parse(Buffer.from(scanData, 'base64').toString('utf-8'));
           idNumber = decoded.idNumber || decoded.id_number || decoded.ID;
           fullName = decoded.fullName || decoded.full_name || decoded.name;
+          firstName = decoded.firstName || decoded.first_name;
+          middleName = decoded.middleName || decoded.middle_name;
+          lastName = decoded.lastName || decoded.last_name;
+          dateOfBirth = decoded.dateOfBirth || decoded.dob || decoded.birth_date;
           documentType = 'ethiopian_id';
           country = 'Ethiopia';
         } catch (e) {
@@ -561,6 +589,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const parsed = JSON.parse(scanData);
             idNumber = parsed.idNumber || parsed.id_number || parsed.ID;
             fullName = parsed.fullName || parsed.full_name || parsed.name;
+            firstName = parsed.firstName || parsed.first_name;
+            middleName = parsed.middleName || parsed.middle_name;
+            lastName = parsed.lastName || parsed.last_name;
+            dateOfBirth = parsed.dateOfBirth || parsed.dob || parsed.birth_date;
             documentType = 'ethiopian_id';
             country = 'Ethiopia';
           } catch (e2) {
@@ -569,6 +601,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             idNumber = match ? match[0] : null;
             documentType = 'ethiopian_id';
             country = 'Ethiopia';
+          }
+        }
+        
+        // Split fullName into firstName, middleName, and lastName if not already provided
+        if (fullName && (!firstName || !lastName)) {
+          const nameParts = fullName.trim().split(/\s+/);
+          if (nameParts.length >= 3) {
+            firstName = firstName || nameParts[0];
+            middleName = middleName || nameParts.slice(1, -1).join(' ');
+            lastName = lastName || nameParts[nameParts.length - 1];
+          } else if (nameParts.length === 2) {
+            firstName = firstName || nameParts[0];
+            lastName = lastName || nameParts[1];
           }
         }
 
@@ -589,6 +634,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Looks like Ethiopian ID
           idNumber = ethiopianData.idNumber;
           fullName = ethiopianData.fullName !== "Not detected" ? ethiopianData.fullName : null;
+          firstName = ethiopianData.firstName;
+          middleName = ethiopianData.middleName;
+          lastName = ethiopianData.lastName;
+          dateOfBirth = ethiopianData.dateOfBirth;
           expiryDate = ethiopianData.expiryDate;
           location = ethiopianData.location !== "Unknown" ? ethiopianData.location : null;
           documentType = 'ethiopian_id';
@@ -602,6 +651,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           country = foreignData.country;
           documentType = foreignData.documentType;
           location = null;
+          
+          // Split full name for foreign documents
+          if (fullName && (!firstName || !lastName)) {
+            const nameParts = fullName.trim().split(/\s+/);
+            if (nameParts.length >= 3) {
+              firstName = firstName || nameParts[0];
+              middleName = middleName || nameParts.slice(1, -1).join(' ');
+              lastName = lastName || nameParts[nameParts.length - 1];
+            } else if (nameParts.length === 2) {
+              firstName = firstName || nameParts[0];
+              lastName = lastName || nameParts[1];
+            }
+          }
         }
       }
       
@@ -638,6 +700,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: true,
         idNumber,
         fullName,
+        firstName,
+        middleName,
+        lastName,
+        dateOfBirth,
         expiryDate,
         location,
         documentType,

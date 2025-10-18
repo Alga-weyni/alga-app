@@ -320,9 +320,27 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Full Name</p>
+                <p className="text-gray-500 dark:text-gray-400">First Name</p>
                 <p className="font-semibold text-gray-900 dark:text-white">
-                  {result.fullName || "N/A"}
+                  {result.firstName || result.fullName?.split(' ')[0] || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-500 dark:text-gray-400">Middle Name <span className="text-gray-400">(optional)</span></p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {result.middleName || "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-500 dark:text-gray-400">Last Name</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {result.lastName || result.fullName?.split(' ').slice(1).join(' ') || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-500 dark:text-gray-400">Date of Birth</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {result.dateOfBirth || result.dob || "N/A"}
                 </p>
               </div>
               {result.expiryDate && (
@@ -333,11 +351,11 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
                   </p>
                 </div>
               )}
-              {result.location && (
+              {result.nationality && (
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Location</p>
+                  <p className="text-gray-500 dark:text-gray-400">Nationality</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {result.location}
+                    {result.nationality}
                   </p>
                 </div>
               )}
