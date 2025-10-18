@@ -1,0 +1,66 @@
+# GOAL:
+# Implement Alga's commission and Ethiopian tax breakdown in the backend.
+# Keep UI simple; detailed tax logic stays server-side for accounting.
+
+1. Open server/src/utils/booking.ts (or equivalent service file).
+
+2. Add a helper function:
+------------------------------------------------------------
+export function calculateBookingBreakdown(totalAmount: number) {
+  const COMMISSION_RATE = 0.12;      // 12% Alga commission
+  const VAT_RATE = 0.15;             // 15% VAT on commission
+  const WITHHOLDING_RATE = 0.02;     // 2% host withholding
+
+  const algaCommission = totalAmount * COMMISSION_RATE;
+  const vatOnCommission = algaCommission * VAT_RATE;
+  const hostGross = totalAmount - algaCommission;
+  const hostWithholding = hostGross * WITHHOLDING_RATE;
+  const hostNet = hostGross - hostWithholding;
+
+  return {
+    totalAmount,
+    algaCommission,
+    vatOnCommission,
+    hostWithholding,
+    hostNet,
+  };
+}
+------------------------------------------------------------
+
+3. Update booking creation logic:
+------------------------------------------------------------
+const breakdown = calculateBookingBreakdown(bookingAmount);
+await db.insert(bookings).values({
+  ...bookingData,
+  alga_commission: breakdown.algaCommission,
+  vat: breakdown.vatOnCommission,
+  withholding: breakdown.hostWithholding,
+  host_payout: breakdown.hostNet,
+});
+------------------------------------------------------------
+
+4. In the Host Dashboard endpoint (/api/host/earnings):
+   - Return summarized values:
+     {
+       gross: totalAmount,
+       serviceFee: algaCommission,
+       vat: vatOnCommission,
+       withholding: hostWithholding,
+       net: hostNet
+     }
+
+5. On the frontend (Host → Earnings Summary component):
+   Display a simple table:
+   Guest Paid | Alga Service Fee | VAT | Withholding | Your Payout
+   10 000 ETB | 1 200 ETB | 180 ETB | 176 ETB | **8 624 ETB**
+
+   Add small note:
+   “All deductions comply with Ethiopian tax regulations. VAT & withholding are remitted to ERCA.”
+
+6. (Optional) In Admin → Reports:
+   - Generate monthly totals for:
+     • Total bookings
+     • Total Alga commission
+     • VAT due
+     • Withholding remitted
+   - Export as CSV / Excel for accountants.

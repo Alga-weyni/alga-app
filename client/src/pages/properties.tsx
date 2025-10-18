@@ -8,6 +8,9 @@ import Footer from "@/components/footer";
 import { BackButton } from "@/components/back-button";
 import { SEOHead } from "@/components/seo-head";
 import { PropertyGridSkeleton } from "@/components/property-skeleton";
+import { FeaturedProperties } from "@/components/featured-properties";
+import { Testimonials } from "@/components/testimonials";
+import { TrustSection } from "@/components/trust-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -216,6 +219,15 @@ export default function Properties() {
             )}
           </div>
         </div>
+
+        {/* Show featured sections only on initial page load (no search filters) */}
+        {!hasSearched && (
+          <>
+            <FeaturedProperties />
+            <TrustSection />
+            <Testimonials />
+          </>
+        )}
 
         <Footer />
       </div>
