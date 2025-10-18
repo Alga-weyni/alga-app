@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Star, TrendingUp, Database, Activity } from "lucide-react";
+import { Star, TrendingUp, Database, Activity, Bell, Zap, Gift, Key, Apple } from "lucide-react";
+import { SiGoogleplay } from "react-icons/si";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import type { Property } from "@shared/schema";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
@@ -106,70 +107,101 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Mobile App Section */}
-        <section className="py-16 bg-eth-warm-tan">
+        {/* Mobile App Download Section */}
+        <section className="py-20 bg-gradient-to-br from-eth-light-tan to-eth-warm-tan">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Left Side - Text Content */}
-              <div className="space-y-6">
-                <h3 className="text-4xl md:text-5xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-                  Share Your Ethiopian Home
-                </h3>
-                <p className="text-lg text-eth-brown">
-                  Open your doors to travelers from around the world and share the beauty of Ethiopian hospitality. 
-                  Earn income while showcasing your property and culture.
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-eth-orange rounded-full mt-2"></div>
-                    <p className="text-eth-brown">Easy property listing and management</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-eth-gold rounded-full mt-2"></div>
-                    <p className="text-eth-brown">Secure payments via Telebirr and CBE Birr</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-eth-green rounded-full mt-2"></div>
-                    <p className="text-eth-brown">24/7 support in Amharic and English</p>
-                  </div>
+            <div className="text-center mb-12">
+              {/* Headline - Large */}
+              <h3 
+                className="text-5xl md:text-6xl font-bold text-eth-brown mb-4" 
+                style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}
+                data-testid="heading-app-download"
+              >
+                Book Faster with the Alga App
+              </h3>
+              
+              {/* Sub-headline - Medium */}
+              <p className="text-xl md:text-2xl text-eth-brown/80" data-testid="text-app-subheading">
+                Your next Ethiopian stay — just a tap away.
+              </p>
+            </div>
+
+            {/* 4-Feature Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {/* Feature 1: Instant Notifications */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 text-center space-y-3" data-testid="feature-notifications">
+                <div className="w-14 h-14 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto">
+                  <Bell className="h-7 w-7 text-eth-orange" />
                 </div>
-                <Link href="/become-host">
-                  <Button 
-                    className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6 mt-4"
-                    data-testid="button-start-hosting-home"
-                  >
-                    Become a Host
-                  </Button>
-                </Link>
+                <h4 className="text-lg font-bold text-eth-brown">Instant Notifications</h4>
+                <p className="text-sm text-eth-brown/70">Get alerts in real time</p>
               </div>
 
-              {/* Right Side - iPhone Mockup */}
-              <div className="flex flex-col items-center justify-center space-y-6">
-                <div className="relative w-full flex justify-center">
-                  <img 
-                    src={mobileAppMockup}
-                    alt="Ethiopia Stays Mobile App"
-                    className="w-full max-w-[300px] h-auto drop-shadow-2xl"
-                    data-testid="img-mobile-mockup"
-                  />
+              {/* Feature 2: Quick Booking */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 text-center space-y-3" data-testid="feature-booking">
+                <div className="w-14 h-14 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto">
+                  <Zap className="h-7 w-7 text-eth-orange" />
                 </div>
-                
-                {/* Download App Button */}
-                <Button 
-                  className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6"
-                  data-testid="button-download-app"
-                  onClick={() => {
-                    toast({
-                      title: "📱 Mobile App Coming Soon!",
-                      description: "The Alga mobile app will be available on the App Store and Google Play soon. For now, book directly through our website!",
-                      duration: 5000,
-                    });
-                  }}
-                >
-                  Download the App
-                </Button>
+                <h4 className="text-lg font-bold text-eth-brown">Quick Booking</h4>
+                <p className="text-sm text-eth-brown/70">Book in 3 taps</p>
+              </div>
+
+              {/* Feature 3: Exclusive Deals */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 text-center space-y-3" data-testid="feature-deals">
+                <div className="w-14 h-14 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto">
+                  <Gift className="h-7 w-7 text-eth-orange" />
+                </div>
+                <h4 className="text-lg font-bold text-eth-brown">Exclusive Deals</h4>
+                <p className="text-sm text-eth-brown/70">App-only offers</p>
+              </div>
+
+              {/* Feature 4: Easy Access */}
+              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 text-center space-y-3" data-testid="feature-access">
+                <div className="w-14 h-14 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto">
+                  <Key className="h-7 w-7 text-eth-orange" />
+                </div>
+                <h4 className="text-lg font-bold text-eth-brown">Easy Access</h4>
+                <p className="text-sm text-eth-brown/70">Digital access codes</p>
               </div>
             </div>
+
+            {/* Download CTA Buttons - Prominent */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+              <Button 
+                className="bg-eth-brown hover:bg-eth-brown/90 text-white text-lg px-8 py-6 min-w-[220px] flex items-center gap-3"
+                data-testid="button-app-store"
+                onClick={() => {
+                  toast({
+                    title: "📱 Coming to iOS!",
+                    description: "The Alga app will be available on the App Store soon. Book now on our website!",
+                    duration: 5000,
+                  });
+                }}
+              >
+                <Apple className="h-6 w-6" />
+                App Store
+              </Button>
+              
+              <Button 
+                className="bg-eth-orange hover:bg-eth-orange/90 text-white text-lg px-8 py-6 min-w-[220px] flex items-center gap-3"
+                data-testid="button-google-play"
+                onClick={() => {
+                  toast({
+                    title: "📱 Coming to Android!",
+                    description: "The Alga app will be available on Google Play soon. Book now on our website!",
+                    duration: 5000,
+                  });
+                }}
+              >
+                <SiGoogleplay className="h-6 w-6" />
+                Google Play
+              </Button>
+            </div>
+
+            {/* Optional Note */}
+            <p className="text-center text-sm text-eth-brown/60" data-testid="text-app-availability">
+              Available for guests and hosts worldwide
+            </p>
           </div>
         </section>
 
