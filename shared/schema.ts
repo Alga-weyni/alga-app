@@ -122,6 +122,7 @@ export const reviews = pgTable("reviews", {
   comment: text("comment"),
   cleanliness: integer("cleanliness"),
   communication: integer("communication"),
+  accuracy: integer("accuracy"),
   location: integer("location"),
   value: integer("value"),
   createdAt: timestamp("created_at").defaultNow(),

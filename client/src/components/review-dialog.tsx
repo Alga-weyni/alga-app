@@ -31,6 +31,7 @@ const reviewSchema = z.object({
   comment: z.string().min(10, "Review must be at least 10 characters"),
   cleanliness: z.number().min(1).max(5).optional(),
   communication: z.number().min(1).max(5).optional(),
+  accuracy: z.number().min(1).max(5).optional(),
   location: z.number().min(1).max(5).optional(),
   value: z.number().min(1).max(5).optional(),
 });
@@ -55,6 +56,7 @@ export function ReviewDialog({ propertyId, bookingId, children }: ReviewDialogPr
       comment: "",
       cleanliness: undefined,
       communication: undefined,
+      accuracy: undefined,
       location: undefined,
       value: undefined,
     },
@@ -190,6 +192,20 @@ export function ReviewDialog({ propertyId, bookingId, children }: ReviewDialogPr
                         value={field.value || 0}
                         onChange={field.onChange}
                         label="Communication"
+                      />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="accuracy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <StarRating
+                        value={field.value || 0}
+                        onChange={field.onChange}
+                        label="Accuracy"
                       />
                     </FormItem>
                   )}
