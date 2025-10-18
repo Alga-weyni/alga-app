@@ -1039,6 +1039,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Access code routes
+  app.get('/api/bookings/:bookingId/access-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const bookingId = parseInt(req.params.bookingId);
+      const userId = req.user.id;
+      
+      // Verify user owns this booking
+      const booking = await storage.getBooking(bookingId);
+      if (!booking || booking.guestId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const accessCode = await storage.getAccessCodeByBookingId(bookingId);
+      if (!accessCode) {
+        return res.status(404).json({ message: "Access code not found" });
+      }
+      
+      res.json(accessCode);
+    } catch (error) {
+      console.error("Error fetching access code:", error);
+      res.status(500).json({ message: "Failed to fetch access code" });
+    }
+  });
+
+  app.get('/api/access-codes/my-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const accessCodes = await storage.getAccessCodesByGuestId(userId);
+      res.json(accessCodes);
+    } catch (error) {
+      console.error("Error fetching access codes:", error);
+      res.status(500).json({ message: "Failed to fetch access codes" });
+    }
+  });
+
   // Mock banking integration endpoints
   app.post('/api/payments/cbe', isAuthenticated, async (req, res) => {
     try {
