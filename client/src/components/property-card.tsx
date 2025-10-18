@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Star, MapPin, Users, Bed, Bath } from "lucide-react";
+import { Heart, Star, MapPin, Users, Bed, Bath, Wifi, Utensils, Car } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,6 +73,19 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
     }
   };
 
+  // Show top 3 amenities with icons
+  const getAmenityIcon = (amenity: string) => {
+    const lower = amenity.toLowerCase();
+    if (lower.includes('wifi')) return <Wifi className="h-3.5 w-3.5" />;
+    if (lower.includes('restaurant') || lower.includes('breakfast') || lower.includes('meals')) 
+      return <Utensils className="h-3.5 w-3.5" />;
+    if (lower.includes('parking') || lower.includes('shuttle')) 
+      return <Car className="h-3.5 w-3.5" />;
+    return null;
+  };
+
+  const topAmenities = (property.amenities || []).slice(0, 3);
+
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" data-testid={`card-property-${property.id}`}>
       <Link href={`/properties/${property.id}`}>
@@ -124,7 +137,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
             <span className="line-clamp-1">{property.location}, {property.city}</span>
           </div>
 
-          <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
+          <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
             <div className="flex items-center whitespace-nowrap">
               <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
               <span className="hidden xs:inline">{property.maxGuests} guests</span>
@@ -141,6 +154,24 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
               <span className="xs:hidden">{property.bathrooms}</span>
             </div>
           </div>
+
+          {topAmenities.length > 0 && (
+            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
+              {topAmenities.map((amenity, index) => {
+                const icon = getAmenityIcon(amenity);
+                return icon ? (
+                  <div 
+                    key={index} 
+                    className="flex items-center gap-1 text-xs text-eth-brown/70"
+                    title={amenity}
+                  >
+                    {icon}
+                    <span className="hidden sm:inline truncate max-w-[80px]">{amenity}</span>
+                  </div>
+                ) : null;
+              }).filter(Boolean)}
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <div>
