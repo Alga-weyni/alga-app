@@ -394,13 +394,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const start = new Date(startDate as string);
         const end = new Date(endDate as string);
         filteredBookings = filteredBookings.filter((b: Booking) => {
-          const bookingDate = new Date(b.createdAt);
+          const bookingDate = b.createdAt ? new Date(b.createdAt) : new Date();
           return bookingDate >= start && bookingDate <= end;
         });
       }
       
-      // Calculate summary
-      const summary = calculateMonthlySummary(filteredBookings);
+      // Calculate summary (convert null to undefined for type compatibility)
+      const summary = calculateMonthlySummary(filteredBookings.map(b => ({
+        totalPrice: b.totalPrice,
+        algaCommission: b.algaCommission ?? undefined,
+        vat: b.vat ?? undefined,
+        withholding: b.withholding ?? undefined,
+        hostPayout: b.hostPayout ?? undefined,
+      })));
       
       // Format detailed bookings for export
       const detailedBookings = filteredBookings.map((b: Booking) => ({
