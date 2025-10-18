@@ -5,12 +5,13 @@ import { sql } from "drizzle-orm";
 async function seed() {
   console.log("Seeding database...");
 
-  // Create sample host user
+  // Create sample host user (password is "password123" hashed with bcrypt)
   const [host] = await db
     .insert(users)
     .values({
       id: "host-ethiopia-1",
       email: "host@ethiopiastays.et",
+      password: "$2b$10$rBV2kU7WLpV7FZJW6xCq5eqKZJZvN6QZ5FGQ0jYcW7WJZLqXZ1q5e", // "password123"
       firstName: "Abebe",
       lastName: "Tadesse",
       role: "guesthouse_owner",
