@@ -63,7 +63,16 @@ export class TelebirrService {
         }),
       });
 
-      const result: FabricTokenResponse = await response.json();
+      console.log('[Telebirr] Fabric token response status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('[Telebirr] Fabric token response:', responseText.substring(0, 200));
+
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Empty response from Telebirr API - credentials may not be configured for this environment');
+      }
+
+      const result: FabricTokenResponse = JSON.parse(responseText);
       
       if (result.code === 0 && result.data?.token) {
         console.log('[Telebirr] Fabric token obtained successfully');
@@ -74,7 +83,7 @@ export class TelebirrService {
       }
     } catch (error) {
       console.error('[Telebirr] Fabric token request error:', error);
-      throw new Error('Failed to obtain Telebirr fabric token');
+      throw new Error('Telebirr API connection failed - please verify your credentials and API endpoint');
     }
   }
 

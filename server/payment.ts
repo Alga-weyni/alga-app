@@ -120,9 +120,22 @@ router.post("/telebirr", async (req, res) => {
     });
   } catch (err: any) {
     console.error("[Telebirr] ❌ Payment error:", err);
+    
+    // Mark booking as pending awaiting manual payment
+    const { bookingId } = req.body;
+    if (bookingId) {
+      await db.update(bookings)
+        .set({ 
+          paymentStatus: "pending", 
+          paymentMethod: "telebirr",
+          updatedAt: new Date()
+        })
+        .where(eq(bookings.id, bookingId));
+    }
+
     return res.status(500).json({ 
       success: false, 
-      message: err.message || "Internal Server Error",
+      message: "Telebirr payment service is temporarily unavailable. Your booking has been created and is pending payment. Please contact support.",
       error: err.toString() 
     });
   }
