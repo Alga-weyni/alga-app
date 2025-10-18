@@ -61,64 +61,61 @@ export default function Footer() {
 
           {/* Secure Payments */}
           <div>
-            <h5 className="font-bold mb-4 text-lg text-eth-orange">Secure Payments</h5>
-            <p className="text-white/80 text-sm mb-4">We accept:</p>
+            <h5 className="font-bold mb-4 text-lg text-eth-orange">Payment Methods</h5>
             
-            {/* Ethiopian Payment */}
-            <div className="mb-4">
-              <p className="text-xs text-white/60 mb-2">🇪🇹 Ethiopian</p>
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                <Smartphone className="h-5 w-5 text-eth-orange" />
-                <span className="text-sm font-medium">Telebirr</span>
+            {/* Primary: Ethiopian Payment */}
+            <div className="bg-eth-orange/20 border border-eth-orange/30 rounded-lg px-3 py-2.5 mb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Smartphone className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-semibold text-white">Telebirr</span>
+                </div>
+                <span className="text-xs text-white/80 font-medium">🇪🇹 Local</span>
               </div>
             </div>
 
-            {/* International Cards */}
-            <div className="mb-4">
-              <p className="text-xs text-white/60 mb-2">💳 Credit & Debit Cards</p>
+            {/* International Payments Grid */}
+            <div className="space-y-2.5">
+              <p className="text-xs text-white/60 uppercase tracking-wide">International</p>
+              
+              {/* Cards & PayPal */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
-                  <SiVisa className="h-5 w-5 text-[#1A1F71]" />
+                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
+                  <SiVisa className="h-4 w-4 text-[#1A1F71]" />
                   <span className="text-xs font-medium">Visa</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
-                  <SiMastercard className="h-5 w-5 text-[#EB001B]" />
+                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
+                  <SiMastercard className="h-4 w-4 text-[#EB001B]" />
                   <span className="text-xs font-medium">Mastercard</span>
                 </div>
               </div>
-            </div>
 
-            {/* Asian Digital Wallets */}
-            <div className="mb-4">
-              <p className="text-xs text-white/60 mb-2">🌏 Asian Digital Wallets</p>
+              {/* Digital Wallets */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
-                  <SiAlipay className="h-5 w-5 text-[#1677FF]" />
+                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
+                  <SiPaypal className="h-4 w-4 text-[#00457C]" />
+                  <span className="text-xs font-medium">PayPal</span>
+                </div>
+                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
+                  <SiAlipay className="h-4 w-4 text-[#1677FF]" />
                   <span className="text-xs font-medium">Alipay</span>
                 </div>
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
-                  <SiWechat className="h-5 w-5 text-[#07C160]" />
-                  <span className="text-xs font-medium">WeChat</span>
-                </div>
               </div>
-            </div>
 
-            {/* Global Wallets */}
-            <div className="mb-4">
-              <p className="text-xs text-white/60 mb-2">🌍 Global Wallets</p>
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                <SiPaypal className="h-5 w-5 text-[#00457C]" />
-                <span className="text-sm font-medium">PayPal</span>
+              {/* WeChat standalone */}
+              <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
+                <SiWechat className="h-4 w-4 text-[#07C160]" />
+                <span className="text-xs font-medium">WeChat Pay</span>
               </div>
             </div>
 
             {/* Security Badge */}
-            <div className="pt-2 border-t border-white/20">
-              <div className="flex items-center space-x-2 text-xs text-white/70">
-                <Shield className="h-4 w-4" />
-                <span>SSL Encrypted • PCI Compliant</span>
+            <div className="mt-4 pt-3 border-t border-white/20">
+              <div className="flex items-center gap-1.5 text-xs text-white/70 mb-1">
+                <Shield className="h-3.5 w-3.5 text-eth-orange" />
+                <span className="font-medium">Secure & Encrypted</span>
               </div>
-              <p className="text-xs text-white/60 mt-2">Powered by Stripe & PayPal</p>
+              <p className="text-xs text-white/50">SSL/TLS • PCI DSS Compliant</p>
             </div>
           </div>
         </div>
