@@ -131,7 +131,7 @@ export default function Home() {
                     <p className="text-eth-brown">24/7 support in Amharic and English</p>
                   </div>
                 </div>
-                <Link href="/start-hosting">
+                <Link href="/become-host">
                   <Button 
                     className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6 mt-4"
                     data-testid="button-start-hosting-home"
