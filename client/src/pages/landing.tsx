@@ -36,37 +36,37 @@ export default function Landing() {
       {/* Main Content */}
       <div className="flex-1 lg:ml-20">
         {/* Header */}
-        <header className="bg-eth-warm-tan shadow-sm sticky top-0 z-50">
+        <header className="bg-white border-b border-[#e5ddd5] sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <div className="flex justify-between items-center h-20">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                  <Home className="text-primary-foreground text-xl" />
+            <div className="flex justify-between items-center h-16">
+              <Link href="/" className="flex items-center space-x-3 cursor-pointer">
+                <div className="w-10 h-10 bg-[#2d1405] rounded-lg flex items-center justify-center">
+                  <Home className="text-white text-base" />
                 </div>
-                <h1 className="text-4xl font-bold text-eth-brown tracking-wide" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", letterSpacing: '0.08em' }}>
-                  ALGA
+                <h1 className="text-2xl font-bold text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                  Alga
                 </h1>
-              </div>
+              </Link>
 
-              <nav className="hidden md:flex items-center space-x-10">
-                <a href="#explore" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
-                  HOME
+              <nav className="hidden md:flex items-center space-x-8">
+                <Link href="/" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                  Home
+                </Link>
+                <Link href="/properties" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                  Properties
+                </Link>
+                <a href="#about" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                  About
                 </a>
-                <a href="#services" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
-                  SERVICES
-                </a>
-                <a href="#about" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
-                  ABOUT
-                </a>
-                <a href="#host" className="hover:opacity-70 transition-opacity font-medium text-lg text-eth-brown">
-                  CONTACT
+                <a href="#contact" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                  Contact
                 </a>
                 <Button 
                   onClick={() => openAuthDialog("login")} 
-                  className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-6 py-2 font-bold"
+                  className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-6 py-2 text-sm font-medium transition-all hover:shadow-md"
                   data-testid="button-signin"
                 >
-                  SIGN IN
+                  Sign In
                 </Button>
               </nav>
             </div>
