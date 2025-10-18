@@ -1099,6 +1099,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Real payment integration (Telebirr & PayPal)
+  // Public payment status endpoint
+  app.get('/api/payment/status/telebirr', (req, res) => {
+    const telebirrService = require('./services/telebirr.service').createTelebirrService();
+    const hasService = !!telebirrService;
+    const config = {
+      configured: hasService,
+      hasBaseUrl: !!process.env.TELEBIRR_BASE_URL,
+      hasFabricAppId: !!process.env.TELEBIRR_FABRIC_APP_ID,
+      hasAppSecret: !!process.env.TELEBIRR_APP_SECRET,
+      hasMerchantAppId: !!process.env.TELEBIRR_MERCHANT_APP_ID,
+      hasPrivateKey: !!process.env.TELEBIRR_PRIVATE_KEY,
+      hasShortCode: !!process.env.TELEBIRR_SHORT_CODE,
+      baseUrl: process.env.TELEBIRR_BASE_URL || 'https://app.ethiotelecom.et:4443 (default)',
+    };
+
+    return res.json({
+      status: hasService ? 'ready' : 'not configured',
+      config,
+      message: hasService 
+        ? 'Telebirr service is ready to use' 
+        : 'Missing required environment variables for Telebirr',
+    });
+  });
+
   app.use('/api/payment', isAuthenticated, paymentRouter);
 
   const httpServer = createServer(app);
