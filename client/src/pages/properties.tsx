@@ -121,16 +121,28 @@ export default function Properties() {
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="sticky top-24 bg-white/60 backdrop-blur-sm border-eth-brown/20">
+            <Card className="sticky top-24 bg-white/60 backdrop-blur-sm border-eth-brown/20 rounded-xl shadow-lg">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-eth-brown">Filters</h3>
-                  {activeFilterCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-eth-brown hover:bg-eth-brown/10">
-                      Clear all
-                    </Button>
-                  )}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold mb-1" style={{ color: '#2d1405', fontFamily: "'Playfair Display', serif" }}>Filters</h3>
+                  <p className="text-xs text-eth-brown/60">Refine your search</p>
                 </div>
+                
+                {activeFilterCount > 0 && (
+                  <div className="flex gap-2 mb-6">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={clearFilters} 
+                      className="
+                        flex-1 text-eth-brown border-eth-brown/30 hover:bg-eth-brown hover:text-white
+                        transition-all duration-200
+                      "
+                    >
+                      Reset Filters
+                    </Button>
+                  </div>
+                )}
 
                 <div className="space-y-6">
                   {/* Location */}
@@ -231,10 +243,10 @@ export default function Properties() {
           <div className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
                 </h2>
-                <p className="text-sm sm:text-base text-eth-brown">
+                <p className="text-sm sm:text-base text-eth-brown/70 mt-1">
                   {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
                 </p>
               </div>
@@ -266,24 +278,63 @@ export default function Properties() {
                 ))}
               </div>
             ) : properties.length === 0 ? (
-              <div className="text-center py-8 sm:py-12 px-4 bg-white/60 backdrop-blur-sm rounded-3xl">
-                <Filter className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-eth-brown mb-3 sm:mb-4" />
-                <h3 className="text-base sm:text-lg font-medium text-eth-brown mb-2">No properties found</h3>
-                <p className="text-sm sm:text-base text-eth-brown mb-4 sm:mb-6">
-                  Try adjusting your search criteria or remove some filters.
-                </p>
-                <Button onClick={clearFilters} className="bg-eth-orange hover:opacity-90 text-white" data-testid="button-clear-filters">Clear all filters</Button>
+              <div className="text-center py-12 sm:py-16 px-6 bg-white/60 backdrop-blur-sm rounded-3xl shadow-lg">
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Filter className="h-8 w-8 text-eth-orange" />
+                  </div>
+                  
+                  <h3 className="text-xl sm:text-2xl font-bold text-eth-brown mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    No stays found
+                  </h3>
+                  
+                  <p className="text-sm sm:text-base text-eth-brown/70 mb-6 leading-relaxed">
+                    No stays found — try exploring a different city or adjusting your price range.
+                  </p>
+                  
+                  <Button 
+                    onClick={clearFilters} 
+                    className="
+                      bg-eth-orange hover:bg-eth-orange/90 text-white px-8 py-6
+                      transition-all duration-200
+                      hover:shadow-lg hover:shadow-eth-orange/30
+                      hover:scale-105
+                    " 
+                    data-testid="button-clear-filters"
+                  >
+                    Reset Search
+                  </Button>
+                  
+                  <p className="text-xs text-eth-brown/50 mt-6 italic">
+                    Showing verified Ethiopian stays curated by Alga.
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {properties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    isFavorite={favoriteIds.has(property.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                  {properties.map((property, index) => (
+                    <div 
+                      key={property.id}
+                      className="animate-fade-in"
+                      style={{ 
+                        animationDelay: `${index * 50}ms`,
+                        opacity: 0,
+                        animation: 'fadeIn 200ms ease-in forwards'
+                      }}
+                    >
+                      <PropertyCard
+                        property={property}
+                        isFavorite={favoriteIds.has(property.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                <p className="text-center text-xs text-eth-brown/50 mt-12 italic">
+                  Showing verified Ethiopian stays curated by Alga.
+                </p>
+              </>
             )}
           </div>
         </div>

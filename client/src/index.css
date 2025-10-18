@@ -223,6 +223,15 @@
     }
   }
   
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
@@ -238,6 +247,10 @@
   
   .animate-fade-in-right {
     animation: fadeInRight 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-in forwards;
   }
   
   .animate-float {
