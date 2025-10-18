@@ -16,9 +16,9 @@ const stripe = process.env.STRIPE_SECRET_KEY
 const telebirrService = createTelebirrService();
 
 // -----------------------------------------------------------------------------
-// TELEBIRR CONFIGURATION CHECK (Diagnostic endpoint)
+// TELEBIRR CONFIGURATION CHECK (Diagnostic endpoint - Public)
 // -----------------------------------------------------------------------------
-router.get("/telebirr/status", (req, res) => {
+router.get("/status/telebirr", (req, res) => {
   const hasService = !!telebirrService;
   const config = {
     configured: hasService,
