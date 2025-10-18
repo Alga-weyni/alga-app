@@ -233,7 +233,7 @@ export default function Landing() {
                   rating: 4.7,
                 },
               ].map((property) => (
-                <Card key={property.title} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 border-0" style={{ backgroundColor: '#d4a574' }}>
+                <Card key={property.title} className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-[#e5ddd5]">
                   <img
                     src={property.image}
                     alt={property.title}
@@ -241,22 +241,22 @@ export default function Landing() {
                   />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium" style={{ color: '#3d1f0a' }}>{property.type}</span>
+                      <span className="text-xs font-semibold text-[#5a4a42] uppercase tracking-wide">{property.type}</span>
                       <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4" style={{ fill: '#fb470b', color: '#fb470b' }} />
-                        <span className="text-sm font-medium" style={{ color: '#3d1f0a' }}>{property.rating}</span>
+                        <Star className="h-4 w-4 fill-[#2d1405] text-[#2d1405]" />
+                        <span className="text-sm font-medium text-[#2d1405]">{property.rating}</span>
                       </div>
                     </div>
-                    <h4 className="font-bold text-lg mb-2" style={{ color: '#3d1f0a' }}>
+                    <h4 className="font-bold text-lg mb-2 text-[#2d1405]">
                       {property.title}
                     </h4>
-                    <p className="text-sm mb-3 font-medium" style={{ color: '#523419' }}>{property.location}</p>
+                    <p className="text-sm mb-3 text-[#5a4a42]">{property.location}</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-lg font-bold" style={{ color: '#fb470b' }}>
+                        <span className="text-xl font-bold text-[#2d1405]">
                           {property.price} ETB
                         </span>
-                        <span className="text-sm font-medium" style={{ color: '#3d1f0a' }}>/night</span>
+                        <span className="text-sm text-[#5a4a42]">/night</span>
                       </div>
                     </div>
                   </CardContent>
@@ -268,7 +268,7 @@ export default function Landing() {
               <Button 
                 onClick={() => openAuthDialog("login")} 
                 size="lg" 
-                className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-8 py-3 font-bold"
+                className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-8 py-3 font-medium transition-all hover:shadow-lg"
                 data-testid="button-view-properties"
               >
                 View All Properties
@@ -278,103 +278,93 @@ export default function Landing() {
         </section>
 
         {/* Download App Section */}
-        <section className="py-20 bg-gradient-to-br from-eth-orange to-[#fca12b] relative overflow-hidden">
-          {/* Decorative background elements */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          </div>
-
+        <section className="py-20 bg-[#f5ece3] relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
               {/* Left Side - Phone Mockup */}
               <div className="flex justify-center lg:justify-start order-2 lg:order-1">
                 <div className="relative">
                   <img 
                     src={algaAppDownload}
                     alt="Alga Mobile App"
-                    className="w-full max-w-sm h-auto drop-shadow-2xl animate-float"
+                    className="w-full max-w-sm h-auto drop-shadow-lg"
                     data-testid="img-app-download-mockup"
                   />
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent blur-2xl -z-10"></div>
                 </div>
               </div>
 
               {/* Right Side - Content */}
-              <div className="space-y-8 text-white order-1 lg:order-2">
+              <div className="space-y-8 order-1 lg:order-2">
                 <div className="space-y-4">
-                  <h2 className="text-5xl md:text-6xl font-bold leading-tight" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-                    Book Faster with the Alga App
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                    Download the Alga App
                   </h2>
-                  <p className="text-xl md:text-2xl text-white/95">
-                    Your next Ethiopian stay, just a tap away
+                  <p className="text-lg md:text-xl text-[#5a4a42]">
+                    Book stays on the go
                   </p>
                 </div>
 
                 {/* App Features */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Bell className="h-5 w-5 text-white" />
+                    <div className="w-10 h-10 bg-[#2d1405]/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Bell className="h-5 w-5 text-[#2d1405]" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg">Instant Notifications</h4>
-                      <p className="text-sm text-white/80">Get real-time booking updates</p>
+                      <h4 className="font-bold text-base text-[#2d1405]">Instant Alerts</h4>
+                      <p className="text-sm text-[#5a4a42]">Real-time updates</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Zap className="h-5 w-5 text-white" />
+                    <div className="w-10 h-10 bg-[#2d1405]/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Zap className="h-5 w-5 text-[#2d1405]" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg">Quick Booking</h4>
-                      <p className="text-sm text-white/80">Book in just 3 taps</p>
+                      <h4 className="font-bold text-base text-[#2d1405]">Quick Booking</h4>
+                      <p className="text-sm text-[#5a4a42]">Book in 3 taps</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Gift className="h-5 w-5 text-white" />
+                    <div className="w-10 h-10 bg-[#2d1405]/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Gift className="h-5 w-5 text-[#2d1405]" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg">Exclusive Deals</h4>
-                      <p className="text-sm text-white/80">App-only discounts</p>
+                      <h4 className="font-bold text-base text-[#2d1405]">App Deals</h4>
+                      <p className="text-sm text-[#5a4a42]">Exclusive offers</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <QrCode className="h-5 w-5 text-white" />
+                    <div className="w-10 h-10 bg-[#2d1405]/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <QrCode className="h-5 w-5 text-[#2d1405]" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg">Easy Access</h4>
-                      <p className="text-sm text-white/80">Digital access codes</p>
+                      <h4 className="font-bold text-base text-[#2d1405]">Digital Keys</h4>
+                      <p className="text-sm text-[#5a4a42]">Access codes</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Download Buttons */}
-                <div className="space-y-4">
-                  <p className="text-lg font-semibold">Download Now:</p>
-                  <div className="flex flex-wrap gap-4">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-3">
                     {/* App Store Badge */}
                     <button 
                       onClick={() => {
                         toast({
-                          title: "🍎 App Store - Coming Soon!",
-                          description: "The Alga iOS app is in development. We'll notify you when it's available!",
-                          duration: 4000,
+                          title: "Coming Soon",
+                          description: "The iOS app will be available shortly.",
+                          duration: 3000,
                         });
                       }}
-                      className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+                      className="inline-flex items-center space-x-2 bg-[#2d1405] hover:bg-[#3d1f0a] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-md"
                       data-testid="link-app-store"
                     >
-                      <Download className="h-6 w-6" />
+                      <Download className="h-5 w-5" />
                       <div className="text-left">
-                        <div className="text-xs">Download on the</div>
-                        <div className="text-lg font-bold">App Store</div>
+                        <div className="text-sm">App Store</div>
                       </div>
                     </button>
 
@@ -382,28 +372,19 @@ export default function Landing() {
                     <button 
                       onClick={() => {
                         toast({
-                          title: "🤖 Google Play - Coming Soon!",
-                          description: "The Alga Android app is in development. We'll notify you when it's available!",
-                          duration: 4000,
+                          title: "Coming Soon",
+                          description: "The Android app will be available shortly.",
+                          duration: 3000,
                         });
                       }}
-                      className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+                      className="inline-flex items-center space-x-2 bg-[#2d1405] hover:bg-[#3d1f0a] text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-md"
                       data-testid="link-google-play"
                     >
-                      <Smartphone className="h-6 w-6" />
+                      <Smartphone className="h-5 w-5" />
                       <div className="text-left">
-                        <div className="text-xs">GET IT ON</div>
-                        <div className="text-lg font-bold">Google Play</div>
+                        <div className="text-sm">Google Play</div>
                       </div>
                     </button>
-                  </div>
-
-                  {/* QR Code Option */}
-                  <div className="pt-4 border-t border-white/20">
-                    <p className="text-sm text-white/80 flex items-center space-x-2">
-                      <QrCode className="h-4 w-4" />
-                      <span>Or scan QR code from your phone to download instantly</span>
-                    </p>
                   </div>
                 </div>
               </div>
@@ -412,39 +393,39 @@ export default function Landing() {
         </section>
 
         {/* Host Banner */}
-        <section className="py-20 bg-eth-warm-tan" id="host">
+        <section className="py-20 bg-white" id="host">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
               {/* Left Side - Text Content */}
-              <div className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] rounded-3xl p-12 shadow-2xl border-2 border-eth-orange/20">
-                <h3 className="text-4xl font-bold text-eth-brown mb-6" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+              <div className="bg-[#faf8f6] rounded-2xl p-10 border border-[#e5ddd5]">
+                <h3 className="text-3xl md:text-4xl font-bold text-[#2d1405] mb-4" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   Share Your Ethiopian Home
                 </h3>
-                <p className="text-lg text-eth-brown mb-8">
+                <p className="text-base text-[#5a4a42] mb-8">
                   Join thousands of hosts earning extra income while welcoming travelers from around the world.
                 </p>
                 <ul className="space-y-4 mb-10">
                   <li className="flex items-center space-x-3">
-                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                    <span className="text-eth-brown text-lg">Free listing and professional photography</span>
+                    <CheckCircle className="h-5 w-5 text-[#2d1405]" />
+                    <span className="text-[#5a4a42] text-sm">Free listing and professional photography</span>
                   </li>
                   <li className="flex items-center space-x-3">
-                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                    <span className="text-eth-brown text-lg">Secure payments in Ethiopian Birr</span>
+                    <CheckCircle className="h-5 w-5 text-[#2d1405]" />
+                    <span className="text-[#5a4a42] text-sm">Secure payments in Ethiopian Birr</span>
                   </li>
                   <li className="flex items-center space-x-3">
-                    <CheckCircle className="h-6 w-6" style={{ color: '#fb470b' }} />
-                    <span className="text-eth-brown text-lg">24/7 host support in Amharic and English</span>
+                    <CheckCircle className="h-5 w-5 text-[#2d1405]" />
+                    <span className="text-[#5a4a42] text-sm">24/7 host support in Amharic and English</span>
                   </li>
                 </ul>
                 <div>
                   <Button 
                     onClick={() => setLocation("/become-host")} 
                     size="lg" 
-                    className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg"
+                    className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-8 py-3 font-medium transition-all hover:shadow-lg"
                     data-testid="button-start-hosting"
                   >
-                    START HOSTING
+                    Start Hosting
                   </Button>
                 </div>
               </div>
