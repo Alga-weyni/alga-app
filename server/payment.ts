@@ -4,8 +4,40 @@ import { db } from "./db";
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { createTelebirrService } from "./services/telebirr.service";
+import { storage } from "./storage";
 
 const router = express.Router();
+
+// Helper function to generate 6-digit access code
+async function generateAccessCodeForBooking(bookingId: number): Promise<string> {
+  try {
+    // Get booking details
+    const booking = await storage.getBooking(bookingId);
+    if (!booking) {
+      throw new Error(`Booking ${bookingId} not found`);
+    }
+
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Create access code
+    await storage.createAccessCode({
+      bookingId: booking.id,
+      propertyId: booking.propertyId,
+      guestId: booking.guestId,
+      code,
+      validFrom: booking.checkIn,
+      validTo: booking.checkOut,
+      status: "active",
+    });
+
+    console.log(`✅ Access code ${code} generated for booking #${bookingId}`);
+    return code;
+  } catch (error) {
+    console.error(`Failed to generate access code for booking #${bookingId}:`, error);
+    throw error;
+  }
+}
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -157,6 +189,9 @@ router.post("/confirm/telebirr", async (req, res) => {
           updatedAt: new Date() 
         })
         .where(eq(bookings.id, parseInt(bookingId)));
+      
+      // Generate access code for confirmed booking
+      await generateAccessCodeForBooking(parseInt(bookingId));
     } else {
       await db.update(bookings)
         .set({ 
@@ -295,6 +330,10 @@ router.post("/confirm/paypal", async (req, res) => {
           updatedAt: new Date() 
         })
         .where(eq(bookings.id, bookingId));
+      
+      // Generate access code for confirmed booking
+      await generateAccessCodeForBooking(bookingId);
+      
       return res.status(200).json({ success: true, message: "Payment confirmed" });
     } else {
       return res.status(400).json({ success: false, message: "Payment capture failed" });
@@ -401,6 +440,9 @@ router.post(
               updatedAt: new Date() 
             })
             .where(eq(bookings.id, bookingId));
+          
+          // Generate access code for confirmed booking
+          await generateAccessCodeForBooking(bookingId);
           break;
 
         case "payment_intent.payment_failed":
