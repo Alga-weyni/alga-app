@@ -1,134 +1,133 @@
 import { Link } from "wouter";
-import { Home, Facebook, Twitter, Instagram, Shield, CreditCard, Smartphone, Mail } from "lucide-react";
-import { SiStripe, SiPaypal, SiTiktok, SiYoutube, SiVisa, SiMastercard, SiAlipay, SiWechat } from "react-icons/si";
+import { Home, MapPin, Users, Building, Shield, Phone, Mail, Facebook, Instagram, Twitter } from "lucide-react";
+import { SiTiktok, SiYoutube, SiVisa, SiMastercard, SiAlipay, SiWechat, SiPaypal } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-eth-brown text-white py-16">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand */}
+    <footer className="bg-eth-brown text-white">
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          {/* Brand & Social */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-eth-orange rounded-lg flex items-center justify-center">
-                <Home className="text-white text-xl" />
+            <div className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 bg-eth-orange rounded-lg flex items-center justify-center">
+                <Home className="h-5 w-5 text-white" />
               </div>
-              <h4 className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>ALGA</h4>
+              <h4 className="text-xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>ALGA</h4>
             </div>
-            <p className="text-white/80 text-sm leading-relaxed">
-              Connecting travelers with authentic Ethiopian experiences.
+            <p className="text-white/70 text-sm leading-relaxed">
+              Authentic Ethiopian stays for travelers and diaspora.
             </p>
-            <div className="flex items-center space-x-2 text-sm">
-              <Shield className="h-4 w-4 text-eth-orange" />
-              <span className="text-white/90 font-semibold">100% Ethiopian Owned</span>
+            <div className="flex items-center gap-2 text-xs">
+              <Shield className="h-3.5 w-3.5 text-eth-orange" />
+              <span className="text-white/80 font-medium">100% Ethiopian Owned</span>
             </div>
-            <div>
-              <p className="text-xs text-white/60 mb-2">Follow Us</p>
-              <div className="flex flex-wrap gap-3">
-                <a href="https://facebook.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#1877F2] transition-colors" title="Facebook">
-                  <Facebook className="h-5 w-5" />
+            
+            {/* Social Media */}
+            <div className="pt-2">
+              <div className="flex gap-2.5">
+                <a href="https://facebook.com/alga" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" title="Facebook">
+                  <Facebook className="h-4 w-4" />
                 </a>
-                <a href="https://instagram.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#E4405F] transition-colors" title="Instagram">
-                  <Instagram className="h-5 w-5" />
+                <a href="https://instagram.com/alga" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" title="Instagram">
+                  <Instagram className="h-4 w-4" />
                 </a>
-                <a href="https://twitter.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#1DA1F2] transition-colors" title="Twitter/X">
-                  <Twitter className="h-5 w-5" />
+                <a href="https://twitter.com/alga" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" title="Twitter">
+                  <Twitter className="h-4 w-4" />
                 </a>
-                <a href="https://tiktok.com/@alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="TikTok">
-                  <SiTiktok className="h-5 w-5" />
+                <a href="https://tiktok.com/@alga" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" title="TikTok">
+                  <SiTiktok className="h-4 w-4" />
                 </a>
-                <a href="https://youtube.com/@alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#FF0000] transition-colors" title="YouTube">
-                  <SiYoutube className="h-5 w-5" />
-                </a>
-                <a href="mailto:hello@alga.et" className="text-white/70 hover:text-eth-orange transition-colors" title="Email Us">
-                  <Mail className="h-5 w-5" />
+                <a href="https://youtube.com/@alga" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" title="YouTube">
+                  <SiYoutube className="h-4 w-4" />
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Support */}
+          {/* For Guests */}
           <div>
-            <h5 className="font-bold mb-4 text-lg text-eth-orange">Support & Resources</h5>
-            <ul className="space-y-2.5 text-sm">
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Safety & Trust</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Host Resources</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Cancellation Policy</a></li>
-              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Contact Us</a></li>
+            <h5 className="font-semibold text-white mb-3 text-sm uppercase tracking-wide">For Guests</h5>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/properties" className="text-white/70 hover:text-white transition-colors">Browse Properties</Link></li>
+              <li><Link href="/properties?city=Addis%20Ababa" className="text-white/70 hover:text-white transition-colors">Addis Ababa Stays</Link></li>
+              <li><Link href="/properties?city=Bahir%20Dar" className="text-white/70 hover:text-white transition-colors">Bahir Dar Stays</Link></li>
+              <li><Link href="/properties?city=Gondar" className="text-white/70 hover:text-white transition-colors">Gondar Stays</Link></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Travel Guide</a></li>
             </ul>
           </div>
 
-          {/* Secure Payments */}
+          {/* For Hosts */}
           <div>
-            <h5 className="font-bold mb-4 text-lg text-eth-orange">Payment Methods</h5>
-            
-            {/* Primary: Ethiopian Payment */}
-            <div className="bg-eth-orange/20 border border-eth-orange/30 rounded-lg px-3 py-2.5 mb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Smartphone className="h-5 w-5 text-eth-orange" />
-                  <span className="text-sm font-semibold text-white">Telebirr</span>
-                </div>
-                <span className="text-xs text-white/80 font-medium">🇪🇹 Local</span>
-              </div>
-            </div>
+            <h5 className="font-semibold text-white mb-3 text-sm uppercase tracking-wide">For Hosts</h5>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/become-host" className="text-white/70 hover:text-white transition-colors">List Your Property</Link></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Hosting Resources</a></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Pricing Tips</a></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Host Community</a></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Safety Guidelines</a></li>
+            </ul>
+          </div>
 
-            {/* International Payments Grid */}
-            <div className="space-y-2.5">
-              <p className="text-xs text-white/60 uppercase tracking-wide">International</p>
-              
-              {/* Cards & PayPal */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
-                  <SiVisa className="h-4 w-4 text-[#1A1F71]" />
-                  <span className="text-xs font-medium">Visa</span>
-                </div>
-                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
-                  <SiMastercard className="h-4 w-4 text-[#EB001B]" />
-                  <span className="text-xs font-medium">Mastercard</span>
-                </div>
-              </div>
+          {/* Support & Payments */}
+          <div>
+            <h5 className="font-semibold text-white mb-3 text-sm uppercase tracking-wide">Support</h5>
+            <ul className="space-y-2 text-sm mb-4">
+              <li><a href="tel:+251911000000" className="text-white/70 hover:text-white transition-colors flex items-center gap-2">
+                <Phone className="h-3.5 w-3.5" /> +251 911 000 000
+              </a></li>
+              <li><a href="mailto:hello@alga.et" className="text-white/70 hover:text-white transition-colors flex items-center gap-2">
+                <Mail className="h-3.5 w-3.5" /> hello@alga.et
+              </a></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Cancellations</a></li>
+            </ul>
 
-              {/* Digital Wallets */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
-                  <SiPaypal className="h-4 w-4 text-[#00457C]" />
-                  <span className="text-xs font-medium">PayPal</span>
+            {/* Payment Methods - Compact */}
+            <div className="pt-3 border-t border-white/20">
+              <p className="text-xs text-white/60 mb-2 uppercase tracking-wide">We Accept</p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="bg-white/10 rounded px-2 py-1 flex items-center gap-1.5">
+                  <Phone className="h-3 w-3 text-eth-orange" />
+                  <span className="text-xs font-medium">Telebirr</span>
                 </div>
-                <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
-                  <SiAlipay className="h-4 w-4 text-[#1677FF]" />
-                  <span className="text-xs font-medium">Alipay</span>
+                <div className="bg-white/10 rounded px-1.5 py-1">
+                  <SiVisa className="h-3.5 w-3.5 text-[#1A1F71]" title="Visa" />
+                </div>
+                <div className="bg-white/10 rounded px-1.5 py-1">
+                  <SiMastercard className="h-3.5 w-3.5 text-[#EB001B]" title="Mastercard" />
+                </div>
+                <div className="bg-white/10 rounded px-1.5 py-1">
+                  <SiPaypal className="h-3.5 w-3.5 text-[#00457C]" title="PayPal" />
+                </div>
+                <div className="bg-white/10 rounded px-1.5 py-1">
+                  <SiAlipay className="h-3.5 w-3.5 text-[#1677FF]" title="Alipay" />
+                </div>
+                <div className="bg-white/10 rounded px-1.5 py-1">
+                  <SiWechat className="h-3.5 w-3.5 text-[#07C160]" title="WeChat Pay" />
                 </div>
               </div>
-
-              {/* WeChat standalone */}
-              <div className="bg-white/10 rounded px-2 py-1.5 flex items-center space-x-1.5">
-                <SiWechat className="h-4 w-4 text-[#07C160]" />
-                <span className="text-xs font-medium">WeChat Pay</span>
+              <div className="flex items-center gap-1.5 text-xs text-white/50">
+                <Shield className="h-3 w-3" />
+                <span>SSL Encrypted</span>
               </div>
-            </div>
-
-            {/* Security Badge */}
-            <div className="mt-4 pt-3 border-t border-white/20">
-              <div className="flex items-center gap-1.5 text-xs text-white/70 mb-1">
-                <Shield className="h-3.5 w-3.5 text-eth-orange" />
-                <span className="font-medium">Secure & Encrypted</span>
-              </div>
-              <p className="text-xs text-white/50">SSL/TLS • PCI DSS Compliant</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-white/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-white/70">
-          <p className="text-sm mb-4 md:mb-0">
-            © 2024 Alga. Made with ❤️ in Ethiopia. All rights reserved.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Sitemap</a>
+      {/* Bottom Bar */}
+      <div className="border-t border-white/20">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-white/60">
+            <p>© 2024 Alga. Made with ❤️ in Ethiopia.</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="#" className="hover:text-white transition-colors">Sitemap</a>
+            </div>
           </div>
         </div>
       </div>
