@@ -12,6 +12,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      server: 'Ethiopia Stays API',
+      version: '1.0.0',
+      payments: {
+        stripe: !!process.env.STRIPE_SECRET_KEY,
+        telebirr: !!process.env.TELEBIRR_APP_ID,
+        paypal: !!process.env.PAYPAL_CLIENT_ID
+      }
+    });
+  });
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
