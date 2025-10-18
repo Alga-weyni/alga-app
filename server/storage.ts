@@ -374,9 +374,25 @@ export class DatabaseStorage implements IStorage {
 
   // Booking operations
   async createBooking(booking: InsertBooking): Promise<Booking> {
+    // Import the booking breakdown utility
+    const { calculateBookingBreakdown } = await import('./utils/booking.js');
+    
+    // Calculate commission and tax breakdown
+    const totalAmount = parseFloat(booking.totalPrice);
+    const breakdown = calculateBookingBreakdown(totalAmount);
+    
+    // Add financial breakdown to booking
+    const bookingWithFinancials = {
+      ...booking,
+      algaCommission: breakdown.algaCommission.toString(),
+      vat: breakdown.vatOnCommission.toString(),
+      withholding: breakdown.hostWithholding.toString(),
+      hostPayout: breakdown.hostNet.toString(),
+    };
+    
     const [newBooking] = await db
       .insert(bookings)
-      .values(booking)
+      .values(bookingWithFinancials)
       .returning();
     return newBooking;
   }
