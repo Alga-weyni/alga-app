@@ -56,20 +56,20 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
   };
 
   return (
-    <section className="bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] text-eth-brown py-12 sm:py-16">
+    <section className="bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] text-eth-brown py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-        <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+        <div className="text-center mb-7 sm:mb-9">
+          <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
             Find Your Ethiopian Stay
           </h2>
-          <p className="text-sm md:text-base text-[#5a4a42] max-w-2xl mx-auto">
+          <p className="text-sm text-[#5a4a42]/80 max-w-xl mx-auto">
             Authentic homes and hotels across Ethiopia
           </p>
         </div>
 
         {/* Search Form */}
         <div className="flex justify-center max-w-7xl mx-auto">
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-6 w-full lg:max-w-5xl border border-[#e5ddd5] hover:shadow-xl transition-shadow duration-300">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-5 w-full lg:max-w-5xl border border-[#e5ddd5]/50 hover:shadow-lg transition-all duration-300">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               {/* Destination */}
               <div className="md:col-span-1">
@@ -163,9 +163,9 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 <Button
                   type="submit"
                   className="
-                    h-12 px-8 bg-[#2d1405] hover:bg-[#3d1f0a] text-white font-medium rounded-lg
+                    h-12 px-8 bg-[#2d1405] hover:bg-[#3d1f0a] text-white font-semibold rounded-xl
                     transition-all duration-200
-                    hover:shadow-md
+                    hover:shadow-lg hover:scale-105
                   "
                   aria-label="Search properties"
                   data-testid="button-search-properties"
