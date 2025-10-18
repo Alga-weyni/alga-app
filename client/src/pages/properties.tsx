@@ -37,6 +37,8 @@ interface Filters {
   maxGuests?: number;
   checkIn?: string;
   checkOut?: string;
+  q?: string;
+  sort?: string;
 }
 
 export default function Properties() {
@@ -44,6 +46,7 @@ export default function Properties() {
   const [filters, setFilters] = useState<Filters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [keyword, setKeyword] = useState("");
 
   // Parse URL params on mount
   useEffect(() => {
@@ -58,6 +61,11 @@ export default function Properties() {
     if (params.get('guests')) urlFilters.maxGuests = parseInt(params.get('guests')!);
     if (params.get('checkIn')) urlFilters.checkIn = params.get('checkIn')!;
     if (params.get('checkOut')) urlFilters.checkOut = params.get('checkOut')!;
+    if (params.get('q')) {
+      urlFilters.q = params.get('q')!;
+      setKeyword(params.get('q')!);
+    }
+    if (params.get('sort')) urlFilters.sort = params.get('sort')!;
     
     setFilters(urlFilters);
     
@@ -95,6 +103,22 @@ export default function Properties() {
 
   const clearFilters = () => {
     setFilters({});
+    setKeyword("");
+  };
+
+  const removeFilter = (key: keyof Filters) => {
+    const newFilters = { ...filters };
+    delete newFilters[key];
+    setFilters(newFilters);
+    if (key === 'q') setKeyword("");
+  };
+
+  const handleKeywordSearch = () => {
+    if (keyword.trim()) {
+      updateFilter('q', keyword.trim());
+    } else {
+      removeFilter('q');
+    }
   };
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
@@ -158,8 +182,177 @@ export default function Properties() {
             )}
           </div>
           
-          {/* Properties Grid - Full Width */}
+          {/* Enhanced Search & Filters */}
           <div>
+            {/* Keyword Search & Controls Bar */}
+            <div className="mb-4 space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Keyword Search */}
+                <div className="flex-1 flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Search by name, location, or description..."
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleKeywordSearch()}
+                    className="flex-1 bg-white border-eth-brown/20"
+                    data-testid="input-keyword-search"
+                  />
+                  <Button
+                    onClick={handleKeywordSearch}
+                    className="bg-eth-brown hover:bg-eth-brown/90"
+                    data-testid="button-keyword-search"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Sort Dropdown */}
+                <Select value={filters.sort || 'recommended'} onValueChange={(value) => updateFilter('sort', value)}>
+                  <SelectTrigger className="w-full sm:w-[200px] bg-white border-eth-brown/20">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recommended">Recommended</SelectItem>
+                    <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                    <SelectItem value="rating_desc">Highest Rated</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Filter Toggle */}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white"
+                  data-testid="button-toggle-filters"
+                >
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
+                </Button>
+              </div>
+
+              {/* Collapsible Advanced Filters */}
+              {showFilters && (
+                <Card className="border-eth-brown/20">
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* City Filter */}
+                      <div>
+                        <Label className="text-xs font-semibold text-eth-brown mb-2 block">City</Label>
+                        <Select value={filters.city || ''} onValueChange={(value) => updateFilter('city', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="All cities" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All cities</SelectItem>
+                            {ETHIOPIAN_CITIES.map((city) => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Property Type Filter */}
+                      <div>
+                        <Label className="text-xs font-semibold text-eth-brown mb-2 block">Property Type</Label>
+                        <Select value={filters.type || ''} onValueChange={(value) => updateFilter('type', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="All types" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All types</SelectItem>
+                            {PROPERTY_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Min Price */}
+                      <div>
+                        <Label className="text-xs font-semibold text-eth-brown mb-2 block">Min Price (ETB)</Label>
+                        <Input
+                          type="number"
+                          placeholder="Any"
+                          value={filters.minPrice || ''}
+                          onChange={(e) => updateFilter('minPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          className="bg-white"
+                          data-testid="input-min-price"
+                        />
+                      </div>
+
+                      {/* Max Price */}
+                      <div>
+                        <Label className="text-xs font-semibold text-eth-brown mb-2 block">Max Price (ETB)</Label>
+                        <Input
+                          type="number"
+                          placeholder="Any"
+                          value={filters.maxPrice || ''}
+                          onChange={(e) => updateFilter('maxPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          className="bg-white"
+                          data-testid="input-max-price"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Active Filter Badges */}
+              {activeFilterCount > 0 && (
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="text-xs text-eth-brown/60">Active filters:</span>
+                  {filters.city && (
+                    <Badge variant="secondary" className="gap-1" data-testid="badge-filter-city">
+                      City: {filters.city}
+                      <button onClick={() => removeFilter('city')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  {filters.type && (
+                    <Badge variant="secondary" className="gap-1" data-testid="badge-filter-type">
+                      Type: {filters.type}
+                      <button onClick={() => removeFilter('type')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  {filters.minPrice && (
+                    <Badge variant="secondary" className="gap-1">
+                      Min: {filters.minPrice} ETB
+                      <button onClick={() => removeFilter('minPrice')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  {filters.maxPrice && (
+                    <Badge variant="secondary" className="gap-1">
+                      Max: {filters.maxPrice} ETB
+                      <button onClick={() => removeFilter('maxPrice')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  {filters.maxGuests && (
+                    <Badge variant="secondary" className="gap-1">
+                      Guests: {filters.maxGuests}+
+                      <button onClick={() => removeFilter('maxGuests')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  {filters.q && (
+                    <Badge variant="secondary" className="gap-1" data-testid="badge-filter-keyword">
+                      "{filters.q}"
+                      <button onClick={() => removeFilter('q')} className="ml-1 hover:text-destructive">×</button>
+                    </Badge>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="h-6 text-xs text-eth-brown hover:text-eth-brown/70"
+                    data-testid="button-clear-filters"
+                  >
+                    Clear all
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Results Count */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-eth-brown" style={{ fontSize: '87%' }}>
                 🏠 {properties.length} {properties.length === 1 ? 'Stay' : 'Stays'} Available
@@ -168,6 +361,27 @@ export default function Properties() {
 
             {isLoading ? (
               <PropertyGridSkeleton count={12} />
+            ) : properties.length === 0 ? (
+              <Card className="mt-8 border-eth-brown/20">
+                <CardContent className="py-12 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="mb-4 text-6xl">🔍</div>
+                    <h3 className="text-xl font-semibold text-eth-brown mb-2">No properties found</h3>
+                    <p className="text-eth-brown/60 mb-6">
+                      We couldn't find any properties matching your search criteria. Try adjusting your filters or search terms.
+                    </p>
+                    {activeFilterCount > 0 && (
+                      <Button
+                        onClick={clearFilters}
+                        className="bg-eth-brown hover:bg-eth-brown/90"
+                        data-testid="button-clear-filters-empty"
+                      >
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
