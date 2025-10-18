@@ -1,0 +1,149 @@
+"use client";
+/**
+ * ALGA INTELLIGENT DISCOVERY – ONE-STEP SETUP
+ * Drop-in page for Replit (Next.js + Drizzle + Google Maps)
+ * Features:
+ *  - Map-based search (drag / zoom)
+ *  - AI-style recommendations
+ *  - Real-time price & availability mock
+ *  - Nearby amenities (mock Google Places)
+ */
+
+import React, { useState, useEffect } from "react";
+import GoogleMapReact from "google-map-react";
+
+/* ---------- BACKEND INLINE (API) ---------- */
+// This inline API runs client-side fetches to your existing backend route.
+// Create it once inside: /app/api/properties/discover/route.ts
+// If it doesn’t exist, paste this same code in there too.
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const north = Number(searchParams.get("north"));
+    const south = Number(searchParams.get("south"));
+    const east = Number(searchParams.get("east"));
+    const west = Number(searchParams.get("west"));
+    const city = searchParams.get("city") || "";
+
+    // Mock DB data (replace with real Drizzle query)
+    const sample = [
+      {
+        id: 1,
+        title: "Addis Guesthouse Prime",
+        city: "Addis Ababa",
+        latitude: 9.01,
+        longitude: 38.76,
+        price_per_night: 850,
+        base_price: 800,
+      },
+      {
+        id: 2,
+        title: "Bole Luxury Stay",
+        city: "Addis Ababa",
+        latitude: 9.015,
+        longitude: 38.78,
+        price_per_night: 1200,
+        base_price: 1150,
+      },
+    ];
+
+    // AI-style simple recommendations
+    const recommendations = sample.slice(0, 2);
+
+    // Add dynamic mock price & availability
+    const enriched = sample.map((p) => ({
+      ...p,
+      dynamic_price: p.base_price * (1 + Math.random() * 0.1),
+      is_available: Math.random() > 0.1,
+    }));
+
+    // Mock nearby amenities (replace later with real Google Places)
+    const amenities = [
+      { id: "a1", name: "Coffee Spot Roastery", type: "Cafe", lat: 9.012, lng: 38.763 },
+      { id: "a2", name: "Addis Clinic", type: "Hospital", lat: 9.014, lng: 38.769 },
+      { id: "a3", name: "Bus Terminal Bole", type: "Transport", lat: 9.008, lng: 38.755 },
+    ];
+
+    return new Response(JSON.stringify({ mapResults: enriched, recommendations, amenities }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
+}
+
+/* ---------- FRONTEND MAP COMPONENT ---------- */
+
+export default function DiscoverPage() {
+  const [bounds, setBounds] = useState<any>(null);
+  const [results, setResults] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [amenities, setAmenities] = useState([]);
+
+  async function fetchDiscovery() {
+    if (!bounds) return;
+    const url = `/api/properties/discover?north=${bounds.ne.lat}&south=${bounds.sw.lat}&east=${bounds.ne.lng}&west=${bounds.sw.lng}&city=Addis%20Ababa`;
+    const res = await fetch(url);
+    const data = await res.json();
+    setResults(data.mapResults || []);
+    setRecommendations(data.recommendations || []);
+    setAmenities(data.amenities || []);
+  }
+
+  useEffect(() => {
+    if (bounds) fetchDiscovery();
+  }, [bounds]);
+
+  return (
+    <div style={{ height: "100vh", width: "100%" }} className="relative">
+      {/* MAP */}
+      <GoogleMapReact
+        bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY! }}
+        defaultCenter={{ lat: 9.0108, lng: 38.7613 }}
+        defaultZoom={12}
+        onChange={(obj) => setBounds(obj.bounds)}
+      >
+        {/* Property Pins */}
+        {results.map((p: any) => (
+          <div
+            key={p.id}
+            lat={p.latitude}
+            lng={p.longitude}
+            className="bg-[#fff9f2] border border-[#d6a77a] text-[#6b3f19] px-2 py-1 rounded-md shadow text-xs font-semibold"
+          >
+            {p.price_per_night} ETB
+          </div>
+        ))}
+
+        {/* Amenity Pins */}
+        {amenities.map((a: any) => (
+          <div
+            key={a.id}
+            lat={a.lat}
+            lng={a.lng}
+            className="bg-[#6b3f19] text-white text-[10px] px-1 py-[2px] rounded"
+          >
+            {a.type}
+          </div>
+        ))}
+      </GoogleMapReact>
+
+      {/* Recommendations */}
+      <div className="absolute bottom-0 left-0 right-0 bg-[#fffaf4] p-3 shadow-lg overflow-x-scroll">
+        <h3 className="text-[#6b3f19] font-semibold mb-2">
+          Guests who booked in Addis also liked:
+        </h3>
+        <div className="flex gap-3">
+          {recommendations.map((r: any) => (
+            <div key={r.id} className="min-w-[150px] p-2 border border-[#e3c6a3] rounded-md">
+              <p className="text-sm font-semibold">{r.title}</p>
+              <p className="text-xs text-gray-600">{r.city}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
