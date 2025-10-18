@@ -113,12 +113,12 @@ export default function Properties() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
-          <div className="mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-8">
+          <div className="mb-4 sm:mb-6">
             <BackButton />
           </div>
           
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <Card className="sticky top-24 bg-white/60 backdrop-blur-sm border-eth-brown/20">
@@ -229,19 +229,19 @@ export default function Properties() {
 
           {/* Main Content */}
           <div className="flex-1">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <div>
-                <h2 className="text-3xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
                 </h2>
-                <p className="text-eth-brown">
+                <p className="text-sm sm:text-base text-eth-brown">
                   {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 {activeFilterCount > 0 && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="text-xs">
                     {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
                   </Badge>
                 )}
@@ -251,6 +251,7 @@ export default function Properties() {
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
                   className="lg:hidden"
+                  data-testid="button-toggle-filters"
                 >
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   Filters
@@ -259,22 +260,22 @@ export default function Properties() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-80"></div>
+                  <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-80"></div>
                 ))}
               </div>
             ) : properties.length === 0 ? (
-              <div className="text-center py-12 bg-white/60 backdrop-blur-sm rounded-3xl">
-                <Filter className="mx-auto h-12 w-12 text-eth-brown mb-4" />
-                <h3 className="text-lg font-medium text-eth-brown mb-2">No properties found</h3>
-                <p className="text-eth-brown mb-6">
+              <div className="text-center py-8 sm:py-12 px-4 bg-white/60 backdrop-blur-sm rounded-3xl">
+                <Filter className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-eth-brown mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-eth-brown mb-2">No properties found</h3>
+                <p className="text-sm sm:text-base text-eth-brown mb-4 sm:mb-6">
                   Try adjusting your search criteria or remove some filters.
                 </p>
-                <Button onClick={clearFilters} className="bg-eth-orange hover:opacity-90 text-white">Clear all filters</Button>
+                <Button onClick={clearFilters} className="bg-eth-orange hover:opacity-90 text-white" data-testid="button-clear-filters">Clear all filters</Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {properties.map((property) => (
                   <PropertyCard
                     key={property.id}
