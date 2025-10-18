@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
 import paymentRouter from "./payment";
 import rateLimit from "express-rate-limit";
+import { generateInvoice } from "./utils/invoice";
 
 // Security: Rate limiting for authentication endpoints
 const authLimiter = rateLimit({
@@ -1339,6 +1340,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching access codes:", error);
       res.status(500).json({ message: "Failed to fetch access codes" });
+    }
+  });
+
+  // Invoice generation endpoint (ERCA-compliant)
+  app.get('/api/bookings/:bookingId/invoice', isAuthenticated, async (req: any, res) => {
+    try {
+      const bookingId = parseInt(req.params.bookingId);
+      const userId = req.user.id;
+      
+      // Get booking details
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Verify user has access to this booking (guest or host)
+      const property = await storage.getProperty(booking.propertyId);
+      if (!property || (booking.guestId !== userId && property.hostId !== userId)) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      // Get guest and property details
+      const guest = await storage.getUser(booking.guestId);
+      if (!guest) {
+        return res.status(404).json({ message: "Guest not found" });
+      }
+      
+      // Prepare invoice data (convert string decimals to numbers)
+      const invoiceData = {
+        id: booking.id,
+        guestName: `${guest.firstName} ${guest.lastName}`,
+        propertyName: property.title,
+        createdAt: booking.createdAt!,
+        totalAmount: parseFloat(booking.totalPrice),
+        algaCommission: parseFloat(booking.algaCommission || '0'),
+        vat: parseFloat(booking.vat || '0'),
+        withholding: parseFloat(booking.withholding || '0'),
+        hostPayout: parseFloat(booking.hostPayout || '0'),
+      };
+      
+      // Generate PDF invoice
+      const pdfDataUri = await generateInvoice(invoiceData, {
+        algaTIN: "ALGA-TIN-12345",
+        hostTIN: property.hostId || "N/A",
+      });
+      
+      res.json({ 
+        invoicePDF: pdfDataUri,
+        bookingId: booking.id,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      res.status(500).json({ message: "Failed to generate invoice" });
     }
   });
 
