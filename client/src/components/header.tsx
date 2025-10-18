@@ -74,19 +74,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 </SheetHeader>
                 <nav className="flex flex-col space-y-4 mt-8">
                   <Link 
-                    href="/properties"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                      location === '/properties' 
-                        ? 'bg-primary text-primary-foreground font-medium' 
-                        : 'hover:bg-secondary'
-                    }`}
-                    data-testid="mobile-link-explore"
-                  >
-                    Explore Properties
-                  </Link>
-                  
-                  <Link 
                     href="/discover"
                     onClick={() => setMobileMenuOpen(false)}
                     className={`text-lg py-3 px-4 rounded-lg transition-colors ${
@@ -97,19 +84,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     data-testid="mobile-link-discover"
                   >
                     Discover Map
-                  </Link>
-
-                  <Link 
-                    href="/search"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                      location === '/search' 
-                        ? 'bg-primary text-primary-foreground font-medium' 
-                        : 'hover:bg-secondary'
-                    }`}
-                    data-testid="mobile-link-search"
-                  >
-                    Advanced Search
                   </Link>
                   
                   {isAuthenticated && user?.role === 'host' && (
@@ -214,21 +188,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
           {!hideNavigation && (
             <nav className="hidden md:flex items-center space-x-8">
               <Link 
-                href="/properties"
-                className={`
-                  relative transition-all duration-200 pb-1
-                  ${location === '/properties' 
-                    ? 'text-eth-brown font-medium' 
-                    : 'text-eth-brown/70 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                  ${location === '/properties' ? 'after:w-full' : 'hover:after:w-full'}
-                `}
-                data-testid="link-explore"
-              >
-                Explore
-              </Link>
-              
-              <Link 
                 href="/discover"
                 className={`
                   relative transition-all duration-200 pb-1
@@ -242,33 +201,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               >
                 Discover Map
               </Link>
-              
-              {isAuthenticated && user?.role === 'host' && (
-                <Link 
-                  href="/host/dashboard"
-                  className={`
-                    relative transition-all duration-200 pb-1
-                    ${location === '/host/dashboard' 
-                      ? 'text-eth-brown font-medium' 
-                      : 'text-eth-brown/70 hover:text-eth-brown'}
-                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                    ${location === '/host/dashboard' ? 'after:w-full' : 'hover:after:w-full'}
-                  `}
-                >
-                  Host Your Property
-                </Link>
-              )}
-              
-              <a 
-                href="#" 
-                className="
-                  relative text-eth-brown/70 hover:text-eth-brown transition-all duration-200 pb-1
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                  hover:after:w-full
-                "
-              >
-                About Ethiopia
-              </a>
             </nav>
           )}
 
