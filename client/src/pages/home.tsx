@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Star, TrendingUp, Database, Activity, Bell, Zap, Gift, Key, Apple } from "lucide-react";
+import { Star, TrendingUp, Database, Activity, Bell, Zap, Gift, Key, Apple, MapPin } from "lucide-react";
 import { SiGoogleplay } from "react-icons/si";
 import type { Property } from "@shared/schema";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
@@ -33,6 +33,101 @@ export default function Home() {
       <div className="flex-1 lg:ml-20">
         <Header />
         <SearchBanner />
+
+        {/* Explore by Map Section */}
+        <section className="py-16 bg-eth-light-tan">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
+            <div className="bg-gradient-to-r from-eth-warm-tan to-eth-light-tan rounded-3xl shadow-xl overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-0 items-center">
+                
+                {/* Left Side - Content */}
+                <div className="p-8 md:p-12 space-y-6">
+                  <div>
+                    <h3 
+                      className="text-3xl md:text-4xl lg:text-5xl font-bold text-eth-brown mb-4" 
+                      style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}
+                      data-testid="heading-explore-map"
+                    >
+                      <span className="hidden md:inline">Explore Ethiopian Stays by Map</span>
+                      <span className="md:hidden">Explore by Map</span>
+                    </h3>
+                    <div className="w-20 h-1 bg-eth-orange rounded-full"></div>
+                  </div>
+                  
+                  <p className="text-base md:text-lg text-eth-brown/80 leading-relaxed" data-testid="text-map-description">
+                    <span className="hidden md:block">
+                      Discover authentic homes, guesthouses, and city escapes across Ethiopia — from Addis to Axum. 
+                      Zoom in, explore local stays, and experience Ethiopian hospitality wherever you go.
+                    </span>
+                    <span className="md:hidden">
+                      Find verified stays across Ethiopia — from Addis to Axum.
+                    </span>
+                  </p>
+                  
+                  <Link href="/properties">
+                    <Button 
+                      className="bg-eth-orange hover:bg-eth-orange/90 text-white text-lg px-8 py-6 flex items-center gap-2"
+                      data-testid="button-explore-map"
+                    >
+                      <MapPin className="h-5 w-5" />
+                      Explore Map View
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Right Side - Map Visual */}
+                <div className="relative h-64 md:h-full min-h-[300px] bg-eth-brown/10">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative">
+                      {/* Decorative Map Pins */}
+                      <div className="relative w-64 h-64">
+                        {/* Center pin - Addis Ababa */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-bounce">
+                          <div className="w-16 h-16 bg-eth-orange rounded-full flex items-center justify-center shadow-lg">
+                            <MapPin className="h-8 w-8 text-white" />
+                          </div>
+                          <p className="text-center text-xs font-semibold text-eth-brown mt-2">Addis Ababa</p>
+                        </div>
+                        
+                        {/* Other pins */}
+                        <div className="absolute top-12 left-16 opacity-70">
+                          <div className="w-10 h-10 bg-eth-gold rounded-full flex items-center justify-center shadow-md">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <p className="text-center text-xs text-eth-brown/70 mt-1">Lalibela</p>
+                        </div>
+                        
+                        <div className="absolute top-8 right-20 opacity-70">
+                          <div className="w-10 h-10 bg-eth-green rounded-full flex items-center justify-center shadow-md">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <p className="text-center text-xs text-eth-brown/70 mt-1">Axum</p>
+                        </div>
+                        
+                        <div className="absolute bottom-16 left-20 opacity-70">
+                          <div className="w-10 h-10 bg-eth-orange/70 rounded-full flex items-center justify-center shadow-md">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <p className="text-center text-xs text-eth-brown/70 mt-1">Bahir Dar</p>
+                        </div>
+                        
+                        <div className="absolute bottom-12 right-16 opacity-70">
+                          <div className="w-10 h-10 bg-eth-gold/80 rounded-full flex items-center justify-center shadow-md">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <p className="text-center text-xs text-eth-brown/70 mt-1">Gondar</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-eth-warm-tan/30 to-transparent pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Featured Properties */}
         <section className="py-16 bg-eth-warm-tan">
