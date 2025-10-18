@@ -43,11 +43,20 @@ Preferred communication style: Simple, everyday language.
 - **Property Management**: CRUD for listings, including image uploads.
 - **Booking System**: Full workflow with date validation and conflict prevention.
 - **Review System**: User-generated ratings and reviews.
-- **Verification System**:
-    - **Ethiopian ID Scanner**: `ScanID` component for identity verification using QR code scanning or OCR (Tesseract.js for Amharic/English) from photo uploads. Updates `idVerified` in the database.
-    - **Operator Dashboard**: Dedicated dashboard (`/operator/dashboard`) for operators to review and approve/reject host verification documents (ID, passport, property deed, business license) and property listings.
+- **Universal ID Verification System** (REQUIRED FOR ALL USERS):
+    - **Ethiopian Citizens**: Digital ID QR code scanning via `qr-scanner` library (`/scan-id` page)
+    - **Foreign Visitors**: Photo upload (passport, driver's license, national ID) with OCR via Tesseract.js
+    - **Document Types Supported**: 
+        - `ethiopian_id` - Ethiopian Digital ID (QR scan)
+        - `passport` - International passports (photo OCR)
+        - `drivers_license` - Driver's licenses (photo OCR)
+        - `other` - Other government-issued IDs (photo OCR)
+    - **Universal Scanner Component**: `UniversalIDScanner` with tabbed interface for QR scan vs photo upload
+    - **Database Tracking**: `idVerified`, `idNumber`, `idFullName`, `idDocumentType`, `idExpiryDate`, `idCountry` fields in users table
+    - **Verification Check Component**: `IDVerificationCheck` for enforcing requirements and showing verification status
+    - **Operator Dashboard**: Dedicated dashboard (`/operator/dashboard`) for operators to review and approve/reject host verification documents and property listings.
     - Phone verification readiness for Ethiopian Telecom SMS.
-    - Multi-stage verification process for hosts and tenants.
+    - Multi-stage verification process for all user types.
 - **Payment Gateway**: Integration with Stripe for global credit/debit card payments (supporting 135+ currencies, Alipay, WeChat Pay), Telebirr for local Ethiopian payments, and PayPal for international users. Includes dedicated success/cancellation pages and webhook handling.
 - **International Support**: Multi-language support (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
