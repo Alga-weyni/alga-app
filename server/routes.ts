@@ -6,6 +6,7 @@ import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFa
 import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
+import paymentRouter from "./payment";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -848,6 +849,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Mobile payment failed" });
     }
   });
+
+  // Real payment integration (Telebirr & PayPal)
+  app.use('/api/payment', isAuthenticated, paymentRouter);
 
   const httpServer = createServer(app);
   return httpServer;
