@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Home className="text-primary-foreground text-lg" />
               </div>
-              <h4 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h4>
+              <h4 className="text-xl font-bold luxury-rich-gold">Alga</h4>
             </div>
             <p className="text-muted-foreground text-sm mb-4">
               Discover authentic Ethiopian hospitality and connect with local communities 
@@ -86,7 +86,7 @@ export default function Footer() {
 
         <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-            © 2024 Ethiopia Stays. All rights reserved.
+            © 2024 Alga. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>

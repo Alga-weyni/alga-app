@@ -33,7 +33,7 @@ export default function StartHosting() {
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-eth-brown mb-4">
-              Start Hosting with Ethiopia Stays
+              Start Hosting with Alga
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl mx-auto">
               Share your property with travelers and earn income while showcasing Ethiopian hospitality

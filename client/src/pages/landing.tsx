@@ -38,7 +38,7 @@ export default function Landing() {
                   <Home className="text-primary-foreground text-xl" />
                 </div>
                 <h1 className="text-4xl font-bold text-eth-brown tracking-wide" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", letterSpacing: '0.08em' }}>
-                  ETHIOPIA STAYS
+                  ALGA
                 </h1>
               </div>
 
