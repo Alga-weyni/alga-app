@@ -1,0 +1,114 @@
+alga-app/
+│
+├── server/
+│   ├── api/
+│   │   └── payment/
+│   │       ├── telebirr/
+│   │       │   ├── applyFabricTokenService.py
+│   │       │   ├── authTokenService.py   👈 (paste your code here)
+│   │       │   ├── createOrderService.py
+│   │       │   └── checkoutService.py
+│   │       └── ...
+│   ├── utils/
+│   │   └── tools.py
+│   └── config/
+│       └── env.py
+│
+└── ...
+✅ Step-by-Step: How to Paste and Connect It
+1. Create the File
+In your Replit sidebar:
+
+Right-click on payment/telebirr/
+
+Choose New File
+
+Name it:
+
+Copy code
+authTokenService.py
+2. Paste the Entire Code You Shared
+Paste the full class (from import requests down to the last line).
+
+3. Ensure These Support Files Exist
+a) applyFabricTokenService.py
+This should contain a class like:
+
+python
+Copy code
+class ApplyFabricTokenService:
+    def __init__(self, BASE_URL, fabricAppId, appSecret, merchantAppId):
+        self.BASE_URL = BASE_URL
+        self.fabricAppId = fabricAppId
+        self.appSecret = appSecret
+        self.merchantAppId = merchantAppId
+
+    def applyFabricToken(self):
+        # Request to Telebirr’s token endpoint
+        import requests, json
+        headers = {
+            "Content-Type": "application/json",
+            "X-APP-Key": self.fabricAppId
+        }
+        payload = { "appSecret": self.appSecret }
+        res = requests.post(self.BASE_URL + "/payment/v1/token", headers=headers, json=payload)
+        return res.json()
+b) tools.py
+This should include:
+
+python
+Copy code
+import time, random, string, hashlib
+
+def create_timestamp():
+    return int(time.time() * 1000)
+
+def create_nonce_str():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+
+def sign_request_object(req):
+    # This can later use your RSA private key to sign requests.
+    # For now, just a placeholder.
+    sign_str = json.dumps(req, separators=(',', ':'))
+    return hashlib.sha256(sign_str.encode()).hexdigest()
+c) env.py
+This stores your keys:
+
+python
+Copy code
+BASE_URL = "https://app.ethiotelecom.et:4443"
+FABRIC_APP_ID = "c4182ef8-9249-458a-985e-06d191f4d505"
+APP_SECRET = "fad0f06383c6297f545876694b974599"
+MERCHANT_APP_ID = "1509918625254408"
+4. How to Call It
+You can now test it in a simple Python runner file:
+
+python
+Copy code
+from server.api.payment.telebirr.authTokenService import AuthTokenService
+from config import env
+
+telebirr_service = AuthTokenService(
+    env.BASE_URL,
+    env.FABRIC_APP_ID,
+    env.APP_SECRET,
+    env.MERCHANT_APP_ID
+)
+
+fabric_token = "Bearer 94cc42bee412696d754508c06ca1db20"  # your token from Step 1
+
+auth_response = telebirr_service.auth_token(fabric_token)
+print(auth_response)
+If everything’s connected correctly, the console will show a response like:
+
+json
+Copy code
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "access_token": "eyJhbGciOi...",
+    "expires_in": 7200
+  }
+}
+That’s your Auth Token 🎉 — the one you’ll use to create payment orders next.

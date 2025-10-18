@@ -230,7 +230,7 @@ Birth: 15/03/1985`,
 
             {verificationResult.success && (
               <div className="mt-4 space-y-2">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       ID Number
@@ -245,6 +245,22 @@ Birth: 15/03/1985`,
                     </p>
                     <p className="text-lg font-semibold">
                       {verificationResult.fullName || "Not extracted"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Expiry Date
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {verificationResult.expiryDate || "Not detected"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Location
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {verificationResult.location || "Not detected"}
                     </p>
                   </div>
                 </div>
