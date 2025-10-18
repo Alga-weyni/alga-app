@@ -41,7 +41,23 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features Architecture
 - **Property Management**: CRUD for listings, including image uploads.
+- **Advanced Property Search**: Multi-parameter search API with:
+    - **Keyword Search**: Full-text search across title, description, location, and address fields
+    - **Filters**: City, property type, price range (min/max), guest capacity, availability dates
+    - **Sorting Options**: 
+        - `recommended` - Highest rated properties first (default)
+        - `price_asc` - Lowest to highest price
+        - `price_desc` - Highest to lowest price
+        - `rating_desc` - Highest rated properties
+    - **Performance**: Limited to 50 results per query for optimal performance
 - **Booking System**: Full workflow with date validation and conflict prevention.
+- **6-Digit Access Code System**: Automated property access management
+    - **Auto-Generation**: Codes automatically created when payment is confirmed (Telebirr, Stripe, PayPal)
+    - **Format**: 6-digit numeric codes for easy entry
+    - **Validity Period**: Active from check-in to check-out dates
+    - **Status Tracking**: Active, expired, or revoked states
+    - **Guest Display**: Prominently shown on booking success page with validity dates
+    - **API Access**: Routes for retrieving codes by booking ID or all guest codes
 - **Review System**: User-generated ratings and reviews.
 - **Universal ID Verification System** (REQUIRED FOR ALL USERS):
     - **Ethiopian Citizens**: Digital ID QR code scanning via `qr-scanner` library (`/scan-id` page)
