@@ -70,6 +70,13 @@ export const AMENITIES = [
 
 export const PAYMENT_METHODS = [
   {
+    id: "stripe",
+    name: "Credit/Debit Card",
+    description: "Global cards (Visa, Mastercard, Alipay, CNY)",
+    icon: "💳",
+    global: true,
+  },
+  {
     id: "telebirr",
     name: "Telebirr",
     description: "Ethiopian mobile money - Fast & Secure",
