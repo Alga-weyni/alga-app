@@ -68,6 +68,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
+import { HostEarnings } from "@/components/host-earnings";
 import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
@@ -365,9 +366,10 @@ export default function HostDashboard() {
         </div>
 
         <Tabs defaultValue="properties" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="properties">Properties</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="earnings">Earnings</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -552,6 +554,10 @@ export default function HostDashboard() {
                 })}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="earnings" className="space-y-6">
+            <HostEarnings />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
