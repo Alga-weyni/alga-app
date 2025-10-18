@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand - Takes 2 columns */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center space-x-2.5">
-              <div className="w-12 h-12 bg-eth-orange rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-eth-brown rounded-lg flex items-center justify-center">
                 <Home className="h-6 w-6 text-white" />
               </div>
               <h4 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>ALGA</h4>
@@ -21,7 +21,7 @@ export default function Footer() {
               Authentic Ethiopian stays — connecting travelers and diaspora to local hospitality.
             </p>
             <div className="flex items-center gap-2 text-xs">
-              <Shield className="h-4 w-4 text-eth-orange" />
+              <Shield className="h-4 w-4 text-white/80" />
               <span className="text-white/90 font-semibold">100% Ethiopian Owned</span>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function Footer() {
                 >
                   Contact Us
                 </h5>
-                <div className="w-12 h-1 bg-eth-orange rounded-full"></div>
+                <div className="w-12 h-1 bg-eth-brown/60 rounded-full"></div>
               </div>
               
               <div className="space-y-3">
@@ -89,8 +89,8 @@ export default function Footer() {
                   className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-phone"
                 >
-                  <div className="w-10 h-10 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors flex-shrink-0">
-                    <Phone className="h-4 w-4 text-eth-orange" />
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
+                    <Phone className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Phone</p>
@@ -103,8 +103,8 @@ export default function Footer() {
                   className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-email"
                 >
-                  <div className="w-10 h-10 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors flex-shrink-0">
-                    <Mail className="h-4 w-4 text-eth-orange" />
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
+                    <Mail className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Email</p>
@@ -124,7 +124,7 @@ export default function Footer() {
                 >
                   Follow Us
                 </h5>
-                <div className="w-12 h-1 bg-eth-orange rounded-full"></div>
+                <div className="w-12 h-1 bg-eth-brown/60 rounded-full"></div>
               </div>
               
               <p className="text-white/70 text-sm leading-relaxed">
@@ -140,7 +140,7 @@ export default function Footer() {
                   title="Instagram"
                   data-testid="link-instagram"
                 >
-                  <Instagram className="h-5 w-5 text-eth-orange" />
+                  <Instagram className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">Instagram</span>
                 </a>
                 
@@ -152,7 +152,7 @@ export default function Footer() {
                   title="TikTok"
                   data-testid="link-tiktok"
                 >
-                  <SiTiktok className="h-5 w-5 text-eth-orange" />
+                  <SiTiktok className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">TikTok</span>
                 </a>
                 
@@ -164,7 +164,7 @@ export default function Footer() {
                   title="Facebook"
                   data-testid="link-facebook"
                 >
-                  <Facebook className="h-5 w-5 text-eth-orange" />
+                  <Facebook className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">Facebook</span>
                 </a>
                 
@@ -176,7 +176,7 @@ export default function Footer() {
                   title="YouTube"
                   data-testid="link-youtube"
                 >
-                  <SiYoutube className="h-5 w-5 text-eth-orange" />
+                  <SiYoutube className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">YouTube</span>
                 </a>
                 
@@ -188,7 +188,7 @@ export default function Footer() {
                   title="LinkedIn"
                   data-testid="link-linkedin"
                 >
-                  <Linkedin className="h-5 w-5 text-eth-orange" />
+                  <Linkedin className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">LinkedIn</span>
                 </a>
                 
@@ -200,7 +200,7 @@ export default function Footer() {
                   title="Telegram"
                   data-testid="link-telegram"
                 >
-                  <SiTelegram className="h-5 w-5 text-eth-orange" />
+                  <SiTelegram className="h-5 w-5 text-white" />
                   <span className="text-sm font-medium">Telegram</span>
                 </a>
               </div>

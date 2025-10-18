@@ -54,8 +54,8 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3 cursor-pointer">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="text-primary-foreground text-base sm:text-lg" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-eth-brown rounded-lg flex items-center justify-center">
+              <Home className="text-white text-base sm:text-lg" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold luxury-rich-gold">Alga</h1>
           </Link>
@@ -220,7 +220,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   ${location === '/properties' 
                     ? 'text-eth-brown font-medium' 
                     : 'text-eth-brown/70 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
                   ${location === '/properties' ? 'after:w-full' : 'hover:after:w-full'}
                 `}
                 data-testid="link-explore"
@@ -235,7 +235,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   ${location === '/discover' 
                     ? 'text-eth-brown font-medium' 
                     : 'text-eth-brown/70 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
                   ${location === '/discover' ? 'after:w-full' : 'hover:after:w-full'}
                 `}
                 data-testid="link-discover"
@@ -251,7 +251,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     ${location === '/host/dashboard' 
                       ? 'text-eth-brown font-medium' 
                       : 'text-eth-brown/70 hover:text-eth-brown'}
-                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
                     ${location === '/host/dashboard' ? 'after:w-full' : 'hover:after:w-full'}
                   `}
                 >
@@ -263,7 +263,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 href="#" 
                 className="
                   relative text-eth-brown/70 hover:text-eth-brown transition-all duration-200 pb-1
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
                   hover:after:w-full
                 "
               >
