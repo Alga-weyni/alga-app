@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
+import PropertySearch from "@/pages/search";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import OperatorDashboard from "@/pages/operator-dashboard";
@@ -27,6 +28,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes - accessible to everyone */}
+      <Route path="/search" component={PropertySearch} />
       <Route path="/start-hosting" component={StartHosting} />
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:id" component={PropertyDetails} />
