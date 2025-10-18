@@ -62,8 +62,8 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
           <h2 className="text-3xl md:text-4xl font-bold mb-2 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
             Find Your Ethiopian Stay
           </h2>
-          <p className="text-sm text-[#5a4a42]/80 max-w-xl mx-auto">
-            Authentic homes and hotels across Ethiopia
+          <p className="text-base text-[#5a4a42] max-w-2xl mx-auto leading-relaxed" style={{ fontFamily: "'Merriweather', 'Georgia', serif" }}>
+            Authentic stays, local stories, and genuine hospitality — just a click away.
           </p>
         </div>
 
