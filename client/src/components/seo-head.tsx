@@ -8,8 +8,8 @@ interface SEOHeadProps {
 }
 
 export function SEOHead({
-  title = "Alga - Authentic Ethiopian Stays",
-  description = "Discover unique Ethiopian accommodations from Addis Ababa to Lalibela. Book traditional homes, modern hotels, and cultural guesthouses. Safe, verified, and authentically Ethiopian.",
+  title = "Alga — Stay. Discover. Belong — The Ethiopian Way!",
+  description = "Discover authentic Ethiopian stays with Alga — from city apartments to countryside lodges. Book safely, pay securely, and feel at home wherever you go.",
   image = "/og-image.jpg",
   url = typeof window !== 'undefined' ? window.location.href : '',
 }: SEOHeadProps) {
