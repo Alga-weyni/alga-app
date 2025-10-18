@@ -95,14 +95,10 @@ export default function PropertyDetails() {
       // Handle Telebirr payment
       if (bookingData.paymentMethod === "telebirr") {
         try {
-          const paymentResponse = await fetch("/api/payment/telebirr", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              bookingId: booking.id,
-              amount: booking.totalPrice,
-              customerPhone: user?.phoneNumber || "+251912345678",
-            }),
+          const paymentResponse = await apiRequest("POST", "/api/payment/telebirr", {
+            bookingId: booking.id,
+            amount: booking.totalPrice,
+            customerPhone: user?.phoneNumber || "+251912345678",
           });
           
           const paymentData = await paymentResponse.json();
@@ -131,13 +127,9 @@ export default function PropertyDetails() {
       // Handle PayPal payment
       else if (bookingData.paymentMethod === "paypal") {
         try {
-          const paymentResponse = await fetch("/api/payment/paypal", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              bookingId: booking.id,
-              amount: parseFloat(booking.totalPrice) / 50, // Convert ETB to USD (approximate rate)
-            }),
+          const paymentResponse = await apiRequest("POST", "/api/payment/paypal", {
+            bookingId: booking.id,
+            amount: parseFloat(booking.totalPrice) / 50, // Convert ETB to USD (approximate rate)
           });
           
           const paymentData = await paymentResponse.json();
