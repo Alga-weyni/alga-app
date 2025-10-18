@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Home, Facebook, Twitter, Instagram, Shield, CreditCard, Smartphone, Mail } from "lucide-react";
-import { SiStripe, SiPaypal, SiTiktok, SiYoutube } from "react-icons/si";
+import { SiStripe, SiPaypal, SiTiktok, SiYoutube, SiVisa, SiMastercard, SiAlipay, SiWechat } from "react-icons/si";
 
 export default function Footer() {
   return (
@@ -94,24 +94,63 @@ export default function Footer() {
           {/* Secure Payments */}
           <div>
             <h5 className="font-bold mb-4 text-lg text-eth-orange">Secure Payments</h5>
-            <p className="text-white/80 text-sm mb-4">We accept payments via:</p>
-            <div className="space-y-3">
+            <p className="text-white/80 text-sm mb-4">We accept:</p>
+            
+            {/* Ethiopian Payment */}
+            <div className="mb-4">
+              <p className="text-xs text-white/60 mb-2">🇪🇹 Ethiopian</p>
               <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
                 <Smartphone className="h-5 w-5 text-eth-orange" />
                 <span className="text-sm font-medium">Telebirr</span>
               </div>
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                <SiStripe className="h-5 w-5 text-[#635BFF]" />
-                <span className="text-sm font-medium">Stripe</span>
+            </div>
+
+            {/* International Cards */}
+            <div className="mb-4">
+              <p className="text-xs text-white/60 mb-2">💳 Credit & Debit Cards</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
+                  <SiVisa className="h-5 w-5 text-[#1A1F71]" />
+                  <span className="text-xs font-medium">Visa</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
+                  <SiMastercard className="h-5 w-5 text-[#EB001B]" />
+                  <span className="text-xs font-medium">Mastercard</span>
+                </div>
               </div>
+            </div>
+
+            {/* Asian Digital Wallets */}
+            <div className="mb-4">
+              <p className="text-xs text-white/60 mb-2">🌏 Asian Digital Wallets</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
+                  <SiAlipay className="h-5 w-5 text-[#1677FF]" />
+                  <span className="text-xs font-medium">Alipay</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-2">
+                  <SiWechat className="h-5 w-5 text-[#07C160]" />
+                  <span className="text-xs font-medium">WeChat</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Global Wallets */}
+            <div className="mb-4">
+              <p className="text-xs text-white/60 mb-2">🌍 Global Wallets</p>
               <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
                 <SiPaypal className="h-5 w-5 text-[#00457C]" />
                 <span className="text-sm font-medium">PayPal</span>
               </div>
             </div>
-            <div className="mt-4 flex items-center space-x-2 text-xs text-white/70">
-              <Shield className="h-4 w-4" />
-              <span>256-bit SSL encryption</span>
+
+            {/* Security Badge */}
+            <div className="pt-2 border-t border-white/20">
+              <div className="flex items-center space-x-2 text-xs text-white/70">
+                <Shield className="h-4 w-4" />
+                <span>SSL Encrypted • PCI Compliant</span>
+              </div>
+              <p className="text-xs text-white/60 mt-2">Powered by Stripe & PayPal</p>
             </div>
           </div>
         </div>
