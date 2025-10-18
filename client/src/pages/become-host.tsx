@@ -48,7 +48,7 @@ export default function BecomeHost() {
                     Why Host with Alga?
                   </h1>
                   <p className="text-xl text-eth-brown leading-relaxed">
-                    Join a growing community of guesthouse owners across Ethiopia who earn income by sharing authentic local stays.
+                    Join a growing community of guesthouse owners across Ethiopia earning income by sharing authentic local stays.
                   </p>
                 </div>
 
@@ -88,7 +88,7 @@ export default function BecomeHost() {
                       </div>
                       <h3 className="font-bold text-lg text-eth-brown mb-2">Secure Payments</h3>
                       <p className="text-eth-brown/80 text-sm">
-                        Receive safe payments via Ethiopian banks and mobile money.
+                        Receive safe payments through Ethiopian banks and mobile money services like Telebirr and CBE Birr.
                       </p>
                     </CardContent>
                   </Card>
@@ -101,7 +101,7 @@ export default function BecomeHost() {
                       </div>
                       <h3 className="font-bold text-lg text-eth-brown mb-2">24/7 Local Support</h3>
                       <p className="text-eth-brown/80 text-sm">
-                        Our bilingual team is ready to help anytime.
+                        Our bilingual team is always ready to assist you — in Amharic or English.
                       </p>
                     </CardContent>
                   </Card>
@@ -174,8 +174,8 @@ export default function BecomeHost() {
                         <span className="text-eth-brown font-medium">Monthly Earnings</span>
                         <Banknote className="h-5 w-5 text-eth-orange" />
                       </div>
-                      <p className="text-3xl font-bold text-eth-brown mb-1">18,500 ETB</p>
-                      <p className="text-sm text-green-600 font-medium">↑ 23% from last month</p>
+                      <p className="text-3xl font-bold text-eth-brown mb-1">18,500 ETB/month</p>
+                      <p className="text-sm text-green-600 font-medium">↑ Up 23% from last month</p>
                     </div>
                   </div>
                 </div>
@@ -196,7 +196,7 @@ export default function BecomeHost() {
                 How It Works
               </h2>
               <p className="text-lg text-eth-brown max-w-2xl mx-auto">
-                Start hosting in three simple steps
+                Start hosting in three simple steps:
               </p>
             </div>
 
@@ -213,7 +213,7 @@ export default function BecomeHost() {
                     </div>
                     <h3 className="text-xl font-bold text-eth-brown mb-3">Create Your Account</h3>
                     <p className="text-eth-brown/80">
-                      Sign up with phone or email and verify your identity.
+                      Sign up with your phone or email and verify your identity.
                     </p>
                   </CardContent>
                 </Card>
@@ -262,13 +262,16 @@ export default function BecomeHost() {
 
             {/* Bottom CTA */}
             <div className="text-center mt-12">
+              <p className="text-lg text-eth-brown mb-6">
+                Get Started Today — turn your space into opportunity with Alga.
+              </p>
               <Button
                 onClick={handleApplyClick}
                 size="lg"
                 className="bg-eth-orange hover:opacity-90 text-white rounded-xl px-10 py-4 font-bold text-lg border-0"
                 data-testid="button-apply-host-bottom"
               >
-                Get Started Today
+                Apply to Become a Host
               </Button>
             </div>
           </div>
