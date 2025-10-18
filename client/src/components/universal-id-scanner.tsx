@@ -229,7 +229,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
           <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="qr">
               <Camera className="w-4 h-4 mr-2" />
-              QR Scan (Yellow Card Holders)
+              QR Scan (Ethiopian Citizens)
             </TabsTrigger>
             <TabsTrigger value="photo">
               <Upload className="w-4 h-4 mr-2" />
