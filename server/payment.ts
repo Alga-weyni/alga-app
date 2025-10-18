@@ -16,17 +16,56 @@ const stripe = process.env.STRIPE_SECRET_KEY
 const telebirrService = createTelebirrService();
 
 // -----------------------------------------------------------------------------
+// TELEBIRR CONFIGURATION CHECK (Diagnostic endpoint)
+// -----------------------------------------------------------------------------
+router.get("/telebirr/status", (req, res) => {
+  const hasService = !!telebirrService;
+  const config = {
+    configured: hasService,
+    hasBaseUrl: !!process.env.TELEBIRR_BASE_URL,
+    hasFabricAppId: !!process.env.TELEBIRR_FABRIC_APP_ID,
+    hasAppSecret: !!process.env.TELEBIRR_APP_SECRET,
+    hasMerchantAppId: !!process.env.TELEBIRR_MERCHANT_APP_ID,
+    hasPrivateKey: !!process.env.TELEBIRR_PRIVATE_KEY,
+    hasShortCode: !!process.env.TELEBIRR_SHORT_CODE,
+    baseUrl: process.env.TELEBIRR_BASE_URL || 'https://app.ethiotelecom.et:4443 (default)',
+  };
+
+  return res.json({
+    status: hasService ? 'ready' : 'not configured',
+    config,
+    message: hasService 
+      ? 'Telebirr service is ready to use' 
+      : 'Missing required environment variables for Telebirr',
+  });
+});
+
+// -----------------------------------------------------------------------------
 // TELEBIRR PAYMENT - Official Implementation
 // -----------------------------------------------------------------------------
 router.post("/telebirr", async (req, res) => {
   try {
     const { bookingId, amount, customerPhone } = req.body;
 
+    // Validate inputs
+    if (!bookingId || !amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: bookingId and amount are required",
+      });
+    }
+
     // Check if Telebirr service is configured
     if (!telebirrService) {
+      const missing = [];
+      if (!process.env.TELEBIRR_FABRIC_APP_ID) missing.push('TELEBIRR_FABRIC_APP_ID');
+      if (!process.env.TELEBIRR_APP_SECRET) missing.push('TELEBIRR_APP_SECRET');
+      if (!process.env.TELEBIRR_MERCHANT_APP_ID) missing.push('TELEBIRR_MERCHANT_APP_ID');
+      
       return res.status(503).json({
         success: false,
-        message: "Telebirr payment service is not configured. Please add required environment variables.",
+        message: `Telebirr payment service is not configured. Missing: ${missing.join(', ')}`,
+        missingVars: missing,
       });
     }
 
@@ -44,9 +83,12 @@ router.post("/telebirr", async (req, res) => {
     };
 
     console.log('[Telebirr] Initiating payment for booking:', bookingId);
+    console.log('[Telebirr] Order params:', { ...orderParams, totalAmount: `${amount} ETB` });
 
     // Use official Telebirr SDK flow
     const result = await telebirrService.initiatePayment(orderParams);
+
+    console.log('[Telebirr] Payment result:', JSON.stringify(result, null, 2));
 
     if (result.code === 0 && result.data) {
       // Update booking with payment reference
@@ -59,6 +101,8 @@ router.post("/telebirr", async (req, res) => {
         })
         .where(eq(bookings.id, bookingId));
 
+      console.log('[Telebirr] ✅ Payment initiated successfully');
+
       return res.status(200).json({
         success: true,
         message: "Telebirr transaction initiated successfully.",
@@ -67,17 +111,19 @@ router.post("/telebirr", async (req, res) => {
       });
     }
 
-    console.error('[Telebirr] Payment initiation failed:', result);
+    console.error('[Telebirr] ❌ Payment initiation failed:', result);
     return res.status(400).json({ 
       success: false, 
       message: result.message || "Telebirr initiation failed",
-      code: result.code 
+      code: result.code,
+      details: result 
     });
   } catch (err: any) {
-    console.error("[Telebirr] Payment error:", err);
+    console.error("[Telebirr] ❌ Payment error:", err);
     return res.status(500).json({ 
       success: false, 
-      message: err.message || "Internal Server Error" 
+      message: err.message || "Internal Server Error",
+      error: err.toString() 
     });
   }
 });
