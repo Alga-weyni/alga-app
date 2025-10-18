@@ -56,30 +56,30 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
   };
 
   return (
-    <section className="bg-eth-warm-tan text-eth-brown py-12">
+    <section className="bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] text-eth-brown py-20">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-        <div className="text-center mb-8">
-          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-            Welcome to Alga
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+            Find Your Ethiopian Stay
           </h2>
-          <p className="text-xl font-normal tracking-wide text-eth-brown">
-            Discover the beauty of Ethiopian hospitality
+          <p className="text-base md:text-lg text-[#5a4a42] max-w-2xl mx-auto">
+            Authentic homes and hotels across Ethiopia
           </p>
         </div>
 
         {/* Search Form */}
         <div className="flex justify-center max-w-7xl mx-auto">
-          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 w-full lg:max-w-4xl border border-eth-brown/20 hover:shadow-[0_20px_50px_rgba(61,31,10,0.15)] transition-shadow duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-6 w-full lg:max-w-5xl border border-[#e5ddd5] hover:shadow-xl transition-shadow duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               {/* Destination */}
               <div className="md:col-span-1">
-                <Label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-2">
-                  Where
+                <Label htmlFor="destination" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
+                  Destination
                 </Label>
                 <div className="relative">
                   <Select value={filters.destination} onValueChange={(value) => updateFilter("destination", value)}>
-                    <SelectTrigger className="w-full text-sm" style={{ backgroundColor: '#f6bd89', border: 'none' }}>
-                      <SelectValue placeholder="Choose destination..." className="text-eth-brown/70 text-sm" />
+                    <SelectTrigger className="w-full h-12 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors">
+                      <SelectValue placeholder="All cities" />
                     </SelectTrigger>
                     <SelectContent>
                       {ETHIOPIAN_CITIES.map((city) => (
@@ -89,13 +89,13 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                       ))}
                     </SelectContent>
                   </Select>
-                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-eth-brown pointer-events-none" />
+                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-[#8b7766] pointer-events-none" />
                 </div>
               </div>
 
               {/* Check-in */}
               <div>
-                <Label htmlFor="checkIn" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="checkIn" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
                   Check-in
                 </Label>
                 <div className="relative">
@@ -104,14 +104,12 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                     type="date"
                     value={filters.checkIn}
                     onChange={(e) => updateFilter("checkIn", e.target.value)}
-                    className="w-full pl-10"
-                    style={{ backgroundColor: '#f6bd89', border: 'none' }}
+                    className="w-full h-12 pl-10 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors"
                     min={new Date().toISOString().split('T')[0]}
                     data-testid="input-check-in"
                   />
                   <Calendar 
-                    className="absolute left-3 top-3 h-4 w-4 cursor-pointer" 
-                    style={{ color: '#fca12b' }}
+                    className="absolute left-3 top-3 h-4 w-4 text-[#8b7766] cursor-pointer"
                     onClick={() => document.getElementById('checkIn')?.click()}
                     data-testid="icon-check-in-calendar"
                   />
@@ -120,7 +118,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
 
               {/* Check-out */}
               <div>
-                <Label htmlFor="checkOut" className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="checkOut" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
                   Check-out
                 </Label>
                 <div className="relative">
@@ -129,14 +127,12 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                     type="date"
                     value={filters.checkOut}
                     onChange={(e) => updateFilter("checkOut", e.target.value)}
-                    className="w-full pl-10"
-                    style={{ backgroundColor: '#f6bd89', border: 'none' }}
+                    className="w-full h-12 pl-10 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors"
                     min={filters.checkIn || new Date().toISOString().split('T')[0]}
                     data-testid="input-check-out"
                   />
                   <Calendar 
-                    className="absolute left-3 top-3 h-4 w-4 cursor-pointer" 
-                    style={{ color: '#fca12b' }}
+                    className="absolute left-3 top-3 h-4 w-4 text-[#8b7766] cursor-pointer"
                     onClick={() => document.getElementById('checkOut')?.click()}
                     data-testid="icon-check-out-calendar"
                   />
@@ -144,14 +140,14 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
               </div>
 
               {/* Guests with Search Button */}
-              <div className="flex gap-2 items-end">
+              <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <Label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-2">
+                  <Label htmlFor="guests" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
                     Guests
                   </Label>
                   <div className="relative">
                     <Select value={filters.guests} onValueChange={(value) => updateFilter("guests", value)}>
-                      <SelectTrigger className="w-full" style={{ backgroundColor: '#f6bd89', border: 'none' }}>
+                      <SelectTrigger className="w-full h-12 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -167,17 +163,15 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 <Button
                   type="submit"
                   className="
-                    bg-eth-brown hover:bg-eth-brown/90 text-white p-3 font-bold border-0 rounded-xl
+                    h-12 px-8 bg-[#2d1405] hover:bg-[#3d1f0a] text-white font-medium rounded-lg
                     transition-all duration-200
-                    hover:shadow-lg hover:shadow-eth-brown/30
-                    hover:scale-105
-                    active:scale-95
+                    hover:shadow-md
                   "
-                  size="icon"
                   aria-label="Search properties"
                   data-testid="button-search-properties"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
                 </Button>
               </div>
             </div>
