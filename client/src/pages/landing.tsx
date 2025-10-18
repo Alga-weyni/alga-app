@@ -6,6 +6,7 @@ import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
 import AuthDialog from "@/components/auth-dialog";
 import { BackButton } from "@/components/back-button";
+import { useToast } from "@/hooks/use-toast";
 import { Star, CheckCircle, Home, ArrowRight, Shield, Bell, Zap, Gift, QrCode, Smartphone, Download } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
@@ -19,6 +20,7 @@ export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const openAuthDialog = (mode: "login" | "register") => {
     setAuthMode(mode);
@@ -95,7 +97,13 @@ export default function Landing() {
                   <Button 
                     size="lg"
                     className="bg-eth-brown hover:bg-eth-brown/90 text-white rounded-xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    onClick={() => {
+                      toast({
+                        title: "📱 Mobile App Coming Soon!",
+                        description: "The Alga mobile app will be available on the App Store and Google Play soon. For now, book directly through our website!",
+                        duration: 5000,
+                      });
+                    }}
                     data-testid="button-download-app-hero"
                   >
                     Download the Alga App
@@ -342,8 +350,14 @@ export default function Landing() {
                   <p className="text-lg font-semibold">Download Now:</p>
                   <div className="flex flex-wrap gap-4">
                     {/* App Store Badge */}
-                    <a 
-                      href="#" 
+                    <button 
+                      onClick={() => {
+                        toast({
+                          title: "🍎 App Store - Coming Soon!",
+                          description: "The Alga iOS app is in development. We'll notify you when it's available!",
+                          duration: 4000,
+                        });
+                      }}
                       className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
                       data-testid="link-app-store"
                     >
@@ -352,11 +366,17 @@ export default function Landing() {
                         <div className="text-xs">Download on the</div>
                         <div className="text-lg font-bold">App Store</div>
                       </div>
-                    </a>
+                    </button>
 
                     {/* Google Play Badge */}
-                    <a 
-                      href="#" 
+                    <button 
+                      onClick={() => {
+                        toast({
+                          title: "🤖 Google Play - Coming Soon!",
+                          description: "The Alga Android app is in development. We'll notify you when it's available!",
+                          duration: 4000,
+                        });
+                      }}
                       className="inline-flex items-center space-x-3 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
                       data-testid="link-google-play"
                     >
@@ -365,7 +385,7 @@ export default function Landing() {
                         <div className="text-xs">GET IT ON</div>
                         <div className="text-lg font-bold">Google Play</div>
                       </div>
-                    </a>
+                    </button>
                   </div>
 
                   {/* QR Code Option */}
