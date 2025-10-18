@@ -122,8 +122,8 @@ export default function Properties() {
           />
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-8">
-          <div className="mb-4 sm:mb-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-2 pb-4 sm:pt-4 sm:pb-8">
+          <div className="mb-3 sm:mb-4 flex items-center justify-between">
             <BackButton />
             {hasSearched && (
               <Button

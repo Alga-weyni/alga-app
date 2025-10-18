@@ -56,13 +56,13 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
   };
 
   return (
-    <section className="bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] text-eth-brown py-20">
+    <section className="bg-gradient-to-b from-[#faf5f0] to-[#f5ece3] text-eth-brown py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+        <div className="text-center mb-8 sm:mb-10">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
             Find Your Ethiopian Stay
           </h2>
-          <p className="text-base md:text-lg text-[#5a4a42] max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-[#5a4a42] max-w-2xl mx-auto">
             Authentic homes and hotels across Ethiopia
           </p>
         </div>
