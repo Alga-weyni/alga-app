@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema } from "@shared/schema";
+import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking } from "@shared/schema";
 import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
@@ -371,6 +371,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error verifying property:", error);
       res.status(500).json({ message: "Failed to verify property" });
+    }
+  });
+
+  // Admin financial reports (ERCA compliance)
+  app.get('/api/admin/financial-reports', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (userRole !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const { startDate, endDate } = req.query;
+      const { calculateMonthlySummary } = await import('./utils/booking.js');
+      
+      // Get all paid bookings
+      const allBookings = await storage.getAllBookings();
+      let filteredBookings = allBookings.filter((b: Booking) => b.paymentStatus === 'paid');
+      
+      // Filter by date range if provided
+      if (startDate && endDate) {
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        filteredBookings = filteredBookings.filter((b: Booking) => {
+          const bookingDate = new Date(b.createdAt);
+          return bookingDate >= start && bookingDate <= end;
+        });
+      }
+      
+      // Calculate summary
+      const summary = calculateMonthlySummary(filteredBookings);
+      
+      // Format detailed bookings for export
+      const detailedBookings = filteredBookings.map((b: Booking) => ({
+        bookingId: b.id,
+        date: b.createdAt,
+        propertyId: b.propertyId,
+        guestId: b.guestId,
+        totalRevenue: parseFloat(b.totalPrice),
+        algaCommission: parseFloat(b.algaCommission || '0'),
+        vat: parseFloat(b.vat || '0'),
+        withholding: parseFloat(b.withholding || '0'),
+        hostPayout: parseFloat(b.hostPayout || '0'),
+      }));
+      
+      res.json({
+        summary,
+        detailedBookings,
+        period: {
+          start: startDate || filteredBookings[0]?.createdAt,
+          end: endDate || new Date(),
+        },
+        generated: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error generating financial report:", error);
+      res.status(500).json({ message: "Failed to generate financial report" });
     }
   });
 
