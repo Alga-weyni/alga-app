@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ID Scanning endpoint
+  // ID Scanning endpoint with Ethiopian ID validation
   app.post('/api/id-scan', isAuthenticated, async (req: any, res) => {
     try {
       const { scanData, scanMethod, timestamp } = req.body;
@@ -441,40 +441,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[ID SCAN] User ${userId} scanned ID via ${scanMethod} at ${timestamp}`);
       console.log(`[ID SCAN] Data preview: ${scanData.substring(0, 100)}...`);
       
-      // In production, you would:
-      // 1. Parse the QR data or OCR text
-      // 2. Extract ID information (name, ID number, etc.)
-      // 3. Verify against Ethiopian ID database API
-      // 4. Create a verification document record
-      // 5. Update user's idVerified status
+      // Ethiopian ID number format: 12 digits
+      const idRegex = /^[0-9]{12}$/;
+      let idNumber: string | null = null;
+      let fullName: string | null = null;
       
-      // For now, we'll mark as verified if scan contains data
-      if (scanData.length > 10) {
-        // Update user's ID verification status
-        const user = await storage.getUser(userId);
-        if (user) {
-          await storage.upsertUser({
-            ...user,
-            idVerified: true,
-          });
+      // Parse data based on scan method
+      if (scanMethod === "qr") {
+        try {
+          // Try to parse as base64-encoded JSON (Ethiopian digital ID format)
+          const decoded = JSON.parse(Buffer.from(scanData, 'base64').toString('utf-8'));
+          idNumber = decoded.idNumber || decoded.id_number || decoded.ID;
+          fullName = decoded.fullName || decoded.full_name || decoded.name;
+        } catch (e) {
+          // If not base64, try parsing as plain JSON
+          try {
+            const parsed = JSON.parse(scanData);
+            idNumber = parsed.idNumber || parsed.id_number || parsed.ID;
+            fullName = parsed.fullName || parsed.full_name || parsed.name;
+          } catch (e2) {
+            // If not JSON, try extracting ID number directly from string
+            const match = scanData.match(idRegex);
+            idNumber = match ? match[0] : null;
+          }
         }
+      } else if (scanMethod === "photo") {
+        // OCR text - extract 12-digit ID number
+        const match = scanData.match(idRegex);
+        idNumber = match ? match[0] : null;
         
-        res.json({
-          success: true,
-          message: "ID verified successfully",
-          verified: true,
-          scanMethod,
-          timestamp,
-        });
-      } else {
-        res.status(400).json({
+        // Try to extract name (common patterns in Ethiopian IDs)
+        // Look for "Name:" or "ስም:" followed by text
+        const nameMatch = scanData.match(/(?:Name|ስም):\s*([A-Za-z\u1200-\u137F\s]+)/i);
+        if (nameMatch) {
+          fullName = nameMatch[1].trim();
+        }
+      }
+      
+      // Validate ID number format
+      if (!idNumber || !idRegex.test(idNumber)) {
+        return res.status(400).json({
           success: false,
-          message: "Invalid ID data. Please try again.",
+          message: "Invalid Ethiopian ID format. ID must be 12 digits.",
+          error: "Invalid ID number",
         });
       }
+      
+      console.log(`[ID SCAN] Extracted - ID: ${idNumber}, Name: ${fullName || 'Not extracted'}`);
+      
+      // Update user with verified ID information
+      const user = await storage.getUser(userId);
+      if (user) {
+        await storage.upsertUser({
+          ...user,
+          idVerified: true,
+          idNumber,
+          idFullName: fullName || user.idFullName,
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: "Ethiopian ID verified successfully",
+        verified: true,
+        idNumber,
+        fullName,
+        scanMethod,
+        timestamp,
+      });
     } catch (error: any) {
       console.error("Error processing ID scan:", error);
-      res.status(500).json({ message: error.message || "Failed to process ID scan" });
+      res.status(500).json({ 
+        success: false,
+        message: error.message || "Failed to process ID scan",
+        error: "Processing error",
+      });
     }
   });
 

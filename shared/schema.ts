@@ -38,6 +38,8 @@ export const users = pgTable("users", {
   phoneNumber: varchar("phone_number").unique(),
   phoneVerified: boolean("phone_verified").default(false),
   idVerified: boolean("id_verified").default(false),
+  idNumber: varchar("id_number", { length: 12 }),
+  idFullName: varchar("id_full_name"),
   otp: varchar("otp", { length: 4 }),
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
