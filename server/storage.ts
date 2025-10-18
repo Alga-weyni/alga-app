@@ -69,6 +69,7 @@ export interface IStorage {
   
   // Review operations
   createReview(review: InsertReview): Promise<Review>;
+  recalculatePropertyRating(propertyId: number): Promise<number>;
   getReviewsByProperty(propertyId: number): Promise<Review[]>;
   
   // Favorite operations
@@ -426,25 +427,54 @@ export class DatabaseStorage implements IStorage {
       .values(review)
       .returning();
 
-    // Update property rating
-    const [avgRating] = await db
-      .select({
-        avg: sql<number>`AVG(${reviews.rating})`,
-        count: sql<number>`COUNT(${reviews.id})`
-      })
+    // Recalculate property rating using weighted algorithm
+    const newRating = await this.recalculatePropertyRating(review.propertyId);
+    
+    return newReview;
+  }
+
+  async recalculatePropertyRating(propertyId: number): Promise<number> {
+    const allReviews = await db
+      .select()
       .from(reviews)
-      .where(eq(reviews.propertyId, review.propertyId));
+      .where(eq(reviews.propertyId, propertyId));
+
+    if (allReviews.length === 0) {
+      await db
+        .update(properties)
+        .set({
+          rating: "0",
+          reviewCount: 0,
+          updatedAt: new Date()
+        })
+        .where(eq(properties.id, propertyId));
+      return 0;
+    }
+
+    const now = new Date();
+    let weightedSum = 0;
+    let totalWeight = 0;
+
+    allReviews.forEach((review: any) => {
+      const createdAt = new Date(review.createdAt);
+      const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      const weight = 1 / (1 + ageDays / 90);
+      weightedSum += review.rating * weight;
+      totalWeight += weight;
+    });
+
+    const weightedRating = Number((weightedSum / totalWeight).toFixed(2));
 
     await db
       .update(properties)
       .set({
-        rating: avgRating.avg.toString(),
-        reviewCount: avgRating.count,
+        rating: weightedRating.toString(),
+        reviewCount: allReviews.length,
         updatedAt: new Date()
       })
-      .where(eq(properties.id, review.propertyId));
+      .where(eq(properties.id, propertyId));
 
-    return newReview;
+    return weightedRating;
   }
 
   async getReviewsByProperty(propertyId: number): Promise<Review[]> {
