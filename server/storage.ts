@@ -5,6 +5,7 @@ import {
   reviews,
   favorites,
   verificationDocuments,
+  accessCodes,
   type User,
   type UpsertUser,
   type Property,
@@ -15,6 +16,8 @@ import {
   type InsertReview,
   type Favorite,
   type InsertFavorite,
+  type AccessCode,
+  type InsertAccessCode,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -99,6 +102,12 @@ export interface IStorage {
     totalRevenue: number;
     monthlyRevenue: number;
   }>;
+  
+  // Access code operations
+  createAccessCode(accessCode: InsertAccessCode): Promise<AccessCode>;
+  getAccessCodeByBookingId(bookingId: number): Promise<AccessCode | undefined>;
+  getAccessCodesByGuestId(guestId: string): Promise<AccessCode[]>;
+  expireOldAccessCodes(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -685,6 +694,45 @@ export class DatabaseStorage implements IStorage {
       totalRevenue: revenueStats.total || 0,
       monthlyRevenue: revenueStats.monthly || 0,
     };
+  }
+
+  // Access code operations
+  async createAccessCode(accessCode: InsertAccessCode): Promise<AccessCode> {
+    const [newAccessCode] = await db
+      .insert(accessCodes)
+      .values(accessCode)
+      .returning();
+    return newAccessCode;
+  }
+
+  async getAccessCodeByBookingId(bookingId: number): Promise<AccessCode | undefined> {
+    const [accessCode] = await db
+      .select()
+      .from(accessCodes)
+      .where(eq(accessCodes.bookingId, bookingId))
+      .orderBy(desc(accessCodes.createdAt))
+      .limit(1);
+    return accessCode;
+  }
+
+  async getAccessCodesByGuestId(guestId: string): Promise<AccessCode[]> {
+    return await db
+      .select()
+      .from(accessCodes)
+      .where(eq(accessCodes.guestId, guestId))
+      .orderBy(desc(accessCodes.createdAt));
+  }
+
+  async expireOldAccessCodes(): Promise<void> {
+    await db
+      .update(accessCodes)
+      .set({ status: "expired", updatedAt: new Date() })
+      .where(
+        and(
+          sql`${accessCodes.validTo} < NOW()`,
+          eq(accessCodes.status, "active")
+        )
+      );
   }
 }
 
