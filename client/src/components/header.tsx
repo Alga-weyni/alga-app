@@ -112,33 +112,18 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     Advanced Search
                   </Link>
                   
-                  {isAuthenticated ? (
-                    user?.role === 'host' && (
-                      <Link 
-                        href="/host/dashboard"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                          location === '/host/dashboard' 
-                            ? 'bg-primary text-primary-foreground font-medium' 
-                            : 'hover:bg-secondary'
-                        }`}
-                        data-testid="mobile-link-host-dashboard"
-                      >
-                        Host Dashboard
-                      </Link>
-                    )
-                  ) : (
+                  {isAuthenticated && user?.role === 'host' && (
                     <Link 
-                      href="/start-hosting"
+                      href="/host/dashboard"
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`text-lg py-3 px-4 rounded-lg transition-colors font-medium ${
-                        location === '/start-hosting' 
-                          ? 'bg-eth-orange text-white' 
-                          : 'text-eth-orange hover:bg-eth-orange/10'
+                      className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                        location === '/host/dashboard' 
+                          ? 'bg-primary text-primary-foreground font-medium' 
+                          : 'hover:bg-secondary'
                       }`}
-                      data-testid="mobile-link-start-hosting"
+                      data-testid="mobile-link-host-dashboard"
                     >
-                      Start Hosting
+                      Host Dashboard
                     </Link>
                   )}
 
@@ -252,33 +237,16 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 Discover Map
               </Link>
               
-              {/* Show different links based on auth status and role */}
-              {isAuthenticated ? (
-                // Only show "Host Your Property" if user is a host
-                user?.role === 'host' && (
-                  <Link 
-                    href="/host/dashboard"
-                    className={`transition-colors ${
-                      location === '/host/dashboard' 
-                        ? 'text-primary font-medium' 
-                        : 'text-foreground hover:text-primary'
-                    }`}
-                  >
-                    Host Your Property
-                  </Link>
-                )
-              ) : (
-                // Show "Start Hosting" for non-authenticated users
+              {isAuthenticated && user?.role === 'host' && (
                 <Link 
-                  href="/start-hosting"
-                  className={`transition-colors font-medium ${
-                    location === '/start-hosting' 
-                      ? 'text-primary' 
-                      : 'text-eth-orange hover:text-eth-orange/80'
+                  href="/host/dashboard"
+                  className={`transition-colors ${
+                    location === '/host/dashboard' 
+                      ? 'text-primary font-medium' 
+                      : 'text-foreground hover:text-primary'
                   }`}
-                  data-testid="link-start-hosting"
                 >
-                  Start Hosting
+                  Host Your Property
                 </Link>
               )}
               

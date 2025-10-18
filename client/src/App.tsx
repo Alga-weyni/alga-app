@@ -13,7 +13,6 @@ import DiscoverPage from "@/pages/discover";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import OperatorDashboard from "@/pages/operator-dashboard";
-import StartHosting from "@/pages/start-hosting";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
 import BookingSuccess from "@/pages/booking-success";
@@ -31,7 +30,6 @@ function Router() {
       {/* Public routes - accessible to everyone */}
       <Route path="/search" component={PropertySearch} />
       <Route path="/discover" component={DiscoverPage} />
-      <Route path="/start-hosting" component={StartHosting} />
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:id" component={PropertyDetails} />
       <Route path="/booking/success" component={BookingSuccess} />
