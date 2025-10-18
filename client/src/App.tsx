@@ -39,11 +39,10 @@ function Router() {
       <Route path="/scan-id" component={ScanIDPage} />
       <Route path="/test-id-scanner" component={TestIDScanner} />
       
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      <Route path="/" component={Properties} />
+      
+      {!isLoading && isAuthenticated && (
         <>
-          <Route path="/" component={Home} />
           <Route path="/bookings" component={Bookings} />
           <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/favorites" component={Favorites} />
