@@ -1,8 +1,8 @@
-# Ethiopia Stays
+# Alga
 
 ## Overview
 
-Ethiopia Stays is a full-stack web application designed for the Ethiopian property rental market. It connects property owners with travelers seeking authentic Ethiopian accommodations, from traditional homes to modern hotels. The platform emphasizes local culture, safety, and supports multiple Ethiopian cities and regions, aiming to provide a secure and culturally rich rental experience. It includes robust features for host and property verification, diverse payment options, and role-based access for guests, hosts, operators, and administrators.
+Alga ("bed" in Amharic) is a full-stack web application designed for the Ethiopian property rental market. It connects property owners with travelers seeking authentic Ethiopian accommodations, from traditional homes to modern hotels. The platform emphasizes local culture, safety, and supports multiple Ethiopian cities and regions, aiming to provide a secure and culturally rich rental experience. It includes robust features for host and property verification, diverse payment options, and role-based access for guests, hosts, operators, and administrators.
 
 ## User Preferences
 
