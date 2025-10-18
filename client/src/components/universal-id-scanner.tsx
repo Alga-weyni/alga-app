@@ -61,19 +61,25 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
       setResult(null);
       setScanMethod("qr");
 
-      if (!videoRef.current) return;
+      if (!videoRef.current) {
+        throw new Error("Video element not ready");
+      }
 
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const backCamera = devices.find(
-        (d) => d.kind === "videoinput" && d.label.toLowerCase().includes("back")
-      );
-
-      const stream = await navigator.mediaDevices.getUserMedia({
+      // Simplified camera access - request with timeout
+      const streamPromise = navigator.mediaDevices.getUserMedia({
         video: { 
-          deviceId: backCamera?.deviceId || undefined,
-          facingMode: backCamera ? undefined : { ideal: "environment" }
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         },
       });
+
+      // 10 second timeout for camera access
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Camera timeout")), 10000)
+      );
+
+      const stream = await Promise.race([streamPromise, timeoutPromise]) as MediaStream;
 
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
@@ -94,13 +100,20 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         }
       );
 
-      scanner.start();
+      await scanner.start();
       scannerRef.current = scanner;
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Camera error:", err);
       setStatus("error");
-      setMessage("❌ Camera access denied or unavailable");
+      const errorMsg = err.message === "Camera timeout" 
+        ? "❌ Camera took too long to start. Please refresh and try again."
+        : err.name === "NotAllowedError"
+        ? "❌ Camera access denied. Please allow camera permissions."
+        : err.name === "NotFoundError"
+        ? "❌ No camera found on this device."
+        : "❌ Camera unavailable. Please try photo upload instead.";
+      setMessage(errorMsg);
     }
   };
 
