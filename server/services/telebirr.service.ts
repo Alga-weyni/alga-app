@@ -52,37 +52,54 @@ export class TelebirrService {
    */
   async applyFabricToken(): Promise<FabricTokenResponse> {
     try {
-      const response = await fetch(`${this.config.baseUrl}/payment/v1/token`, {
+      const url = `${this.config.baseUrl}/payment/v1/token`;
+      const requestBody = {
+        appSecret: this.config.appSecret,
+      };
+      
+      console.log('[Telebirr] 🔵 Requesting fabric token');
+      console.log('[Telebirr] URL:', url);
+      console.log('[Telebirr] Fabric App ID (first 10 chars):', this.config.fabricAppId.substring(0, 10) + '...');
+      console.log('[Telebirr] Request body:', JSON.stringify(requestBody).substring(0, 50) + '...');
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-APP-Key': this.config.fabricAppId,
         },
-        body: JSON.stringify({
-          appSecret: this.config.appSecret,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      console.log('[Telebirr] Fabric token response status:', response.status);
+      console.log('[Telebirr] Response status:', response.status, response.statusText);
+      console.log('[Telebirr] Response headers:', Object.fromEntries(response.headers.entries()));
       
       const responseText = await response.text();
-      console.log('[Telebirr] Fabric token response:', responseText.substring(0, 200));
+      console.log('[Telebirr] Response body length:', responseText.length);
+      console.log('[Telebirr] Response body:', responseText.substring(0, 500));
 
       if (!responseText || responseText.trim() === '') {
-        throw new Error('Empty response from Telebirr API - credentials may not be configured for this environment');
+        console.error('[Telebirr] ❌ API returned empty response');
+        console.error('[Telebirr] This usually means:');
+        console.error('[Telebirr] 1. The API URL is incorrect');
+        console.error('[Telebirr] 2. The credentials are invalid');
+        console.error('[Telebirr] 3. Your merchant account is not activated');
+        throw new Error(`Telebirr API returned empty response (HTTP ${response.status})`);
       }
 
       const result: FabricTokenResponse = JSON.parse(responseText);
       
       if (result.code === 0 && result.data?.token) {
-        console.log('[Telebirr] Fabric token obtained successfully');
+        console.log('[Telebirr] ✅ Fabric token obtained successfully');
         return result;
       } else {
-        console.error('[Telebirr] Failed to obtain fabric token:', result);
+        console.error('[Telebirr] ❌ Failed to obtain fabric token');
+        console.error('[Telebirr] Error code:', result.code);
+        console.error('[Telebirr] Error message:', result.message);
         return result;
       }
     } catch (error) {
-      console.error('[Telebirr] Fabric token request error:', error);
+      console.error('[Telebirr] ❌ Fabric token request error:', error);
       throw new Error('Telebirr API connection failed - please verify your credentials and API endpoint');
     }
   }
