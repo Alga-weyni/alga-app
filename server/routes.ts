@@ -829,6 +829,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Map-based discovery endpoint
+  app.get('/api/properties/discover', async (req, res) => {
+    try {
+      const { north, south, east, west, city } = req.query;
+      
+      const filters: any = {};
+      if (city) filters.city = city as string;
+      
+      const allProperties = await storage.getProperties(filters);
+      
+      // Filter by map bounds if provided
+      let mapResults = allProperties;
+      if (north && south && east && west) {
+        const northNum = parseFloat(north as string);
+        const southNum = parseFloat(south as string);
+        const eastNum = parseFloat(east as string);
+        const westNum = parseFloat(west as string);
+        
+        mapResults = allProperties.filter((p: any) => {
+          const lat = parseFloat(p.latitude || "0");
+          const lng = parseFloat(p.longitude || "0");
+          return lat >= southNum && lat <= northNum && lng >= westNum && lng <= eastNum;
+        });
+      }
+      
+      // AI-style recommendations (top 3 highest rated)
+      const recommendations = [...allProperties]
+        .sort((a: any, b: any) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"))
+        .slice(0, 3);
+      
+      // Mock nearby amenities (can be replaced with real Google Places API)
+      const amenities = [
+        { id: "a1", name: "Coffee Roastery", type: "Cafe", lat: 9.012, lng: 38.763 },
+        { id: "a2", name: "Medical Clinic", type: "Hospital", lat: 9.014, lng: 38.769 },
+        { id: "a3", name: "Bus Terminal", type: "Transport", lat: 9.008, lng: 38.755 },
+      ];
+      
+      res.json({ mapResults, recommendations, amenities });
+    } catch (error) {
+      console.error("Error in discovery endpoint:", error);
+      res.status(500).json({ message: "Failed to fetch discovery data" });
+    }
+  });
+
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
