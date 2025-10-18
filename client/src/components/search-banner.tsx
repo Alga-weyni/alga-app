@@ -69,7 +69,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
 
         {/* Search Form */}
         <div className="flex justify-center max-w-7xl mx-auto">
-          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 w-full lg:max-w-4xl border border-eth-brown/20">
+          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 w-full lg:max-w-4xl border border-eth-brown/20 hover:shadow-[0_20px_50px_rgba(61,31,10,0.15)] transition-shadow duration-300">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
               {/* Destination */}
               <div className="md:col-span-1">
@@ -78,8 +78,8 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 </Label>
                 <div className="relative">
                   <Select value={filters.destination} onValueChange={(value) => updateFilter("destination", value)}>
-                    <SelectTrigger className="w-full" style={{ backgroundColor: '#f6bd89', border: 'none' }}>
-                      <SelectValue placeholder="Choose destination..." />
+                    <SelectTrigger className="w-full text-sm" style={{ backgroundColor: '#f6bd89', border: 'none' }}>
+                      <SelectValue placeholder="Choose destination..." className="text-eth-brown/70 text-sm" />
                     </SelectTrigger>
                     <SelectContent>
                       {ETHIOPIAN_CITIES.map((city) => (
@@ -89,7 +89,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                       ))}
                     </SelectContent>
                   </Select>
-                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-600 pointer-events-none" />
+                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-eth-brown pointer-events-none" />
                 </div>
               </div>
 
@@ -166,7 +166,13 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 </div>
                 <Button
                   type="submit"
-                  className="bg-eth-orange hover:opacity-90 text-white p-3 font-bold border-0 rounded-xl"
+                  className="
+                    bg-eth-brown hover:bg-eth-brown/90 text-white p-3 font-bold border-0 rounded-xl
+                    transition-all duration-200
+                    hover:shadow-lg hover:shadow-eth-brown/30
+                    hover:scale-105
+                    active:scale-95
+                  "
                   size="icon"
                   aria-label="Search properties"
                   data-testid="button-search-properties"

@@ -215,11 +215,14 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             <nav className="hidden md:flex items-center space-x-8">
               <Link 
                 href="/properties"
-                className={`transition-colors ${
-                  location === '/properties' 
-                    ? 'text-primary font-medium' 
-                    : 'text-foreground hover:text-primary'
-                }`}
+                className={`
+                  relative transition-all duration-200 pb-1
+                  ${location === '/properties' 
+                    ? 'text-eth-brown font-medium' 
+                    : 'text-eth-brown/70 hover:text-eth-brown'}
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  ${location === '/properties' ? 'after:w-full' : 'hover:after:w-full'}
+                `}
                 data-testid="link-explore"
               >
                 Explore
@@ -227,11 +230,14 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               
               <Link 
                 href="/discover"
-                className={`transition-colors ${
-                  location === '/discover' 
-                    ? 'text-primary font-medium' 
-                    : 'text-foreground hover:text-primary'
-                }`}
+                className={`
+                  relative transition-all duration-200 pb-1
+                  ${location === '/discover' 
+                    ? 'text-eth-brown font-medium' 
+                    : 'text-eth-brown/70 hover:text-eth-brown'}
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  ${location === '/discover' ? 'after:w-full' : 'hover:after:w-full'}
+                `}
                 data-testid="link-discover"
               >
                 Discover Map
@@ -240,17 +246,27 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               {isAuthenticated && user?.role === 'host' && (
                 <Link 
                   href="/host/dashboard"
-                  className={`transition-colors ${
-                    location === '/host/dashboard' 
-                      ? 'text-primary font-medium' 
-                      : 'text-foreground hover:text-primary'
-                  }`}
+                  className={`
+                    relative transition-all duration-200 pb-1
+                    ${location === '/host/dashboard' 
+                      ? 'text-eth-brown font-medium' 
+                      : 'text-eth-brown/70 hover:text-eth-brown'}
+                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                    ${location === '/host/dashboard' ? 'after:w-full' : 'hover:after:w-full'}
+                  `}
                 >
                   Host Your Property
                 </Link>
               )}
               
-              <a href="#" className="text-foreground hover:text-primary transition-colors">
+              <a 
+                href="#" 
+                className="
+                  relative text-eth-brown/70 hover:text-eth-brown transition-all duration-200 pb-1
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-orange after:transition-all after:duration-200
+                  hover:after:w-full
+                "
+              >
                 About Ethiopia
               </a>
             </nav>
@@ -332,6 +348,13 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               <Button 
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-signin-header"
+                className="
+                  bg-eth-orange hover:bg-eth-orange/90 text-white
+                  transition-all duration-200
+                  hover:shadow-lg hover:shadow-eth-orange/30
+                  hover:scale-105
+                  active:scale-95
+                "
               >
                 Sign In
               </Button>
