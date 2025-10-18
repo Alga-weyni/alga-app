@@ -68,66 +68,66 @@ export default function Footer() {
 
         {/* Contact & Social Section */}
         <div className="mt-16 pt-12 border-t border-white/20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12">
             
             {/* Contact Us */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div>
                 <h5 
-                  className="text-2xl font-bold text-white mb-2" 
+                  className="text-xl font-bold text-white mb-2" 
                   style={{ fontFamily: "'Playfair Display', serif" }}
                   data-testid="heading-contact"
                 >
                   Contact Us
                 </h5>
-                <div className="w-16 h-1 bg-eth-orange rounded-full"></div>
+                <div className="w-12 h-1 bg-eth-orange rounded-full"></div>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <a 
                   href="tel:+251996034044" 
-                  className="group flex items-center gap-4 text-white/90 hover:text-white transition-all duration-300"
+                  className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-phone"
                 >
-                  <div className="w-12 h-12 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors">
-                    <Phone className="h-5 w-5 text-eth-orange" />
+                  <div className="w-10 h-10 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors flex-shrink-0">
+                    <Phone className="h-4 w-4 text-eth-orange" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Phone</p>
-                    <p className="text-lg font-medium">+251 996 034 044</p>
+                    <p className="text-base font-medium">+251 996 034 044</p>
                   </div>
                 </a>
                 
                 <a 
                   href="mailto:hello@alga.et" 
-                  className="group flex items-center gap-4 text-white/90 hover:text-white transition-all duration-300"
+                  className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-email"
                 >
-                  <div className="w-12 h-12 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors">
-                    <Mail className="h-5 w-5 text-eth-orange" />
+                  <div className="w-10 h-10 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors flex-shrink-0">
+                    <Mail className="h-4 w-4 text-eth-orange" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Email</p>
-                    <p className="text-lg font-medium">hello@alga.et</p>
+                    <p className="text-base font-medium">hello@alga.et</p>
                   </div>
                 </a>
               </div>
             </div>
 
             {/* Follow Us */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div>
                 <h5 
-                  className="text-2xl font-bold text-white mb-2" 
+                  className="text-xl font-bold text-white mb-2" 
                   style={{ fontFamily: "'Playfair Display', serif" }}
                   data-testid="heading-social"
                 >
                   Follow Us
                 </h5>
-                <div className="w-16 h-1 bg-eth-orange rounded-full"></div>
+                <div className="w-12 h-1 bg-eth-orange rounded-full"></div>
               </div>
               
-              <p className="text-white/70 text-base leading-relaxed">
+              <p className="text-white/70 text-sm leading-relaxed">
                 Stay connected with Alga across platforms:
               </p>
               
