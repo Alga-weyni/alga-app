@@ -349,9 +349,9 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-signin-header"
                 className="
-                  bg-eth-orange hover:bg-eth-orange/90 text-white
+                  bg-eth-brown hover:bg-eth-brown/90 text-white
                   transition-all duration-200
-                  hover:shadow-lg hover:shadow-eth-orange/30
+                  hover:shadow-lg hover:shadow-eth-brown/30
                   hover:scale-105
                   active:scale-95
                 "

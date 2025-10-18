@@ -297,7 +297,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                 <Button
                   type="submit"
                   disabled={verifyOtpMutation.isPending}
-                  className="flex-1 bg-eth-orange hover:bg-eth-orange/90 text-white"
+                  className="flex-1 bg-eth-brown hover:bg-eth-brown/90 text-white"
                   data-testid="button-verify-otp"
                 >
                   {verifyOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
@@ -321,12 +321,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   data-[state=inactive]:hover:text-eth-brown
                   data-[state=inactive]:hover:shadow-sm
                   data-[state=inactive]:hover:scale-[1.02]
-                  data-[state=active]:bg-eth-orange
+                  data-[state=active]:bg-eth-brown
                   data-[state=active]:border-transparent
                   data-[state=active]:text-white
                   data-[state=active]:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
-                  data-[state=active]:shadow-eth-orange/40
-                  focus:outline-none focus:ring-2 focus:ring-eth-orange/50 focus:ring-offset-2
+                  data-[state=active]:shadow-eth-brown/40
+                  focus:outline-none focus:ring-2 focus:ring-eth-brown/50 focus:ring-offset-2
                 " 
                 data-testid="tab-phone"
               >
@@ -346,12 +346,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   data-[state=inactive]:hover:text-eth-brown
                   data-[state=inactive]:hover:shadow-sm
                   data-[state=inactive]:hover:scale-[1.02]
-                  data-[state=active]:bg-eth-orange
+                  data-[state=active]:bg-eth-brown
                   data-[state=active]:border-transparent
                   data-[state=active]:text-white
                   data-[state=active]:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
-                  data-[state=active]:shadow-eth-orange/40
-                  focus:outline-none focus:ring-2 focus:ring-eth-orange/50 focus:ring-offset-2
+                  data-[state=active]:shadow-eth-brown/40
+                  focus:outline-none focus:ring-2 focus:ring-eth-brown/50 focus:ring-offset-2
                 " 
                 data-testid="tab-email"
               >
@@ -403,7 +403,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={loginPhoneMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-phone-login">
+                    <Button type="submit" disabled={loginPhoneMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-phone-login">
                       {loginPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
                     </Button>
                   </form>
@@ -478,7 +478,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={registerPhoneMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-phone-register">
+                    <Button type="submit" disabled={registerPhoneMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-phone-register">
                       {registerPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
                     </Button>
                   </form>
@@ -516,7 +516,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={loginEmailMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-email-login">
+                    <Button type="submit" disabled={loginEmailMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-email-login">
                       {loginEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
                     </Button>
                   </form>
@@ -578,7 +578,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={registerEmailMutation.isPending} className="w-full bg-eth-orange hover:bg-eth-orange/90 text-white" data-testid="button-email-register">
+                    <Button type="submit" disabled={registerEmailMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-email-register">
                       {registerEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
                     </Button>
                   </form>
