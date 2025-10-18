@@ -1063,6 +1063,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Host earnings endpoint (ERCA compliant)
+  app.get('/api/host/earnings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get all properties for this host
+      const properties = await storage.getPropertiesByHost(userId);
+      const propertyIds = properties.map(p => p.id);
+      
+      // Get all paid bookings for host's properties
+      const allBookings = await Promise.all(
+        propertyIds.map(id => storage.getBookingsByProperty(id))
+      );
+      const paidBookings = allBookings
+        .flat()
+        .filter(b => b.paymentStatus === 'paid');
+      
+      // Calculate totals
+      const summary = {
+        totalBookings: paidBookings.length,
+        grossRevenue: paidBookings.reduce((sum, b) => sum + parseFloat(b.totalPrice || '0'), 0),
+        algaServiceFee: paidBookings.reduce((sum, b) => sum + parseFloat(b.algaCommission || '0'), 0),
+        vat: paidBookings.reduce((sum, b) => sum + parseFloat(b.vat || '0'), 0),
+        withholding: paidBookings.reduce((sum, b) => sum + parseFloat(b.withholding || '0'), 0),
+        netPayout: paidBookings.reduce((sum, b) => sum + parseFloat(b.hostPayout || '0'), 0),
+        bookings: paidBookings.map(b => ({
+          id: b.id,
+          propertyId: b.propertyId,
+          checkIn: b.checkIn,
+          checkOut: b.checkOut,
+          guestPaid: parseFloat(b.totalPrice),
+          serviceFee: parseFloat(b.algaCommission || '0'),
+          vat: parseFloat(b.vat || '0'),
+          withholding: parseFloat(b.withholding || '0'),
+          yourPayout: parseFloat(b.hostPayout || '0'),
+        }))
+      };
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching host earnings:", error);
+      res.status(500).json({ message: "Failed to fetch host earnings" });
+    }
+  });
+
   // Booking routes
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
