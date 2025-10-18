@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="bg-eth-brown text-white py-16">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -45,38 +45,6 @@ export default function Footer() {
                 </a>
               </div>
             </div>
-          </div>
-
-          {/* Explore Cities */}
-          <div>
-            <h5 className="font-bold mb-4 text-lg text-eth-orange">Explore Ethiopia</h5>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link href="/properties?city=Addis Ababa" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
-                  → Addis Ababa
-                </Link>
-              </li>
-              <li>
-                <Link href="/properties?city=Bahir Dar" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
-                  → Bahir Dar
-                </Link>
-              </li>
-              <li>
-                <Link href="/properties?city=Gondar" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
-                  → Gondar
-                </Link>
-              </li>
-              <li>
-                <Link href="/properties?city=Lalibela" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
-                  → Lalibela
-                </Link>
-              </li>
-              <li>
-                <Link href="/properties?city=Hawassa" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
-                  → Hawassa
-                </Link>
-              </li>
-            </ul>
           </div>
 
           {/* Support */}
