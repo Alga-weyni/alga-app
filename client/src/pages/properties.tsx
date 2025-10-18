@@ -122,44 +122,44 @@ export default function Properties() {
           />
         )}
 
-        <div className="max-w-5xl mx-auto px-3 sm:px-4 lg:px-6 pt-2 pb-3 sm:pt-3 sm:pb-4">
-          <div className="mb-2 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-2 sm:px-3 pt-1 pb-2">
+          <div className="mb-1 flex items-center justify-between">
             <BackButton />
             {hasSearched && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setHasSearched(false)}
-                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white h-7 text-xs px-3"
+                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white h-6 text-[10px] px-2"
                 data-testid="button-new-search"
               >
-                <Search className="h-3 w-3 mr-1.5" />
-                New Search
+                <Search className="h-2.5 w-2.5 mr-1" />
+                New
               </Button>
             )}
           </div>
           
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
+        <div className="flex flex-col lg:flex-row gap-2">
           {/* Filters Sidebar */}
-          <div className={`lg:w-48 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="sticky top-20 bg-transparent">
-              <div className="space-y-2">
+          <div className={`lg:w-36 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="sticky top-20">
+              <div className="space-y-1">
                 {activeFilterCount > 0 && (
                   <button 
                     onClick={clearFilters} 
-                    className="text-[10px] text-eth-brown/60 hover:text-eth-brown underline underline-offset-1 transition-colors"
+                    className="text-[8px] text-eth-brown/50 hover:text-eth-brown underline mb-0.5"
                   >
-                    Clear ({activeFilterCount})
+                    Clear
                   </button>
                 )}
 
-                <div className="space-y-2.5">
+                <div className="space-y-1.5">
                   {/* Location */}
                   <div>
-                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Location</Label>
+                    <Label className="text-[8px] font-medium text-eth-brown/40 mb-0.5 block uppercase tracking-wide">Location</Label>
                     <Select value={filters.city || "all"} onValueChange={(value) => updateFilter("city", value === "all" ? undefined : value)}>
-                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
-                        <SelectValue placeholder="All cities" />
+                      <SelectTrigger className="h-6 text-[10px] border-eth-brown/10 bg-white/40">
+                        <SelectValue placeholder="All" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All cities</SelectItem>
@@ -174,10 +174,10 @@ export default function Properties() {
 
                   {/* Property Type */}
                   <div>
-                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Type</Label>
+                    <Label className="text-[8px] font-medium text-eth-brown/40 mb-0.5 block uppercase tracking-wide">Type</Label>
                     <Select value={filters.type || "all"} onValueChange={(value) => updateFilter("type", value === "all" ? undefined : value)}>
-                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
-                        <SelectValue placeholder="All types" />
+                      <SelectTrigger className="h-6 text-[10px] border-eth-brown/10 bg-white/40">
+                        <SelectValue placeholder="All" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All types</SelectItem>
@@ -192,15 +192,15 @@ export default function Properties() {
 
                   {/* Price Range */}
                   <div>
-                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Price</Label>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <Label className="text-[8px] font-medium text-eth-brown/40 mb-0.5 block uppercase tracking-wide">Price</Label>
+                    <div className="grid grid-cols-2 gap-1">
                       <Input
                         id="minPrice"
                         type="number"
                         placeholder="Min"
                         value={filters.minPrice || ""}
                         onChange={(e) => updateFilter("minPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="h-7 text-xs px-2 border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                        className="h-6 text-[10px] px-1.5 border-eth-brown/10 bg-white/40"
                       />
                       <Input
                         id="maxPrice"
@@ -208,19 +208,19 @@ export default function Properties() {
                         placeholder="Max"
                         value={filters.maxPrice || ""}
                         onChange={(e) => updateFilter("maxPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="h-7 text-xs px-2 border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                        className="h-6 text-[10px] px-1.5 border-eth-brown/10 bg-white/40"
                       />
                     </div>
                   </div>
 
                   {/* Guests */}
                   <div>
-                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Guests</Label>
+                    <Label className="text-[8px] font-medium text-eth-brown/40 mb-0.5 block uppercase tracking-wide">Guests</Label>
                     <Select 
                       value={filters.maxGuests?.toString() || "all"} 
                       onValueChange={(value) => updateFilter("maxGuests", value === "all" ? undefined : parseInt(value))}
                     >
-                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                      <SelectTrigger className="h-6 text-[10px] border-eth-brown/10 bg-white/40">
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
                       <SelectContent>
@@ -240,60 +240,46 @@ export default function Properties() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-2 gap-2">
-              <p className="text-[10px] text-eth-brown/40 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-1 gap-1">
+              <p className="text-[8px] text-eth-brown/40 uppercase tracking-wide">
                 {properties.length} {properties.length === 1 ? 'stay' : 'stays'}
-                {filters.city && ` in ${filters.city}`}
               </p>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                {activeFilterCount > 0 && (
-                  <span className="text-[10px] text-eth-brown/50">
-                    {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
-                  </span>
-                )}
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5 h-6 text-[10px] px-2"
-                  data-testid="button-toggle-filters"
-                >
-                  <SlidersHorizontal className="h-3 w-3 mr-1" />
-                  Filters
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="lg:hidden border-eth-brown/20 h-5 text-[8px] px-1.5"
+                data-testid="button-toggle-filters"
+              >
+                <SlidersHorizontal className="h-2.5 w-2.5" />
+              </Button>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-xl h-56"></div>
+                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-lg h-48"></div>
                 ))}
               </div>
             ) : properties.length === 0 ? (
-              <div className="text-center py-8 px-4 bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm">
+              <div className="text-center py-6 px-3 bg-white/40 rounded-lg">
                 <div className="max-w-xs mx-auto">
-                  <div className="w-12 h-12 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Filter className="h-6 w-6 text-eth-orange" />
+                  <div className="w-10 h-10 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Filter className="h-5 w-5 text-eth-orange" />
                   </div>
                   
-                  <h3 className="text-base font-bold text-eth-brown mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    No stays found
+                  <h3 className="text-sm font-bold text-eth-brown mb-1.5" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    No stays
                   </h3>
                   
-                  <p className="text-xs text-eth-brown/70 mb-4">
-                    Try adjusting your filters
+                  <p className="text-[10px] text-eth-brown/70 mb-3">
+                    Adjust filters
                   </p>
                   
                   <Button 
                     onClick={clearFilters} 
-                    className="
-                      bg-eth-orange hover:bg-eth-orange/90 text-white px-5 py-2 text-xs
-                      transition-all duration-200
-                      hover:shadow-md
-                    " 
+                    className="bg-eth-orange hover:bg-eth-orange/90 text-white px-4 py-1.5 text-[10px]" 
                     data-testid="button-clear-filters"
                   >
                     Reset
@@ -302,15 +288,15 @@ export default function Properties() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
                   {properties.map((property, index) => (
                     <div 
                       key={property.id}
-                      className="animate-fade-in hover:scale-[1.01] transition-transform duration-200"
+                      className="animate-fade-in hover:scale-[1.01] transition-transform"
                       style={{ 
-                        animationDelay: `${index * 30}ms`,
+                        animationDelay: `${index * 20}ms`,
                         opacity: 0,
-                        animation: 'fadeIn 150ms ease-out forwards'
+                        animation: 'fadeIn 120ms ease-out forwards'
                       }}
                     >
                       <PropertyCard
@@ -321,8 +307,8 @@ export default function Properties() {
                   ))}
                 </div>
                 
-                <p className="text-center text-[10px] text-eth-brown/30 mt-6 italic">
-                  Verified stays by Alga
+                <p className="text-center text-[8px] text-eth-brown/25 mt-4 italic">
+                  Verified by Alga
                 </p>
               </>
             )}
