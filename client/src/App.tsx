@@ -14,6 +14,8 @@ import OperatorDashboard from "@/pages/operator-dashboard";
 import StartHosting from "@/pages/start-hosting";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
+import BookingSuccess from "@/pages/booking-success";
+import BookingCancelled from "@/pages/booking-cancelled";
 import Favorites from "@/pages/favorites";
 import NotFound from "@/pages/not-found";
 
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/start-hosting" component={StartHosting} />
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:id" component={PropertyDetails} />
+      <Route path="/booking/success" component={BookingSuccess} />
+      <Route path="/booking/cancelled" component={BookingCancelled} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />

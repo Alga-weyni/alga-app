@@ -79,13 +79,88 @@ export default function PropertyDetails() {
       const response = await apiRequest("POST", "/api/bookings", data);
       return response.json();
     },
-    onSuccess: (booking: Booking) => {
-      toast({
-        title: "Booking created successfully!",
-        description: "Your booking request has been submitted. You'll receive a confirmation email soon.",
-      });
+    onSuccess: async (booking: Booking) => {
       setShowBookingDialog(false);
-      setLocation(`/bookings/${booking.id}`);
+      
+      // Handle Telebirr payment
+      if (bookingData.paymentMethod === "telebirr") {
+        try {
+          const paymentResponse = await fetch("/api/payment/telebirr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: booking.totalPrice,
+              customerPhone: user?.phoneNumber || "+251912345678",
+            }),
+          });
+          
+          const paymentData = await paymentResponse.json();
+          
+          if (paymentData.success && paymentData.redirectUrl) {
+            // Redirect to Telebirr checkout
+            window.location.href = paymentData.redirectUrl;
+          } else {
+            toast({
+              title: "Payment initiation failed",
+              description: "Unable to start Telebirr payment. Please try another method.",
+              variant: "destructive",
+            });
+            setLocation(`/bookings/${booking.id}`);
+          }
+        } catch (error) {
+          console.error("Telebirr payment error:", error);
+          toast({
+            title: "Payment error",
+            description: "Unable to process Telebirr payment.",
+            variant: "destructive",
+          });
+          setLocation(`/bookings/${booking.id}`);
+        }
+      }
+      // Handle PayPal payment
+      else if (bookingData.paymentMethod === "paypal") {
+        try {
+          const paymentResponse = await fetch("/api/payment/paypal", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              amount: parseFloat(booking.totalPrice) / 50, // Convert ETB to USD (approximate rate)
+            }),
+          });
+          
+          const paymentData = await paymentResponse.json();
+          
+          if (paymentData.success && paymentData.approvalUrl) {
+            // Redirect to PayPal checkout
+            window.location.href = paymentData.approvalUrl;
+          } else {
+            toast({
+              title: "Payment initiation failed",
+              description: "Unable to start PayPal payment. Please try another method.",
+              variant: "destructive",
+            });
+            setLocation(`/bookings/${booking.id}`);
+          }
+        } catch (error) {
+          console.error("PayPal payment error:", error);
+          toast({
+            title: "Payment error",
+            description: "Unable to process PayPal payment.",
+            variant: "destructive",
+          });
+          setLocation(`/bookings/${booking.id}`);
+        }
+      }
+      // Handle other payment methods
+      else {
+        toast({
+          title: "Booking created successfully!",
+          description: "Your booking request has been submitted. You'll receive a confirmation email soon.",
+        });
+        setLocation(`/bookings/${booking.id}`);
+      }
     },
     onError: () => {
       toast({
