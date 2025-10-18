@@ -10,22 +10,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### October 17, 2025 - Payment Integration (Telebirr & PayPal)
-- **Payment System**:
-  - Integrated Telebirr payment gateway for Ethiopian customers
-  - Integrated PayPal payment gateway for international travelers
-  - Added payment routes at `/api/payment/telebirr` and `/api/payment/paypal`
-  - Webhook support for payment confirmations
-  - Transaction reference tracking in database
-  - Payment method selection (telebirr, paypal)
-  - Payment status tracking (pending, paid, failed, refunded)
-  - Secure payment flow with authentication
-  - Environment variables for API credentials
-  - Full documentation in PAYMENT_SETUP.md
-- **Database Updates**:
-  - Added `payment_ref` field to bookings table for transaction IDs
-  - Updated payment method enum to include telebirr and paypal
-  - Payment status and booking status separation for better tracking
+### October 18, 2025 - Payment Integration Frontend (Telebirr & PayPal)
+- **Payment UI Components**:
+  - Added Telebirr and PayPal to payment methods with priority positioning
+  - Telebirr marked as "recommended" for Ethiopian users (📱 icon)
+  - PayPal marked for "international" users (💳 icon)
+  - Payment method selection integrated into booking dialog
+  - Automatic payment redirect after booking creation
+- **Payment Flow Pages**:
+  - Created `/booking/success` page with confirmation message and booking details
+  - Created `/booking/cancelled` page for failed/cancelled payments with retry option
+  - PayPal payment confirmation logic on success page
+  - User guidance on next steps after successful payment
+- **Booking Integration**:
+  - Property details page now handles Telebirr and PayPal payment flows
+  - After booking creation, users are redirected to payment gateway
+  - ETB to USD conversion for PayPal (approximate rate: 1 USD = 50 ETB)
+  - Customer phone number passed to Telebirr for SMS notifications
+  - Error handling with toast notifications for payment failures
+- **Backend Routes** (from previous implementation):
+  - POST `/api/payment/telebirr` - Initiate Telebirr payment
+  - POST `/api/payment/paypal` - Create PayPal order
+  - POST `/api/payment/confirm/paypal` - Confirm PayPal payment
+  - Webhook endpoints for payment provider callbacks
+  - Transaction reference tracking in bookings table via `paymentRef` field
+- **Required Secrets** (to be added via Replit Secrets):
+  - `TELEBIRR_APP_ID` - From developer.telebirr.com
+  - `TELEBIRR_API_KEY` - From developer.telebirr.com
+  - `PAYPAL_CLIENT_ID` - From developer.paypal.com
+  - `PAYPAL_SECRET` - From developer.paypal.com
+  - `BASE_URL` - Current: https://ce3a76da-b414-4186-9234-d3db2b65b94b-00-2df3xcgh8cs7v.kirk.replit.dev
+- **Documentation**: Full setup guide available in PAYMENT_SETUP.md
 
 ### October 17, 2025 - Mobile App Showcase Section
 - **Home Page Enhancement**:
