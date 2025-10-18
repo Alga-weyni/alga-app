@@ -135,6 +135,19 @@ export const favorites = pgTable("favorites", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const accessCodes = pgTable("access_codes", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").notNull().references(() => bookings.id),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  guestId: varchar("guest_id").notNull().references(() => users.id),
+  code: varchar("code", { length: 6 }).notNull(),
+  validFrom: timestamp("valid_from").notNull(),
+  validTo: timestamp("valid_to").notNull(),
+  status: varchar("status").default("active").notNull(), // active, expired, revoked
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties),
@@ -179,6 +192,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
     references: [users.id],
   }),
   reviews: many(reviews),
+  accessCodes: many(accessCodes),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -204,6 +218,21 @@ export const favoritesRelations = relations(favorites, ({ one }) => ({
   property: one(properties, {
     fields: [favorites.propertyId],
     references: [properties.id],
+  }),
+}));
+
+export const accessCodesRelations = relations(accessCodes, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [accessCodes.bookingId],
+    references: [bookings.id],
+  }),
+  property: one(properties, {
+    fields: [accessCodes.propertyId],
+    references: [properties.id],
+  }),
+  guest: one(users, {
+    fields: [accessCodes.guestId],
+    references: [users.id],
   }),
 }));
 
@@ -288,6 +317,12 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
   createdAt: true,
 });
 
+export const insertAccessCodeSchema = createInsertSchema(accessCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -304,3 +339,5 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+export type InsertAccessCode = z.infer<typeof insertAccessCodeSchema>;
+export type AccessCode = typeof accessCodes.$inferSelect;
