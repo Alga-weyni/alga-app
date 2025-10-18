@@ -1,0 +1,91 @@
+# ===============================================
+# 🎯 GOAL:
+# Apply final polish to Alga app before launch:
+# - Refine tagline
+# - Add invoice PDF system (ERCA-compliant)
+# - Enforce ETB currency formatting
+# - Add meta & OG tags for SEO
+# ===============================================
+
+# 1️⃣  HOMEPAGE TAGLINE UPDATE
+# File: client/src/pages/landing.tsx  (or Home.tsx)
+# ------------------------------------------------
+# Replace existing tagline line:
+# "Stay. Discover. Belong—The Ethiopian Way!!"
+# With:
+"Stay. Discover. Belong — The Ethiopian Way!"
+
+# 2️⃣  INVOICE PDF GENERATION (ERCA-COMPLIANT)
+# File: server/src/utils/invoice.ts
+# ------------------------------------------------
+import { jsPDF } from "jspdf";
+
+export async function generateInvoice(booking, algaTIN, hostTIN) {
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Alga Booking Invoice", 20, 20);
+  doc.setFontSize(12);
+
+  doc.text(`Booking ID: ${booking.id}`, 20, 35);
+  doc.text(`Guest: ${booking.guestName}`, 20, 45);
+  doc.text(`Property: ${booking.propertyName}`, 20, 55);
+  doc.text(`Date: ${new Date(booking.createdAt).toLocaleDateString('en-ET')}`, 20, 65);
+
+  doc.text(`Gross Amount: ${booking.totalAmount.toFixed(2)} ETB`, 20, 80);
+  doc.text(`Alga Commission (12%): ${booking.algaCommission.toFixed(2)} ETB`, 20, 90);
+  doc.text(`VAT (15%): ${booking.vat.toFixed(2)} ETB`, 20, 100);
+  doc.text(`Withholding Tax (2%): ${booking.withholding.toFixed(2)} ETB`, 20, 110);
+  doc.text(`Net Payout to Host: ${booking.hostPayout.toFixed(2)} ETB`, 20, 120);
+
+  doc.text(`Alga TIN: ${algaTIN}`, 20, 140);
+  doc.text(`Host TIN: ${hostTIN}`, 20, 150);
+  doc.text("All taxes remitted per ERCA regulation.", 20, 165);
+
+  return doc.output("datauristring");
+}
+
+# This function can be called after every booking confirmation:
+# const pdfInvoice = await generateInvoice(booking, "ALGA-TIN-12345", host.tin);
+
+# 3️⃣  CURRENCY FORMATTER UTILITY
+# File: client/src/utils/formatCurrency.ts
+# ------------------------------------------------
+export function formatETB(amount) {
+  return new Intl.NumberFormat('en-ET', {
+    style: 'currency',
+    currency: 'ETB',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+# Usage Example:
+# {formatETB(booking.totalAmount)}
+
+# 4️⃣  SEO & META TAGS
+# File: client/public/index.html  (or client/index.html)
+# ------------------------------------------------
+<head>
+  <title>Alga — Stay. Discover. Belong — The Ethiopian Way!</title>
+  <meta name="description" content="Discover authentic Ethiopian stays with Alga — from city apartments to countryside lodges. Book safely, pay securely, and feel at home wherever you go." />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Alga — Stay. Discover. Belong — The Ethiopian Way!" />
+  <meta property="og:description" content="Book authentic Ethiopian stays. Local warmth, secure payments, and real hospitality — all in one app." />
+  <meta property="og:image" content="https://alga-app-1-winnieaman94.replit.app/preview-image.png" />
+  <meta property="og:url" content="https://alga-app-1-winnieaman94.replit.app/" />
+  <meta name="twitter:card" content="summary_large_image" />
+</head>
+
+# 5️⃣  OPTIONAL TOUCH
+# Ensure all displayed values (commissions, taxes, payouts) use formatETB(amount)
+# And display the note in Host Dashboard:
+# “Earnings are net of Alga service fee, VAT, and withholding tax per ERCA regulation.”
+
+# ===============================================
+# ✅ RESULT:
+# • Clean, professional tagline
+# • Automatic ERCA-compliant invoices
+# • Consistent Ethiopian Birr formatting
+# • SEO-optimized home page
+# ===============================================

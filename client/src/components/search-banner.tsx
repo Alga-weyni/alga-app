@@ -60,7 +60,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
         <div className="text-center mb-7 sm:mb-9">
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-[#2d1405]" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-            Stay. Discover. Belong—The Ethiopian Way!!
+            Stay. Discover. Belong — The Ethiopian Way!
           </h2>
           <p className="text-base text-[#5a4a42] max-w-3xl mx-auto leading-relaxed mb-2" style={{ fontFamily: "'Merriweather', 'Georgia', serif" }}>
             Find unique stays and experiences across Ethiopia — from city apartments to countryside lodges. Book safely, pay securely, and feel at home wherever you go.
