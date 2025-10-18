@@ -78,6 +78,13 @@ Preferred communication style: Simple, everyday language.
         - `drivers_license` - Driver's licenses (photo OCR)
         - `other` - Other government-issued IDs (photo OCR)
     - **Universal Scanner Component**: `UniversalIDScanner` with tabbed interface for QR scan vs photo upload
+    - **Automatic Data Extraction**: System automatically extracts and displays:
+        - First Name (required)
+        - Middle Name (optional) - extracted when available from 3+ word names
+        - Last Name (required)
+        - Date of Birth
+        - ID Number
+        - Expiry Date (when applicable)
     - **Database Tracking**: `idVerified`, `idNumber`, `idFullName`, `idDocumentType`, `idExpiryDate`, `idCountry` fields in users table
     - **Verification Check Component**: `IDVerificationCheck` for enforcing requirements and showing verification status
     - **Operator Dashboard**: Dedicated dashboard (`/operator/dashboard`) for operators to review and approve/reject host verification documents and property listings.
