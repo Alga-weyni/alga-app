@@ -263,6 +263,18 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Accept dates as strings or Date objects
+  checkIn: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  checkOut: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  // Accept totalPrice as string or number
+  totalPrice: z.union([z.string(), z.number()]).transform((val) => 
+    typeof val === 'number' ? val.toString() : val
+  ),
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
