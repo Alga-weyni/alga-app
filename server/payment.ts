@@ -1,9 +1,16 @@
 import express from "express";
+import Stripe from "stripe";
 import { db } from "./db";
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 const router = express.Router();
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2024-11-20.acacia",
+    })
+  : null;
 
 // -----------------------------------------------------------------------------
 // TELEBIRR PAYMENT
@@ -215,6 +222,132 @@ router.post("/confirm/paypal", async (req, res) => {
     return res.status(500).json({ success: false, message: "Payment confirmation failed" });
   }
 });
+
+// -----------------------------------------------------------------------------
+// STRIPE PAYMENT (Global Credit Cards, CNY, USD, etc.)
+// -----------------------------------------------------------------------------
+router.post("/stripe", async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Stripe is not configured. Please add STRIPE_SECRET_KEY to environment." 
+      });
+    }
+
+    const { bookingId, amount, currency = "usd" } = req.body;
+
+    // Create a PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: currency.toLowerCase(),
+      automatic_payment_methods: { enabled: true },
+      description: `Ethiopia Stays Booking #${bookingId}`,
+      metadata: { 
+        bookingId: bookingId.toString(),
+        platform: "Ethiopia Stays"
+      },
+    });
+
+    // Update booking with payment reference
+    await db.update(bookings)
+      .set({ 
+        paymentStatus: "pending", 
+        paymentRef: paymentIntent.id,
+        paymentMethod: "stripe",
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId));
+
+    return res.status(200).json({ 
+      success: true, 
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    });
+  } catch (err: any) {
+    console.error("Stripe payment error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Stripe payment initialization failed" 
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// STRIPE WEBHOOK (Payment confirmation)
+// -----------------------------------------------------------------------------
+router.post(
+  "/webhook/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).send("Stripe not configured");
+      }
+
+      const sig = req.headers["stripe-signature"];
+      if (!sig) {
+        return res.status(400).send("Missing stripe-signature header");
+      }
+
+      let event: Stripe.Event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET!
+        );
+      } catch (err: any) {
+        console.log("Webhook signature verification failed:", err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      // Handle the event
+      switch (event.type) {
+        case "payment_intent.succeeded":
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          const bookingId = parseInt(paymentIntent.metadata.bookingId);
+
+          console.log(`✅ Payment succeeded for booking #${bookingId}`);
+
+          // Update booking status to confirmed and paid
+          await db.update(bookings)
+            .set({ 
+              status: "confirmed",
+              paymentStatus: "paid", 
+              updatedAt: new Date() 
+            })
+            .where(eq(bookings.id, bookingId));
+          break;
+
+        case "payment_intent.payment_failed":
+          const failedIntent = event.data.object as Stripe.PaymentIntent;
+          const failedBookingId = parseInt(failedIntent.metadata.bookingId);
+
+          console.log(`❌ Payment failed for booking #${failedBookingId}`);
+
+          // Update booking status to failed
+          await db.update(bookings)
+            .set({ 
+              status: "cancelled",
+              paymentStatus: "failed", 
+              updatedAt: new Date() 
+            })
+            .where(eq(bookings.id, failedBookingId));
+          break;
+
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.status(200).json({ received: true });
+    } catch (err) {
+      console.error("Stripe webhook error:", err);
+      return res.status(500).send("Webhook handler failed");
+    }
+  }
+);
 
 // -----------------------------------------------------------------------------
 // EXPORT ROUTER
