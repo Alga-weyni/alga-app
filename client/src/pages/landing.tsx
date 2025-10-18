@@ -22,6 +22,7 @@ export default function Landing() {
   const openAuthDialog = (mode: "login" | "register") => {
     setAuthMode(mode);
     setAuthDialogOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -385,7 +386,7 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Side - Text Content */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl">
+              <div className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] rounded-3xl p-12 shadow-2xl border-2 border-eth-orange/20">
                 <h3 className="text-4xl font-bold text-eth-brown mb-6" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   Share Your Ethiopian Home
                 </h3>
