@@ -14,17 +14,25 @@ import {
   Banknote
 } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import AuthDialog from "@/components/auth-dialog";
 
 export default function BecomeHost() {
   const { user } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const handleApplyClick = () => {
     if (!user) {
       setAuthDialogOpen(true);
-    } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (user.idVerified) {
+      // User is logged in and ID verified, show message
+      alert("Your application has been submitted! An admin will review your account and upgrade you to a host.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // User is logged in but not ID verified, redirect to ID scanner
+      setLocation("/scan-id");
     }
   };
 
