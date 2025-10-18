@@ -168,30 +168,6 @@ export default function Properties() {
 
             {isLoading ? (
               <PropertyGridSkeleton count={12} />
-            ) : properties.length === 0 ? (
-              <div className="text-center py-16 px-6">
-                <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-eth-brown/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Filter className="h-8 w-8 text-eth-brown" />
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-eth-brown mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    No properties found
-                  </h3>
-                  
-                  <p className="text-eth-brown/70 mb-6">
-                    Try adjusting your search criteria
-                  </p>
-                  
-                  <Button 
-                    onClick={() => setHasSearched(false)} 
-                    className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6" 
-                    data-testid="button-clear-filters"
-                  >
-                    Clear Search
-                  </Button>
-                </div>
-              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
