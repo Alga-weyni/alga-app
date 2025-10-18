@@ -38,8 +38,11 @@ export const users = pgTable("users", {
   phoneNumber: varchar("phone_number").unique(),
   phoneVerified: boolean("phone_verified").default(false),
   idVerified: boolean("id_verified").default(false),
-  idNumber: varchar("id_number", { length: 12 }),
+  idNumber: varchar("id_number", { length: 50 }), // Support passport numbers too
   idFullName: varchar("id_full_name"),
+  idDocumentType: varchar("id_document_type"), // ethiopian_id, passport, drivers_license, other
+  idExpiryDate: varchar("id_expiry_date"), // Store expiry date
+  idCountry: varchar("id_country"), // Country of issue
   otp: varchar("otp", { length: 4 }),
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
