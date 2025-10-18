@@ -55,7 +55,15 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 ### Key Features
 
 - **Property Management**: CRUD operations for listings, including image uploads.
-- **Advanced Property Search**: Multi-parameter search API with keyword search, filters (city, type, price, capacity, dates), and sorting (recommended, price, rating). Limited to 50 results per query.
+- **Enhanced Search & Discovery System**: 
+  - Keyword search across property names, descriptions, locations, and addresses
+  - Advanced filters: city, property type, price range (min/max), guest capacity, check-in/out dates
+  - Sorting options: Recommended (by rating), Price (low-high, high-low), Highest Rated
+  - Collapsible filter panel with clean UI
+  - Active filter badges with individual clear buttons
+  - Visual feedback for search results (count, empty states)
+  - Mobile-optimized search experience
+  - API limited to 50 results per query for performance
 - **Booking System**: Full workflow with date validation and conflict prevention.
 - **6-Digit Access Code System**: Automated, auto-generated codes for property access upon payment confirmation, valid from check-in to check-out.
 - **Advanced Weighted Review System (ALGA Review Engine)**: Time-decay algorithm (recent reviews weighted more), auto-recalculation of property ratings, 6 rating categories (overall, cleanliness, communication, accuracy, location, value).
