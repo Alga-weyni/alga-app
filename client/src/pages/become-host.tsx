@@ -13,26 +13,66 @@ import {
   Camera,
   Banknote
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import AuthDialog from "@/components/auth-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BecomeHost() {
   const { user } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  // Auto-redirect after login if ID not verified
+  useEffect(() => {
+    if (user && !user.idVerified && !authDialogOpen) {
+      // User just logged in but hasn't verified ID - auto redirect
+      setTimeout(() => {
+        toast({
+          title: "ID Verification Required",
+          description: "Please verify your identity to complete your host application.",
+        });
+        setLocation("/scan-id");
+      }, 1000);
+    } else if (user && user.idVerified && user.role === 'guest') {
+      // User is verified but still a guest - show success message
+      setTimeout(() => {
+        toast({
+          title: "Application Submitted! ✓",
+          description: "An admin will review your application and upgrade your account to host status soon.",
+          duration: 6000,
+        });
+      }, 500);
+    }
+  }, [user, setLocation, toast, authDialogOpen]);
 
   const handleApplyClick = () => {
     if (!user) {
+      // Not logged in - open auth dialog
       setAuthDialogOpen(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (user.idVerified) {
-      // User is logged in and ID verified, show message
-      alert("Your application has been submitted! An admin will review your account and upgrade you to a host.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      // User is logged in but not ID verified, redirect to ID scanner
+    } else if (!user.idVerified) {
+      // Logged in but no ID - redirect to scanner
+      toast({
+        title: "ID Verification Required",
+        description: "Please verify your identity to complete your host application.",
+      });
       setLocation("/scan-id");
+    } else if (user.role === 'guest') {
+      // ID verified but still guest - show confirmation
+      toast({
+        title: "Application Submitted! ✓",
+        description: "An admin will review your application and upgrade your account to host status soon.",
+        duration: 6000,
+      });
+    } else if (user.role === 'host') {
+      // Already a host
+      toast({
+        title: "You're Already a Host!",
+        description: "You can manage your properties from your host dashboard.",
+      });
+      setLocation("/host/dashboard");
     }
   };
 
