@@ -9,7 +9,6 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Star, TrendingUp, Database, Activity, Bell, Zap, Gift, Key, Apple } from "lucide-react";
 import { SiGoogleplay } from "react-icons/si";
-import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import type { Property } from "@shared/schema";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
 
@@ -34,40 +33,6 @@ export default function Home() {
       <div className="flex-1 lg:ml-20">
         <Header />
         <SearchBanner />
-
-        {/* Featured Destinations */}
-        <section className="py-16 bg-eth-light-tan">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
-            <h3 className="text-4xl font-bold text-eth-brown mb-12" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-              Explore Ethiopian Destinations
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {FEATURED_DESTINATIONS.map((destination) => (
-                <Link
-                  key={destination.name}
-                  href={`/properties?city=${encodeURIComponent(destination.name)}`}
-                >
-                  <div className="relative overflow-hidden rounded-xl shadow-lg group cursor-pointer">
-                    <img
-                      src={destination.image}
-                      alt={`${destination.name} landscape`}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-6 left-6 text-white">
-                      <h4 className="text-xl font-bold">{destination.name}</h4>
-                      <p className="text-sm">{destination.description}</p>
-                      <p className="text-sm font-medium mt-1">
-                        From {destination.priceFrom} ETB/night
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Featured Properties */}
         <section className="py-16 bg-eth-warm-tan">
