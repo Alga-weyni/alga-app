@@ -213,11 +213,11 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         </h3>
         <div className="grid md:grid-cols-2 gap-2 text-sm">
           <div>
-            <p className="font-medium text-gray-700 dark:text-gray-300">🇪🇹 Ethiopians:</p>
-            <p className="text-gray-600 dark:text-gray-400">Ethiopian Digital ID (QR code)</p>
+            <p className="font-medium text-gray-700 dark:text-gray-300">🇪🇹 Ethiopians & Diaspora:</p>
+            <p className="text-gray-600 dark:text-gray-400">Ethiopian Digital ID / Yellow Card (QR code)</p>
           </div>
           <div>
-            <p className="font-medium text-gray-700 dark:text-gray-300">🌍 Foreigners:</p>
+            <p className="font-medium text-gray-700 dark:text-gray-300">🌍 Foreign Visitors:</p>
             <p className="text-gray-600 dark:text-gray-400">Passport, Driver's License, or National ID</p>
           </div>
         </div>
@@ -229,11 +229,11 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
           <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="qr">
               <Camera className="w-4 h-4 mr-2" />
-              QR Scan (Ethiopians)
+              QR Scan (Yellow Card Holders)
             </TabsTrigger>
             <TabsTrigger value="photo">
               <Upload className="w-4 h-4 mr-2" />
-              Photo Upload (Foreigners)
+              Photo Upload (Foreign Visitors)
             </TabsTrigger>
           </TabsList>
 
@@ -242,9 +242,14 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
               <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                 <Camera className="w-16 h-16 text-gray-400" />
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                For Ethiopian citizens with Digital ID cards
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  For Ethiopian citizens & diaspora with Yellow Card (Digital ID)
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Note: Even if you hold an international passport, use this option if you have an Ethiopian ID
+                </p>
+              </div>
               <Button 
                 onClick={startQRScan}
                 className="w-full bg-eth-orange hover:bg-eth-orange/90"

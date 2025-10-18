@@ -28,7 +28,7 @@ export default function ScanIDPage() {
             Required for all users - guests, hosts, and property owners
           </p>
           <p className="text-sm text-eth-brown/70">
-            Ethiopians: Digital ID | Foreigners: Passport, Driver's License, or National ID
+            Ethiopians & Diaspora with Yellow Card: Digital ID (QR) | Foreign Visitors: Passport, Driver's License, or National ID
           </p>
         </div>
 
@@ -39,8 +39,11 @@ export default function ScanIDPage() {
         <div className="mt-8 max-w-2xl mx-auto grid md:grid-cols-2 gap-4">
           <div className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-2 border-eth-orange/30 rounded-lg p-4 shadow-lg">
             <h3 className="font-semibold text-sm text-eth-brown mb-2 flex items-center gap-2">
-              🇪🇹 Ethiopian Citizens
+              🇪🇹 Ethiopian Citizens & Diaspora
             </h3>
+            <p className="text-xs text-eth-brown/80 mb-2 italic">
+              Have a Yellow Card (Ethiopian Digital ID)? Use this option, even if you carry an international passport.
+            </p>
             <ol className="text-sm text-eth-brown space-y-1 list-decimal list-inside">
               <li>Select "QR Scan" tab</li>
               <li>Tap "Scan Ethiopian ID QR Code"</li>
