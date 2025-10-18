@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { db } from "./db";
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { createTelebirrService } from "./services/telebirr.service";
 
 const router = express.Router();
 
@@ -12,50 +13,72 @@ const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
+const telebirrService = createTelebirrService();
+
 // -----------------------------------------------------------------------------
-// TELEBIRR PAYMENT
+// TELEBIRR PAYMENT - Official Implementation
 // -----------------------------------------------------------------------------
 router.post("/telebirr", async (req, res) => {
   try {
     const { bookingId, amount, customerPhone } = req.body;
 
-    const payload = {
-      appid: process.env.TELEBIRR_APP_ID,
-      appkey: process.env.TELEBIRR_API_KEY,
+    // Check if Telebirr service is configured
+    if (!telebirrService) {
+      return res.status(503).json({
+        success: false,
+        message: "Telebirr payment service is not configured. Please add required environment variables.",
+      });
+    }
+
+    const baseUrl = process.env.BASE_URL || req.get('origin') || 'http://localhost:5000';
+    
+    // Create order parameters following official Telebirr format
+    const orderParams = {
+      outTradeNo: `ETH-STAYS-${bookingId}-${Date.now()}`,
+      subject: `Ethiopia Stays Booking #${bookingId}`,
+      totalAmount: amount,
+      timeout: '30m', // 30 minutes timeout
+      notifyUrl: `${baseUrl}/api/payment/confirm/telebirr`,
+      returnUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
       nonce: Math.random().toString(36).substring(2, 15),
-      amount,
-      msisdn: customerPhone,
-      reference: `ETHIOPIA-STAYS-${bookingId}`,
-      callbackUrl: `${process.env.BASE_URL}/api/payment/confirm/telebirr`,
     };
 
-    const response = await fetch("https://api.telebirr.com/payments/initiate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    console.log('[Telebirr] Initiating payment for booking:', bookingId);
 
-    const data: any = await response.json();
-    if (data?.status === "SUCCESS") {
+    // Use official Telebirr SDK flow
+    const result = await telebirrService.initiatePayment(orderParams);
+
+    if (result.code === 0 && result.data) {
+      // Update booking with payment reference
       await db.update(bookings)
         .set({ 
           paymentStatus: "pending", 
-          paymentRef: data.transactionId,
+          paymentRef: result.data.trade_no || orderParams.outTradeNo,
           paymentMethod: "telebirr",
           updatedAt: new Date()
         })
         .where(eq(bookings.id, bookingId));
+
       return res.status(200).json({
         success: true,
-        message: "Telebirr transaction initiated.",
-        redirectUrl: data.checkoutUrl,
+        message: "Telebirr transaction initiated successfully.",
+        redirectUrl: result.data.checkout_url || result.data.pay_url,
+        tradeNo: result.data.trade_no,
       });
     }
 
-    return res.status(400).json({ success: false, message: "Telebirr initiation failed", data });
-  } catch (err) {
-    console.error("Telebirr error:", err);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error('[Telebirr] Payment initiation failed:', result);
+    return res.status(400).json({ 
+      success: false, 
+      message: result.message || "Telebirr initiation failed",
+      code: result.code 
+    });
+  } catch (err: any) {
+    console.error("[Telebirr] Payment error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Internal Server Error" 
+    });
   }
 });
 
