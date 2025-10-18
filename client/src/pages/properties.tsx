@@ -141,37 +141,25 @@ export default function Properties() {
           
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Filters Sidebar */}
-          <div className={`lg:w-72 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="sticky top-20 bg-white border-eth-brown/10 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="mb-5">
-                  <h3 className="text-lg font-bold mb-0.5" style={{ color: '#2d1405', fontFamily: "'Playfair Display', serif" }}>Filters</h3>
-                  <p className="text-xs text-eth-brown/50">Refine your search</p>
-                </div>
-                
+          <div className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="sticky top-20 bg-transparent">
+              <div className="space-y-3.5">
                 {activeFilterCount > 0 && (
-                  <div className="flex gap-2 mb-5">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={clearFilters} 
-                      className="
-                        flex-1 text-eth-brown border-eth-brown/20 hover:bg-eth-brown hover:text-white
-                        transition-all duration-200 text-xs font-medium
-                      "
-                    >
-                      Reset All
-                    </Button>
-                  </div>
+                  <button 
+                    onClick={clearFilters} 
+                    className="text-xs text-eth-brown/60 hover:text-eth-brown underline underline-offset-2 transition-colors"
+                  >
+                    Clear filters ({activeFilterCount})
+                  </button>
                 )}
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {/* Location */}
                   <div>
-                    <Label className="text-sm font-medium mb-3 block">Location</Label>
+                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Location</Label>
                     <Select value={filters.city || "all"} onValueChange={(value) => updateFilter("city", value === "all" ? undefined : value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose city..." />
+                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                        <SelectValue placeholder="All cities" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All cities</SelectItem>
@@ -184,14 +172,12 @@ export default function Properties() {
                     </Select>
                   </div>
 
-                  <Separator />
-
                   {/* Property Type */}
                   <div>
-                    <Label className="text-sm font-medium mb-3 block">Property Type</Label>
+                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Type</Label>
                     <Select value={filters.type || "all"} onValueChange={(value) => updateFilter("type", value === "all" ? undefined : value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All types..." />
+                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                        <SelectValue placeholder="All types" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All types</SelectItem>
@@ -204,60 +190,52 @@ export default function Properties() {
                     </Select>
                   </div>
 
-                  <Separator />
-
                   {/* Price Range */}
                   <div>
-                    <Label className="text-sm font-medium mb-3 block">Price Range (ETB/night)</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="minPrice" className="text-xs text-gray-500">Min</Label>
-                        <Input
-                          id="minPrice"
-                          type="number"
-                          placeholder="0"
-                          value={filters.minPrice || ""}
-                          onChange={(e) => updateFilter("minPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="maxPrice" className="text-xs text-gray-500">Max</Label>
-                        <Input
-                          id="maxPrice"
-                          type="number"
-                          placeholder="10000"
-                          value={filters.maxPrice || ""}
-                          onChange={(e) => updateFilter("maxPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        />
-                      </div>
+                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Price (ETB/night)</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="minPrice"
+                        type="number"
+                        placeholder="Min"
+                        value={filters.minPrice || ""}
+                        onChange={(e) => updateFilter("minPrice", e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                      />
+                      <Input
+                        id="maxPrice"
+                        type="number"
+                        placeholder="Max"
+                        value={filters.maxPrice || ""}
+                        onChange={(e) => updateFilter("maxPrice", e.target.value ? parseInt(e.target.value) : undefined)}
+                        className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                      />
                     </div>
                   </div>
 
-                  <Separator />
-
                   {/* Guests */}
                   <div>
-                    <Label className="text-sm font-medium mb-3 block">Guests</Label>
+                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Guests</Label>
                     <Select 
                       value={filters.maxGuests?.toString() || "all"} 
                       onValueChange={(value) => updateFilter("maxGuests", value === "all" ? undefined : parseInt(value))}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any number..." />
+                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                        <SelectValue placeholder="Any" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Any number</SelectItem>
-                        <SelectItem value="1">1 guest</SelectItem>
-                        <SelectItem value="2">2 guests</SelectItem>
-                        <SelectItem value="3">3 guests</SelectItem>
-                        <SelectItem value="4">4 guests</SelectItem>
-                        <SelectItem value="5">5+ guests</SelectItem>
+                        <SelectItem value="all">Any</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5+</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Main Content */}
