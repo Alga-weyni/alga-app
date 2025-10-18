@@ -109,6 +109,11 @@ export const bookings = pgTable("bookings", {
   paymentStatus: varchar("payment_status").default("pending").notNull(), // pending, paid, failed, refunded
   paymentRef: varchar("payment_ref"), // Transaction ID from payment provider (Telebirr/PayPal)
   specialRequests: text("special_requests"),
+  // Commission & Tax Breakdown (ERCA Compliance)
+  algaCommission: decimal("alga_commission", { precision: 10, scale: 2 }),
+  vat: decimal("vat", { precision: 10, scale: 2 }),
+  withholding: decimal("withholding", { precision: 10, scale: 2 }),
+  hostPayout: decimal("host_payout", { precision: 10, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
