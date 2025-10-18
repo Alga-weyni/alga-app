@@ -74,9 +74,9 @@ export default function Footer() {
             <div>
               <h5 className="font-bold text-white mb-4 text-sm">Contact Us</h5>
               <div className="space-y-2.5 text-sm">
-                <a href="tel:+251911000000" className="text-white/80 hover:text-white transition-colors flex items-center gap-2">
+                <a href="tel:+251996034044" className="text-white/80 hover:text-white transition-colors flex items-center gap-2">
                   <Phone className="h-4 w-4 text-eth-orange" />
-                  <span>+251 911 000 000</span>
+                  <span>+251 996 034 044</span>
                 </a>
                 <a href="mailto:hello@alga.et" className="text-white/80 hover:text-white transition-colors flex items-center gap-2">
                   <Mail className="h-4 w-4 text-eth-orange" />
