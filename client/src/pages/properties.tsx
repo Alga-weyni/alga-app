@@ -161,7 +161,7 @@ export default function Properties() {
           {/* Properties Grid - Full Width */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-eth-brown">
+              <h2 className="text-lg font-semibold text-eth-brown" style={{ fontSize: '87%' }}>
                 🏠 {properties.length} {properties.length === 1 ? 'Stay' : 'Stays'} Available
               </h2>
             </div>
