@@ -36,7 +36,6 @@ export class EthioTelecomSMSService {
   private async sendSMS(phone: string, message: string): Promise<SMSResponse> {
     try {
       if (!this.apiKey) {
-        console.log(`[DEV MODE] SMS to ${phone}: ${message}`);
         return { success: true, messageId: 'dev_' + Date.now() };
       }
 
