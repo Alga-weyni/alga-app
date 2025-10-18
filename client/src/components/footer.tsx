@@ -1,6 +1,6 @@
 import { Link } from "wouter";
-import { Home, Facebook, Twitter, Instagram, Shield, CreditCard, Smartphone } from "lucide-react";
-import { SiStripe, SiPaypal } from "react-icons/si";
+import { Home, Facebook, Twitter, Instagram, Shield, CreditCard, Smartphone, Mail } from "lucide-react";
+import { SiStripe, SiPaypal, SiTiktok, SiYoutube } from "react-icons/si";
 
 export default function Footer() {
   return (
@@ -22,16 +22,28 @@ export default function Footer() {
               <Shield className="h-4 w-4 text-eth-orange" />
               <span className="text-white/90 font-semibold">100% Ethiopian Owned</span>
             </div>
-            <div className="flex space-x-4 pt-2">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
+            <div>
+              <p className="text-xs text-white/60 mb-2">Follow Us</p>
+              <div className="flex flex-wrap gap-3">
+                <a href="https://facebook.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#1877F2] transition-colors" title="Facebook">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="https://instagram.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#E4405F] transition-colors" title="Instagram">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://twitter.com/alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#1DA1F2] transition-colors" title="Twitter/X">
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a href="https://tiktok.com/@alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="TikTok">
+                  <SiTiktok className="h-5 w-5" />
+                </a>
+                <a href="https://youtube.com/@alga" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-[#FF0000] transition-colors" title="YouTube">
+                  <SiYoutube className="h-5 w-5" />
+                </a>
+                <a href="mailto:hello@alga.et" className="text-white/70 hover:text-eth-orange transition-colors" title="Email Us">
+                  <Mail className="h-5 w-5" />
+                </a>
+              </div>
             </div>
           </div>
 
