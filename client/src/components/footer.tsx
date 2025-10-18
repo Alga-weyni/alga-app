@@ -16,7 +16,7 @@ export default function Footer() {
               <h4 className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>ALGA</h4>
             </div>
             <p className="text-white/80 text-sm leading-relaxed">
-              Authentic Ethiopian hospitality connecting travelers with local communities across Ethiopia's beautiful landscapes.
+              Connecting travelers with authentic Ethiopian experiences.
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <Shield className="h-4 w-4 text-eth-orange" />

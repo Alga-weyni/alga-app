@@ -147,7 +147,7 @@ export default function Landing() {
         <section className="py-16 bg-eth-warm-tan" id="explore">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <h3 className="text-4xl font-bold text-eth-brown mb-12" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-              Explore Ethiopian Destinations
+              Top Ethiopian Destinations
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -183,8 +183,7 @@ export default function Landing() {
                 Authentic Ethiopian Accommodations
               </h3>
               <p className="text-eth-brown max-w-2xl mx-auto text-lg">
-                From traditional lodges in the Simien Mountains to modern hotels in Addis Ababa, 
-                discover unique stays that showcase Ethiopia's rich culture and hospitality.
+                From traditional lodges in the Simien Mountains to modern hotels in Addis Ababa.
               </p>
             </div>
 
@@ -290,7 +289,7 @@ export default function Landing() {
                     Book Faster with the Alga App
                   </h2>
                   <p className="text-xl md:text-2xl text-white/95">
-                    Your Ethiopian adventure, now in your pocket
+                    Your next Ethiopian stay, just a tap away
                   </p>
                 </div>
 
@@ -391,8 +390,7 @@ export default function Landing() {
                   Share Your Ethiopian Home
                 </h3>
                 <p className="text-lg text-eth-brown mb-8">
-                  Join thousands of hosts earning extra income by welcoming travelers to 
-                  experience authentic Ethiopian hospitality.
+                  Join thousands of hosts earning extra income while welcoming travelers from around the world.
                 </p>
                 <ul className="space-y-4 mb-10">
                   <li className="flex items-center space-x-3">
