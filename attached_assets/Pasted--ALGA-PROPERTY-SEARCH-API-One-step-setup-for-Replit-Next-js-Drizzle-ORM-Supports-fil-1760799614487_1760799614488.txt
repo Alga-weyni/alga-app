@@ -1,0 +1,50 @@
+/**
+ * ALGA PROPERTY SEARCH API
+ * One-step setup for Replit (Next.js + Drizzle ORM)
+ * Supports filters: city, type, price range, keyword, and sorting
+ */
+
+import { db } from "@/shared/db";
+import { properties } from "@/shared/schema";
+import { sql, and, between, gte, lte, like, asc, desc } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    // Extract filters
+    const city = searchParams.get("city") || "";
+    const type = searchParams.get("type") || "";
+    const minPrice = Number(searchParams.get("minPrice")) || 0;
+    const maxPrice = Number(searchParams.get("maxPrice")) || 9999999;
+    const sort = searchParams.get("sort") || "recommended";
+    const q = searchParams.get("q") || "";
+
+    // Build dynamic query
+    let query = db.select().from(properties);
+
+    // Filters
+    const conditions: any[] = [];
+    if (city) conditions.push(like(properties.city, `%${city}%`));
+    if (type) conditions.push(like(properties.property_type, `%${type}%`));
+    if (minPrice || maxPrice) conditions.push(between(properties.price_per_night, minPrice, maxPrice));
+    if (q) conditions.push(sql`to_tsvector('english', ${properties.title}) @@ plainto_tsquery('english', ${q})`);
+
+    if (conditions.length > 0) query = query.where(and(...conditions));
+
+    // Sorting
+    if (sort === "price_asc") query = query.orderBy(asc(properties.price_per_night));
+    else if (sort === "price_desc") query = query.orderBy(desc(properties.price_per_night));
+    else if (sort === "rating_desc") query = query.orderBy(desc(properties.rating));
+    else query = query.orderBy(desc(properties.created_at)); // default: newest first
+
+    // Limit for performance
+    const results = await query.limit(50);
+
+    return NextResponse.json(results);
+  } catch (error: any) {
+    console.error("❌ Property search failed:", error);
+    return NextResponse.json({ error: "Search failed", details: error.message }, { status: 500 });
+  }
+}

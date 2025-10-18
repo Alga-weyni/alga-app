@@ -781,10 +781,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Property routes
+  // Property routes - Enhanced search with filters and sorting
   app.get('/api/properties', async (req, res) => {
     try {
-      const { city, type, minPrice, maxPrice, maxGuests, checkIn, checkOut } = req.query;
+      const { city, type, minPrice, maxPrice, maxGuests, checkIn, checkOut, q, sort } = req.query;
       
       const filters: any = {};
       if (city) filters.city = city as string;
@@ -794,6 +794,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (maxGuests) filters.maxGuests = parseInt(maxGuests as string);
       if (checkIn) filters.checkIn = new Date(checkIn as string);
       if (checkOut) filters.checkOut = new Date(checkOut as string);
+      if (q) filters.q = q as string;
+      if (sort) filters.sort = sort as string;
 
       const properties = await storage.getProperties(filters);
       res.json(properties);

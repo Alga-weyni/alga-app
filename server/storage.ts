@@ -50,6 +50,8 @@ export interface IStorage {
     maxGuests?: number;
     checkIn?: Date;
     checkOut?: Date;
+    q?: string;
+    sort?: string;
   }): Promise<Property[]>;
   getProperty(id: number): Promise<Property | undefined>;
   createProperty(property: InsertProperty): Promise<Property>;
@@ -204,6 +206,8 @@ export class DatabaseStorage implements IStorage {
     maxGuests?: number;
     checkIn?: Date;
     checkOut?: Date;
+    q?: string;
+    sort?: string;
   }): Promise<Property[]> {
     const conditions = [eq(properties.isActive, true), eq(properties.status, 'approved')];
 
@@ -227,6 +231,38 @@ export class DatabaseStorage implements IStorage {
       if (filters.maxGuests) {
         conditions.push(gte(properties.maxGuests, filters.maxGuests));
       }
+
+      // Keyword search in title, description, and location
+      if (filters.q) {
+        conditions.push(
+          sql`(
+            ${properties.title} ILIKE ${`%${filters.q}%`} OR 
+            ${properties.description} ILIKE ${`%${filters.q}%`} OR 
+            ${properties.location} ILIKE ${`%${filters.q}%`} OR
+            ${properties.address} ILIKE ${`%${filters.q}%`}
+          )`
+        );
+      }
+    }
+    
+    // Determine sort order
+    const sortOrder = filters?.sort || 'recommended';
+    let orderByClause;
+    
+    switch (sortOrder) {
+      case 'price_asc':
+        orderByClause = asc(properties.pricePerNight);
+        break;
+      case 'price_desc':
+        orderByClause = desc(properties.pricePerNight);
+        break;
+      case 'rating_desc':
+        orderByClause = desc(properties.rating);
+        break;
+      case 'recommended':
+      default:
+        orderByClause = desc(properties.rating);
+        break;
     }
 
     // Handle date filtering - exclude properties with conflicting confirmed bookings
@@ -286,7 +322,8 @@ export class DatabaseStorage implements IStorage {
             sql`${bookings.id} IS NULL`
           )
         )
-        .orderBy(desc(properties.rating));
+        .orderBy(orderByClause)
+        .limit(50);
 
       return availableProperties;
     }
@@ -296,7 +333,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(properties)
       .where(and(...conditions))
-      .orderBy(desc(properties.rating));
+      .orderBy(orderByClause)
+      .limit(50);
   }
 
   async getProperty(id: number): Promise<Property | undefined> {
