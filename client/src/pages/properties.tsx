@@ -19,7 +19,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter, SlidersHorizontal, Search } from "lucide-react";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES } from "@/lib/constants";
 import type { Property } from "@shared/schema";
 
@@ -37,6 +37,7 @@ export default function Properties() {
   const [location] = useLocation();
   const [filters, setFilters] = useState<Filters>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -53,6 +54,11 @@ export default function Properties() {
     if (params.get('checkOut')) urlFilters.checkOut = params.get('checkOut')!;
     
     setFilters(urlFilters);
+    
+    // If there are any filters from URL, mark as searched
+    if (Object.keys(urlFilters).length > 0) {
+      setHasSearched(true);
+    }
   }, [location]);
 
   const { data: properties = [], isLoading } = useQuery<Property[]>({
@@ -96,26 +102,41 @@ export default function Properties() {
       <div className="flex-1 lg:ml-20">
         <Header />
         
-        <SearchBanner 
-          onSearch={(searchFilters) => {
-            setFilters({
-              city: searchFilters.destination,
-              maxGuests: parseInt(searchFilters.guests),
-              checkIn: searchFilters.checkIn,
-              checkOut: searchFilters.checkOut,
-            });
-          }}
-          initialFilters={{
-            destination: filters.city || "",
-            guests: filters.maxGuests?.toString() || "1",
-            checkIn: filters.checkIn || "",
-            checkOut: filters.checkOut || "",
-          }}
-        />
+        {!hasSearched && (
+          <SearchBanner 
+            onSearch={(searchFilters) => {
+              setFilters({
+                city: searchFilters.destination,
+                maxGuests: parseInt(searchFilters.guests),
+                checkIn: searchFilters.checkIn,
+                checkOut: searchFilters.checkOut,
+              });
+              setHasSearched(true);
+            }}
+            initialFilters={{
+              destination: filters.city || "",
+              guests: filters.maxGuests?.toString() || "1",
+              checkIn: filters.checkIn || "",
+              checkOut: filters.checkOut || "",
+            }}
+          />
+        )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-8">
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-4 sm:mb-6 flex items-center justify-between">
             <BackButton />
+            {hasSearched && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setHasSearched(false)}
+                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white"
+                data-testid="button-new-search"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                New Search
+              </Button>
+            )}
           </div>
           
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
