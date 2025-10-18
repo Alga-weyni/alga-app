@@ -1,10 +1,30 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import helmet from "helmet";
+import cors from "cors";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Security: Add helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Security: Configure CORS
+const corsOptions = {
+  origin: process.env.NODE_ENV === "production" 
+    ? process.env.ALLOWED_ORIGINS?.split(',') || []
+    : true,
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
+// Security: Limit request body size to prevent DoS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -39,12 +59,26 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Security: Global error handler - don't leak stack traces in production
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+    
+    // Don't expose detailed error messages in production
+    const errorResponse: any = { message };
+    
+    if (process.env.NODE_ENV === 'development') {
+      errorResponse.stack = err.stack;
+    }
 
-    res.status(status).json({ message });
-    throw err;
+    res.status(status).json(errorResponse);
+    
+    // Log error but don't throw in production
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    } else {
+      console.error('Error:', err);
+    }
   });
 
   // importantly only setup vite in development and after

@@ -5,12 +5,34 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema } from "@shared/schema";
 import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
-import { randomBytes } from "crypto";
+import { randomBytes, randomInt } from "crypto";
 import paymentRouter from "./payment";
+import rateLimit from "express-rate-limit";
+
+// Security: Rate limiting for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { message: "Too many authentication attempts, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Security: General API rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { message: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Apply general rate limiting to all API routes
+  app.use('/api/', apiLimiter);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
@@ -38,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Phone Registration - Step 1: Register with password
-  app.post('/api/auth/register/phone', async (req, res) => {
+  app.post('/api/auth/register/phone', authLimiter, async (req, res) => {
     try {
       const validatedData = registerPhoneUserSchema.parse(req.body);
       
@@ -51,8 +73,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
       
-      // Generate 4-digit OTP
-      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      // Security: Generate cryptographically secure 4-digit OTP
+      const otp = randomInt(1000, 10000).toString();
       
       // Create user
       const userId = randomBytes(16).toString('hex');
@@ -84,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Phone Registration - Step 2: Verify OTP
-  app.post('/api/auth/verify-otp', async (req, res) => {
+  app.post('/api/auth/verify-otp', authLimiter, async (req, res) => {
     try {
       const validatedData = verifyOtpSchema.parse(req.body);
       
@@ -115,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Phone Login - Step 1: Login with password
-  app.post('/api/auth/login/phone', async (req, res) => {
+  app.post('/api/auth/login/phone', authLimiter, async (req, res) => {
     try {
       const validatedData = loginPhoneUserSchema.parse(req.body);
       
@@ -129,8 +151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid phone number or password" });
       }
 
-      // Generate and send OTP
-      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      // Security: Generate cryptographically secure OTP
+      const otp = randomInt(1000, 10000).toString();
       await storage.saveOtp(validatedData.phoneNumber, otp, 10);
       
       // Log OTP for development (in production, send via SMS)
@@ -149,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email Registration
-  app.post('/api/auth/register/email', async (req, res) => {
+  app.post('/api/auth/register/email', authLimiter, async (req, res) => {
     try {
       const validatedData = registerEmailUserSchema.parse(req.body);
       
@@ -191,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email Login
-  app.post('/api/auth/login/email', async (req, res) => {
+  app.post('/api/auth/login/email', authLimiter, async (req, res) => {
     try {
       const validatedData = loginEmailUserSchema.parse(req.body);
       
@@ -355,9 +377,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Document verification routes
   app.post('/api/verification-documents/upload', isAuthenticated, async (req: any, res) => {
     try {
-      // In a real app, handle file upload to cloud storage (AWS S3, Cloudinary, etc.)
+      // Security: In production, validate file type, size (max 5MB), and scan for malware
+      // Security: Use multipart/form-data parser with size limits
+      // Security: Store files in isolated cloud storage (AWS S3, Cloudinary) with restricted access
       // For now, we'll simulate the upload
       const { documentType, userId } = req.body;
+      
+      // Security: Validate userId matches authenticated user (except for admins)
+      if (userId !== req.user.id && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Cannot upload documents for other users" });
+      }
+      
       const documentUrl = `https://example.com/documents/${Date.now()}.jpg`; // Mock URL
       
       const document = await storage.createVerificationDocument({
