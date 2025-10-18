@@ -75,7 +75,7 @@ export default function BecomeHost() {
                       </div>
                       <h3 className="font-bold text-lg text-eth-brown mb-2">Verified Guests</h3>
                       <p className="text-eth-brown/80 text-sm">
-                        Every guest is verified with Ethiopian ID or passport.
+                        Every guest is verified with a valid ID or passport — Ethiopian or international.
                       </p>
                     </CardContent>
                   </Card>
@@ -113,7 +113,7 @@ export default function BecomeHost() {
                     Ready to Get Started?
                   </h3>
                   <p className="text-eth-brown mb-6">
-                    Apply to become a host and start sharing your property with travelers across Ethiopia.
+                    Apply to become a host and welcome travelers from across Ethiopia and around the globe.
                   </p>
                   
                   <Button
