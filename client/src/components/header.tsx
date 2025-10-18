@@ -10,8 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, Globe, User } from "lucide-react";
+import { Home, Menu, Globe, User, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog";
@@ -24,6 +31,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const { user, isAuthenticated } = useAuth();
   const [location, navigate] = useLocation();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
@@ -45,12 +53,177 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-6 lg:pr-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 cursor-pointer">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="text-primary-foreground text-lg" />
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 cursor-pointer">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Home className="text-primary-foreground text-base sm:text-lg" />
             </div>
-            <h1 className="text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
+            <h1 className="text-lg sm:text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
           </Link>
+
+          {/* Mobile Menu Button */}
+          {!hideNavigation && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left luxury-rich-gold">Navigation</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col space-y-4 mt-8">
+                  <Link 
+                    href="/properties"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                      location === '/properties' 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    data-testid="mobile-link-explore"
+                  >
+                    Explore Properties
+                  </Link>
+                  
+                  <Link 
+                    href="/discover"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                      location === '/discover' 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    data-testid="mobile-link-discover"
+                  >
+                    Discover Map
+                  </Link>
+
+                  <Link 
+                    href="/search"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                      location === '/search' 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    data-testid="mobile-link-search"
+                  >
+                    Advanced Search
+                  </Link>
+                  
+                  {isAuthenticated ? (
+                    user?.role === 'host' && (
+                      <Link 
+                        href="/host/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                          location === '/host/dashboard' 
+                            ? 'bg-primary text-primary-foreground font-medium' 
+                            : 'hover:bg-secondary'
+                        }`}
+                        data-testid="mobile-link-host-dashboard"
+                      >
+                        Host Dashboard
+                      </Link>
+                    )
+                  ) : (
+                    <Link 
+                      href="/start-hosting"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`text-lg py-3 px-4 rounded-lg transition-colors font-medium ${
+                        location === '/start-hosting' 
+                          ? 'bg-eth-orange text-white' 
+                          : 'text-eth-orange hover:bg-eth-orange/10'
+                      }`}
+                      data-testid="mobile-link-start-hosting"
+                    >
+                      Start Hosting
+                    </Link>
+                  )}
+
+                  {isAuthenticated && (
+                    <>
+                      <div className="border-t border-border my-2"></div>
+                      
+                      {(user?.role === 'guest' || user?.role === 'host') && (
+                        <>
+                          <Link 
+                            href="/bookings"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
+                            data-testid="mobile-link-bookings"
+                          >
+                            My Bookings
+                          </Link>
+                          <Link 
+                            href="/favorites"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
+                            data-testid="mobile-link-favorites"
+                          >
+                            My Favorites
+                          </Link>
+                        </>
+                      )}
+
+                      {user?.role === 'admin' && (
+                        <Link 
+                          href="/admin/dashboard"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
+                          data-testid="mobile-link-admin"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+
+                      {user?.role === 'operator' && (
+                        <Link 
+                          href="/operator/dashboard"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
+                          data-testid="mobile-link-operator"
+                        >
+                          Operator Dashboard
+                        </Link>
+                      )}
+
+                      <div className="border-t border-border my-2"></div>
+                      
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-lg py-6"
+                        onClick={() => {
+                          logoutMutation.mutate();
+                          setMobileMenuOpen(false);
+                        }}
+                        data-testid="mobile-button-logout"
+                      >
+                        Sign Out
+                      </Button>
+                    </>
+                  )}
+
+                  {!isAuthenticated && (
+                    <>
+                      <div className="border-t border-border my-2"></div>
+                      <Button
+                        className="w-full justify-start text-lg py-6"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setAuthDialogOpen(true);
+                        }}
+                        data-testid="mobile-button-signin"
+                      >
+                        Sign In / Register
+                      </Button>
+                    </>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          )}
 
           {/* Desktop Navigation - Hidden for operator/admin dashboards */}
           {!hideNavigation && (
@@ -115,9 +288,9 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             </nav>
           )}
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
+          {/* User Menu - Desktop Only */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" size="icon">
               <Globe className="h-5 w-5" />
             </Button>
 
