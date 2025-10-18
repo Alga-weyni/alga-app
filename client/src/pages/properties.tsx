@@ -122,43 +122,43 @@ export default function Properties() {
           />
         )}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-2 pb-4 sm:pt-4 sm:pb-8">
-          <div className="mb-3 sm:mb-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 lg:px-6 pt-2 pb-3 sm:pt-3 sm:pb-4">
+          <div className="mb-2 flex items-center justify-between">
             <BackButton />
             {hasSearched && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setHasSearched(false)}
-                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white"
+                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white h-7 text-xs px-3"
                 data-testid="button-new-search"
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="h-3 w-3 mr-1.5" />
                 New Search
               </Button>
             )}
           </div>
           
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           {/* Filters Sidebar */}
-          <div className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+          <div className={`lg:w-48 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="sticky top-20 bg-transparent">
-              <div className="space-y-3.5">
+              <div className="space-y-2">
                 {activeFilterCount > 0 && (
                   <button 
                     onClick={clearFilters} 
-                    className="text-xs text-eth-brown/60 hover:text-eth-brown underline underline-offset-2 transition-colors"
+                    className="text-[10px] text-eth-brown/60 hover:text-eth-brown underline underline-offset-1 transition-colors"
                   >
-                    Clear filters ({activeFilterCount})
+                    Clear ({activeFilterCount})
                   </button>
                 )}
 
-                <div className="space-y-4">
+                <div className="space-y-2.5">
                   {/* Location */}
                   <div>
-                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Location</Label>
+                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Location</Label>
                     <Select value={filters.city || "all"} onValueChange={(value) => updateFilter("city", value === "all" ? undefined : value)}>
-                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
                         <SelectValue placeholder="All cities" />
                       </SelectTrigger>
                       <SelectContent>
@@ -174,9 +174,9 @@ export default function Properties() {
 
                   {/* Property Type */}
                   <div>
-                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Type</Label>
+                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Type</Label>
                     <Select value={filters.type || "all"} onValueChange={(value) => updateFilter("type", value === "all" ? undefined : value)}>
-                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
                         <SelectValue placeholder="All types" />
                       </SelectTrigger>
                       <SelectContent>
@@ -192,15 +192,15 @@ export default function Properties() {
 
                   {/* Price Range */}
                   <div>
-                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Price (ETB/night)</Label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Price</Label>
+                    <div className="grid grid-cols-2 gap-1.5">
                       <Input
                         id="minPrice"
                         type="number"
                         placeholder="Min"
                         value={filters.minPrice || ""}
                         onChange={(e) => updateFilter("minPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                        className="h-7 text-xs px-2 border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
                       />
                       <Input
                         id="maxPrice"
@@ -208,19 +208,19 @@ export default function Properties() {
                         placeholder="Max"
                         value={filters.maxPrice || ""}
                         onChange={(e) => updateFilter("maxPrice", e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
+                        className="h-7 text-xs px-2 border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all"
                       />
                     </div>
                   </div>
 
                   {/* Guests */}
                   <div>
-                    <Label className="text-xs font-medium text-eth-brown/50 mb-1.5 block uppercase tracking-wider">Guests</Label>
+                    <Label className="text-[9px] font-medium text-eth-brown/50 mb-1 block uppercase tracking-wider">Guests</Label>
                     <Select 
                       value={filters.maxGuests?.toString() || "all"} 
                       onValueChange={(value) => updateFilter("maxGuests", value === "all" ? undefined : parseInt(value))}
                     >
-                      <SelectTrigger className="h-9 text-sm border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
+                      <SelectTrigger className="h-7 text-xs border-eth-brown/10 bg-white/50 hover:bg-white hover:border-eth-brown/20 transition-all">
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
                       <SelectContent>
@@ -240,15 +240,15 @@ export default function Properties() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-4 gap-3">
-              <p className="text-xs text-eth-brown/40 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <p className="text-[10px] text-eth-brown/40 uppercase tracking-wider">
                 {properties.length} {properties.length === 1 ? 'stay' : 'stays'}
                 {filters.city && ` in ${filters.city}`}
               </p>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 {activeFilterCount > 0 && (
-                  <span className="text-xs text-eth-brown/50">
+                  <span className="text-[10px] text-eth-brown/50">
                     {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
                   </span>
                 )}
@@ -257,65 +257,60 @@ export default function Properties() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5 h-8 text-xs"
+                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5 h-6 text-[10px] px-2"
                   data-testid="button-toggle-filters"
                 >
-                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
+                  <SlidersHorizontal className="h-3 w-3 mr-1" />
                   Filters
                 </Button>
               </div>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-2xl h-72"></div>
+                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-xl h-56"></div>
                 ))}
               </div>
             ) : properties.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 px-6 bg-white/60 backdrop-blur-sm rounded-3xl shadow-lg">
-                <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Filter className="h-8 w-8 text-eth-orange" />
+              <div className="text-center py-8 px-4 bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm">
+                <div className="max-w-xs mx-auto">
+                  <div className="w-12 h-12 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Filter className="h-6 w-6 text-eth-orange" />
                   </div>
                   
-                  <h3 className="text-xl sm:text-2xl font-bold text-eth-brown mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h3 className="text-base font-bold text-eth-brown mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
                     No stays found
                   </h3>
                   
-                  <p className="text-sm sm:text-base text-eth-brown/70 mb-6 leading-relaxed">
-                    No stays found — try exploring a different city or adjusting your price range.
+                  <p className="text-xs text-eth-brown/70 mb-4">
+                    Try adjusting your filters
                   </p>
                   
                   <Button 
                     onClick={clearFilters} 
                     className="
-                      bg-eth-orange hover:bg-eth-orange/90 text-white px-8 py-6
+                      bg-eth-orange hover:bg-eth-orange/90 text-white px-5 py-2 text-xs
                       transition-all duration-200
-                      hover:shadow-lg hover:shadow-eth-orange/30
-                      hover:scale-105
+                      hover:shadow-md
                     " 
                     data-testid="button-clear-filters"
                   >
-                    Reset Search
+                    Reset
                   </Button>
-                  
-                  <p className="text-xs text-eth-brown/50 mt-6 italic">
-                    Showing verified Ethiopian stays curated by Alga.
-                  </p>
                 </div>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                   {properties.map((property, index) => (
                     <div 
                       key={property.id}
-                      className="animate-fade-in hover:scale-[1.02] transition-transform duration-200"
+                      className="animate-fade-in hover:scale-[1.01] transition-transform duration-200"
                       style={{ 
-                        animationDelay: `${index * 40}ms`,
+                        animationDelay: `${index * 30}ms`,
                         opacity: 0,
-                        animation: 'fadeIn 180ms ease-out forwards'
+                        animation: 'fadeIn 150ms ease-out forwards'
                       }}
                     >
                       <PropertyCard
@@ -326,8 +321,8 @@ export default function Properties() {
                   ))}
                 </div>
                 
-                <p className="text-center text-xs text-eth-brown/40 mt-10 italic">
-                  Verified Ethiopian stays curated by Alga
+                <p className="text-center text-[10px] text-eth-brown/30 mt-6 italic">
+                  Verified stays by Alga
                 </p>
               </>
             )}
