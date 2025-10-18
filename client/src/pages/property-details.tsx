@@ -80,7 +80,7 @@ export default function PropertyDetails() {
   const bookingMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/bookings", data);
-      return response.json();
+      return response;
     },
     onSuccess: async (booking: Booking) => {
       setShowBookingDialog(false);
@@ -97,15 +97,12 @@ export default function PropertyDetails() {
         try {
           console.log("[Telebirr] Initiating payment for booking:", booking.id);
           
-          const paymentResponse = await apiRequest("POST", "/api/payment/telebirr", {
+          const paymentData = await apiRequest("POST", "/api/payment/telebirr", {
             bookingId: booking.id,
             amount: parseFloat(booking.totalPrice),
             customerPhone: user?.phoneNumber || "+251912345678",
           });
           
-          console.log("[Telebirr] Payment response status:", paymentResponse.status);
-          
-          const paymentData = await paymentResponse.json();
           console.log("[Telebirr] Payment data:", paymentData);
           
           if (paymentData.success && paymentData.redirectUrl) {
@@ -134,12 +131,10 @@ export default function PropertyDetails() {
       // Handle PayPal payment
       else if (bookingData.paymentMethod === "paypal") {
         try {
-          const paymentResponse = await apiRequest("POST", "/api/payment/paypal", {
+          const paymentData = await apiRequest("POST", "/api/payment/paypal", {
             bookingId: booking.id,
             amount: parseFloat(booking.totalPrice) / 50, // Convert ETB to USD (approximate rate)
           });
-          
-          const paymentData = await paymentResponse.json();
           
           if (paymentData.success && paymentData.approvalUrl) {
             // Redirect to PayPal checkout
