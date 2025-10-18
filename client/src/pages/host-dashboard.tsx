@@ -135,7 +135,7 @@ export default function HostDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/host/properties"] });
       toast({
         title: "Property created successfully!",
-        description: "Your property has been added to Ethiopia Stays.",
+        description: "Your property has been added to Alga.",
       });
       setShowAddPropertyDialog(false);
       form.reset();
@@ -192,7 +192,7 @@ export default function HostDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/host/properties"] });
       toast({
         title: "Property deleted successfully",
-        description: "Your property has been removed from Ethiopia Stays.",
+        description: "Your property has been removed from Alga.",
       });
     },
     onError: () => {
@@ -384,7 +384,7 @@ export default function HostDashboard() {
                   <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No properties yet</h3>
                   <p className="text-gray-600 mb-6">
-                    Start earning by adding your first property to Ethiopia Stays.
+                    Start earning by adding your first property to Alga.
                   </p>
                   <Button onClick={handleAddNew} className="bg-eth-green hover:bg-green-700">
                     <Plus className="mr-2 h-4 w-4" />

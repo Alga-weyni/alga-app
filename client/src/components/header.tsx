@@ -57,7 +57,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
               <Home className="text-primary-foreground text-base sm:text-lg" />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold luxury-rich-gold">Ethiopia Stays</h1>
+            <h1 className="text-lg sm:text-xl font-bold luxury-rich-gold">Alga</h1>
           </Link>
 
           {/* Mobile Menu Button */}

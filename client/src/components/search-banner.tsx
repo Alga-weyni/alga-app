@@ -60,7 +60,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
         <div className="text-center mb-8">
           <h2 className="text-5xl md:text-6xl font-bold mb-6 text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-            Welcome to Ethiopia Stays
+            Welcome to Alga
           </h2>
           <p className="text-xl font-normal tracking-wide text-eth-brown">
             Discover the beauty of Ethiopian hospitality
