@@ -10,6 +10,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### October 17, 2025 - Payment Integration (Telebirr & PayPal)
+- **Payment System**:
+  - Integrated Telebirr payment gateway for Ethiopian customers
+  - Integrated PayPal payment gateway for international travelers
+  - Added payment routes at `/api/payment/telebirr` and `/api/payment/paypal`
+  - Webhook support for payment confirmations
+  - Transaction reference tracking in database
+  - Payment method selection (telebirr, paypal)
+  - Payment status tracking (pending, paid, failed, refunded)
+  - Secure payment flow with authentication
+  - Environment variables for API credentials
+  - Full documentation in PAYMENT_SETUP.md
+- **Database Updates**:
+  - Added `payment_ref` field to bookings table for transaction IDs
+  - Updated payment method enum to include telebirr and paypal
+  - Payment status and booking status separation for better tracking
+
 ### October 17, 2025 - Mobile App Showcase Section
 - **Home Page Enhancement**:
   - Added "Share Your Ethiopian Home" section with two-column layout

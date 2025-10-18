@@ -99,9 +99,10 @@ export const bookings = pgTable("bookings", {
   guests: integer("guests").notNull(),
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency").default("ETB").notNull(),
-  status: varchar("status").default("pending").notNull(), // pending, confirmed, cancelled, completed
-  paymentMethod: varchar("payment_method"), // cbe, dashen, abyssinia, m_birr
+  status: varchar("status").default("pending").notNull(), // pending, confirmed, cancelled, completed, paid, failed
+  paymentMethod: varchar("payment_method"), // telebirr, paypal, cbe, dashen, abyssinia, m_birr
   paymentStatus: varchar("payment_status").default("pending").notNull(), // pending, paid, failed, refunded
+  paymentRef: varchar("payment_ref"), // Transaction ID from payment provider (Telebirr/PayPal)
   specialRequests: text("special_requests"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

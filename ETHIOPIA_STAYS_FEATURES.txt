@@ -275,16 +275,53 @@ VERIFICATION SYSTEM
 - Document status tracking
 
 ================================================================================
-PAYMENT INTEGRATION (READY)
+PAYMENT INTEGRATION (FULLY INTEGRATED)
 ================================================================================
 
-INTEGRATED:
-- PayPal SDK for international travelers
+LIVE PAYMENT GATEWAYS:
+
+1. TELEBIRR PAYMENT
+   - Ethiopian mobile money payment system
+   - Real-time payment processing
+   - Webhook confirmation support
+   - Transaction reference tracking
+   - Secure API integration
+   - Automatic booking confirmation on successful payment
+   
+2. PAYPAL PAYMENT
+   - International payment gateway
+   - Supports credit cards, debit cards, PayPal balance
+   - OAuth 2.0 authentication
+   - Order creation and capture flow
+   - Sandbox mode for testing
+   - Production-ready for live payments
+
+PAYMENT FEATURES:
+- Payment method selection (Telebirr, PayPal)
+- Payment status tracking (pending, paid, failed, refunded)
+- Transaction ID storage for reconciliation
+- Secure payment flow with authentication
+- Webhook support for payment confirmations
+- Automatic booking status updates
+- Payment retry capability
+- Refund support
+
+API ENDPOINTS:
+- POST /api/payment/telebirr - Initiate Telebirr payment
+- POST /api/payment/confirm/telebirr - Telebirr webhook
+- POST /api/payment/paypal - Initiate PayPal payment
+- POST /api/payment/confirm/paypal - Confirm PayPal payment
+
+ENVIRONMENT VARIABLES REQUIRED:
+- TELEBIRR_APP_ID
+- TELEBIRR_API_KEY
+- PAYPAL_CLIENT_ID
+- PAYPAL_SECRET
+- BASE_URL
 
 READY FOR INTEGRATION:
-- Telebirr (Ethiopian mobile money)
 - CBE Birr (Commercial Bank of Ethiopia)
-- Ethiopian bank transfers
+- Additional Ethiopian bank transfers
 - Other local payment methods
 
 ================================================================================
