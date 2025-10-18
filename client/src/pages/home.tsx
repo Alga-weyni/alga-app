@@ -6,12 +6,14 @@ import Footer from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import { Star, TrendingUp, Database, Activity } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import type { Property } from "@shared/schema";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
 
 export default function Home() {
+  const { toast } = useToast();
   const { data: properties = [], isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
   });
@@ -157,7 +159,11 @@ export default function Home() {
                   className="bg-eth-orange hover:opacity-90 text-white text-lg px-8 py-6"
                   data-testid="button-download-app"
                   onClick={() => {
-                    window.open('#', '_blank');
+                    toast({
+                      title: "📱 Mobile App Coming Soon!",
+                      description: "The Alga mobile app will be available on the App Store and Google Play soon. For now, book directly through our website!",
+                      duration: 5000,
+                    });
                   }}
                 >
                   Download the App
