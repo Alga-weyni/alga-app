@@ -18,6 +18,7 @@ import BookingSuccess from "@/pages/booking-success";
 import BookingCancelled from "@/pages/booking-cancelled";
 import Favorites from "@/pages/favorites";
 import TestIDScanner from "@/pages/test-id-scanner";
+import ScanIDPage from "@/pages/scan-id";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/properties/:id" component={PropertyDetails} />
       <Route path="/booking/success" component={BookingSuccess} />
       <Route path="/booking/cancelled" component={BookingCancelled} />
+      <Route path="/scan-id" component={ScanIDPage} />
       <Route path="/test-id-scanner" component={TestIDScanner} />
       
       {isLoading || !isAuthenticated ? (
