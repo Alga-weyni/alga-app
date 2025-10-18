@@ -6,12 +6,13 @@ import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
 import AuthDialog from "@/components/auth-dialog";
 import { BackButton } from "@/components/back-button";
-import { Star, CheckCircle, Home } from "lucide-react";
+import { Star, CheckCircle, Home, ArrowRight, Shield } from "lucide-react";
 import { FEATURED_DESTINATIONS } from "@/lib/constants";
 import mountainLodgeImg from "@assets/stock_images/mountain_lodge_cabin_537ba6f4.jpg";
 import boutiqueHotelImg from "@assets/stock_images/luxury_boutique_hote_429d7d7d.jpg";
 import lakesideRetreatImg from "@assets/stock_images/lakeside_resort_peac_aa065d79.jpg";
 import mobileAppMockup from "@/assets/ethiopia-stays-mobile-mockup.png";
+import algaMobileHero from "@assets/alga mobile app image _1760805527089.jpeg";
 
 export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -67,8 +68,78 @@ export default function Landing() {
           </div>
         </header>
 
-        {/* Search Banner */}
-        <SearchBanner />
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#f6bd89] via-[#fb9547] to-[#fb470b] py-16 md:py-24">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Side - Text and CTAs */}
+              <div className="space-y-8 animate-fade-in-up">
+                {/* Title */}
+                <div className="space-y-4">
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+                    Welcome to Alga
+                  </h1>
+                  <p className="text-2xl md:text-3xl text-white/95 font-medium">
+                    Experience Ethiopian stays — authentic, local, and easy to book.
+                  </p>
+                  <p className="text-lg md:text-xl text-white/90 max-w-xl">
+                    Built for travelers, hosts, and the diaspora who believe home is where Ethiopia beats.
+                  </p>
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    size="lg"
+                    className="bg-eth-brown hover:bg-eth-brown/90 text-white rounded-xl px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    data-testid="button-download-app-hero"
+                  >
+                    Download the Alga App
+                  </Button>
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white rounded-xl px-8 py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    onClick={() => openAuthDialog("login")}
+                    data-testid="button-explore-stays-hero"
+                  >
+                    Explore Stays <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+
+                {/* Reassurance Line */}
+                <div className="flex items-center space-x-3 text-white/95">
+                  <Shield className="h-6 w-6" />
+                  <p className="text-lg font-semibold">
+                    Secure Telebirr Payments • 100% Ethiopian
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side - Phone Mockup */}
+              <div className="relative flex justify-center lg:justify-end animate-fade-in-right">
+                <div className="relative w-full max-w-md lg:max-w-lg">
+                  <img 
+                    src={algaMobileHero}
+                    alt="Alga Mobile App"
+                    className="w-full h-auto drop-shadow-2xl animate-float"
+                    data-testid="img-hero-phone-mockup"
+                  />
+                  {/* Decorative glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#fb470b]/20 to-transparent blur-3xl -z-10"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Closing Line */}
+          <div className="mt-16 text-center">
+            <p className="text-xl md:text-2xl text-white/95 font-medium italic px-6">
+              From Axum to Arba Minch — your next stay is just a tap away.
+            </p>
+          </div>
+        </section>
 
         {/* Featured Destinations */}
         <section className="py-16 bg-eth-warm-tan" id="explore">
