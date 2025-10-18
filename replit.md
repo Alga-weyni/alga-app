@@ -66,6 +66,26 @@ Preferred communication style: Simple, everyday language.
 - **Role-Based Access Control**: Guest (default), Host, Admin, Operator roles with specific dashboards and access rights.
 - **Session Management**: PostgreSQL storage for sessions.
 
+### Security Implementation (Oct 18, 2025)
+- **Web Application Security**:
+    - **Helmet.js**: Comprehensive security headers (HSTS, X-Frame-Options, CSP, etc.)
+    - **CORS Protection**: Configured with credentials support and origin validation
+    - **Rate Limiting**: 
+        - Authentication endpoints: 100 requests per 15 minutes
+        - General endpoints: 500 requests per 15 minutes
+    - **Request Size Limits**: 10MB body, 50MB file uploads (DoS prevention)
+- **Cryptographic Security**:
+    - **Secure OTP Generation**: Uses `crypto.randomInt()` instead of Math.random()
+    - **Session Security**: Custom session name, httpOnly cookies, sameSite protection
+    - **Password Hashing**: Bcrypt with 10 salt rounds
+- **Input Validation & Sanitization**:
+    - Zod schema validation on all API endpoints
+    - File upload validation with size and type restrictions
+    - User authorization checks on document uploads
+- **Error Handling**: 
+    - Production mode hides stack traces to prevent information leakage
+    - Secure error messages without exposing internal details
+
 ### Key Features Architecture
 - **Property Management**: CRUD for listings, including image uploads.
 - **Advanced Property Search**: Multi-parameter search API with:
