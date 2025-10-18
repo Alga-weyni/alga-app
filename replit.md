@@ -133,6 +133,14 @@ Preferred communication style: Simple, everyday language.
     - Phone verification readiness for Ethiopian Telecom SMS.
     - Multi-stage verification process for all user types.
 - **Payment Gateway**: Integration with Stripe for global credit/debit card payments (supporting 135+ currencies, Alipay, WeChat Pay), Telebirr for local Ethiopian payments, and PayPal for international users. Includes dedicated success/cancellation pages and webhook handling.
+- **Commission & Tax System (ERCA Compliant)**: Automated financial breakdown system
+    - **12% Alga Commission**: Platform service fee on all bookings
+    - **15% VAT**: Value-added tax on commission (remitted to ERCA)
+    - **2% Withholding Tax**: Deducted from host earnings (remitted to ERCA)
+    - **Automatic Calculation**: All bookings automatically calculate breakdown on creation
+    - **Host Dashboard**: Transparent earnings display showing gross revenue, deductions, and net payout
+    - **Admin Reports**: Financial reports for ERCA tax compliance with date range filtering
+    - **Example**: Guest pays 10,000 ETB → Alga commission 1,200 ETB → VAT 180 ETB → Host withholding 176 ETB → **Host receives 8,624 ETB**
 - **International Support**: Multi-language support (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
 
@@ -193,3 +201,18 @@ Preferred communication style: Simple, everyday language.
 - **Page Titles**: Dynamic page titles based on content (e.g., "Addis Ababa Stays - Alga")
 - **Meta Descriptions**: Search engine optimized descriptions for all major pages
 - **Enhanced Footer**: Comprehensive footer with trust badges, social media links, and additional navigation
+
+### Financial System Implementation (Oct 18, 2025)
+- **Database Schema**: Added commission and tax fields to bookings table (algaCommission, vat, withholding, hostPayout)
+- **Calculation Utility**: Created booking breakdown calculator (`server/utils/booking.ts`) with Ethiopian tax rates
+- **Automated Booking Processing**: All new bookings automatically calculate and store financial breakdown
+- **Host Earnings Dashboard**: New "Earnings" tab in host dashboard with:
+    - Summary cards (total bookings, gross revenue, net payout)
+    - Detailed breakdown table showing all deductions
+    - ERCA compliance notice explaining tax deductions
+    - Calculation example for transparency
+- **Admin Financial Reports**: New `/api/admin/financial-reports` endpoint for:
+    - Monthly/custom date range summaries
+    - Total commission, VAT, and withholding calculations
+    - Export-ready data for accountant reporting
+    - ERCA tax filing preparation
