@@ -67,59 +67,149 @@ export default function Footer() {
         </div>
 
         {/* Contact & Social Section */}
-        <div className="mt-12 pt-8 border-t border-white/20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="mt-16 pt-12 border-t border-white/20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             
             {/* Contact Us */}
-            <div>
-              <h5 className="font-bold text-white mb-4 text-sm">Contact Us</h5>
-              <div className="space-y-2.5 text-sm">
-                <a href="tel:+251996034044" className="text-white/80 hover:text-white transition-colors flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-eth-orange" />
-                  <span>+251 996 034 044</span>
+            <div className="space-y-6">
+              <div>
+                <h5 
+                  className="text-2xl font-bold text-white mb-2" 
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  data-testid="heading-contact"
+                >
+                  Contact Us
+                </h5>
+                <div className="w-16 h-1 bg-eth-orange rounded-full"></div>
+              </div>
+              
+              <div className="space-y-4">
+                <a 
+                  href="tel:+251996034044" 
+                  className="group flex items-center gap-4 text-white/90 hover:text-white transition-all duration-300"
+                  data-testid="link-phone"
+                >
+                  <div className="w-12 h-12 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors">
+                    <Phone className="h-5 w-5 text-eth-orange" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60 uppercase tracking-wide">Phone</p>
+                    <p className="text-lg font-medium">+251 996 034 044</p>
+                  </div>
                 </a>
-                <a href="mailto:hello@alga.et" className="text-white/80 hover:text-white transition-colors flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-eth-orange" />
-                  <span>hello@alga.et</span>
+                
+                <a 
+                  href="mailto:hello@alga.et" 
+                  className="group flex items-center gap-4 text-white/90 hover:text-white transition-all duration-300"
+                  data-testid="link-email"
+                >
+                  <div className="w-12 h-12 rounded-full bg-eth-orange/20 flex items-center justify-center group-hover:bg-eth-orange/30 transition-colors">
+                    <Mail className="h-5 w-5 text-eth-orange" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60 uppercase tracking-wide">Email</p>
+                    <p className="text-lg font-medium">hello@alga.et</p>
+                  </div>
                 </a>
               </div>
             </div>
 
             {/* Follow Us */}
-            <div>
-              <h5 className="font-bold text-white mb-3 text-sm">Follow Us</h5>
-              <p className="text-white/70 text-xs mb-3">Stay connected with Alga across platforms:</p>
+            <div className="space-y-6">
+              <div>
+                <h5 
+                  className="text-2xl font-bold text-white mb-2" 
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  data-testid="heading-social"
+                >
+                  Follow Us
+                </h5>
+                <div className="w-16 h-1 bg-eth-orange rounded-full"></div>
+              </div>
               
-              <div className="flex flex-wrap gap-2 mb-3">
-                <a href="https://instagram.com/algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="Instagram">
-                  <Instagram className="h-3.5 w-3.5" />
-                  <span>Instagram</span>
+              <p className="text-white/70 text-base leading-relaxed">
+                Stay connected with Alga across platforms:
+              </p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <a 
+                  href="https://instagram.com/algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="Instagram"
+                  data-testid="link-instagram"
+                >
+                  <Instagram className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">Instagram</span>
                 </a>
-                <a href="https://tiktok.com/@algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="TikTok">
-                  <SiTiktok className="h-3.5 w-3.5" />
-                  <span>TikTok</span>
+                
+                <a 
+                  href="https://tiktok.com/@algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="TikTok"
+                  data-testid="link-tiktok"
+                >
+                  <SiTiktok className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">TikTok</span>
                 </a>
-                <a href="https://facebook.com/algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="Facebook">
-                  <Facebook className="h-3.5 w-3.5" />
-                  <span>Facebook</span>
+                
+                <a 
+                  href="https://facebook.com/algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="Facebook"
+                  data-testid="link-facebook"
+                >
+                  <Facebook className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">Facebook</span>
                 </a>
-                <a href="https://youtube.com/@algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="YouTube">
-                  <SiYoutube className="h-3.5 w-3.5" />
-                  <span>YouTube</span>
+                
+                <a 
+                  href="https://youtube.com/@algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="YouTube"
+                  data-testid="link-youtube"
+                >
+                  <SiYoutube className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">YouTube</span>
                 </a>
-                <a href="https://linkedin.com/company/algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="LinkedIn">
-                  <Linkedin className="h-3.5 w-3.5" />
-                  <span>LinkedIn</span>
+                
+                <a 
+                  href="https://linkedin.com/company/algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="LinkedIn"
+                  data-testid="link-linkedin"
+                >
+                  <Linkedin className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">LinkedIn</span>
                 </a>
-                <a href="https://t.me/algaethiopia" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-1.5 text-xs transition-colors" title="Telegram">
-                  <SiTelegram className="h-3.5 w-3.5" />
-                  <span>Telegram</span>
+                
+                <a 
+                  href="https://t.me/algaethiopia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex items-center gap-2 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+                  title="Telegram"
+                  data-testid="link-telegram"
+                >
+                  <SiTelegram className="h-5 w-5 text-eth-orange" />
+                  <span className="text-sm font-medium">Telegram</span>
                 </a>
               </div>
               
-              <p className="text-white/60 text-xs italic">
-                @algaethiopia — for travel stories, host features, and behind-the-scenes journeys.
-              </p>
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-white/60 text-sm italic leading-relaxed" data-testid="text-social-tagline">
+                  <span className="font-semibold text-white/80">@algaethiopia</span> — for travel stories, host features, and behind-the-scenes journeys.
+                </p>
+              </div>
             </div>
           </div>
         </div>
