@@ -35,48 +35,48 @@ export default function StartHosting() {
             <h1 className="text-4xl md:text-5xl font-bold text-eth-brown mb-4">
               Start Hosting with Alga
             </h1>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            <p className="text-xl text-eth-brown/80 max-w-2xl mx-auto">
               Share your property with travelers and earn income while showcasing Ethiopian hospitality
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Benefits Section */}
-            <Card className="bg-white">
+            <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-2 border-eth-orange/20">
               <CardHeader>
                 <CardTitle className="text-2xl text-eth-brown">Why Host with Us?</CardTitle>
-                <CardDescription>Join thousands of successful guesthouse owners across Ethiopia</CardDescription>
+                <CardDescription className="text-eth-brown/70">Join thousands of successful guesthouse owners across Ethiopia</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-eth-green mt-1 flex-shrink-0" />
+                  <CheckCircle className="h-6 w-6 text-eth-orange mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold text-eth-brown">Earn Extra Income</h3>
-                    <p className="text-gray-600">List your property and start earning from day one</p>
+                    <p className="text-eth-brown/70">List your property and start earning from day one</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-eth-yellow mt-1 flex-shrink-0" />
+                  <CheckCircle className="h-6 w-6 text-eth-orange mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold text-eth-brown">Verified Guests</h3>
-                    <p className="text-gray-600">All guests are verified with Ethiopian ID or passport</p>
+                    <p className="text-eth-brown/70">All guests are verified with Ethiopian ID or passport</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-eth-red mt-1 flex-shrink-0" />
+                  <CheckCircle className="h-6 w-6 text-eth-orange mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold text-eth-brown">Secure Payments</h3>
-                    <p className="text-gray-600">Get paid safely through Ethiopian banks and mobile money</p>
+                    <p className="text-eth-brown/70">Get paid safely through Ethiopian banks and mobile money</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-6 w-6 text-eth-green mt-1 flex-shrink-0" />
+                  <CheckCircle className="h-6 w-6 text-eth-orange mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold text-eth-brown">24/7 Support</h3>
-                    <p className="text-gray-600">Our team is always ready to help you succeed</p>
+                    <p className="text-eth-brown/70">Our team is always ready to help you succeed</p>
                   </div>
                 </div>
               </CardContent>
@@ -154,43 +154,43 @@ export default function StartHosting() {
           <div className="mt-16">
             <h2 className="text-3xl font-bold text-eth-brown text-center mb-8">How It Works</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-white">
+              <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-2 border-eth-orange/20">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-eth-green/10 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-eth-green">1</span>
+                  <div className="w-12 h-12 bg-eth-orange/20 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-orange">1</span>
                   </div>
                   <CardTitle className="text-eth-brown">Create Your Account</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">
+                  <p className="text-eth-brown/70">
                     Sign up with your phone number or email. Verify your identity with Ethiopian ID or passport.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white">
+              <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-2 border-eth-orange/20">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-eth-yellow/10 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-eth-yellow">2</span>
+                  <div className="w-12 h-12 bg-eth-orange/20 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-orange">2</span>
                   </div>
                   <CardTitle className="text-eth-brown">List Your Property</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">
+                  <p className="text-eth-brown/70">
                     Add photos, descriptions, and pricing. Our team will verify your listing within 24 hours.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white">
+              <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-2 border-eth-orange/20">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-eth-red/10 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-eth-red">3</span>
+                  <div className="w-12 h-12 bg-eth-orange/20 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-eth-orange">3</span>
                   </div>
                   <CardTitle className="text-eth-brown">Start Earning</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">
+                  <p className="text-eth-brown/70">
                     Welcome guests and receive payments directly to your bank account or mobile money.
                   </p>
                 </CardContent>
