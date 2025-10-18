@@ -181,29 +181,33 @@ export default function OperatorDashboard() {
     <div className="min-h-screen bg-eth-warm-tan flex flex-col">
       <Header hideNavigation={true} />
       
-      <main className="flex-1 container mx-auto px-4 py-12 mb-16">
-        <div className="mb-6">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 mb-16">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-eth-brown mb-2" data-testid="text-operator-title">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-eth-brown mb-2" data-testid="text-operator-title">
             Operator Dashboard
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Review and verify guesthouse owner details and property listings
           </p>
         </div>
 
-        <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="bg-white">
-            <TabsTrigger value="documents" data-testid="tab-documents">
-              <FileText className="h-4 w-4 mr-2" />
-              Host Verification ({pendingDocs?.length || 0})
+        <Tabs defaultValue="documents" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-white w-full grid grid-cols-2">
+            <TabsTrigger value="documents" data-testid="tab-documents" className="text-xs sm:text-sm">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Host Verification</span>
+              <span className="sm:hidden">Hosts</span>
+              <span className="ml-1">({pendingDocs?.length || 0})</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" data-testid="tab-properties">
-              <Home className="h-4 w-4 mr-2" />
-              Property Verification ({pendingProperties?.length || 0})
+            <TabsTrigger value="properties" data-testid="tab-properties" className="text-xs sm:text-sm">
+              <Home className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Property Verification</span>
+              <span className="sm:hidden">Properties</span>
+              <span className="ml-1">({pendingProperties?.length || 0})</span>
             </TabsTrigger>
           </TabsList>
 

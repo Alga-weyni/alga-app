@@ -196,15 +196,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="mb-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
+      <div className="mb-4 sm:mb-6">
         <BackButton />
       </div>
       
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage users, properties, and system operations
           </p>
         </div>
@@ -213,6 +213,7 @@ export default function AdminDashboard() {
           onClick={() => signOutMutation.mutate()}
           disabled={signOutMutation.isPending}
           data-testid="button-signout-admin"
+          className="w-full sm:w-auto"
         >
           <LogOut className="h-4 w-4 mr-2" />
           {signOutMutation.isPending ? "Signing out..." : "Sign Out"}
@@ -220,7 +221,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* System Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -275,13 +276,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">System Overview</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="properties">Property Verification</TabsTrigger>
-          <TabsTrigger value="documents">ID Verification</TabsTrigger>
-          <TabsTrigger value="config">System Config</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-5 h-auto overflow-x-auto">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">Overview</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap">Users</TabsTrigger>
+          <TabsTrigger value="properties" className="text-xs sm:text-sm whitespace-nowrap">Properties</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap">ID Verify</TabsTrigger>
+          <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap">Config</TabsTrigger>
         </TabsList>
 
         {/* System Overview Tab */}
