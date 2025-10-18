@@ -233,7 +233,14 @@ export class TelebirrService {
  * Create Telebirr service instance from environment variables
  */
 export function createTelebirrService(): TelebirrService | null {
-  const baseUrl = process.env.TELEBIRR_BASE_URL || 'https://app.ethiotelecom.et:4443';
+  let baseUrl = process.env.TELEBIRR_BASE_URL || 'https://app.ethiotelecom.et:4443';
+  
+  // Validate and fix baseUrl if it's invalid
+  if (baseUrl.includes('import') || baseUrl.includes('react') || !baseUrl.startsWith('http')) {
+    console.warn('[Telebirr] Invalid BASE_URL detected in environment, using default sandbox URL');
+    baseUrl = 'https://app.ethiotelecom.et:4443';
+  }
+  
   const fabricAppId = process.env.TELEBIRR_FABRIC_APP_ID;
   const appSecret = process.env.TELEBIRR_APP_SECRET;
   const merchantAppId = process.env.TELEBIRR_MERCHANT_APP_ID;
@@ -242,6 +249,8 @@ export function createTelebirrService(): TelebirrService | null {
     console.warn('[Telebirr] Service not configured - missing environment variables');
     return null;
   }
+
+  console.log('[Telebirr] Service initialized with baseUrl:', baseUrl);
 
   return new TelebirrService({
     baseUrl,
