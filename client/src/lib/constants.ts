@@ -70,6 +70,20 @@ export const AMENITIES = [
 
 export const PAYMENT_METHODS = [
   {
+    id: "telebirr",
+    name: "Telebirr",
+    description: "Ethiopian mobile money - Fast & Secure",
+    icon: "📱",
+    recommended: true,
+  },
+  {
+    id: "paypal",
+    name: "PayPal",
+    description: "International payment - Cards accepted",
+    icon: "💳",
+    international: true,
+  },
+  {
     id: "cbe",
     name: "Commercial Bank of Ethiopia",
     description: "Secure payment via CBE",
