@@ -62,8 +62,21 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     ? 'text-primary font-medium' 
                     : 'text-foreground hover:text-primary'
                 }`}
+                data-testid="link-explore"
               >
                 Explore
+              </Link>
+              
+              <Link 
+                href="/discover"
+                className={`transition-colors ${
+                  location === '/discover' 
+                    ? 'text-primary font-medium' 
+                    : 'text-foreground hover:text-primary'
+                }`}
+                data-testid="link-discover"
+              >
+                Discover Map
               </Link>
               
               {/* Show different links based on auth status and role */}
