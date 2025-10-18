@@ -8,6 +8,28 @@ Alga ("bed" in Amharic) is a full-stack web application designed for the Ethiopi
 
 Preferred communication style: Simple, everyday language.
 
+## Design System (Updated Oct 18, 2025)
+
+### Color Palette - Clean & Minimal Aesthetic
+- **Primary Dark Brown**: `#2d1405` - Headlines, buttons, icons, primary text
+- **Medium Brown**: `#5a4a42` - Body text, secondary elements
+- **Cream Backgrounds**: `#faf5f0`, `#f5ece3`, `#faf8f6` - Section backgrounds
+- **Card Borders**: `#e5ddd5` - Subtle cream borders for cards
+- **White**: `#ffffff` - Card backgrounds, header background
+
+### Typography
+- **Headings**: Playfair Display (serif) - elegant, classic Italian style
+- **Italic Usage**: Artistic taglines (e.g., "From Axum to Arba Minch")
+- **Body Text**: System fonts for readability
+- **Transitions**: 200ms standard for all hover effects
+
+### UI Principles
+- Minimal design with subtle shadows (no heavy glows)
+- Clean white header with subtle border
+- Dark brown buttons throughout (no bright orange)
+- Cream/white card backgrounds with refined borders
+- Soft, sophisticated color transitions
+
 ## System Architecture
 
 ### Frontend Architecture
