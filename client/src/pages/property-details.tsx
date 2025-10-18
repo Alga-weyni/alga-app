@@ -43,6 +43,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_METHODS } from "@/lib/constants";
+import StripeCheckout from "@/components/stripe-checkout";
 import type { Property, Review, Booking } from "@shared/schema";
 
 export default function PropertyDetails() {
@@ -63,6 +64,8 @@ export default function PropertyDetails() {
   });
 
   const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [showStripeCheckout, setShowStripeCheckout] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
 
   const { data: property, isLoading } = useQuery<Property>({
     queryKey: [`/api/properties/${propertyId}`],
@@ -81,6 +84,13 @@ export default function PropertyDetails() {
     },
     onSuccess: async (booking: Booking) => {
       setShowBookingDialog(false);
+      setCurrentBooking(booking);
+      
+      // Handle Stripe payment
+      if (bookingData.paymentMethod === "stripe") {
+        setShowStripeCheckout(true);
+        return;
+      }
       
       // Handle Telebirr payment
       if (bookingData.paymentMethod === "telebirr") {
@@ -597,6 +607,45 @@ export default function PropertyDetails() {
       </div>
 
       <Footer />
+      
+      {/* Stripe Payment Modal */}
+      <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-eth-brown">Secure Payment</DialogTitle>
+          </DialogHeader>
+          {currentBooking && (
+            <StripeCheckout
+              amount={parseFloat(currentBooking.totalPrice)}
+              currency="usd"
+              bookingId={currentBooking.id}
+              onSuccess={() => {
+                setShowStripeCheckout(false);
+                toast({
+                  title: "Payment successful!",
+                  description: "Your booking has been confirmed.",
+                });
+                setLocation(`/booking/success?bookingId=${currentBooking.id}`);
+              }}
+              onError={(error) => {
+                toast({
+                  title: "Payment failed",
+                  description: error,
+                  variant: "destructive",
+                });
+              }}
+              onCancel={() => {
+                setShowStripeCheckout(false);
+                toast({
+                  title: "Payment cancelled",
+                  description: "You can retry payment from your bookings page.",
+                });
+                setLocation(`/bookings/${currentBooking.id}`);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       </div>
     </div>
   );
