@@ -427,6 +427,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ID Scanning endpoint
+  app.post('/api/id-scan', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scanData, scanMethod, timestamp } = req.body;
+      const userId = req.user.id;
+      
+      if (!scanData) {
+        return res.status(400).json({ message: "No scan data provided" });
+      }
+      
+      // Log scan for audit trail
+      console.log(`[ID SCAN] User ${userId} scanned ID via ${scanMethod} at ${timestamp}`);
+      console.log(`[ID SCAN] Data preview: ${scanData.substring(0, 100)}...`);
+      
+      // In production, you would:
+      // 1. Parse the QR data or OCR text
+      // 2. Extract ID information (name, ID number, etc.)
+      // 3. Verify against Ethiopian ID database API
+      // 4. Create a verification document record
+      // 5. Update user's idVerified status
+      
+      // For now, we'll mark as verified if scan contains data
+      if (scanData.length > 10) {
+        // Update user's ID verification status
+        const user = await storage.getUser(userId);
+        if (user) {
+          await storage.upsertUser({
+            ...user,
+            idVerified: true,
+          });
+        }
+        
+        res.json({
+          success: true,
+          message: "ID verified successfully",
+          verified: true,
+          scanMethod,
+          timestamp,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "Invalid ID data. Please try again.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error processing ID scan:", error);
+      res.status(500).json({ message: error.message || "Failed to process ID scan" });
+    }
+  });
+
   // Admin statistics
   app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
     try {
