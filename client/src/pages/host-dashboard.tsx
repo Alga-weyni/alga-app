@@ -292,56 +292,56 @@ export default function HostDashboard() {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
         
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-dark">Host Dashboard</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-dark">Host Dashboard</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
               Welcome back, {user?.firstName}! Manage your properties and bookings.
             </p>
           </div>
-          <Button onClick={handleAddNew} className="bg-eth-green hover:bg-green-700">
+          <Button onClick={handleAddNew} className="bg-eth-green hover:bg-green-700 w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Add Property
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Home className="h-8 w-8 text-eth-green" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Properties</p>
-                  <p className="text-2xl font-bold text-neutral-dark">{totalProperties}</p>
+                <Home className="h-6 w-6 sm:h-8 sm:w-8 text-eth-green" />
+                <div className="ml-2 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Properties</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-dark">{totalProperties}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-eth-yellow" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Bookings</p>
-                  <p className="text-2xl font-bold text-neutral-dark">{totalBookings}</p>
+                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-eth-yellow" />
+                <div className="ml-2 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Bookings</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-dark">{totalBookings}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-eth-red" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-neutral-dark">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-eth-red" />
+                <div className="ml-2 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-dark">
                     {formatPrice(totalRevenue.toString())}
                   </p>
                 </div>
@@ -350,12 +350,12 @@ export default function HostDashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
-                <Star className="h-8 w-8 text-eth-yellow" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Average Rating</p>
-                  <p className="text-2xl font-bold text-neutral-dark">
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-eth-yellow" />
+                <div className="ml-2 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Average Rating</p>
+                  <p className="text-lg sm:text-2xl font-bold text-neutral-dark">
                     {averageRating.toFixed(1)}
                   </p>
                 </div>
