@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "");
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface StripeCheckoutFormProps {
   clientSecret: string;
@@ -129,6 +130,30 @@ export default function StripeCheckout({
       },
     },
   };
+
+  // Show configuration warning if Stripe key is missing
+  if (!stripePromise) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-eth-brown">Payment Configuration Required</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 space-y-4">
+            <p className="text-gray-600">
+              Stripe payment integration requires configuration.
+            </p>
+            <p className="text-sm text-gray-500">
+              Add <code className="bg-gray-100 px-2 py-1 rounded">VITE_STRIPE_PUBLIC_KEY</code> to your environment secrets.
+            </p>
+            <Button variant="outline" onClick={onCancel}>
+              Go Back
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
