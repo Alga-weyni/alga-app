@@ -141,31 +141,31 @@ export default function Properties() {
           
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
           {/* Filters Sidebar */}
-          <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="sticky top-24 bg-white/60 backdrop-blur-sm border-eth-brown/20 rounded-xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-1" style={{ color: '#2d1405', fontFamily: "'Playfair Display', serif" }}>Filters</h3>
-                  <p className="text-xs text-eth-brown/60">Refine your search</p>
+          <div className={`lg:w-72 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <Card className="sticky top-20 bg-white border-eth-brown/10 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-5">
+                <div className="mb-5">
+                  <h3 className="text-lg font-bold mb-0.5" style={{ color: '#2d1405', fontFamily: "'Playfair Display', serif" }}>Filters</h3>
+                  <p className="text-xs text-eth-brown/50">Refine your search</p>
                 </div>
                 
                 {activeFilterCount > 0 && (
-                  <div className="flex gap-2 mb-6">
+                  <div className="flex gap-2 mb-5">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={clearFilters} 
                       className="
-                        flex-1 text-eth-brown border-eth-brown/30 hover:bg-eth-brown hover:text-white
-                        transition-all duration-200
+                        flex-1 text-eth-brown border-eth-brown/20 hover:bg-eth-brown hover:text-white
+                        transition-all duration-200 text-xs font-medium
                       "
                     >
-                      Reset Filters
+                      Reset All
                     </Button>
                   </div>
                 )}
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {/* Location */}
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Location</Label>
@@ -261,21 +261,21 @@ export default function Properties() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-              <div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-eth-brown" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-5 gap-3">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-2xl sm:text-3xl font-bold text-eth-brown truncate" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
                   {filters.city ? `Properties in ${filters.city}` : 'All Properties'}
                 </h2>
-                <p className="text-sm sm:text-base text-eth-brown/70 mt-1">
-                  {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
+                <p className="text-sm text-eth-brown/60 mt-0.5">
+                  {properties.length} {properties.length === 1 ? 'property' : 'properties'}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
+                  <Badge variant="secondary" className="text-xs px-2.5 py-0.5 bg-eth-orange/10 text-eth-brown border-0">
+                    {activeFilterCount} active
                   </Badge>
                 )}
                 
@@ -283,19 +283,19 @@ export default function Properties() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden"
+                  className="lg:hidden border-eth-brown/20 hover:bg-eth-brown/5"
                   data-testid="button-toggle-filters"
                 >
-                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  <SlidersHorizontal className="h-4 w-4 mr-1.5" />
                   Filters
                 </Button>
               </div>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-80"></div>
+                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-2xl h-72"></div>
                 ))}
               </div>
             ) : properties.length === 0 ? (
@@ -333,15 +333,15 @@ export default function Properties() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {properties.map((property, index) => (
                     <div 
                       key={property.id}
-                      className="animate-fade-in"
+                      className="animate-fade-in hover:scale-[1.02] transition-transform duration-200"
                       style={{ 
-                        animationDelay: `${index * 50}ms`,
+                        animationDelay: `${index * 40}ms`,
                         opacity: 0,
-                        animation: 'fadeIn 200ms ease-in forwards'
+                        animation: 'fadeIn 180ms ease-out forwards'
                       }}
                     >
                       <PropertyCard
@@ -352,8 +352,8 @@ export default function Properties() {
                   ))}
                 </div>
                 
-                <p className="text-center text-xs text-eth-brown/50 mt-12 italic">
-                  Showing verified Ethiopian stays curated by Alga.
+                <p className="text-center text-xs text-eth-brown/40 mt-10 italic">
+                  Verified Ethiopian stays curated by Alga
                 </p>
               </>
             )}
