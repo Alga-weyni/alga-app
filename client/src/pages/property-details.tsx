@@ -288,27 +288,29 @@ export default function PropertyDetails() {
       <div className="flex-1 lg:ml-20">
         <Header />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
         
         {/* Image Gallery */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          <div className="lg:col-span-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
+          <div className="sm:col-span-2 lg:col-span-3">
             <img
               src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
               alt={property.title}
-              className="w-full h-96 object-cover rounded-xl"
+              className="w-full h-56 sm:h-80 lg:h-96 object-cover rounded-lg sm:rounded-xl"
+              data-testid="img-property-main"
             />
           </div>
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-4">
             {property.images?.slice(1, 3).map((image, index) => (
               <img
                 key={index}
                 src={image}
                 alt={`${property.title} ${index + 2}`}
-                className="w-full h-44 object-cover rounded-xl"
+                className="w-full h-32 sm:h-44 object-cover rounded-lg sm:rounded-xl"
+                data-testid={`img-property-${index + 2}`}
               />
             ))}
           </div>
@@ -317,106 +319,106 @@ export default function PropertyDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-neutral-dark mb-2">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                <div className="flex-1">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-dark mb-1 sm:mb-2" data-testid="text-property-title">
                     {property.title}
                   </h1>
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <MapPin className="h-4 w-4 mr-1" />
+                  <div className="flex items-center text-gray-600 text-sm sm:text-base mb-3 sm:mb-4">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
                     <span>{property.location}, {property.city}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="icon">
-                    <Share className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="button-share">
+                    <Share className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
-                    <Heart className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="button-favorite">
+                    <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4 mb-6">
-                <Badge variant="secondary">{getTypeLabel(property.type)}</Badge>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <Badge variant="secondary" className="text-xs sm:text-sm">{getTypeLabel(property.type)}</Badge>
                 <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 fill-eth-yellow text-eth-yellow" />
-                  <span className="font-medium">
+                  <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-eth-yellow text-eth-yellow" />
+                  <span className="text-sm sm:text-base font-medium" data-testid="text-rating">
                     {parseFloat(property.rating || "0").toFixed(1)}
                   </span>
-                  <span className="text-gray-500">
+                  <span className="text-xs sm:text-sm text-gray-500">
                     ({property.reviewCount} reviews)
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-6 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>{property.maxGuests} guests</span>
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base">{property.maxGuests} guests</span>
                 </div>
                 <div className="flex items-center">
-                  <Bed className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>{property.bedrooms} bedrooms</span>
+                  <Bed className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base">{property.bedrooms} bedrooms</span>
                 </div>
                 <div className="flex items-center">
-                  <Bath className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>{property.bathrooms} bathrooms</span>
+                  <Bath className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base">{property.bathrooms} bathrooms</span>
                 </div>
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-4 sm:my-6" />
 
             {/* Description */}
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">About this place</h3>
-              <p className="text-gray-700 leading-relaxed">{property.description}</p>
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">About this place</h3>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{property.description}</p>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-4 sm:my-6" />
 
             {/* Amenities */}
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Amenities</h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Amenities</h3>
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                 {property.amenities?.map((amenity) => (
                   <div key={amenity} className="flex items-center">
-                    <Wifi className="h-4 w-4 mr-2 text-gray-600" />
-                    <span>{amenity}</span>
+                    <Wifi className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-600 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">{amenity}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="my-4 sm:my-6" />
 
             {/* Reviews */}
             <div>
-              <h3 className="text-xl font-semibold mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
                 Reviews ({reviews.length})
               </h3>
               {reviews.length === 0 ? (
-                <p className="text-gray-600">No reviews yet. Be the first to review!</p>
+                <p className="text-sm sm:text-base text-gray-600">No reviews yet. Be the first to review!</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {reviews.slice(0, 3).map((review) => (
-                    <div key={review.id} className="border-b pb-4">
+                    <div key={review.id} className="border-b pb-3 sm:pb-4">
                       <div className="flex items-center mb-2">
-                        <Avatar className="h-8 w-8 mr-3">
+                        <Avatar className="h-7 w-7 sm:h-8 sm:w-8 mr-2 sm:mr-3">
                           <AvatarFallback>
                             {review.reviewerId.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="flex items-center">
-                            <span className="font-medium mr-2">Guest</span>
+                          <div className="flex items-center flex-wrap gap-2">
+                            <span className="text-sm sm:text-base font-medium">Guest</span>
                             <div className="flex">
                               {[...Array(5)].map((_, i) => (
                                 <Star
                                   key={i}
-                                  className={`h-3 w-3 ${
+                                  className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
                                     i < review.rating
                                       ? "fill-eth-yellow text-eth-yellow"
                                       : "text-gray-300"
@@ -425,12 +427,12 @@ export default function PropertyDetails() {
                               ))}
                             </div>
                           </div>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-[10px] sm:text-xs text-gray-500">
                             {new Date(review.createdAt!).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
-                      <p className="text-gray-700">{review.comment}</p>
+                      <p className="text-sm sm:text-base text-gray-700">{review.comment}</p>
                     </div>
                   ))}
                 </div>
@@ -440,45 +442,49 @@ export default function PropertyDetails() {
 
           {/* Booking Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="text-2xl">
+            <Card className="lg:sticky lg:top-24">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-xl sm:text-2xl">
                   {formatPrice(property.pricePerNight)}
-                  <span className="text-base font-normal text-gray-600">/night</span>
+                  <span className="text-sm sm:text-base font-normal text-gray-600">/night</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
-                      <Label htmlFor="checkIn">Check-in</Label>
+                      <Label htmlFor="checkIn" className="text-xs sm:text-sm">Check-in</Label>
                       <Input
                         id="checkIn"
                         type="date"
                         value={bookingData.checkIn}
                         onChange={(e) => setBookingData(prev => ({ ...prev, checkIn: e.target.value }))}
                         min={new Date().toISOString().split('T')[0]}
+                        className="text-xs sm:text-sm h-9 sm:h-10"
+                        data-testid="input-checkin"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="checkOut">Check-out</Label>
+                      <Label htmlFor="checkOut" className="text-xs sm:text-sm">Check-out</Label>
                       <Input
                         id="checkOut"
                         type="date"
                         value={bookingData.checkOut}
                         onChange={(e) => setBookingData(prev => ({ ...prev, checkOut: e.target.value }))}
                         min={bookingData.checkIn || new Date().toISOString().split('T')[0]}
+                        className="text-xs sm:text-sm h-9 sm:h-10"
+                        data-testid="input-checkout"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="guests">Guests</Label>
+                    <Label htmlFor="guests" className="text-xs sm:text-sm">Guests</Label>
                     <Select 
                       value={bookingData.guests.toString()} 
                       onValueChange={(value) => setBookingData(prev => ({ ...prev, guests: parseInt(value) }))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10" data-testid="select-guests">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -492,8 +498,8 @@ export default function PropertyDetails() {
                   </div>
 
                   {bookingData.checkIn && bookingData.checkOut && (
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
+                    <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
                         <span>
                           {formatPrice(property.pricePerNight)} x{" "}
                           {Math.ceil(
@@ -514,9 +520,9 @@ export default function PropertyDetails() {
                         </span>
                       </div>
                       <Separator className="my-2" />
-                      <div className="flex justify-between items-center font-semibold">
+                      <div className="flex justify-between items-center font-semibold text-sm sm:text-base">
                         <span>Total</span>
-                        <span>
+                        <span data-testid="text-total-price">
                           {formatPrice(
                             (parseFloat(property.pricePerNight) * 
                              Math.ceil(
@@ -533,11 +539,11 @@ export default function PropertyDetails() {
                   <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
                     <DialogTrigger asChild>
                       <Button 
-                        className="w-full bg-eth-red hover:bg-red-700" 
-                        size="lg"
+                        className="w-full bg-eth-red hover:bg-red-700 h-10 sm:h-11 text-sm sm:text-base" 
                         disabled={!bookingData.checkIn || !bookingData.checkOut}
+                        data-testid="button-reserve"
                       >
-                        <Calendar className="mr-2 h-4 w-4" />
+                        <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                         Reserve
                       </Button>
                     </DialogTrigger>
