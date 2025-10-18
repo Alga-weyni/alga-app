@@ -17,6 +17,11 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: Tailwind CSS with an Ethiopian-themed color palette.
 - **State Management**: React Query for server state management.
 - **Forms**: React Hook Form with Zod for validation.
+- **Mobile Optimization**: All dashboards (Host, Admin, Operator) fully responsive with:
+    - Responsive headers and stat grids (2-column layout on mobile)
+    - Compact tab navigation with abbreviated labels
+    - Mobile-first padding and spacing
+    - Touch-friendly button sizing
 - **UI/UX Decisions**: Incorporates Shadcn/ui tabs, responsive grid layouts, modal-based checkouts, and a dual-tab authentication dialog. Features like the "Share Your Ethiopian Home" section with an iPhone app mockup and Ethiopian-themed design elements are integrated into the home page.
 
 ### Backend Architecture
@@ -58,7 +63,12 @@ Preferred communication style: Simple, everyday language.
     - **Status Tracking**: Active, expired, or revoked states
     - **Guest Display**: Prominently shown on booking success page with validity dates
     - **API Access**: Routes for retrieving codes by booking ID or all guest codes
-- **Review System**: User-generated ratings and reviews.
+- **Advanced Weighted Review System (ALGA Review Engine)**: 
+    - **Time-Decay Algorithm**: Recent reviews weighted more heavily with 3-month decay curve
+    - **Weight Formula**: `weight = 1 / (1 + ageDays / 90)` 
+    - **Auto-Recalculation**: Property ratings recalculate automatically after each new review
+    - **Rating Categories**: 6 categories (overall, cleanliness, communication, accuracy, location, value)
+    - **Display**: Shows both weighted average and total review count
 - **Universal ID Verification System** (REQUIRED FOR ALL USERS):
     - **Ethiopian Citizens**: Digital ID QR code scanning via `qr-scanner` library (`/scan-id` page)
     - **Foreign Visitors**: Photo upload (passport, driver's license, national ID) with OCR via Tesseract.js
