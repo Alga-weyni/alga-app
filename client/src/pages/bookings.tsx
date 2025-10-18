@@ -69,8 +69,8 @@ export default function Bookings() {
                 Start exploring properties and make your first booking
               </p>
               <Button asChild>
-                <Link href="/properties">
-                  <a data-testid="button-browse-properties">Browse Properties</a>
+                <Link href="/properties" data-testid="button-browse-properties">
+                  Browse Properties
                 </Link>
               </Button>
             </CardContent>
@@ -118,11 +118,9 @@ export default function Bookings() {
                           </p>
                         </div>
                         <Button variant="outline" asChild>
-                          <Link href={`/bookings/${booking.id}`}>
-                            <a className="flex items-center gap-2" data-testid={`button-view-details-${booking.id}`}>
-                              View Details
-                              <ChevronRight className="h-4 w-4" />
-                            </a>
+                          <Link href={`/bookings/${booking.id}`} className="flex items-center gap-2" data-testid={`button-view-details-${booking.id}`}>
+                            View Details
+                            <ChevronRight className="h-4 w-4" />
                           </Link>
                         </Button>
                       </div>

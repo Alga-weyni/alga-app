@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import type { AccessCode } from "@shared/schema";
 
 export default function BookingSuccess() {
   const [, setLocation] = useLocation();
@@ -21,7 +22,7 @@ export default function BookingSuccess() {
   }, []);
 
   // Fetch access code for this booking
-  const { data: accessCode } = useQuery({
+  const { data: accessCode } = useQuery<AccessCode>({
     queryKey: ["/api/bookings", bookingId, "access-code"],
     enabled: !!bookingId,
     retry: 3, // Retry a few times as code might be generating
