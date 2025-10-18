@@ -1,57 +1,67 @@
 import { Link } from "wouter";
-import { Home, Facebook, Twitter, Instagram } from "lucide-react";
+import { Home, Facebook, Twitter, Instagram, Shield, CreditCard, Smartphone } from "lucide-react";
+import { SiStripe, SiPaypal } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-background border-t border-border text-foreground py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-eth-brown text-white py-16">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div>
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Home className="text-primary-foreground text-lg" />
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-eth-orange rounded-lg flex items-center justify-center">
+                <Home className="text-white text-xl" />
               </div>
-              <h4 className="text-xl font-bold luxury-rich-gold">Alga</h4>
+              <h4 className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>ALGA</h4>
             </div>
-            <p className="text-muted-foreground text-sm mb-4">
-              Discover authentic Ethiopian hospitality and connect with local communities 
-              across the beautiful landscapes of Ethiopia.
+            <p className="text-white/80 text-sm leading-relaxed">
+              Authentic Ethiopian hospitality connecting travelers with local communities across Ethiopia's beautiful landscapes.
             </p>
-            <div className="flex space-x-4">
-              <Facebook className="h-5 w-5 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
-              <Twitter className="h-5 w-5 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
-              <Instagram className="h-5 w-5 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
+            <div className="flex items-center space-x-2 text-sm">
+              <Shield className="h-4 w-4 text-eth-orange" />
+              <span className="text-white/90 font-semibold">100% Ethiopian Owned</span>
+            </div>
+            <div className="flex space-x-4 pt-2">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-eth-orange transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
-          {/* Explore */}
+          {/* Explore Cities */}
           <div>
-            <h5 className="font-semibold mb-4 luxury-rich-gold">Explore</h5>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <h5 className="font-bold mb-4 text-lg text-eth-orange">Explore Ethiopia</h5>
+            <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/properties?city=Addis Ababa" className="hover:text-primary transition-colors">
-                  Addis Ababa
+                <Link href="/properties?city=Addis Ababa" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
+                  → Addis Ababa
                 </Link>
               </li>
               <li>
-                <Link href="/properties?city=Bahir Dar" className="hover:text-primary transition-colors">
-                  Bahir Dar
+                <Link href="/properties?city=Bahir Dar" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
+                  → Bahir Dar
                 </Link>
               </li>
               <li>
-                <Link href="/properties?city=Gondar" className="hover:text-primary transition-colors">
-                  Gondar
+                <Link href="/properties?city=Gondar" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
+                  → Gondar
                 </Link>
               </li>
               <li>
-                <Link href="/properties?city=Lalibela" className="hover:text-primary transition-colors">
-                  Lalibela
+                <Link href="/properties?city=Lalibela" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
+                  → Lalibela
                 </Link>
               </li>
               <li>
-                <Link href="/properties?city=Hawassa" className="hover:text-primary transition-colors">
-                  Hawassa
+                <Link href="/properties?city=Hawassa" className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block">
+                  → Hawassa
                 </Link>
               </li>
             </ul>
@@ -59,39 +69,50 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h5 className="font-semibold mb-4 luxury-rich-gold">Support</h5>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Safety Information</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Cancellation Options</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Host Resources</a></li>
+            <h5 className="font-bold mb-4 text-lg text-eth-orange">Support & Resources</h5>
+            <ul className="space-y-2.5 text-sm">
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Safety & Trust</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Host Resources</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Cancellation Policy</a></li>
+              <li><a href="#" className="text-white/80 hover:text-white transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
-          {/* Payment Methods */}
+          {/* Secure Payments */}
           <div>
-            <h5 className="font-semibold mb-4 luxury-rich-gold">Payment Partners</h5>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Secure payments via:</p>
-              <ul className="space-y-1">
-                <li>• Commercial Bank of Ethiopia</li>
-                <li>• Dashen Bank</li>
-                <li>• Bank of Abyssinia</li>
-                <li>• Mobile Money (M-Birr)</li>
-              </ul>
+            <h5 className="font-bold mb-4 text-lg text-eth-orange">Secure Payments</h5>
+            <p className="text-white/80 text-sm mb-4">We accept payments via:</p>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                <Smartphone className="h-5 w-5 text-eth-orange" />
+                <span className="text-sm font-medium">Telebirr</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                <SiStripe className="h-5 w-5 text-[#635BFF]" />
+                <span className="text-sm font-medium">Stripe</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                <SiPaypal className="h-5 w-5 text-[#00457C]" />
+                <span className="text-sm font-medium">PayPal</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center space-x-2 text-xs text-white/70">
+              <Shield className="h-4 w-4" />
+              <span>256-bit SSL encryption</span>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-            © 2024 Alga. All rights reserved.
+        <div className="border-t border-white/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-white/70">
+          <p className="text-sm mb-4 md:mb-0">
+            © 2024 Alga. Made with ❤️ in Ethiopia. All rights reserved.
           </p>
-          <div className="flex space-x-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-primary transition-colors">Sitemap</a>
+          <div className="flex flex-wrap justify-center gap-6 text-sm">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Sitemap</a>
           </div>
         </div>
       </div>
