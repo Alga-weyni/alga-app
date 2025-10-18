@@ -448,10 +448,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locationMatch = cleanText.match(/Addis Ababa|Tigray|Oromia|Amhara|Sidama|Afar|Somali|SNNPR|Dire Dawa|Harar/i);
     const location = locationMatch ? locationMatch[0] : "Unknown";
 
-    return { idNumber, fullName, expiryDate, location };
+    return { idNumber, fullName, expiryDate, location, documentType: 'ethiopian_id' };
   }
 
-  // ID Scanning endpoint with Ethiopian ID validation
+  // Extract data from foreign documents (passport, driver's license, etc.)
+  function extractForeignDocumentData(ocrText: string) {
+    const cleanText = ocrText.replace(/\s+/g, " ").trim();
+    const upperText = cleanText.toUpperCase();
+
+    // Detect document type
+    let documentType = 'other';
+    if (upperText.includes('PASSPORT')) {
+      documentType = 'passport';
+    } else if (upperText.includes('DRIVER') || upperText.includes('DRIVING') || upperText.includes('LICENSE')) {
+      documentType = 'drivers_license';
+    }
+
+    // Extract passport number (various formats)
+    let idNumber: string | null = null;
+    
+    // Common passport patterns
+    const passportPatterns = [
+      /(?:Passport|No|Number)[:\s]*([A-Z0-9]{6,15})/i,
+      /\b([A-Z]{1,2}\d{6,9})\b/,
+      /\b(\d{9})\b/,
+    ];
+    
+    for (const pattern of passportPatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        idNumber = match[1] || match[0];
+        break;
+      }
+    }
+
+    // Extract name (usually in CAPS on passports)
+    const namePatterns = [
+      /(?:Name|Surname|Given Names?)[:\s]*([A-Z\s]{5,50})/i,
+      /([A-Z]{3,}\s+[A-Z]{3,})/,
+    ];
+    
+    let fullName: string | null = null;
+    for (const pattern of namePatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        fullName = match[1].trim();
+        break;
+      }
+    }
+
+    // Extract expiry date (various formats)
+    const expiryPatterns = [
+      /(?:Expiry|Expires?|Valid Until)[:\s]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+    ];
+    
+    let expiryDate: string | null = null;
+    for (const pattern of expiryPatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        expiryDate = match[1];
+        break;
+      }
+    }
+
+    // Extract country/nationality
+    const countryMatch = cleanText.match(/(?:Nationality|Country)[:\s]*([A-Za-z\s]+)/i);
+    const country = countryMatch ? countryMatch[1].trim() : null;
+
+    return {
+      idNumber,
+      fullName,
+      expiryDate,
+      country,
+      documentType,
+      location: null,
+    };
+  }
+
+  // Universal ID Scanning endpoint - supports Ethiopian ID and foreign documents
   app.post('/api/id-scan', isAuthenticated, async (req: any, res) => {
     try {
       const { scanData, scanMethod, timestamp } = req.body;
@@ -465,51 +540,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[ID SCAN] User ${userId} scanned ID via ${scanMethod} at ${timestamp}`);
       console.log(`[ID SCAN] Data preview: ${scanData.substring(0, 100)}...`);
       
-      // Ethiopian ID number format: 12 digits
-      const idRegex = /^[0-9]{12}$/;
       let idNumber: string | null = null;
       let fullName: string | null = null;
       let expiryDate: string | null = null;
       let location: string | null = null;
+      let documentType: string = 'other';
+      let country: string | null = null;
       
       // Parse data based on scan method
       if (scanMethod === "qr") {
+        // QR code scan - Ethiopian Digital ID
+        const ethiopianIdRegex = /^[0-9]{12}$/;
         try {
           // Try to parse as base64-encoded JSON (Ethiopian digital ID format)
           const decoded = JSON.parse(Buffer.from(scanData, 'base64').toString('utf-8'));
           idNumber = decoded.idNumber || decoded.id_number || decoded.ID;
           fullName = decoded.fullName || decoded.full_name || decoded.name;
+          documentType = 'ethiopian_id';
+          country = 'Ethiopia';
         } catch (e) {
           // If not base64, try parsing as plain JSON
           try {
             const parsed = JSON.parse(scanData);
             idNumber = parsed.idNumber || parsed.id_number || parsed.ID;
             fullName = parsed.fullName || parsed.full_name || parsed.name;
+            documentType = 'ethiopian_id';
+            country = 'Ethiopia';
           } catch (e2) {
             // If not JSON, try extracting ID number directly from string
-            const match = scanData.match(idRegex);
+            const match = scanData.match(ethiopianIdRegex);
             idNumber = match ? match[0] : null;
+            documentType = 'ethiopian_id';
+            country = 'Ethiopia';
           }
         }
+
+        // Validate Ethiopian ID format
+        if (!idNumber || !ethiopianIdRegex.test(idNumber)) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid Ethiopian ID format. ID must be 12 digits.",
+            error: "Invalid ID number",
+          });
+        }
       } else if (scanMethod === "photo") {
-        // OCR text - use enhanced extraction function
-        const extractedData = extractEthiopianIDData(scanData);
-        idNumber = extractedData.idNumber;
-        fullName = extractedData.fullName !== "Not detected" ? extractedData.fullName : null;
-        expiryDate = extractedData.expiryDate;
-        location = extractedData.location !== "Unknown" ? extractedData.location : null;
+        // Photo upload - could be Ethiopian ID or foreign document
+        // Try Ethiopian ID first
+        const ethiopianData = extractEthiopianIDData(scanData);
+        
+        if (ethiopianData.idNumber) {
+          // Looks like Ethiopian ID
+          idNumber = ethiopianData.idNumber;
+          fullName = ethiopianData.fullName !== "Not detected" ? ethiopianData.fullName : null;
+          expiryDate = ethiopianData.expiryDate;
+          location = ethiopianData.location !== "Unknown" ? ethiopianData.location : null;
+          documentType = 'ethiopian_id';
+          country = 'Ethiopia';
+        } else {
+          // Try foreign document extraction
+          const foreignData = extractForeignDocumentData(scanData);
+          idNumber = foreignData.idNumber;
+          fullName = foreignData.fullName;
+          expiryDate = foreignData.expiryDate;
+          country = foreignData.country;
+          documentType = foreignData.documentType;
+          location = null;
+        }
       }
       
-      // Validate ID number format
-      if (!idNumber || !idRegex.test(idNumber)) {
+      // Validate that we extracted at least an ID number
+      if (!idNumber) {
         return res.status(400).json({
           success: false,
-          message: "Invalid Ethiopian ID format. ID must be 12 digits.",
-          error: "Invalid ID number",
+          message: "Could not extract ID number from document. Please ensure the image is clear and try again.",
+          error: "No ID number detected",
         });
       }
       
-      console.log(`[ID SCAN] Extracted - ID: ${idNumber}, Name: ${fullName || 'Not extracted'}`);
+      console.log(`[ID SCAN] Extracted - Type: ${documentType}, ID: ${idNumber}, Name: ${fullName || 'Not extracted'}`);
       
       // Update user with verified ID information
       const user = await storage.getUser(userId);
@@ -519,17 +627,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           idVerified: true,
           idNumber,
           idFullName: fullName || user.idFullName,
+          idDocumentType: documentType,
+          idExpiryDate: expiryDate || user.idExpiryDate,
+          idCountry: country || user.idCountry,
         });
       }
       
+      const docTypeLabel = documentType === 'ethiopian_id' ? 'Ethiopian ID' : 
+                          documentType === 'passport' ? 'Passport' :
+                          documentType === 'drivers_license' ? "Driver's License" : 'ID';
+      
       res.json({
         success: true,
-        message: "Ethiopian ID verified successfully",
+        message: `${docTypeLabel} verified successfully`,
         verified: true,
         idNumber,
         fullName,
         expiryDate,
         location,
+        documentType,
+        country,
         scanMethod,
         timestamp,
       });
