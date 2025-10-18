@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import LoginPage from "@/pages/login";
 import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
 import PropertySearch from "@/pages/search";
@@ -30,6 +31,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes - accessible to everyone */}
+      <Route path="/login" component={LoginPage} />
       <Route path="/search" component={PropertySearch} />
       <Route path="/discover" component={DiscoverPage} />
       <Route path="/become-host" component={BecomeHost} />
