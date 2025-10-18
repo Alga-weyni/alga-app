@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
@@ -18,6 +18,7 @@ import algaAppDownload from "@assets/alga mobile app image _1760806950707.jpeg";
 export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [, setLocation] = useLocation();
 
   const openAuthDialog = (mode: "login" | "register") => {
     setAuthMode(mode);
@@ -408,7 +409,7 @@ export default function Landing() {
                 </ul>
                 <div>
                   <Button 
-                    onClick={() => openAuthDialog("register")} 
+                    onClick={() => setLocation("/become-host")} 
                     size="lg" 
                     className="bg-eth-orange hover:opacity-90 border-0 text-white rounded-xl px-10 py-4 font-bold text-lg"
                     data-testid="button-start-hosting"
