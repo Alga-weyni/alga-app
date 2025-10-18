@@ -6,6 +6,8 @@ import PropertyCard from "@/components/property-card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
 import { BackButton } from "@/components/back-button";
+import { SEOHead } from "@/components/seo-head";
+import { PropertyGridSkeleton } from "@/components/property-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,8 +95,21 @@ export default function Properties() {
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
+  const seoTitle = filters.city 
+    ? `${filters.city} Stays - Alga` 
+    : "Authentic Ethiopian Stays - Alga";
+  
+  const seoDescription = filters.city
+    ? `Find unique stays in ${filters.city}, Ethiopia. Book traditional homes, modern hotels, and cultural guesthouses. Safe, verified, and authentically Ethiopian.`
+    : "Discover unique Ethiopian accommodations from Addis Ababa to Lalibela. Book traditional homes, modern hotels, and cultural guesthouses. Safe, verified, and authentically Ethiopian.";
+
   return (
     <div className="flex min-h-screen bg-eth-warm-tan">
+      <SEOHead 
+        title={seoTitle}
+        description={seoDescription}
+      />
+      
       {/* Ethiopian Pattern Sidebar */}
       <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
       
@@ -148,16 +163,12 @@ export default function Properties() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="bg-eth-brown/5 animate-pulse rounded-2xl h-80"></div>
-                ))}
-              </div>
+              <PropertyGridSkeleton count={12} />
             ) : properties.length === 0 ? (
               <div className="text-center py-16 px-6">
                 <div className="max-w-md mx-auto">
-                  <div className="w-16 h-16 bg-eth-orange/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Filter className="h-8 w-8 text-eth-orange" />
+                  <div className="w-16 h-16 bg-eth-brown/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Filter className="h-8 w-8 text-eth-brown" />
                   </div>
                   
                   <h3 className="text-2xl font-bold text-eth-brown mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -170,7 +181,7 @@ export default function Properties() {
                   
                   <Button 
                     onClick={() => setHasSearched(false)} 
-                    className="bg-eth-orange hover:bg-eth-orange/90 text-white px-8 py-6" 
+                    className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6" 
                     data-testid="button-clear-filters"
                   >
                     Clear Search

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { BackButton } from "@/components/back-button";
+import { SEOHead } from "@/components/seo-head";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -284,6 +285,11 @@ export default function PropertyDetails() {
 
   return (
     <div className="flex min-h-screen bg-eth-warm-tan">
+      <SEOHead
+        title={`${property.title} - ${property.city} | Alga`}
+        description={`${property.description.substring(0, 155)}... Book this ${getTypeLabel(property.type)} in ${property.city}, Ethiopia. From ${formatPrice(property.pricePerNight)}/night.`}
+      />
+      
       <div className="ethiopian-pattern-sidebar fixed left-0 top-0 hidden lg:block"></div>
       <div className="flex-1 lg:ml-20">
         <Header />
