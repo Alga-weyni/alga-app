@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Home, Menu, Globe, User, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import AuthDialog from "@/components/auth-dialog";
+import AuthDialog from "@/components/auth-dialog-passwordless";
 
 interface HeaderProps {
   hideNavigation?: boolean;
