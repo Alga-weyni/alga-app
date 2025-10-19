@@ -40,7 +40,7 @@ interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultMode?: "login" | "register";
-  redirectAfterAuth?: string; // Optional redirect path after successful auth
+  redirectAfterAuth?: string;
 }
 
 export default function AuthDialog({ open, onOpenChange, defaultMode = "login", redirectAfterAuth }: AuthDialogProps) {
@@ -50,7 +50,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const [pendingContact, setPendingContact] = useState(""); // phone or email
   const [devOtp, setDevOtp] = useState<string | undefined>();
   const [, navigate] = useLocation();
-  const { toast} = useToast();
+  const { toast } = useToast();
 
   // Passwordless forms
   const phoneForm = useForm<RequestPhoneOtpData>({
@@ -105,13 +105,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       } else if (user.role === "host") {
         redirectPath = "/host/dashboard";
       } else {
-        redirectPath = "/";
+        redirectPath = "/properties";
       }
     }
     
     toast({
       title: mode === "login" ? "Welcome back!" : "Account created!",
-      description: mode === "login" ? `Logged in as ${user.firstName} ${user.lastName}` : `Welcome to Ethiopia Stays, ${user.firstName}!`,
+      description: mode === "login" ? `Logged in as ${user.firstName} ${user.lastName}` : `Welcome to Alga, ${user.firstName}!`,
     });
 
     navigate(redirectPath);
@@ -192,7 +192,9 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
             {showOtpInput ? "Verify OTP" : mode === "login" ? "Sign In" : "Create Account"}
           </DialogTitle>
           <DialogDescription className="text-eth-brown/70">
-            {showOtpInput ? "Enter the 4-digit code sent to your phone" : mode === "login" ? "Welcome back to Ethiopia Stays" : "Join our community"}
+            {showOtpInput 
+              ? `Enter the 4-digit code sent to ${pendingContact}` 
+              : mode === "login" ? "Welcome back to Alga" : "Join Ethiopia's best rental platform"}
           </DialogDescription>
         </DialogHeader>
 
@@ -210,8 +212,9 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         {...field}
                         placeholder="1234"
                         maxLength={4}
-                        className="bg-white border-eth-brown/20 text-eth-brown"
+                        className="bg-white border-eth-brown/20 text-eth-brown text-center text-2xl tracking-widest"
                         data-testid="input-otp"
+                        autoFocus
                       />
                     </FormControl>
                     <FormMessage />
@@ -229,7 +232,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   variant="outline"
                   onClick={() => {
                     setShowOtpInput(false);
-                    setPendingPhoneNumber("");
+                    setPendingContact("");
                     setDevOtp(undefined);
                   }}
                   className="flex-1 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
@@ -303,246 +306,165 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </TabsTrigger>
             </TabsList>
 
+            {/* Phone OTP Form */}
             <TabsContent value="phone" className="mt-6">
-              {mode === "login" ? (
-                <Form {...loginPhoneForm}>
-                  <form onSubmit={loginPhoneForm.handleSubmit((data) => loginPhoneMutation.mutate(data))} className="space-y-4">
-                    <FormField
-                      control={loginPhoneForm.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Phone Number</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="+251912345678" 
-                              className="bg-white border-eth-brown/20 text-eth-brown" 
-                              data-testid="input-phone-login"
-                              onChange={(e) => {
-                                let value = e.target.value;
-                                if (value && !value.startsWith('+')) {
-                                  value = '+' + value;
-                                }
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginPhoneForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-login" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={loginPhoneMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-phone-login">
-                      {loginPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
-                    </Button>
-                  </form>
-                </Form>
-              ) : (
-                <Form {...registerPhoneForm}>
-                  <form onSubmit={registerPhoneForm.handleSubmit((data) => registerPhoneMutation.mutate(data))} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+              <Form {...phoneForm}>
+                <form onSubmit={phoneForm.handleSubmit((data) => requestPhoneOtpMutation.mutate(data))} className="space-y-4">
+                  {mode === "register" && (
+                    <div className="grid grid-cols-2 gap-3">
                       <FormField
-                        control={registerPhoneForm.control}
+                        control={phoneForm.control}
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-eth-brown">First Name</FormLabel>
                             <FormControl>
-                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-firstname-register" />
+                              <Input {...field} placeholder="Abebe" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-first-name" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <FormField
-                        control={registerPhoneForm.control}
+                        control={phoneForm.control}
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-eth-brown">Last Name</FormLabel>
                             <FormControl>
-                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-lastname-register" />
+                              <Input {...field} placeholder="Kebede" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-last-name" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <FormField
-                      control={registerPhoneForm.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Phone Number</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="+251912345678" 
-                              className="bg-white border-eth-brown/20 text-eth-brown" 
-                              data-testid="input-phone-register"
-                              onChange={(e) => {
-                                let value = e.target.value;
-                                if (value && !value.startsWith('+')) {
-                                  value = '+' + value;
-                                }
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerPhoneForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-register" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={registerPhoneMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-phone-register">
-                      {registerPhoneMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
-                    </Button>
-                  </form>
-                </Form>
-              )}
+                  )}
+                  
+                  <FormField
+                    control={phoneForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-eth-brown">Phone Number</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder="+251912345678" 
+                            className="bg-white border-eth-brown/20 text-eth-brown" 
+                            data-testid="input-phone"
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              if (value && !value.startsWith('+')) {
+                                value = '+' + value;
+                              }
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={requestPhoneOtpMutation.isPending}
+                    className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                    data-testid="button-send-otp"
+                  >
+                    {requestPhoneOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {mode === "login" ? "Send OTP" : "Create Account & Send OTP"}
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
 
+            {/* Email OTP Form */}
             <TabsContent value="email" className="mt-6">
-              {mode === "login" ? (
-                <Form {...loginEmailForm}>
-                  <form onSubmit={loginEmailForm.handleSubmit((data) => loginEmailMutation.mutate(data))} className="space-y-4">
-                    <FormField
-                      control={loginEmailForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="email" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-login" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginEmailForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-email-login" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={loginEmailMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-email-login">
-                      {loginEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"}
-                    </Button>
-                  </form>
-                </Form>
-              ) : (
-                <Form {...registerEmailForm}>
-                  <form onSubmit={registerEmailForm.handleSubmit((data) => registerEmailMutation.mutate(data))} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit((data) => requestEmailOtpMutation.mutate(data))} className="space-y-4">
+                  {mode === "register" && (
+                    <div className="grid grid-cols-2 gap-3">
                       <FormField
-                        control={registerEmailForm.control}
+                        control={emailForm.control}
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-eth-brown">First Name</FormLabel>
                             <FormControl>
-                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-firstname-email-register" />
+                              <Input {...field} placeholder="Abebe" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-first-name-email" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <FormField
-                        control={registerEmailForm.control}
+                        control={emailForm.control}
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-eth-brown">Last Name</FormLabel>
                             <FormControl>
-                              <Input {...field} className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-lastname-email-register" />
+                              <Input {...field} placeholder="Kebede" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-last-name-email" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <FormField
-                      control={registerEmailForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="email" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-register" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerEmailForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-password-email-register" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={registerEmailMutation.isPending} className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white" data-testid="button-email-register">
-                      {registerEmailMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
-                    </Button>
-                  </form>
-                </Form>
-              )}
+                  )}
+                  
+                  <FormField
+                    control={emailForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-eth-brown">Email</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="email"
+                            placeholder="abebe@example.com" 
+                            className="bg-white border-eth-brown/20 text-eth-brown" 
+                            data-testid="input-email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={requestEmailOtpMutation.isPending}
+                    className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                    data-testid="button-send-otp-email"
+                  >
+                    {requestEmailOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {mode === "login" ? "Send OTP" : "Create Account & Send OTP"}
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         )}
 
+        {/* Toggle Login/Register */}
         {!showOtpInput && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-eth-brown/70">
-              {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button
-                onClick={() => switchMode(mode === "login" ? "register" : "login")}
-                className="text-eth-orange hover:underline font-medium"
-                data-testid="button-switch-mode"
-              >
-                {mode === "login" ? "Sign Up" : "Sign In"}
-              </button>
-            </p>
+          <div className="text-center text-sm mt-4">
+            <span className="text-eth-brown/70">
+              {mode === "login" ? "Don't have an account? " : "Already have an account? "}
+            </span>
+            <button
+              type="button"
+              onClick={() => switchMode(mode === "login" ? "register" : "login")}
+              className="text-eth-brown font-medium hover:underline"
+              data-testid="button-toggle-mode"
+            >
+              {mode === "login" ? "Create Account" : "Sign In"}
+            </button>
           </div>
         )}
       </DialogContent>
