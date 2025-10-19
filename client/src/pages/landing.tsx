@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
-import AuthDialog from "@/components/auth-dialog";
+import AuthDialog from "@/components/auth-dialog-passwordless";
 import { BackButton } from "@/components/back-button";
 import { useToast } from "@/hooks/use-toast";
 import { Star, CheckCircle, Home, ArrowRight, Shield, Bell, Zap, Gift, QrCode, Smartphone, Download } from "lucide-react";
