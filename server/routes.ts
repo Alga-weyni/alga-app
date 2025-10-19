@@ -60,6 +60,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === PASSWORDLESS OTP AUTHENTICATION ===
+  
+  // Request OTP for Phone Registration (Passwordless)
+  app.post('/api/auth/request-otp/phone/register', authLimiter, async (req, res) => {
+    try {
+      const { phoneNumber, firstName, lastName } = req.body;
+      
+      if (!phoneNumber || !firstName || !lastName) {
+        return res.status(400).json({ message: "Phone number, first name, and last name are required" });
+      }
+
+      // Check if phone number already exists
+      const existingUser = await storage.getUserByPhoneNumber(phoneNumber);
+      if (existingUser) {
+        return res.status(400).json({ message: "Phone number already registered. Please login instead." });
+      }
+
+      // Auto-generate secure password in background (user doesn't need to know)
+      const autoPassword = randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(autoPassword, 10);
+      
+      // Security: Generate cryptographically secure 4-digit OTP
+      const otp = randomInt(1000, 10000).toString();
+      
+      // Create user
+      const userId = randomBytes(16).toString('hex');
+      await storage.createUser({
+        id: userId,
+        phoneNumber,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'guest',
+      });
+      
+      // Save OTP
+      await storage.saveOtp(phoneNumber, otp, 10);
+      
+      // Log OTP for development (in production, send via SMS)
+      console.log(`[PASSWORDLESS AUTH] Registration OTP for ${phoneNumber}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your phone",
+        phoneNumber,
+        contact: phoneNumber,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error in passwordless phone registration:", error);
+      res.status(400).json({ message: error.message || "Failed to send OTP" });
+    }
+  });
+
+  // Request OTP for Phone Login (Passwordless)
+  app.post('/api/auth/request-otp/phone/login', authLimiter, async (req, res) => {
+    try {
+      const { phoneNumber } = req.body;
+      
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      const user = await storage.getUserByPhoneNumber(phoneNumber);
+      if (!user) {
+        return res.status(404).json({ message: "Phone number not registered. Please create an account first." });
+      }
+
+      // Security: Generate cryptographically secure 4-digit OTP
+      const otp = randomInt(1000, 10000).toString();
+      await storage.saveOtp(phoneNumber, otp, 10);
+      
+      // Log OTP for development (in production, send via SMS)
+      console.log(`[PASSWORDLESS AUTH] Login OTP for ${phoneNumber}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your phone",
+        phoneNumber,
+        contact: phoneNumber,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error in passwordless phone login:", error);
+      res.status(400).json({ message: error.message || "Failed to send OTP" });
+    }
+  });
+
+  // Request OTP for Email Registration (Passwordless)
+  app.post('/api/auth/request-otp/email/register', authLimiter, async (req, res) => {
+    try {
+      const { email, firstName, lastName } = req.body;
+      
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({ message: "Email, first name, and last name are required" });
+      }
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered. Please login instead." });
+      }
+
+      // Auto-generate secure password in background (user doesn't need to know)
+      const autoPassword = randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(autoPassword, 10);
+      
+      // Security: Generate cryptographically secure 4-digit OTP
+      const otp = randomInt(1000, 10000).toString();
+      
+      // Create user
+      const userId = randomBytes(16).toString('hex');
+      await storage.createUser({
+        id: userId,
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'guest',
+      });
+      
+      // Save OTP (store with email as key)
+      await storage.saveOtp(email, otp, 10);
+      
+      // Log OTP for development (in production, send via email)
+      console.log(`[PASSWORDLESS AUTH] Registration OTP for ${email}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your email",
+        email,
+        contact: email,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error in passwordless email registration:", error);
+      res.status(400).json({ message: error.message || "Failed to send OTP" });
+    }
+  });
+
+  // Request OTP for Email Login (Passwordless)
+  app.post('/api/auth/request-otp/email/login', authLimiter, async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "Email not registered. Please create an account first." });
+      }
+
+      // Security: Generate cryptographically secure 4-digit OTP
+      const otp = randomInt(1000, 10000).toString();
+      await storage.saveOtp(email, otp, 10);
+      
+      // Log OTP for development (in production, send via email)
+      console.log(`[PASSWORDLESS AUTH] Login OTP for ${email}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your email",
+        email,
+        contact: email,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+      });
+    } catch (error: any) {
+      console.error("Error in passwordless email login:", error);
+      res.status(400).json({ message: error.message || "Failed to send OTP" });
+    }
+  });
+
+  // === LEGACY PASSWORD-BASED AUTHENTICATION (kept for backward compatibility) ===
+  
   // Phone Registration - Step 1: Register with password
   app.post('/api/auth/register/phone', authLimiter, async (req, res) => {
     try {
@@ -106,19 +278,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Phone Registration - Step 2: Verify OTP
+  // Verify OTP (Works for both phone and email, passwordless and legacy)
   app.post('/api/auth/verify-otp', authLimiter, async (req, res) => {
     try {
-      const validatedData = verifyOtpSchema.parse(req.body);
+      const { phoneNumber, email, otp } = req.body;
       
-      const isValid = await storage.verifyOtp(validatedData.phoneNumber, validatedData.otp);
+      if (!otp) {
+        return res.status(400).json({ message: "OTP is required" });
+      }
+
+      if (!phoneNumber && !email) {
+        return res.status(400).json({ message: "Phone number or email is required" });
+      }
+
+      const contact = phoneNumber || email;
+      const isValid = await storage.verifyOtp(contact, otp);
       
       if (!isValid) {
         return res.status(400).json({ message: "Invalid or expired OTP" });
       }
       
-      // Mark phone as verified
-      const user = await storage.markPhoneVerified(validatedData.phoneNumber);
+      // Get user and mark as verified
+      let user;
+      if (phoneNumber) {
+        user = await storage.markPhoneVerified(phoneNumber);
+      } else if (email) {
+        // For email, just get user (emails are auto-verified)
+        user = await storage.getUserByEmail(email);
+      }
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       
       // Log in user
       (req as any).login(user, (err: any) => {
@@ -126,9 +317,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Failed to log in after verification" });
         }
         res.json({ 
-          message: "Phone verified successfully",
+          message: "Verification successful",
           user,
-          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/'
+          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/properties'
         });
       });
     } catch (error: any) {
