@@ -40,10 +40,14 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 
 ### Authentication & Authorization
 
-- **Methods**: Phone + Password + 4-digit SMS OTP (Ethiopian numbers), Email + Password.
-- **Security**: Bcrypt password hashing (10 salt rounds), secure session cookies, OTP with expiry.
+- **Methods**: **Passwordless 4-digit OTP authentication** (phone and email) - Similar to ride-sharing apps, users don't need to remember passwords. Auto-generated secure passwords are created in the background for security compliance.
+- **Security**: Bcrypt password hashing (32-byte auto-generated passwords), secure session cookies, cryptographically secure 4-digit OTP with 10-minute expiry.
 - **Roles**: Guest (default), Host, Admin, Operator with role-based access control.
 - **Session Management**: PostgreSQL storage.
+- **Authentication Flow**:
+  - **Registration**: Enter phone/email + name → Receive 4-digit OTP → Verify → Logged in
+  - **Login**: Enter phone/email → Receive 4-digit OTP → Verify → Logged in
+  - Legacy password-based authentication routes maintained for backward compatibility
 
 ### Security Implementation
 
