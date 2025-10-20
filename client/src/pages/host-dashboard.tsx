@@ -858,20 +858,24 @@ export default function HostDashboard() {
                   <div className="p-8 text-center">
                     <div className="flex justify-center mb-4">
                       {uploadingFiles ? (
-                        <Loader2 className="h-12 w-12 text-eth-brown animate-spin" />
+                        <Loader2 className="h-16 w-16 text-eth-brown animate-spin" />
                       ) : (
-                        <div className="relative">
-                          <Upload className="h-12 w-12 text-eth-brown" />
-                          <ImageIcon className="h-6 w-6 text-eth-brown/60 absolute -bottom-1 -right-1" />
+                        <div className="relative inline-block">
+                          <div className="bg-eth-brown/10 p-4 rounded-full">
+                            <Upload className="h-10 w-10 text-eth-brown" />
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 bg-eth-brown rounded-full p-1.5">
+                            <ImageIcon className="h-4 w-4 text-white" />
+                          </div>
                         </div>
                       )}
                     </div>
                     
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-eth-brown">
+                      <p className="text-base font-semibold text-eth-brown">
                         {uploadingFiles ? 'Uploading images...' : dragActive ? 'Drop your images here' : 'Upload Property Images'}
                       </p>
-                      <p className="text-xs text-eth-brown/60">
+                      <p className="text-sm text-eth-brown/70">
                         Drag and drop images here, or click to browse
                       </p>
                       <p className="text-xs text-eth-brown/50">
