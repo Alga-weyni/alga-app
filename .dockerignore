@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Development files
+.replit
+.replit.nix
+.replitversion
+
+# Environment files (use docker-compose env_file instead)
+.env.local
+.env.development
+.env.test
+
+# Build outputs (will be created during build)
+dist
+client/dist
+.vite
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Test files
+coverage
+.nyc_output
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Replit specific
+replit.md
