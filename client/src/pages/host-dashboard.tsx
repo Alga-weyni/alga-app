@@ -210,6 +210,10 @@ export default function HostDashboard() {
   });
 
   const onSubmit = (data: PropertyFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Image URLs:', imageUrls);
+    console.log('Selected amenities:', selectedAmenities);
+    
     if (editingProperty) {
       updatePropertyMutation.mutate({ id: editingProperty.id, data });
     } else {
@@ -297,7 +301,11 @@ export default function HostDashboard() {
       }
 
       const data = await response.json();
-      setImageUrls(prev => [...prev, ...data.urls]);
+      const newImageUrls = [...imageUrls, ...data.urls];
+      setImageUrls(newImageUrls);
+      
+      // Update form field to sync with uploaded images
+      form.setValue('images', newImageUrls, { shouldValidate: true });
 
       toast({
         title: "Images uploaded successfully",
@@ -351,7 +359,10 @@ export default function HostDashboard() {
   }, []);
 
   const removeImageUrl = (url: string) => {
-    setImageUrls(imageUrls.filter(img => img !== url));
+    const newImageUrls = imageUrls.filter(img => img !== url);
+    setImageUrls(newImageUrls);
+    // Update form field to sync with removed images
+    form.setValue('images', newImageUrls, { shouldValidate: true });
   };
 
   const formatPrice = (price: string) => {
