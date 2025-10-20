@@ -213,6 +213,17 @@ export default function HostDashboard() {
     console.log('Form submitted with data:', data);
     console.log('Image URLs:', imageUrls);
     console.log('Selected amenities:', selectedAmenities);
+    console.log('Form errors:', form.formState.errors);
+    
+    // Ensure we have at least 5 images
+    if (imageUrls.length < 5) {
+      toast({
+        title: "Not enough images",
+        description: "Please upload at least 5 images of your property",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (editingProperty) {
       updatePropertyMutation.mutate({ id: editingProperty.id, data });
@@ -306,6 +317,11 @@ export default function HostDashboard() {
       
       // Update form field to sync with uploaded images
       form.setValue('images', newImageUrls, { shouldValidate: true });
+
+      // Reset file input so same files can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
       toast({
         title: "Images uploaded successfully",
