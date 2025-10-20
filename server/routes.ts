@@ -12,9 +12,10 @@ import { generateInvoice } from "./utils/invoice";
 import { sendOtpEmail, sendWelcomeEmail } from "./utils/email.js";
 
 // Security: Rate limiting for authentication endpoints
+// More generous limits in development for testing
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 10 : 100, // 100 in dev, 10 in production
   message: { message: "Too many authentication attempts, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
