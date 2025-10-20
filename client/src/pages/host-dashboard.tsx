@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,6 +63,10 @@ import {
   TrendingUp,
   DollarSign,
   Bookmark,
+  Upload,
+  X,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -77,7 +81,7 @@ const propertyFormSchema = insertPropertySchema.omit({
   hostId: true,
 }).extend({
   amenities: z.array(z.string()).optional(),
-  images: z.array(z.string()).optional(),
+  images: z.array(z.string()).min(5, "At least 5 property images are required"),
 });
 
 type PropertyFormData = z.infer<typeof propertyFormSchema>;
@@ -90,7 +94,9 @@ export default function HostDashboard() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
@@ -142,7 +148,6 @@ export default function HostDashboard() {
       form.reset();
       setSelectedAmenities([]);
       setImageUrls([]);
-      setNewImageUrl("");
     },
     onError: () => {
       toast({
@@ -173,7 +178,6 @@ export default function HostDashboard() {
       form.reset();
       setSelectedAmenities([]);
       setImageUrls([]);
-      setNewImageUrl("");
     },
     onError: () => {
       toast({
@@ -240,7 +244,6 @@ export default function HostDashboard() {
     setEditingProperty(null);
     setSelectedAmenities([]);
     setImageUrls([]);
-    setNewImageUrl("");
     form.reset();
     setShowAddPropertyDialog(true);
   };
@@ -253,12 +256,79 @@ export default function HostDashboard() {
     );
   };
 
-  const addImageUrl = () => {
-    if (newImageUrl.trim() && !imageUrls.includes(newImageUrl.trim())) {
-      setImageUrls([...imageUrls, newImageUrl.trim()]);
-      setNewImageUrl("");
+  const uploadImages = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    setUploadingFiles(true);
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch('/api/upload/property-images', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setImageUrls(prev => [...prev, ...data.urls]);
+
+      toast({
+        title: "Images uploaded successfully",
+        description: `${data.count} image(s) uploaded`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload images",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingFiles(false);
     }
   };
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      uploadImages(files);
+    }
+  }, []);
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (imageFiles.length > 0) {
+      uploadImages(imageFiles);
+    } else {
+      toast({
+        title: "Invalid files",
+        description: "Please select only image files",
+        variant: "destructive",
+      });
+    }
+  }, []);
 
   const removeImageUrl = (url: string) => {
     setImageUrls(imageUrls.filter(img => img !== url));
@@ -752,64 +822,121 @@ export default function HostDashboard() {
                 )}
               />
 
-              {/* Property Images */}
+              {/* Property Images Upload */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Property Images</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addImageUrl();
-                      }
-                    }}
-                    data-testid="input-image-url"
-                  />
-                  <Button
-                    type="button"
-                    onClick={addImageUrl}
-                    variant="outline"
-                    className="whitespace-nowrap"
-                    data-testid="button-add-image"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Image
-                  </Button>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-eth-brown">
+                    Property Images {imageUrls.length > 0 && `(${imageUrls.length})`}
+                  </Label>
+                  <span className={`text-xs ${imageUrls.length >= 5 ? 'text-green-600' : 'text-eth-brown/60'}`}>
+                    {imageUrls.length < 5 ? `Minimum 5 images required (${5 - imageUrls.length} more needed)` : '✓ Minimum met'}
+                  </span>
                 </div>
-                {imageUrls.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {imageUrls.map((url, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                        <img 
-                          src={url} 
-                          alt={`Property ${index + 1}`}
-                          className="w-16 h-16 object-cover rounded"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=100&h=100&fit=crop";
-                          }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-600 truncate">{url}</p>
+
+                {/* Drag and Drop Upload Area */}
+                <div
+                  className={`relative border-2 border-dashed rounded-lg transition-all ${
+                    dragActive
+                      ? 'border-eth-brown bg-eth-brown/10'
+                      : 'border-eth-brown/30 hover:border-eth-brown/50 bg-eth-light-tan/30'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    data-testid="input-file-upload"
+                  />
+                  
+                  <div className="p-8 text-center">
+                    <div className="flex justify-center mb-4">
+                      {uploadingFiles ? (
+                        <Loader2 className="h-12 w-12 text-eth-brown animate-spin" />
+                      ) : (
+                        <div className="relative">
+                          <Upload className="h-12 w-12 text-eth-brown" />
+                          <ImageIcon className="h-6 w-6 text-eth-brown/60 absolute -bottom-1 -right-1" />
                         </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-eth-brown">
+                        {uploadingFiles ? 'Uploading images...' : dragActive ? 'Drop your images here' : 'Upload Property Images'}
+                      </p>
+                      <p className="text-xs text-eth-brown/60">
+                        Drag and drop images here, or click to browse
+                      </p>
+                      <p className="text-xs text-eth-brown/50">
+                        Supports: JPG, PNG, WebP • Max 10MB per file
+                      </p>
+                    </div>
+
+                    {!uploadingFiles && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-4 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
+                        data-testid="button-browse-images"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Browse Files
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Uploaded Images Grid */}
+                {imageUrls.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {imageUrls.map((url, index) => (
+                      <div 
+                        key={index} 
+                        className="relative group rounded-lg overflow-hidden border-2 border-eth-brown/20 hover:border-eth-brown/40 transition-all"
+                        data-testid={`uploaded-image-${index}`}
+                      >
+                        <div className="aspect-square">
+                          <img 
+                            src={url} 
+                            alt={`Property ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=200&h=200&fit=crop";
+                            }}
+                          />
+                        </div>
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2">
+                            <Badge className="bg-eth-brown text-white text-xs">Main</Badge>
+                          </div>
+                        )}
                         <Button
                           type="button"
-                          variant="ghost"
-                          size="sm"
+                          variant="destructive"
+                          size="icon"
                           onClick={() => removeImageUrl(url)}
-                          className="text-red-500 hover:text-red-700"
+                          className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600"
                           data-testid={`button-remove-image-${index}`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
                   </div>
                 )}
-                <p className="text-xs text-gray-500">
-                  Add URLs of property images. The first image will be used as the main display image.
+                
+                <p className="text-xs text-eth-brown/60">
+                  {imageUrls.length === 0 
+                    ? "Upload at least 5 high-quality images of your property. The first image will be used as the main display image."
+                    : "The first image will be used as the main display image. You can remove and re-upload to change the order."}
                 </p>
               </div>
 
