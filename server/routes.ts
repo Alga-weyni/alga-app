@@ -9,6 +9,7 @@ import { randomBytes, randomInt } from "crypto";
 import paymentRouter from "./payment";
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from "./utils/invoice";
+import { sendOtpEmail, sendWelcomeEmail } from "./utils/email.js";
 
 // Security: Rate limiting for authentication endpoints
 const authLimiter = rateLimit({
@@ -182,7 +183,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save OTP (store with email as key)
       await storage.saveOtp(email, otp, 10);
       
-      // Log OTP for development (in production, send via email)
+      // Send OTP via email in background (non-blocking)
+      sendOtpEmail(email, otp, firstName).catch(err => {
+        console.error('[EMAIL] Failed to send OTP email (non-critical):', err);
+      });
+      
+      // Log OTP for development
       console.log(`[PASSWORDLESS AUTH] Registration OTP for ${email}: ${otp}`);
       
       res.json({ 
@@ -215,7 +221,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = randomInt(1000, 10000).toString();
       await storage.saveOtp(email, otp, 10);
       
-      // Log OTP for development (in production, send via email)
+      // Send OTP via email in background (non-blocking)
+      sendOtpEmail(email, otp, user.firstName).catch(err => {
+        console.error('[EMAIL] Failed to send OTP email (non-critical):', err);
+      });
+      
+      // Log OTP for development
       console.log(`[PASSWORDLESS AUTH] Login OTP for ${email}: ${otp}`);
       
       res.json({ 
