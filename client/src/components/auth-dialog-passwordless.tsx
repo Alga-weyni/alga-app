@@ -16,14 +16,14 @@ import { Loader2, Phone, Mail } from "lucide-react";
 // Passwordless schemas - OTP only
 const requestPhoneOtpSchema = z.object({
   phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone must be in format +251XXXXXXXXX"),
-  firstName: z.string().min(1, "First name is required").optional(),
-  lastName: z.string().min(1, "Last name is required").optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
 
 const requestEmailOtpSchema = z.object({
   email: z.string().email("Invalid email address"),
-  firstName: z.string().min(1, "First name is required").optional(),
-  lastName: z.string().min(1, "Last name is required").optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
 
 const verifyOtpSchema = z.object({
