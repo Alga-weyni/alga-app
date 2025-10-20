@@ -31,9 +31,9 @@ export interface IStorage {
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   
-  // OTP operations
-  saveOtp(phoneNumber: string, otp: string, expiryMinutes?: number): Promise<void>;
-  verifyOtp(phoneNumber: string, otp: string): Promise<boolean>;
+  // OTP operations (supports both phone and email)
+  saveOtp(contact: string, otp: string, expiryMinutes?: number): Promise<void>;
+  verifyOtp(contact: string, otp: string): Promise<boolean>;
   markPhoneVerified(phoneNumber: string): Promise<User>;
   
   // Admin user management
@@ -131,9 +131,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async saveOtp(phoneNumber: string, otp: string, expiryMinutes: number = 10): Promise<void> {
+  async saveOtp(contact: string, otp: string, expiryMinutes: number = 10): Promise<void> {
     const expiryDate = new Date();
     expiryDate.setMinutes(expiryDate.getMinutes() + expiryMinutes);
+    
+    // Check if contact is email or phone number
+    const isEmail = contact.includes('@');
     
     await db
       .update(users)
@@ -141,26 +144,32 @@ export class DatabaseStorage implements IStorage {
         otp,
         otpExpiry: expiryDate,
       })
-      .where(eq(users.phoneNumber, phoneNumber));
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
   }
 
-  async verifyOtp(phoneNumber: string, otp: string): Promise<boolean> {
+  async verifyOtp(contact: string, otp: string): Promise<boolean> {
+    // Check if contact is email or phone number
+    const isEmail = contact.includes('@');
+    
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.phoneNumber, phoneNumber));
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
 
     if (!user || !user.otp || !user.otpExpiry) {
+      console.log(`[OTP VERIFY] Failed: user=${!!user}, otp=${user?.otp}, otpExpiry=${user?.otpExpiry}`);
       return false;
     }
 
     const now = new Date();
     if (now > user.otpExpiry) {
-      // OTP expired
+      console.log(`[OTP VERIFY] OTP expired. Now: ${now}, Expiry: ${user.otpExpiry}`);
       return false;
     }
 
-    return user.otp === otp;
+    const isValid = user.otp === otp;
+    console.log(`[OTP VERIFY] OTP comparison: stored=${user.otp}, provided=${otp}, match=${isValid}`);
+    return isValid;
   }
 
   async markPhoneVerified(phoneNumber: string): Promise<User> {
