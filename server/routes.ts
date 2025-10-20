@@ -10,6 +10,9 @@ import paymentRouter from "./payment";
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from "./utils/invoice";
 import { sendOtpEmail, sendWelcomeEmail } from "./utils/email.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -30,12 +33,78 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// File upload configuration
+const uploadDir = path.join(process.cwd(), 'uploads', 'properties');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${randomBytes(6).toString('hex')}`;
+    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage: fileStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    files: 20 // Max 20 files per request
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, WebP) are allowed'));
+    }
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   
   // Apply general rate limiting to all API routes
   app.use('/api/', apiLimiter);
+
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  }, (req, res, next) => {
+    const filePath = path.join(process.cwd(), 'uploads', req.path);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).json({ message: 'File not found' });
+    }
+  });
+
+  // File upload endpoint (protected - requires authentication)
+  app.post('/api/upload/property-images', isAuthenticated, upload.array('images', 20), (req: any, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+
+      const files = req.files as Express.Multer.File[];
+      const imageUrls = files.map(file => `/uploads/properties/${file.filename}`);
+
+      res.json({
+        message: 'Files uploaded successfully',
+        urls: imageUrls,
+        count: files.length
+      });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      res.status(500).json({ message: error.message || 'Failed to upload files' });
+    }
+  });
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
