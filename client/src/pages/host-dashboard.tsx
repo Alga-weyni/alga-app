@@ -272,8 +272,28 @@ export default function HostDashboard() {
         credentials: 'include',
       });
 
+      const contentType = response.headers.get('content-type');
+      
       if (!response.ok) {
-        throw new Error('Upload failed');
+        let errorMessage = 'Upload failed';
+        
+        if (contentType?.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          const text = await response.text();
+          if (response.status === 401) {
+            errorMessage = 'Please sign in to upload images';
+          } else {
+            errorMessage = `Upload failed (${response.status})`;
+          }
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      if (!contentType?.includes('application/json')) {
+        throw new Error('Invalid response from server');
       }
 
       const data = await response.json();
