@@ -222,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.saveOtp(email, otp, 10);
       
       // Send OTP via email in background (non-blocking)
-      sendOtpEmail(email, otp, user.firstName).catch(err => {
+      sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
         console.error('[EMAIL] Failed to send OTP email (non-critical):', err);
       });
       
