@@ -338,14 +338,14 @@ export default function HostDashboard() {
     }
   };
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
       uploadImages(files);
     }
-  }, []);
+  };
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -353,9 +353,9 @@ export default function HostDashboard() {
     } else if (e.type === "dragleave") {
       setDragActive(false);
     }
-  }, []);
+  };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -372,7 +372,7 @@ export default function HostDashboard() {
         variant: "destructive",
       });
     }
-  }, []);
+  };
 
   const removeImageUrl = (url: string) => {
     const newImageUrls = imageUrls.filter(img => img !== url);
@@ -1100,6 +1100,7 @@ export default function HostDashboard() {
                   type="button" 
                   variant="outline" 
                   onClick={() => setShowAddPropertyDialog(false)}
+                  data-testid="button-cancel-property"
                 >
                   Cancel
                 </Button>
@@ -1107,6 +1108,17 @@ export default function HostDashboard() {
                   type="submit" 
                   className="bg-eth-green hover:bg-green-700"
                   disabled={createPropertyMutation.isPending || updatePropertyMutation.isPending}
+                  data-testid="button-submit-property"
+                  onClick={(e) => {
+                    console.log('Submit button clicked');
+                    console.log('Form state:', {
+                      isValid: form.formState.isValid,
+                      errors: form.formState.errors,
+                      values: form.getValues(),
+                      imageUrls,
+                      selectedAmenities
+                    });
+                  }}
                 >
                   {createPropertyMutation.isPending || updatePropertyMutation.isPending 
                     ? "Saving..." 
