@@ -1,0 +1,47 @@
+# 🧪 Development Docker Compose
+# Use this for local development with hot reload
+version: "3.9"
+
+services:
+  alga-app:
+    container_name: alga-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+    command: npm run dev
+    networks:
+      - alga-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: alga-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: alga_dev
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: alga_dev
+    volumes:
+      - alga_dev_data:/var/lib/postgresql/data
+    networks:
+      - alga-network
+    ports:
+      - "5432:5432"
+
+volumes:
+  alga_dev_data:
+
+networks:
+  alga-network:
+    driver: bridge
