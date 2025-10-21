@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useLocation } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,6 +91,7 @@ export default function HostDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [showAddPropertyDialog, setShowAddPropertyDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -582,7 +584,13 @@ export default function HostDashboard() {
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => setLocation(`/properties/${property.id}`)}
+                          data-testid={`button-view-${property.id}`}
+                        >
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
@@ -591,6 +599,7 @@ export default function HostDashboard() {
                           variant="outline" 
                           onClick={() => handleEdit(property)}
                           className="flex-1"
+                          data-testid={`button-edit-${property.id}`}
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
