@@ -395,14 +395,17 @@ export default function OperatorDashboard() {
 
                     {property.images && property.images.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Property Images</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {property.images.slice(0, 3).map((img, idx) => (
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Property Images ({property.images.length})
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          {property.images.map((img, idx) => (
                             <img
                               key={idx}
                               src={img}
                               alt={`Property ${idx + 1}`}
-                              className="w-full h-24 object-cover rounded"
+                              className="w-full h-32 object-cover rounded border-2 border-gray-200 hover:border-eth-brown transition-colors cursor-pointer"
+                              onClick={() => window.open(img, '_blank')}
                               data-testid={`img-property-${property.id}-${idx}`}
                             />
                           ))}
