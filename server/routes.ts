@@ -1669,6 +1669,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Host Registration Request
+  app.post('/api/host-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { idData } = req.body;
+
+      // Check if user is already a host
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.role === 'host' || user.role === 'admin' || user.role === 'operator') {
+        return res.status(400).json({ message: "You already have host privileges or higher" });
+      }
+
+      // Check if user already has a pending verification request
+      const existingVerifications = await storage.getUserVerificationDocuments(userId);
+      const pendingVerification = existingVerifications.find((v: any) => v.status === 'pending');
+      
+      if (pendingVerification) {
+        return res.status(400).json({ 
+          message: "You already have a pending verification request. Please wait for review." 
+        });
+      }
+
+      // Update user's ID information from scanned data
+      if (idData) {
+        await storage.updateUser(userId, {
+          idNumber: idData.idNumber || null,
+          idFullName: idData.fullName || `${idData.firstName || ''} ${idData.lastName || ''}`.trim() || null,
+          idDocumentType: idData.documentType || 'ethiopian_id',
+          idExpiryDate: idData.expiryDate || null,
+          idCountry: idData.nationality || 'Ethiopia',
+        });
+      }
+
+      // Create a verification document request (this will be reviewed by operator/admin)
+      const verificationDoc = {
+        userId,
+        documentType: 'national_id',
+        documentUrl: '/placeholder-scanned-id', // Placeholder since ID was scanned
+        status: 'pending',
+      };
+
+      await storage.createVerificationDocument(verificationDoc);
+
+      res.json({ 
+        message: "Host application submitted successfully. Your verification is pending review.",
+        status: "pending"
+      });
+    } catch (error) {
+      console.error("Error processing host request:", error);
+      res.status(500).json({ message: "Failed to process host request" });
+    }
+  });
+
   // Payment integration (Telebirr & PayPal)
   // Public payment status endpoint
   app.get('/api/payment/status/telebirr', (req, res) => {
