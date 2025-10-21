@@ -44,6 +44,7 @@ export const users = pgTable("users", {
   idDocumentUrl: varchar("id_document_url"), // URL to uploaded ID image
   idExpiryDate: varchar("id_expiry_date"), // Store expiry date
   idCountry: varchar("id_country"), // Country of issue
+  isServiceProvider: boolean("is_service_provider").default(false), // Add-on services
   otp: varchar("otp", { length: 4 }),
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
@@ -155,6 +156,56 @@ export const accessCodes = pgTable("access_codes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Add-On Services: Service Providers
+export const serviceProviders = pgTable("service_providers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessName: varchar("business_name", { length: 255 }).notNull(),
+  serviceType: varchar("service_type").notNull(), // cleaning, laundry, airport_pickup, electrical, plumbing, welcome_pack, driver
+  description: text("description").notNull(),
+  pricingModel: varchar("pricing_model").notNull(), // hourly, flat_rate
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("ETB").notNull(),
+  city: varchar("city").notNull(),
+  region: varchar("region").notNull(),
+  address: text("address"),
+  availability: text("availability"), // JSON string for schedule
+  idDocumentUrl: varchar("id_document_url"), // ID verification for service provider
+  verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, approved, rejected
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
+  totalJobsCompleted: integer("total_jobs_completed").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Add-On Services: Service Bookings
+export const serviceBookings = pgTable("service_bookings", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").references(() => bookings.id), // Optional: linked to property booking
+  serviceProviderId: integer("service_provider_id").notNull().references(() => serviceProviders.id),
+  guestId: varchar("guest_id").notNull().references(() => users.id),
+  hostId: varchar("host_id").references(() => users.id), // If host requests service
+  serviceType: varchar("service_type").notNull(),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  scheduledTime: varchar("scheduled_time"),
+  propertyLocation: varchar("property_location"), // City/location where service needed
+  status: varchar("status").default("pending").notNull(), // pending, confirmed, in_progress, completed, cancelled
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("ETB").notNull(),
+  algaCommission: decimal("alga_commission", { precision: 10, scale: 2 }), // 15%
+  providerPayout: decimal("provider_payout", { precision: 10, scale: 2 }), // 85%
+  paymentStatus: varchar("payment_status").default("pending").notNull(), // pending, paid, failed
+  paymentRef: varchar("payment_ref"), // Transaction ID
+  payoutStatus: varchar("payout_status").default("pending").notNull(), // pending, processing, completed
+  specialInstructions: text("special_instructions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties),
@@ -165,6 +216,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   verifiedDocuments: many(verificationDocuments, {
     relationName: "verifiedBy"
   }),
+  serviceProviders: many(serviceProviders),
+  serviceBookings: many(serviceBookings),
 }));
 
 export const verificationDocumentsRelations = relations(verificationDocuments, ({ one }) => ({
@@ -240,6 +293,39 @@ export const accessCodesRelations = relations(accessCodes, ({ one }) => ({
   guest: one(users, {
     fields: [accessCodes.guestId],
     references: [users.id],
+  }),
+}));
+
+export const serviceProvidersRelations = relations(serviceProviders, ({ one, many }) => ({
+  user: one(users, {
+    fields: [serviceProviders.userId],
+    references: [users.id],
+  }),
+  verifier: one(users, {
+    fields: [serviceProviders.verifiedBy],
+    references: [users.id],
+    relationName: "verifiedBy"
+  }),
+  serviceBookings: many(serviceBookings),
+}));
+
+export const serviceBookingsRelations = relations(serviceBookings, ({ one }) => ({
+  serviceProvider: one(serviceProviders, {
+    fields: [serviceBookings.serviceProviderId],
+    references: [serviceProviders.id],
+  }),
+  guest: one(users, {
+    fields: [serviceBookings.guestId],
+    references: [users.id],
+  }),
+  host: one(users, {
+    fields: [serviceBookings.hostId],
+    references: [users.id],
+    relationName: "hostServiceBookings"
+  }),
+  booking: one(bookings, {
+    fields: [serviceBookings.bookingId],
+    references: [bookings.id],
   }),
 }));
 
@@ -330,6 +416,30 @@ export const insertAccessCodeSchema = createInsertSchema(accessCodes).omit({
   updatedAt: true,
 });
 
+export const insertServiceProviderSchema = createInsertSchema(serviceProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  rating: true,
+  totalJobsCompleted: true,
+  verificationStatus: true,
+  verifiedBy: true,
+  verifiedAt: true,
+});
+
+export const insertServiceBookingSchema = createInsertSchema(serviceBookings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  scheduledDate: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
+  totalPrice: z.union([z.string(), z.number()]).transform((val) => 
+    typeof val === 'number' ? val.toString() : val
+  ),
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -348,3 +458,7 @@ export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertAccessCode = z.infer<typeof insertAccessCodeSchema>;
 export type AccessCode = typeof accessCodes.$inferSelect;
+export type InsertServiceProvider = z.infer<typeof insertServiceProviderSchema>;
+export type ServiceProvider = typeof serviceProviders.$inferSelect;
+export type InsertServiceBooking = z.infer<typeof insertServiceBookingSchema>;
+export type ServiceBooking = typeof serviceBookings.$inferSelect;
