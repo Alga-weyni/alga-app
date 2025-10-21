@@ -13,10 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { type User, type Property } from "@shared/schema";
+import { type User as UserType, type Property } from "@shared/schema";
 import { BackButton } from "@/components/back-button";
 import { 
   Users, 
+  User,
   Home, 
   FileCheck, 
   UserCheck, 
@@ -68,7 +69,7 @@ interface AdminStats {
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
   const { toast } = useToast();
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
   });
 
   // Fetch users for management
-  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+  const { data: users = [], isLoading: usersLoading } = useQuery<UserType[]>({
     queryKey: ['/api/admin/users'],
   });
 
