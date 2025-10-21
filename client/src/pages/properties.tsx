@@ -240,12 +240,15 @@ export default function Properties() {
                       {/* City Filter */}
                       <div>
                         <Label className="text-xs font-semibold text-eth-brown mb-2 block">City</Label>
-                        <Select value={filters.city || ''} onValueChange={(value) => updateFilter('city', value)}>
+                        <Select 
+                          value={filters.city || 'all'} 
+                          onValueChange={(value) => updateFilter('city', value === 'all' ? undefined : value)}
+                        >
                           <SelectTrigger className="bg-white">
                             <SelectValue placeholder="All cities" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All cities</SelectItem>
+                            <SelectItem value="all">All cities</SelectItem>
                             {ETHIOPIAN_CITIES.map((city) => (
                               <SelectItem key={city} value={city}>{city}</SelectItem>
                             ))}
@@ -256,12 +259,15 @@ export default function Properties() {
                       {/* Property Type Filter */}
                       <div>
                         <Label className="text-xs font-semibold text-eth-brown mb-2 block">Property Type</Label>
-                        <Select value={filters.type || ''} onValueChange={(value) => updateFilter('type', value)}>
+                        <Select 
+                          value={filters.type || 'all'} 
+                          onValueChange={(value) => updateFilter('type', value === 'all' ? undefined : value)}
+                        >
                           <SelectTrigger className="bg-white">
                             <SelectValue placeholder="All types" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All types</SelectItem>
+                            <SelectItem value="all">All types</SelectItem>
                             {PROPERTY_TYPES.map((type) => (
                               <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                             ))}
