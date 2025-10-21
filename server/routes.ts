@@ -785,6 +785,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verifierId = req.user.id;
       
       const updatedDocument = await storage.verifyDocument(parseInt(documentId), status, verifierId, rejectionReason);
+      
+      // If verification is approved, upgrade guest to host role
+      if (status === 'approved' && updatedDocument) {
+        const documentOwner = await storage.getUser(updatedDocument.userId);
+        if (documentOwner && documentOwner.role === 'guest') {
+          await storage.updateUser(updatedDocument.userId, { 
+            role: 'host',
+            idVerified: true 
+          });
+          console.log(`[HOST UPGRADE] User ${updatedDocument.userId} upgraded from guest to host after ID verification approval`);
+        }
+      }
+      
       res.json(updatedDocument);
     } catch (error) {
       console.error("Error verifying document:", error);
