@@ -52,6 +52,7 @@ interface VerificationDocument {
     idNumber?: string | null;
     idFullName?: string | null;
     idDocumentType?: string | null;
+    idDocumentUrl?: string | null;
     idExpiryDate?: string | null;
     idCountry?: string | null;
   };
@@ -954,10 +955,10 @@ export default function AdminDashboard() {
               {/* Document Image */}
               <div>
                 <h3 className="font-semibold text-eth-brown mb-3">Document Image</h3>
-                {selectedDocument.documentUrl && !selectedDocument.documentUrl.includes('placeholder') ? (
+                {(selectedDocument.documentUrl && !selectedDocument.documentUrl.includes('placeholder')) || selectedDocument.user?.idDocumentUrl ? (
                   <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
                     <img
-                      src={selectedDocument.documentUrl}
+                      src={selectedDocument.user?.idDocumentUrl || selectedDocument.documentUrl || ''}
                       alt="Verification Document"
                       className="w-full max-h-[400px] object-contain"
                       data-testid={`img-document-${selectedDocument.id}`}

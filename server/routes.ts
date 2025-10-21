@@ -39,6 +39,11 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const idDocsUploadDir = path.join(process.cwd(), 'uploads', 'id-documents');
+if (!fs.existsSync(idDocsUploadDir)) {
+  fs.mkdirSync(idDocsUploadDir, { recursive: true });
+}
+
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -49,11 +54,37 @@ const fileStorage = multer.diskStorage({
   }
 });
 
+const idFileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, idDocsUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${randomBytes(6).toString('hex')}`;
+    cb(null, `id-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
 const upload = multer({
   storage: fileStorage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max file size
     files: 20 // Max 20 files per request
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, WebP) are allowed'));
+    }
+  }
+});
+
+const idUpload = multer({
+  storage: idFileStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    files: 1 // Only one ID document at a time
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
@@ -103,6 +134,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Upload error:', error);
       res.status(500).json({ message: error.message || 'Failed to upload files' });
+    }
+  });
+
+  // ID document upload endpoint (protected - requires authentication)
+  app.post('/api/upload/id-document', isAuthenticated, idUpload.single('image'), (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const imageUrl = `/uploads/id-documents/${req.file.filename}`;
+
+      res.json({
+        message: 'ID document uploaded successfully',
+        url: imageUrl
+      });
+    } catch (error: any) {
+      console.error('ID upload error:', error);
+      res.status(500).json({ message: error.message || 'Failed to upload ID document' });
     }
   });
 
@@ -1012,7 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Universal ID Scanning endpoint - supports Ethiopian ID and foreign documents
   app.post('/api/id-scan', isAuthenticated, async (req: any, res) => {
     try {
-      const { scanData, scanMethod, timestamp } = req.body;
+      const { scanData, scanMethod, timestamp, imageUrl } = req.body;
       const userId = req.user.id;
       
       if (!scanData) {
@@ -1148,6 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           idNumber,
           idFullName: fullName || user.idFullName,
           idDocumentType: documentType,
+          idDocumentUrl: imageUrl || user.idDocumentUrl,
           idExpiryDate: expiryDate || user.idExpiryDate,
           idCountry: country || user.idCountry,
         });
