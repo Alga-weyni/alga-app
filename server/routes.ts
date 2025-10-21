@@ -790,7 +790,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (status === 'approved' && updatedDocument) {
         const documentOwner = await storage.getUser(updatedDocument.userId);
         if (documentOwner && documentOwner.role === 'guest') {
-          await storage.updateUser(updatedDocument.userId, { 
+          await storage.upsertUser({
+            ...documentOwner,
             role: 'host',
             idVerified: true 
           });
@@ -807,16 +808,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced Ethiopian ID data extraction from OCR text
   function extractEthiopianIDData(ocrText: string) {
-    // Remove extra symbols and spaces
+    // Remove extra symbols and spaces for better matching
     const cleanText = ocrText.replace(/\s+/g, " ").trim();
+    
+    console.log("[ID EXTRACTION] Processing OCR text:", cleanText.substring(0, 200));
 
-    // ID Number — 12 digits
-    const idMatch = cleanText.match(/\b\d{12}\b/);
-    const idNumber = idMatch ? idMatch[0] : null;
+    // ID Number — 12 digits (with flexible patterns)
+    let idNumber: string | null = null;
+    
+    // Try multiple patterns to find 12-digit ID
+    const idPatterns = [
+      /\b(\d{12})\b/,                           // Exact 12 digits
+      /\b(\d{4}[\s\-]?\d{4}[\s\-]?\d{4})\b/,   // 4-4-4 format with optional separators
+      /\b(\d{3}[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{3})\b/,  // 3-3-3-3 format
+      /(?:ID|Number|ቁጥር|መለያ)[:\-\s]*(\d[\s\-\d]{10,20})/i,  // After ID/Number keywords
+    ];
+    
+    for (const pattern of idPatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        // Extract digits only and check if 12 digits
+        const digits = match[1].replace(/\D/g, '');
+        if (digits.length === 12) {
+          idNumber = digits;
+          console.log("[ID EXTRACTION] Found ID number:", idNumber);
+          break;
+        }
+      }
+    }
+    
+    // If still no match, look for any 12-digit sequence
+    if (!idNumber) {
+      const allDigits = cleanText.replace(/\D/g, '');
+      const twelveDigitMatch = allDigits.match(/\d{12}/);
+      if (twelveDigitMatch) {
+        idNumber = twelveDigitMatch[0];
+        console.log("[ID EXTRACTION] Found 12-digit sequence:", idNumber);
+      }
+    }
 
-    // Name — looks for words near Name/ስም
-    const nameMatch = cleanText.match(/(?:Name|ስም)[:\-]?\s*([A-Za-zአ-ዐ\s]+)/);
-    const fullName = nameMatch ? nameMatch[1].trim() : "Not detected";
+    // Name — looks for words near Name/ስም with flexible patterns
+    let fullName: string | null = null;
+    const namePatterns = [
+      /(?:Name|ስም|Full Name|ሙሉ ስም)[:\-]?\s*([A-Za-zአ-ፚ\s]{3,50})/i,
+      /(?:Given Name|First Name)[:\-]?\s*([A-Za-zአ-ፚ\s]{2,30})/i,
+    ];
+    
+    for (const pattern of namePatterns) {
+      const match = cleanText.match(pattern);
+      if (match && match[1]) {
+        fullName = match[1].trim();
+        console.log("[ID EXTRACTION] Found name:", fullName);
+        break;
+      }
+    }
+    
+    if (!fullName || fullName.length < 2) {
+      fullName = "Not detected";
+    }
     
     // Split name into first, middle, and last
     let firstName = null;
@@ -831,20 +880,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (nameParts.length === 2) {
         firstName = nameParts[0];
         lastName = nameParts[1];
+      } else if (nameParts.length === 1) {
+        firstName = nameParts[0];
       }
     }
     
-    // Date of Birth — e.g., DOB: 1985/03/15 or Birth: ...
-    const dobMatch = cleanText.match(/(?:DOB|Birth|የትውልድ ቀን)[:\-]?\s*(\d{4}\/\d{2}\/\d{2})/i);
-    const dateOfBirth = dobMatch ? dobMatch[1] : null;
+    // Date of Birth — flexible patterns
+    const dobPatterns = [
+      /(?:DOB|Birth|የትውልድ ቀን|Date of Birth)[:\-]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/i,
+      /(?:DOB|Birth)[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})/i,
+    ];
+    
+    let dateOfBirth: string | null = null;
+    for (const pattern of dobPatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        dateOfBirth = match[1];
+        break;
+      }
+    }
 
-    // Expiry date — e.g., 2032/06/17 GC
-    const expiryMatch = cleanText.match(/20\d{2}\/\d{2}\/\d{2}/);
-    const expiryDate = expiryMatch ? expiryMatch[0] : null;
+    // Expiry date — flexible patterns
+    const expiryPatterns = [
+      /(?:Expiry|Expires|Valid Until)[:\-]?\s*(\d{4}[\/\-]\d{2}[\/\-]\d{2})/i,
+      /20\d{2}[\/\-]\d{2}[\/\-]\d{2}/,
+      /(?:Expiry|Expires)[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})/i,
+    ];
+    
+    let expiryDate: string | null = null;
+    for (const pattern of expiryPatterns) {
+      const match = cleanText.match(pattern);
+      if (match) {
+        expiryDate = match[1] || match[0];
+        break;
+      }
+    }
 
     // Location — find "Addis Ababa" or region names
     const locationMatch = cleanText.match(/Addis Ababa|Tigray|Oromia|Amhara|Sidama|Afar|Somali|SNNPR|Dire Dawa|Harar/i);
     const location = locationMatch ? locationMatch[0] : "Unknown";
+    
+    console.log("[ID EXTRACTION] Results - ID:", idNumber, "Name:", fullName, "DOB:", dateOfBirth);
 
     return { idNumber, fullName, firstName, middleName, lastName, dateOfBirth, expiryDate, location, documentType: 'ethiopian_id' };
   }
@@ -1699,7 +1775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already has a pending verification request
-      const existingVerifications = await storage.getUserVerificationDocuments(userId);
+      const existingVerifications = await storage.getVerificationDocumentsByUser(userId);
       const pendingVerification = existingVerifications.find((v: any) => v.status === 'pending');
       
       if (pendingVerification) {
@@ -1710,7 +1786,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user's ID information from scanned data
       if (idData) {
-        await storage.updateUser(userId, {
+        await storage.upsertUser({
+          ...user,
           idNumber: idData.idNumber || null,
           idFullName: idData.fullName || `${idData.firstName || ''} ${idData.lastName || ''}`.trim() || null,
           idDocumentType: idData.documentType || 'ethiopian_id',
