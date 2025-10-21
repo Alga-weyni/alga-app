@@ -131,12 +131,11 @@ export default function HostDashboard() {
   // Create property mutation
   const createPropertyMutation = useMutation({
     mutationFn: async (data: PropertyFormData) => {
-      const response = await apiRequest("POST", "/api/properties", {
+      return await apiRequest("POST", "/api/properties", {
         ...data,
         amenities: selectedAmenities,
         images: imageUrls,
       });
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/host/properties"] });
@@ -149,10 +148,11 @@ export default function HostDashboard() {
       setSelectedAmenities([]);
       setImageUrls([]);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Property creation error:', error);
       toast({
         title: "Error creating property",
-        description: "Failed to create property. Please try again.",
+        description: error.message || "Failed to create property. Please try again.",
         variant: "destructive",
       });
     },
@@ -161,12 +161,11 @@ export default function HostDashboard() {
   // Update property mutation
   const updatePropertyMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<PropertyFormData> }) => {
-      const response = await apiRequest("PUT", `/api/properties/${id}`, {
+      return await apiRequest("PUT", `/api/properties/${id}`, {
         ...data,
         amenities: selectedAmenities,
         images: imageUrls,
       });
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/host/properties"] });
@@ -175,14 +174,16 @@ export default function HostDashboard() {
         description: "Your property changes have been saved.",
       });
       setEditingProperty(null);
+      setShowAddPropertyDialog(false);
       form.reset();
       setSelectedAmenities([]);
       setImageUrls([]);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Property update error:', error);
       toast({
         title: "Error updating property",
-        description: "Failed to update property. Please try again.",
+        description: error.message || "Failed to update property. Please try again.",
         variant: "destructive",
       });
     },
