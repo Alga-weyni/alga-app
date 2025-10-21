@@ -272,21 +272,28 @@ export default function HostDashboard() {
   };
 
   const uploadImages = async (files: File[]) => {
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      console.log('No files to upload');
+      return;
+    }
 
+    console.log('Starting upload of', files.length, 'files');
     setUploadingFiles(true);
     try {
       const formData = new FormData();
       files.forEach(file => {
         formData.append('images', file);
+        console.log('Added file to formData:', file.name, file.size, 'bytes');
       });
 
+      console.log('Sending upload request...');
       const response = await fetch('/api/upload/property-images', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       });
 
+      console.log('Upload response status:', response.status);
       const contentType = response.headers.get('content-type');
       
       if (!response.ok) {
@@ -312,11 +319,15 @@ export default function HostDashboard() {
       }
 
       const data = await response.json();
+      console.log('Upload response data:', data);
+      
       const newImageUrls = [...imageUrls, ...data.urls];
+      console.log('New image URLs:', newImageUrls);
       setImageUrls(newImageUrls);
       
       // Update form field to sync with uploaded images
       form.setValue('images', newImageUrls, { shouldValidate: true });
+      console.log('Form images field updated:', newImageUrls.length, 'images');
 
       // Reset file input so same files can be selected again
       if (fileInputRef.current) {
@@ -325,9 +336,10 @@ export default function HostDashboard() {
 
       toast({
         title: "Images uploaded successfully",
-        description: `${data.count} image(s) uploaded`,
+        description: `${data.count} image(s) uploaded. Total: ${newImageUrls.length}`,
       });
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload images",
@@ -340,7 +352,9 @@ export default function HostDashboard() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    console.log('File input changed, files selected:', files.length);
     if (files.length > 0) {
+      console.log('Uploading files:', files.map(f => f.name));
       uploadImages(files);
     }
   };
@@ -752,9 +766,9 @@ export default function HostDashboard() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Property Title</FormLabel>
+                      <FormLabel className="text-eth-brown">Property Title <span className="text-red-600">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Beautiful lakeside retreat..." {...field} />
+                        <Input placeholder="Beautiful lakeside retreat..." {...field} required />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -766,8 +780,8 @@ export default function HostDashboard() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Property Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="text-eth-brown">Property Type <span className="text-red-600">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} required>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select property type..." />
@@ -791,8 +805,8 @@ export default function HostDashboard() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="text-eth-brown">City <span className="text-red-600">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} required>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select city..." />
@@ -816,8 +830,8 @@ export default function HostDashboard() {
                   name="region"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Region</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel className="text-eth-brown">Region <span className="text-red-600">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} required>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select region..." />
@@ -842,9 +856,9 @@ export default function HostDashboard() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Specific Location</FormLabel>
+                    <FormLabel className="text-eth-brown">Specific Location <span className="text-red-600">*</span></FormLabel>
                     <FormControl>
-                      <Input placeholder="Street address or area name..." {...field} />
+                      <Input placeholder="Street address or area name..." {...field} required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -856,12 +870,13 @@ export default function HostDashboard() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-eth-brown">Description <span className="text-red-600">*</span></FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Describe your property, its unique features, and what makes it special..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
+                        required
                       />
                     </FormControl>
                     <FormMessage />
@@ -873,12 +888,17 @@ export default function HostDashboard() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-eth-brown">
-                    Property Images {imageUrls.length > 0 && `(${imageUrls.length})`}
+                    Property Images <span className="text-red-600">*</span> {imageUrls.length > 0 && `(${imageUrls.length})`}
                   </Label>
-                  <span className={`text-xs ${imageUrls.length >= 5 ? 'text-green-600' : 'text-eth-brown/60'}`}>
+                  <span className={`text-sm font-semibold ${imageUrls.length >= 5 ? 'text-green-600' : 'text-red-600'}`}>
                     {imageUrls.length < 5 ? `Minimum 5 images required (${5 - imageUrls.length} more needed)` : '✓ Minimum met'}
                   </span>
                 </div>
+                {form.formState.errors.images && (
+                  <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                    ⚠️ {form.formState.errors.images.message}
+                  </p>
+                )}
 
                 {/* Drag and Drop Upload Area */}
                 <div
@@ -997,13 +1017,14 @@ export default function HostDashboard() {
                   name="maxGuests"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Guests</FormLabel>
+                      <FormLabel className="text-eth-brown">Max Guests <span className="text-red-600">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           min="1" 
                           {...field} 
                           onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          required
                         />
                       </FormControl>
                       <FormMessage />
@@ -1016,13 +1037,14 @@ export default function HostDashboard() {
                   name="bedrooms"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bedrooms</FormLabel>
+                      <FormLabel className="text-eth-brown">Bedrooms <span className="text-red-600">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           min="1" 
                           {...field} 
                           onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          required
                         />
                       </FormControl>
                       <FormMessage />
@@ -1035,13 +1057,14 @@ export default function HostDashboard() {
                   name="bathrooms"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bathrooms</FormLabel>
+                      <FormLabel className="text-eth-brown">Bathrooms <span className="text-red-600">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           min="1" 
                           {...field} 
                           onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          required
                         />
                       </FormControl>
                       <FormMessage />
@@ -1054,13 +1077,14 @@ export default function HostDashboard() {
                   name="pricePerNight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price per Night (ETB)</FormLabel>
+                      <FormLabel className="text-eth-brown">Price per Night (ETB) <span className="text-red-600">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           min="0" 
                           step="0.01"
                           {...field}
+                          required
                         />
                       </FormControl>
                       <FormMessage />
