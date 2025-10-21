@@ -17,11 +17,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, Globe, User, X } from "lucide-react";
+import { Home, Menu, Globe, User, Building2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
+import BecomeHostDialog from "@/components/become-host-dialog";
 
 interface HeaderProps {
   hideNavigation?: boolean;
@@ -32,6 +40,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const [location, navigate] = useLocation();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [becomeHostDialogOpen, setBecomeHostDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
@@ -210,6 +219,19 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               <Globe className="h-5 w-5" />
             </Button>
 
+            {/* Become Host Button - Only for Guests */}
+            {isAuthenticated && user?.role === 'guest' && (
+              <Button
+                onClick={() => setBecomeHostDialogOpen(true)}
+                variant="outline"
+                className="border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white transition-all"
+                data-testid="button-become-host"
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Become Host
+              </Button>
+            )}
+
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -299,6 +321,12 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
         open={authDialogOpen} 
         onOpenChange={setAuthDialogOpen}
         defaultMode="login"
+      />
+      
+      <BecomeHostDialog
+        open={becomeHostDialogOpen}
+        onOpenChange={setBecomeHostDialogOpen}
+        user={user}
       />
     </header>
   );
