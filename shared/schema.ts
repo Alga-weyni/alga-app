@@ -41,6 +41,7 @@ export const users = pgTable("users", {
   idNumber: varchar("id_number", { length: 50 }), // Support passport numbers too
   idFullName: varchar("id_full_name"),
   idDocumentType: varchar("id_document_type"), // ethiopian_id, passport, drivers_license, other
+  idDocumentUrl: varchar("id_document_url"), // URL to uploaded ID image
   idExpiryDate: varchar("id_expiry_date"), // Store expiry date
   idCountry: varchar("id_country"), // Country of issue
   otp: varchar("otp", { length: 4 }),

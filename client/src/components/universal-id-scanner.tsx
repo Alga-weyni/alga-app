@@ -129,26 +129,46 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
     }
 
     setStatus("verifying");
-    setMessage("Reading document...");
+    setMessage("Uploading document...");
     setScanMethod("photo");
-    setProgress("Initializing...");
+    setProgress("Uploading...");
 
     try {
+      // Step 1: Upload the image file first
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const uploadResponse = await fetch('/api/upload/id-document', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.url;
+      
+      // Step 2: Process with OCR
+      setMessage("Reading document...");
+      setProgress("Processing...");
       const {
         data: { text },
       } = await tesseractWorker.recognize(file);
 
-      await verifyDocument(text, "photo");
+      // Step 3: Verify with both OCR text and image URL
+      await verifyDocument(text, "photo", imageUrl);
     } catch (error) {
       console.error("OCR Error:", error);
       setStatus("error");
-      setMessage("❌ Could not read document. Please try again.");
+      setMessage("❌ Could not process document. Please try again.");
     } finally {
       setProgress("");
     }
   };
 
-  const verifyDocument = async (data: string, method: "qr" | "photo") => {
+  const verifyDocument = async (data: string, method: "qr" | "photo", imageUrl?: string) => {
     setStatus("verifying");
     setMessage("Verifying document...");
 
@@ -159,6 +179,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         body: JSON.stringify({
           scanData: data,
           scanMethod: method,
+          imageUrl: imageUrl,
           timestamp: new Date().toISOString(),
         }),
       });
