@@ -645,55 +645,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllVerificationDocuments(): Promise<any[]> {
-    const results = await db
-      .select({
-        id: verificationDocuments.id,
-        userId: verificationDocuments.userId,
-        documentType: verificationDocuments.documentType,
-        documentUrl: verificationDocuments.documentUrl,
-        status: verificationDocuments.status,
-        createdAt: verificationDocuments.createdAt,
-        rejectionReason: verificationDocuments.rejectionReason,
-        verifiedAt: verificationDocuments.verifiedAt,
-        verifierId: verificationDocuments.verifierId,
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        userPhoneNumber: users.phoneNumber,
-        userIdNumber: users.idNumber,
-        userIdFullName: users.idFullName,
-        userIdDocumentType: users.idDocumentType,
-        userIdExpiryDate: users.idExpiryDate,
-        userIdCountry: users.idCountry,
-      })
+    // Get all verification documents first
+    const docs = await db
+      .select()
       .from(verificationDocuments)
-      .leftJoin(users, eq(verificationDocuments.userId, users.id))
       .orderBy(desc(verificationDocuments.createdAt));
     
-    // Transform to include user object
-    return results.map((doc: any) => ({
-      id: doc.id,
-      userId: doc.userId,
-      documentType: doc.documentType,
-      documentUrl: doc.documentUrl,
-      status: doc.status,
-      createdAt: doc.createdAt,
-      rejectionReason: doc.rejectionReason,
-      verifiedAt: doc.verifiedAt,
-      verifierId: doc.verifierId,
-      user: doc.userEmail ? {
-        id: doc.userId,
-        email: doc.userEmail,
-        firstName: doc.userFirstName,
-        lastName: doc.userLastName,
-        phoneNumber: doc.userPhoneNumber,
-        idNumber: doc.userIdNumber,
-        idFullName: doc.userIdFullName,
-        idDocumentType: doc.userIdDocumentType,
-        idExpiryDate: doc.userIdExpiryDate,
-        idCountry: doc.userIdCountry,
-      } : undefined
-    }));
+    // Manually fetch user data for each document
+    const docsWithUsers = await Promise.all(
+      docs.map(async (doc) => {
+        const user = await this.getUser(doc.userId);
+        return {
+          ...doc,
+          user: user ? {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneNumber: user.phoneNumber,
+            idNumber: user.idNumber,
+            idFullName: user.idFullName,
+            idDocumentType: user.idDocumentType,
+            idExpiryDate: user.idExpiryDate,
+            idCountry: user.idCountry,
+          } : undefined
+        };
+      })
+    );
+    
+    return docsWithUsers;
   }
 
   async getPendingVerificationDocuments(): Promise<any[]> {
