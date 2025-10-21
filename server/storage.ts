@@ -666,6 +666,7 @@ export class DatabaseStorage implements IStorage {
             idNumber: user.idNumber,
             idFullName: user.idFullName,
             idDocumentType: user.idDocumentType,
+            idDocumentUrl: user.idDocumentUrl,
             idExpiryDate: user.idExpiryDate,
             idCountry: user.idCountry,
           } : undefined

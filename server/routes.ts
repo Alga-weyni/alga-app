@@ -890,19 +890,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
-    // If still no match, look for longest digit sequence (12-15 digits)
+    // If still no match, look for ALL 15-digit sequences and pick the best one
     if (!idNumber) {
       const allDigits = cleanText.replace(/\D/g, '');
-      // Try 15 digits first (newer format), then 12 digits (older format)
-      const fifteenDigitMatch = allDigits.match(/\d{15}/);
-      const twelveDigitMatch = allDigits.match(/\d{12}/);
       
-      if (fifteenDigitMatch) {
-        idNumber = fifteenDigitMatch[0];
-        console.log("[ID EXTRACTION] Found 15-digit sequence (barcode):", idNumber);
-      } else if (twelveDigitMatch) {
-        idNumber = twelveDigitMatch[0];
-        console.log("[ID EXTRACTION] Found 12-digit sequence:", idNumber);
+      // Find ALL 15-digit sequences
+      const fifteenDigitMatches: string[] = [];
+      let tempDigits = allDigits;
+      while (tempDigits.length >= 15) {
+        const match = tempDigits.match(/\d{15}/);
+        if (match) {
+          fifteenDigitMatches.push(match[0]);
+          tempDigits = tempDigits.substring(match.index! + 15);
+        } else {
+          break;
+        }
+      }
+      
+      if (fifteenDigitMatches.length > 0) {
+        // Prefer sequences starting with 5, 7, or 4 (common barcode patterns)
+        const preferred = fifteenDigitMatches.find(seq => /^[574]/.test(seq));
+        
+        if (preferred) {
+          idNumber = preferred;
+          console.log("[ID EXTRACTION] Found preferred 15-digit barcode:", idNumber);
+        } else {
+          // Use the last 15-digit sequence (barcodes are usually at bottom)
+          idNumber = fifteenDigitMatches[fifteenDigitMatches.length - 1];
+          console.log("[ID EXTRACTION] Found 15-digit sequence (last):", idNumber);
+        }
+        
+        console.log("[ID EXTRACTION] All 15-digit sequences found:", fifteenDigitMatches);
+      } else {
+        // Fall back to 12 digits
+        const twelveDigitMatch = allDigits.match(/\d{12}/);
+        if (twelveDigitMatch) {
+          idNumber = twelveDigitMatch[0];
+          console.log("[ID EXTRACTION] Found 12-digit sequence:", idNumber);
+        }
       }
     }
 
