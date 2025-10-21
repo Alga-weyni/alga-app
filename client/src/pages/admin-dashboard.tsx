@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
+  const [, setLocation] = useLocation();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
@@ -559,7 +561,7 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(`/properties/${property.id}`, '_blank')}
+                            onClick={() => setLocation(`/properties/${property.id}`)}
                             data-testid={`button-view-property-${property.id}`}
                           >
                             <Eye className="h-4 w-4" />
