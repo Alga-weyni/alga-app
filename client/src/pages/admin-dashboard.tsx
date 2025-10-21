@@ -42,6 +42,18 @@ interface VerificationDocument {
   rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    idNumber?: string | null;
+    idFullName?: string | null;
+    idDocumentType?: string | null;
+    idExpiryDate?: string | null;
+    idCountry?: string | null;
+  };
 }
 
 interface AdminStats {
@@ -649,6 +661,7 @@ export default function AdminDashboard() {
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedDocument(doc)}
+                            data-testid={`button-view-document-${doc.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -850,35 +863,143 @@ export default function AdminDashboard() {
       {/* Document Review Dialog */}
       {selectedDocument && (
         <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Review Document</DialogTitle>
+              <DialogTitle className="text-xl">ID Verification Review</DialogTitle>
               <DialogDescription>
-                {selectedDocument.documentType.replace('_', ' ')} - User ID: {selectedDocument.userId}
+                Review identification document and user details
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* User Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-eth-brown mb-3 flex items-center">
+                  <User className="h-5 w-5 mr-2" />
+                  User Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600 mb-1">Full Name</p>
+                    <p className="font-medium">
+                      {selectedDocument.user?.firstName} {selectedDocument.user?.lastName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1">Email</p>
+                    <p className="font-medium">{selectedDocument.user?.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1">Phone Number</p>
+                    <p className="font-medium">{selectedDocument.user?.phoneNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1">User ID</p>
+                    <p className="font-medium font-mono text-xs">{selectedDocument.userId}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scanned ID Details */}
+              {selectedDocument.user && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-eth-brown mb-3 flex items-center">
+                    <FileCheck className="h-5 w-5 mr-2" />
+                    Scanned ID Details
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    {selectedDocument.user.idNumber && (
+                      <div>
+                        <p className="text-gray-600 mb-1">ID Number</p>
+                        <p className="font-medium font-mono">{selectedDocument.user.idNumber}</p>
+                      </div>
+                    )}
+                    {selectedDocument.user.idFullName && (
+                      <div>
+                        <p className="text-gray-600 mb-1">Name on ID</p>
+                        <p className="font-medium">{selectedDocument.user.idFullName}</p>
+                      </div>
+                    )}
+                    {selectedDocument.user.idDocumentType && (
+                      <div>
+                        <p className="text-gray-600 mb-1">Document Type</p>
+                        <Badge variant="outline" className="mt-1">
+                          {selectedDocument.user.idDocumentType.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    )}
+                    {selectedDocument.user.idCountry && (
+                      <div>
+                        <p className="text-gray-600 mb-1">Country</p>
+                        <p className="font-medium">{selectedDocument.user.idCountry}</p>
+                      </div>
+                    )}
+                    {selectedDocument.user.idExpiryDate && (
+                      <div>
+                        <p className="text-gray-600 mb-1">Expiry Date</p>
+                        <p className="font-medium">{selectedDocument.user.idExpiryDate}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-gray-600 mb-1">Submitted</p>
+                      <p className="font-medium">
+                        {new Date(selectedDocument.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Document Image */}
               <div>
-                <img
-                  src={selectedDocument.documentUrl}
-                  alt="Document"
-                  className="w-full max-h-96 object-contain rounded border"
-                />
+                <h3 className="font-semibold text-eth-brown mb-3">Document Image</h3>
+                <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={selectedDocument.documentUrl}
+                    alt="Verification Document"
+                    className="w-full max-h-[400px] object-contain"
+                    data-testid={`img-document-${selectedDocument.id}`}
+                  />
+                </div>
               </div>
               
+              {/* Status Information */}
+              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Current Status</p>
+                  <Badge variant={getVerificationBadgeColor(selectedDocument.status)} className="text-sm">
+                    {selectedDocument.status}
+                  </Badge>
+                </div>
+                {selectedDocument.rejectionReason && (
+                  <div className="flex-1 ml-6">
+                    <p className="text-sm text-gray-600 mb-1">Rejection Reason</p>
+                    <p className="text-sm text-red-600">{selectedDocument.rejectionReason}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions for Pending Documents */}
               {selectedDocument.status === 'pending' && (
-                <div className="space-y-4">
+                <div className="space-y-4 border-t pt-4">
                   <div>
                     <Label htmlFor="rejection-reason">Rejection Reason (Optional)</Label>
                     <Textarea
                       id="rejection-reason"
-                      placeholder="Provide reason if rejecting..."
-                      className="mt-1"
+                      placeholder="Provide a reason if rejecting this document..."
+                      className="mt-2"
+                      data-testid="textarea-rejection-reason"
                     />
                   </div>
                   
                   <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedDocument(null)}
+                      data-testid="button-cancel-review"
+                    >
+                      Cancel
+                    </Button>
                     <Button
                       variant="destructive"
                       onClick={() => {
@@ -890,7 +1011,9 @@ export default function AdminDashboard() {
                         });
                         setSelectedDocument(null);
                       }}
+                      data-testid="button-reject-document"
                     >
+                      <XCircle className="h-4 w-4 mr-2" />
                       Reject
                     </Button>
                     <Button
@@ -901,8 +1024,10 @@ export default function AdminDashboard() {
                         });
                         setSelectedDocument(null);
                       }}
+                      data-testid="button-approve-document"
                     >
-                      Approve
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Approve & Upgrade to Host
                     </Button>
                   </DialogFooter>
                 </div>
