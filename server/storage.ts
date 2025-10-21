@@ -6,6 +6,8 @@ import {
   favorites,
   verificationDocuments,
   accessCodes,
+  serviceProviders,
+  serviceBookings,
   type User,
   type UpsertUser,
   type Property,
@@ -18,6 +20,10 @@ import {
   type InsertFavorite,
   type AccessCode,
   type InsertAccessCode,
+  type ServiceProvider,
+  type InsertServiceProvider,
+  type ServiceBooking,
+  type InsertServiceBooking,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -112,6 +118,29 @@ export interface IStorage {
   getAccessCodeByBookingId(bookingId: number): Promise<AccessCode | undefined>;
   getAccessCodesByGuestId(guestId: string): Promise<AccessCode[]>;
   expireOldAccessCodes(): Promise<void>;
+  
+  // Service provider operations
+  createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
+  getServiceProvider(id: number): Promise<ServiceProvider | undefined>;
+  getServiceProvidersByUser(userId: string): Promise<ServiceProvider[]>;
+  getAllServiceProviders(filters?: {
+    city?: string;
+    serviceType?: string;
+    verificationStatus?: string;
+  }): Promise<ServiceProvider[]>;
+  updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider>;
+  verifyServiceProvider(providerId: number, status: string, verifierId: string, rejectionReason?: string): Promise<ServiceProvider>;
+  updateServiceProviderRating(providerId: number): Promise<void>;
+  
+  // Service booking operations
+  createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking>;
+  getServiceBooking(id: number): Promise<ServiceBooking | undefined>;
+  getServiceBookingsByGuest(guestId: string): Promise<ServiceBooking[]>;
+  getServiceBookingsByHost(hostId: string): Promise<ServiceBooking[]>;
+  getServiceBookingsByProvider(providerId: number): Promise<ServiceBooking[]>;
+  updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking>;
+  updateServiceBookingPayment(id: number, paymentStatus: string, paymentRef?: string): Promise<ServiceBooking>;
+  completeServiceBooking(id: number): Promise<ServiceBooking>;
 }
 
 export class DatabaseStorage implements IStorage {
