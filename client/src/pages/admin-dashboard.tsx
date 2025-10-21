@@ -954,14 +954,31 @@ export default function AdminDashboard() {
               {/* Document Image */}
               <div>
                 <h3 className="font-semibold text-eth-brown mb-3">Document Image</h3>
-                <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={selectedDocument.documentUrl}
-                    alt="Verification Document"
-                    className="w-full max-h-[400px] object-contain"
-                    data-testid={`img-document-${selectedDocument.id}`}
-                  />
-                </div>
+                {selectedDocument.documentUrl && !selectedDocument.documentUrl.includes('placeholder') ? (
+                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={selectedDocument.documentUrl}
+                      alt="Verification Document"
+                      className="w-full max-h-[400px] object-contain"
+                      data-testid={`img-document-${selectedDocument.id}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="border-2 border-gray-200 rounded-lg bg-gray-100 p-8 text-center">
+                    <FileCheck className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-600 mb-2 font-medium">ID Document Verified Digitally</p>
+                    <p className="text-sm text-gray-500">
+                      This user submitted their ID information through digital ID scanning.
+                      All extracted data is shown above.
+                    </p>
+                    {selectedDocument.user?.idNumber && (
+                      <div className="mt-4 p-3 bg-white rounded border">
+                        <p className="text-xs text-gray-500 mb-1">Verified ID Number</p>
+                        <p className="font-mono font-medium text-eth-brown">{selectedDocument.user.idNumber}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               {/* Status Information */}
