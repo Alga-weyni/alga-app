@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
@@ -55,6 +55,11 @@ export default function PropertyDetails() {
   const queryClient = useQueryClient();
 
   const propertyId = parseInt(params.id || "0");
+
+  // Scroll to top when page loads or property changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [propertyId]);
 
   const [bookingData, setBookingData] = useState({
     checkIn: "",
