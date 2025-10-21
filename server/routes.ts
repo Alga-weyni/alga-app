@@ -813,35 +813,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     console.log("[ID EXTRACTION] Processing OCR text:", cleanText.substring(0, 200));
 
-    // ID Number — 12 digits (with flexible patterns)
+    // ID Number — Ethiopian IDs can be 12-15 digits (newer cards use 15-digit barcodes)
     let idNumber: string | null = null;
     
-    // Try multiple patterns to find 12-digit ID
+    // Try multiple patterns to find Ethiopian ID (12-15 digits)
     const idPatterns = [
-      /\b(\d{12})\b/,                           // Exact 12 digits
+      /\b(\d{15})\b/,                           // Exact 15 digits (barcode format)
+      /\b(\d{12})\b/,                           // Exact 12 digits (older format)
+      /\b(\d{5}[\s\-]?\d{5}[\s\-]?\d{5})\b/,   // 5-5-5 format with optional separators
+      /\b(\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{3})\b/,   // 4-4-4-3 format
       /\b(\d{4}[\s\-]?\d{4}[\s\-]?\d{4})\b/,   // 4-4-4 format with optional separators
       /\b(\d{3}[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{3})\b/,  // 3-3-3-3 format
-      /(?:ID|Number|ቁጥር|መለያ)[:\-\s]*(\d[\s\-\d]{10,20})/i,  // After ID/Number keywords
+      /(?:ID|Number|ቁጥር|መለያ|Barcode)[:\-\s]*(\d[\s\-\d]{10,20})/i,  // After ID/Number keywords
     ];
     
     for (const pattern of idPatterns) {
       const match = cleanText.match(pattern);
       if (match) {
-        // Extract digits only and check if 12 digits
+        // Extract digits only and check if 12-15 digits
         const digits = match[1].replace(/\D/g, '');
-        if (digits.length === 12) {
+        if (digits.length >= 12 && digits.length <= 15) {
           idNumber = digits;
-          console.log("[ID EXTRACTION] Found ID number:", idNumber);
+          console.log("[ID EXTRACTION] Found ID number:", idNumber, "Length:", digits.length);
           break;
         }
       }
     }
     
-    // If still no match, look for any 12-digit sequence
+    // If still no match, look for longest digit sequence (12-15 digits)
     if (!idNumber) {
       const allDigits = cleanText.replace(/\D/g, '');
+      // Try 15 digits first (newer format), then 12 digits (older format)
+      const fifteenDigitMatch = allDigits.match(/\d{15}/);
       const twelveDigitMatch = allDigits.match(/\d{12}/);
-      if (twelveDigitMatch) {
+      
+      if (fifteenDigitMatch) {
+        idNumber = fifteenDigitMatch[0];
+        console.log("[ID EXTRACTION] Found 15-digit sequence (barcode):", idNumber);
+      } else if (twelveDigitMatch) {
         idNumber = twelveDigitMatch[0];
         console.log("[ID EXTRACTION] Found 12-digit sequence:", idNumber);
       }
@@ -1024,8 +1033,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Parse data based on scan method
       if (scanMethod === "qr") {
-        // QR code scan - Ethiopian Digital ID
-        const ethiopianIdRegex = /^[0-9]{12}$/;
+        // QR code scan - Ethiopian Digital ID (supports both 12-digit and 15-digit IDs)
+        const ethiopianIdRegex = /^[0-9]{12,15}$/;
         try {
           // Try to parse as base64-encoded JSON (Ethiopian digital ID format)
           const decoded = JSON.parse(Buffer.from(scanData, 'base64').toString('utf-8'));
@@ -1075,7 +1084,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!idNumber || !ethiopianIdRegex.test(idNumber)) {
           return res.status(400).json({
             success: false,
-            message: "Invalid Ethiopian ID format. ID must be 12 digits.",
+            message: "Invalid Ethiopian ID format. ID must be 12-15 digits.",
             error: "Invalid ID number",
           });
         }
