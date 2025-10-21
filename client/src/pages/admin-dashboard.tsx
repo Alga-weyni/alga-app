@@ -559,7 +559,8 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedProperty(property)}
+                            onClick={() => window.open(`/properties/${property.id}`, '_blank')}
+                            data-testid={`button-view-property-${property.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
