@@ -645,10 +645,55 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllVerificationDocuments(): Promise<any[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        id: verificationDocuments.id,
+        userId: verificationDocuments.userId,
+        documentType: verificationDocuments.documentType,
+        documentUrl: verificationDocuments.documentUrl,
+        status: verificationDocuments.status,
+        createdAt: verificationDocuments.createdAt,
+        rejectionReason: verificationDocuments.rejectionReason,
+        verifiedAt: verificationDocuments.verifiedAt,
+        verifierId: verificationDocuments.verifierId,
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userPhoneNumber: users.phoneNumber,
+        userIdNumber: users.idNumber,
+        userIdFullName: users.idFullName,
+        userIdDocumentType: users.idDocumentType,
+        userIdExpiryDate: users.idExpiryDate,
+        userIdCountry: users.idCountry,
+      })
       .from(verificationDocuments)
+      .leftJoin(users, eq(verificationDocuments.userId, users.id))
       .orderBy(desc(verificationDocuments.createdAt));
+    
+    // Transform to include user object
+    return results.map((doc: any) => ({
+      id: doc.id,
+      userId: doc.userId,
+      documentType: doc.documentType,
+      documentUrl: doc.documentUrl,
+      status: doc.status,
+      createdAt: doc.createdAt,
+      rejectionReason: doc.rejectionReason,
+      verifiedAt: doc.verifiedAt,
+      verifierId: doc.verifierId,
+      user: doc.userEmail ? {
+        id: doc.userId,
+        email: doc.userEmail,
+        firstName: doc.userFirstName,
+        lastName: doc.userLastName,
+        phoneNumber: doc.userPhoneNumber,
+        idNumber: doc.userIdNumber,
+        idFullName: doc.userIdFullName,
+        idDocumentType: doc.userIdDocumentType,
+        idExpiryDate: doc.userIdExpiryDate,
+        idCountry: doc.userIdCountry,
+      } : undefined
+    }));
   }
 
   async getPendingVerificationDocuments(): Promise<any[]> {
