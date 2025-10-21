@@ -300,26 +300,49 @@ export default function PropertyDetails() {
         </div>
         
         {/* Image Gallery */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <div className="sm:col-span-2 lg:col-span-3">
+        <div className="mb-6 sm:mb-8">
+          {/* Main Image */}
+          <div className="mb-3 sm:mb-4">
             <img
               src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
               alt={property.title}
-              className="w-full h-56 sm:h-80 lg:h-96 object-cover rounded-lg sm:rounded-xl"
+              className="w-full h-64 sm:h-96 lg:h-[500px] object-cover rounded-lg sm:rounded-xl"
               data-testid="img-property-main"
             />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-4">
-            {property.images?.slice(1, 3).map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`${property.title} ${index + 2}`}
-                className="w-full h-32 sm:h-44 object-cover rounded-lg sm:rounded-xl"
-                data-testid={`img-property-${index + 2}`}
-              />
-            ))}
-          </div>
+          
+          {/* All Images Grid */}
+          {property.images && property.images.length > 1 && (
+            <div>
+              <h3 className="text-lg sm:text-xl font-semibold text-neutral-dark mb-3">
+                All Photos ({property.images.length})
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                {property.images.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-gray-200 hover:border-eth-brown transition-colors"
+                    onClick={() => window.open(image, '_blank')}
+                  >
+                    <img
+                      src={image}
+                      alt={`${property.title} ${index + 1}`}
+                      className="w-full h-32 sm:h-40 object-cover"
+                      data-testid={`img-property-${index}`}
+                    />
+                    {index === 0 && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-eth-brown text-white text-xs">Main</Badge>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">View Full Size</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
