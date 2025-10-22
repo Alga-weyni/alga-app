@@ -72,6 +72,18 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
 
 ## Recent Changes (October 2025)
 
+### Navigation Bar UX Refinement (October 22, 2025)
+- **Reordered Navigation Hierarchy** (user-centered design):
+  - **My Alga** (first) - Bold text for primary emphasis (only when authenticated)
+  - **Services** (second) - Regular weight for secondary focus
+  - **Discover** (last) - Less prominent with map icon 🗺️, smaller font
+- **Desktop Navigation**: Professional hierarchy with visual weights and underline animations
+- **Mobile Navigation**: 
+  - My Alga appears first in dropdown (when authenticated)
+  - Services second
+  - Discover last with map icon
+- **Design Polish**: Emphasizes personalization (My Alga) while maintaining clean, modern Ethiopian aesthetic
+
 ### Service Provider Onboarding Page (October 22, 2025)
 - **New Page**: Created `/become-provider` page for service provider registration
 - **Features**:
