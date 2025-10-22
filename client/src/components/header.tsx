@@ -1,4 +1,4 @@
-// Simplified Child-Friendly Navigation for Alga
+// Universal Navigation - Optimized for Children, Elderly, and All Users
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,22 +49,26 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
     },
   });
 
-  // Navigation items (child-friendly labels with icons)
+  // Navigation items with emojis for universal recognition
   const navItems = [
-    { path: "/properties", icon: Home, label: "Stay", testId: "stay" },
-    { path: "/services", icon: Wrench, label: "Fix", testId: "fix" },
-    ...(isAuthenticated ? [{ path: "/my-alga", icon: User, label: "Me", testId: "me" }] : []),
-    { path: "/support", icon: HelpCircle, label: "Help", testId: "help" },
+    { path: "/properties", icon: Home, emoji: "🏠", label: "Stay", ariaLabel: "Browse places to stay", testId: "stay" },
+    { path: "/services", icon: Wrench, emoji: "🔧", label: "Fix", ariaLabel: "Get help and services", testId: "fix" },
+    { path: "/support", icon: HelpCircle, emoji: "💬", label: "Help", ariaLabel: "Get support and help", testId: "help" },
+    ...(isAuthenticated ? [{ path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" }] : []),
   ];
 
   return (
     <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo - Bigger & Friendlier */}
-          <Link href="/" className="flex items-center space-x-3 cursor-pointer">
+          <Link 
+            href="/" 
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer"
+            aria-label="Alga home"
+          >
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-eth-brown rounded-2xl flex items-center justify-center shadow-md">
-              <Home className="text-white text-xl" />
+              <Home className="text-white text-xl" aria-hidden="true" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-eth-brown">Alga</h1>
           </Link>
@@ -76,17 +80,19 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 <Button 
                   variant="ghost" 
                   size="lg" 
-                  className="h-12 w-12"
+                  className="h-14 w-14"
                   data-testid="button-mobile-menu"
+                  aria-label="Open navigation menu"
+                  role="button"
                 >
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-7 w-7" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[350px]">
+              <SheetContent side="right" className="w-[320px] sm:w-[380px]">
                 <SheetHeader>
-                  <SheetTitle className="text-left text-eth-brown text-xl">Menu</SheetTitle>
+                  <SheetTitle className="text-left text-eth-brown text-2xl">Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col space-y-3 mt-8">
+                <nav className="flex flex-col space-y-4 mt-8" role="navigation" aria-label="Main navigation">
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = location === item.path || location.startsWith(`${item.path}/`);
@@ -96,15 +102,17 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                         href={item.path}
                         onClick={() => setMobileMenuOpen(false)}
                         className={`
-                          flex items-center gap-3 text-lg font-medium py-4 px-5 rounded-xl transition-all
+                          flex items-center gap-4 text-xl font-medium py-5 px-6 rounded-2xl transition-all
                           ${isActive 
-                            ? 'bg-eth-brown text-white shadow-md' 
+                            ? 'bg-eth-brown text-white shadow-lg' 
                             : 'hover:bg-cream-100 text-eth-brown'}
                         `}
                         data-testid={`mobile-link-${item.testId}`}
+                        aria-label={item.ariaLabel}
+                        role="button"
                       >
-                        <Icon className="h-6 w-6" />
-                        {item.label}
+                        <span className="text-3xl" aria-hidden="true">{item.emoji}</span>
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })}
@@ -115,24 +123,28 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full justify-start text-lg py-6 font-medium"
+                      className="w-full justify-start text-xl py-7 font-medium"
                       onClick={() => {
                         logoutMutation.mutate();
                         setMobileMenuOpen(false);
                       }}
                       data-testid="mobile-button-logout"
+                      aria-label="Sign out of your account"
+                      role="button"
                     >
                       Sign Out
                     </Button>
                   ) : (
                     <Button
                       size="lg"
-                      className="w-full text-lg py-6 bg-eth-brown hover:bg-eth-brown/90"
+                      className="w-full text-xl py-7 bg-eth-brown hover:bg-eth-brown/90"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setAuthDialogOpen(true);
                       }}
                       data-testid="mobile-button-signin"
+                      aria-label="Sign in to your account"
+                      role="button"
                     >
                       Sign In
                     </Button>
@@ -142,9 +154,9 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             </Sheet>
           )}
 
-          {/* Desktop Navigation - Clean & Simple */}
+          {/* Desktop Navigation - Larger Icon+Label Buttons */}
           {!hideNavigation && (
-            <nav className="hidden md:flex items-center space-x-2">
+            <nav className="hidden md:flex items-center gap-3" role="navigation" aria-label="Main navigation">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path || location.startsWith(`${item.path}/`);
@@ -153,15 +165,17 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     key={item.path}
                     href={item.path}
                     className={`
-                      flex items-center gap-2 px-5 py-3 rounded-xl transition-all font-medium
+                      flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all font-semibold min-w-[80px]
                       ${isActive 
-                        ? 'bg-eth-brown text-white shadow-md' 
-                        : 'hover:bg-cream-100 text-eth-brown/80 hover:text-eth-brown'}
+                        ? 'bg-eth-brown text-white shadow-lg scale-105' 
+                        : 'hover:bg-cream-100 text-eth-brown/80 hover:text-eth-brown hover:scale-105'}
                     `}
                     data-testid={`link-${item.testId}`}
+                    aria-label={item.ariaLabel}
+                    role="button"
                   >
-                    <Icon className="h-5 w-5" />
-                    <span>{item.label}</span>
+                    <span className="text-2xl" aria-hidden="true">{item.emoji}</span>
+                    <span className="text-sm">{item.label}</span>
                   </Link>
                 );
               })}
@@ -173,34 +187,42 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center space-x-2 bg-cream-100 rounded-full p-2 pr-4 hover:bg-cream-200 transition-colors cursor-pointer">
-                    <Avatar className="w-10 h-10 border-2 border-eth-brown/20">
-                      <AvatarImage src={user?.profileImageUrl || ""} />
-                      <AvatarFallback className="bg-eth-brown text-white font-semibold">
+                  <button 
+                    className="flex items-center space-x-3 bg-cream-100 rounded-full p-2 pr-5 hover:bg-cream-200 transition-colors cursor-pointer"
+                    aria-label="Open user menu"
+                    role="button"
+                  >
+                    <Avatar className="w-11 h-11 border-2 border-eth-brown/20">
+                      <AvatarImage src={user?.profileImageUrl || ""} alt={`${user?.firstName}'s profile`} />
+                      <AvatarFallback className="bg-eth-brown text-white font-semibold text-lg">
                         {user?.firstName?.[0]}{user?.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium text-eth-brown hidden lg:block">
+                    <span className="text-base font-semibold text-eth-brown hidden lg:block">
                       {user?.firstName}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-3 py-2">
-                    <p className="text-sm font-semibold text-eth-brown">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+                <DropdownMenuContent align="end" className="w-64">
+                  <div className="px-4 py-3">
+                    <p className="text-base font-semibold text-eth-brown">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-sm text-gray-500 mt-1">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem asChild>
-                    <Link href="/my-alga" className="cursor-pointer">My Alga</Link>
+                    <Link href="/my-alga" className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
+                      👤 My Dashboard
+                    </Link>
                   </DropdownMenuItem>
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={() => logoutMutation.mutate()}
                     data-testid="button-logout"
-                    className="text-red-600 cursor-pointer"
+                    className="text-red-600 cursor-pointer text-base py-3"
+                    role="button"
+                    aria-label="Sign out of your account"
                   >
                     Sign Out
                   </DropdownMenuItem>
@@ -211,7 +233,9 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 size="lg"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-signin-header"
-                className="bg-eth-brown hover:bg-eth-brown/90 text-white px-6 py-6 rounded-xl shadow-md hover:shadow-lg transition-all"
+                className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6 text-lg rounded-2xl shadow-md hover:shadow-lg transition-all font-semibold"
+                aria-label="Sign in to your account"
+                role="button"
               >
                 Sign In
               </Button>

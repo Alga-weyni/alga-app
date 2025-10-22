@@ -12,6 +12,7 @@ import {
   Trees 
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ContextualTooltip, useContextualTooltip } from "@/components/contextual-tooltip";
 
 const serviceCategories = [
   {
@@ -105,8 +106,20 @@ const serviceCategories = [
 ];
 
 export default function Services() {
+  const { showTooltip, handleDismiss } = useContextualTooltip('services-page');
+
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
+      {/* Contextual Tooltip */}
+      {showTooltip && (
+        <ContextualTooltip
+          message="Need help at home? Tap a service below to find trusted local providers."
+          emoji="💡"
+          duration={5000}
+          onDismiss={handleDismiss}
+        />
+      )}
+
       {/* Header with Provider CTA */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
