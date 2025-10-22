@@ -80,6 +80,37 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 
 ## Recent Changes (October 2025)
 
+### Google Maps Integration (Interactive Property Visualization)
+- **Component**: `GoogleMapView` using `google-map-react` library
+- **Features**:
+  - Interactive map with property markers showing price, rating, and image previews
+  - Map/List view toggle on properties search page
+  - Fullscreen mode with custom controls
+  - User location tracking with "Get My Location" button
+  - Property clustering and custom Ethiopian-themed markers
+  - Single property map view on property details page (zoom level 15)
+- **Configuration**: Requires `VITE_GOOGLE_MAPS_API_KEY` in environment variables
+- **Fallback**: Graceful degradation when API key is not configured
+- **UI/UX**: Seamless toggle between grid and map views, selected property highlighting
+
+### Fayda ID Verification Integration
+- **Implementation**: Backend API integration with Ethiopia's National Digital Identity Program (NIDP)
+- **Database Schema**: Added `faydaId`, `faydaVerified`, `faydaVerifiedAt`, `faydaVerificationData` to users table
+- **Backend Service**: `server/fayda-verification.ts` with sandbox and production modes
+- **API Routes**: 
+  - `POST /api/fayda/verify` - Verify 12-digit Fayda ID
+  - `GET /api/fayda/status` - Check verification status
+- **Frontend Component**: `FaydaVerification` with real-time validation and user-friendly UI
+- **Features**:
+  - 12-digit Fayda ID input with automatic validation
+  - Optional date of birth for enhanced verification
+  - eKYC integration (Electronic Know Your Customer)
+  - Encrypted identity data storage compliant with Digital Identification Proclamation 1284/2023
+  - Sandbox mode for development (auto-accepts any 12-digit number)
+  - Production mode ready for NIDP partnership credentials
+- **Security**: All verification data encrypted, HTTPS required, compliant with Ethiopian data protection laws
+- **Documentation**: API docs at https://nidp.atlassian.net/wiki/spaces/FAPIQ/pages/633733136/
+
 ### Chapa Payment Integration (Embedded Iframe)
 - **Implementation**: Embedded iframe checkout (no redirect) for seamless payment experience
 - **Backend Routes**: `/api/payment/chapa/initiate` and `/api/payment/chapa/verify/:tx_ref`
