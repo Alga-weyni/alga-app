@@ -16,6 +16,7 @@ import BecomeHost from "@/pages/become-host";
 import BecomeProvider from "@/pages/become-provider";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminServiceProviders from "@/pages/admin-service-providers";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
@@ -67,6 +68,7 @@ function Router() {
           <Route path="/profile" component={Profile} />
           <Route path="/host/dashboard" component={HostDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/service-providers" component={AdminServiceProviders} />
           <Route path="/operator/dashboard" component={OperatorDashboard} />
         </>
       )}
