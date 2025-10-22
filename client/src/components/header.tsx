@@ -1,6 +1,6 @@
 // Universal Navigation - Optimized for Children, Elderly, and All Users
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,8 @@ interface HeaderProps {
 
 export default function Header({ hideNavigation = false }: HeaderProps) {
   const { user, isAuthenticated } = useAuth();
-  const [location, navigate] = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
@@ -63,7 +64,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
         <div className="flex justify-between items-center h-16 sm:h-18">
           {/* Logo - Bigger & Friendlier */}
           <Link 
-            href="/" 
+            to="/" 
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer"
             aria-label="Alga home"
           >
@@ -95,11 +96,11 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 <nav className="flex flex-col space-y-4 mt-8" role="navigation" aria-label="Main navigation">
                   {navItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = location === item.path || location.startsWith(`${item.path}/`);
+                    const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
                     return (
                       <Link
                         key={item.path}
-                        href={item.path}
+                        to={item.path}
                         onClick={() => setMobileMenuOpen(false)}
                         className={`
                           flex items-center gap-4 text-xl font-medium py-5 px-6 rounded-2xl transition-all
@@ -159,11 +160,11 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             <nav className="hidden md:flex items-center gap-6 lg:gap-8" role="navigation" aria-label="Main navigation">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location === item.path || location.startsWith(`${item.path}/`);
+                const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
                 return (
                   <Link
                     key={item.path}
-                    href={item.path}
+                    to={item.path}
                     className="group relative flex items-center gap-2 py-2 transition-all"
                     data-testid={`link-${item.testId}`}
                     aria-label={item.ariaLabel}
@@ -218,7 +219,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem asChild>
-                    <Link href="/my-alga" className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
+                    <Link to="/my-alga" className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
                       👤 My Dashboard
                     </Link>
                   </DropdownMenuItem>

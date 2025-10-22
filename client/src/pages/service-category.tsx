@@ -70,7 +70,7 @@ export default function ServiceCategory() {
       {/* Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/services">
+          <Link to="/services">
             <Button variant="ghost" className="mb-4" data-testid="button-back-services">
               <ArrowLeft className="w-4 h-4 mr-2" />
               All Services

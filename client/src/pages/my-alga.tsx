@@ -202,7 +202,7 @@ export default function MyAlga() {
                 Please sign in to view your dashboard
               </p>
             </div>
-            <Link href="/login">
+            <Link to="/login">
               <Button 
                 className="w-full text-lg py-6"
                 style={{ background: "#2d1405" }}
@@ -285,7 +285,7 @@ export default function MyAlga() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Link href="/properties">
+            <Link to="/properties">
               <Button
                 size="lg"
                 className="w-full h-20 text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
@@ -297,7 +297,7 @@ export default function MyAlga() {
               </Button>
             </Link>
 
-            <Link href="/services">
+            <Link to="/services">
               <Button
                 size="lg"
                 className="w-full h-20 text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
@@ -313,7 +313,7 @@ export default function MyAlga() {
           {/* Become Host/Provider CTAs - Only for guests */}
           {user?.role === 'guest' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <Link href="/become-host">
+              <Link to="/become-host">
                 <Button
                   variant="outline"
                   size="lg"
@@ -326,7 +326,7 @@ export default function MyAlga() {
                 </Button>
               </Link>
 
-              <Link href="/become-provider">
+              <Link to="/become-provider">
                 <Button
                   variant="outline"
                   size="lg"

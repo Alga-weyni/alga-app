@@ -61,7 +61,7 @@ export default function BookingCancelled() {
                     </Button>
                   </Link>
                 )}
-                <Link href="/">
+                <Link to="/">
                   <Button variant="outline" className="border-eth-brown text-eth-brown hover:bg-eth-light-tan" data-testid="link-home">
                     Back to Home
                   </Button>

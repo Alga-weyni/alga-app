@@ -97,7 +97,7 @@ export default function Welcome() {
 
         {/* Skip Option */}
         <div className="text-center">
-          <Link href="/properties">
+          <Link to="/properties">
             <Button
               variant="ghost"
               size="lg"

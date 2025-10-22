@@ -125,7 +125,7 @@ export default function Services() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Provider CTA Banner - Top Right */}
           <div className="flex justify-end mb-4">
-            <Link href="/become-provider">
+            <Link to="/become-provider">
               <div 
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity cursor-pointer"
                 style={{ background: "#2d1405" }}
