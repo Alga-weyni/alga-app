@@ -877,7 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if database already has properties
-      const existingProperties = await storage.getAllProperties();
+      const existingProperties = await storage.getProperties();
       if (existingProperties.length > 0) {
         return res.status(400).json({ 
           message: "Database already contains properties. Seeding skipped to prevent duplicates.",
@@ -887,7 +887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Seed properties (15 approved properties)
       const sampleProperties = [
-        { hostId: "host-ethiopia-1", title: "Addis View Hotel", description: "Modern hotel with panoramic city views in the heart of Addis Ababa", city: "Addis Ababa", type: "hotel", pricePerNight: "120.00", capacity: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "parking", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
+        { hostId: "host-ethiopia-1", title: "Addis View Hotel", description: "Modern hotel with panoramic city views in the heart of Addis Ababa", region: "Addis Ababa", location: "Bole District", city: "Addis Ababa", type: "hotel", pricePerNight: "120.00", maxGuests: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "parking", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
         { hostId: "host-ethiopia-2", title: "Cozy Traditional Ethiopian Home in Addis Ababa", description: "Experience authentic Ethiopian living in this charming traditional home", city: "Addis Ababa", type: "house", pricePerNight: "80.00", capacity: 6, bedrooms: 3, bathrooms: 2, amenities: ["wifi", "kitchen", "garden"], images: ["/api/placeholder/800/600"], status: "approved" as const },
         { hostId: "host-ethiopia-3", title: "Simien Mountain Lodge", description: "Eco-lodge with breathtaking mountain views near Gondar", city: "Gondar", type: "lodge", pricePerNight: "150.00", capacity: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "restaurant", "hiking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
         { hostId: "host-ethiopia-4", title: "Bishoftu Resort & Spa", description: "Lakeside resort perfect for relaxation and rejuvenation", city: "Bishoftu", type: "resort", pricePerNight: "200.00", capacity: 2, bedrooms: 1, bathrooms: 1, amenities: ["wifi", "spa", "pool", "restaurant"], images: ["/api/placeholder/800/600"], status: "approved" as const },
