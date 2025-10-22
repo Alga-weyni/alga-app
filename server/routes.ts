@@ -16,6 +16,8 @@ import path from "path";
 import fs from "fs";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -156,6 +158,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('ID upload error:', error);
       res.status(500).json({ message: error.message || 'Failed to upload ID document' });
+    }
+  });
+
+  // === OBJECT STORAGE ENDPOINTS (Replit App Storage) ===
+  // Referenced from blueprint:javascript_object_storage
+  
+  // Serve files from Object Storage (with ACL checks for protected files)
+  app.get('/objects/:objectPath(*)', async (req: any, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      
+      // Get user ID if authenticated
+      const userId = req.user?.id;
+      
+      // Check access permissions
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error('Error accessing object:', error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Get presigned URL for uploading files to Object Storage
+  app.post('/api/objects/upload', isAuthenticated, async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error: any) {
+      console.error('Error generating upload URL:', error);
+      res.status(500).json({ error: error.message || 'Failed to generate upload URL' });
+    }
+  });
+
+  // Set ACL policy for uploaded property/service images
+  app.put('/api/objects/set-acl', isAuthenticated, async (req: any, res) => {
+    try {
+      const { imageURL, visibility = 'public' } = req.body;
+      
+      if (!imageURL) {
+        return res.status(400).json({ error: 'imageURL is required' });
+      }
+
+      const userId = req.user.id;
+      const objectStorageService = new ObjectStorageService();
+      
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        imageURL,
+        {
+          owner: userId,
+          visibility,
+        }
+      );
+
+      res.status(200).json({ objectPath });
+    } catch (error: any) {
+      console.error('Error setting ACL:', error);
+      res.status(500).json({ error: error.message || 'Failed to set ACL policy' });
     }
   });
 
