@@ -97,7 +97,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     if (redirectAfterAuth) {
       redirectPath = redirectAfterAuth;
     } else {
-      // Role-based redirect
+      // Role-based redirect with welcome page for new/guest users
       if (user.role === "admin") {
         redirectPath = "/admin/dashboard";
       } else if (user.role === "operator") {
@@ -105,12 +105,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       } else if (user.role === "host") {
         redirectPath = "/host/dashboard";
       } else {
-        redirectPath = "/properties";
+        // Guest users go to welcome page after login
+        redirectPath = mode === "register" ? "/welcome" : "/welcome";
       }
     }
     
     toast({
-      title: mode === "login" ? "Welcome back!" : "Account created!",
+      title: mode === "login" ? "Welcome back! 👋" : "Account created! 🎉",
       description: mode === "login" ? `Logged in as ${user.firstName} ${user.lastName}` : `Welcome to Alga, ${user.firstName}!`,
     });
 
