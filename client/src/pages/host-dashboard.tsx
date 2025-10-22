@@ -87,6 +87,30 @@ const propertyFormSchema = insertPropertySchema.omit({
 
 type PropertyFormData = z.infer<typeof propertyFormSchema>;
 
+// Ethiopian-relevant property title suggestions
+const PROPERTY_TITLE_SUGGESTIONS = [
+  "Traditional Ethiopian Home",
+  "Modern City Apartment",
+  "Family Guesthouse Retreat",
+  "Lakeside Villa",
+  "Mountain View Lodge",
+  "Eco Stay & Coffee Farm",
+  "Urban Studio Room",
+  "Peaceful Garden Residence",
+];
+
+// Auto-suggested descriptions based on title choice
+const TITLE_DESCRIPTIONS: Record<string, string> = {
+  "Traditional Ethiopian Home": "Experience authentic Ethiopian living in this beautifully preserved traditional home. Features classic architecture, warm hospitality, and proximity to local markets and cultural sites. Perfect for families seeking an immersive cultural experience.",
+  "Modern City Apartment": "Contemporary urban living with all modern amenities. Located in the heart of the city with easy access to restaurants, shops, and business districts. Ideal for travelers who value convenience and comfort.",
+  "Family Guesthouse Retreat": "Spacious and welcoming family-friendly accommodation. Multiple bedrooms, shared living spaces, and a warm, homely atmosphere. Great for groups and families looking to explore Ethiopia together.",
+  "Lakeside Villa": "Stunning waterfront property with panoramic lake views. Enjoy peaceful mornings, beautiful sunsets, and outdoor activities. Perfect for relaxation and nature enthusiasts.",
+  "Mountain View Lodge": "Breathtaking mountain vistas and fresh highland air. Cozy retreat with spectacular views, ideal for hikers and those seeking tranquility away from the city.",
+  "Eco Stay & Coffee Farm": "Sustainable living on a working coffee farm. Learn about Ethiopian coffee culture, enjoy organic meals, and experience rural life. Perfect for eco-conscious travelers and coffee lovers.",
+  "Urban Studio Room": "Compact and efficient city accommodation. Well-designed space with everything you need for a comfortable stay. Great for solo travelers and short business trips.",
+  "Peaceful Garden Residence": "Serene property surrounded by lush gardens and green spaces. Quiet neighborhood, perfect for relaxation while still being close to city amenities. Ideal for those seeking peace and nature.",
+};
+
 export default function HostDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -776,9 +800,45 @@ export default function HostDashboard() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-eth-brown">Property Title <span className="text-red-600">*</span></FormLabel>
+                      <FormLabel className="text-eth-brown">
+                        Property Title <span className="text-red-600">*</span>
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Beautiful lakeside retreat..." {...field} required />
+                        <div className="space-y-1">
+                          <Input
+                            {...field}
+                            list="property-title-suggestions"
+                            placeholder="Choose or type your own..."
+                            required
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Auto-suggest description when a preset title is selected
+                              const selectedTitle = e.target.value;
+                              if (TITLE_DESCRIPTIONS[selectedTitle]) {
+                                // Only auto-fill if description is empty
+                                const currentDescription = form.getValues("description");
+                                if (!currentDescription || currentDescription.trim() === "") {
+                                  form.setValue("description", TITLE_DESCRIPTIONS[selectedTitle]);
+                                  toast({
+                                    title: "Description suggested! ✨",
+                                    description: "Feel free to customize it to match your property.",
+                                  });
+                                }
+                              }
+                            }}
+                            className="text-base"
+                            data-testid="input-property-title"
+                            aria-label="Property title with suggestions"
+                          />
+                          <datalist id="property-title-suggestions">
+                            {PROPERTY_TITLE_SUGGESTIONS.map((suggestion) => (
+                              <option key={suggestion} value={suggestion} />
+                            ))}
+                          </datalist>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            💡 <span>Choose a name that reflects your stay's character</span>
+                          </p>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
