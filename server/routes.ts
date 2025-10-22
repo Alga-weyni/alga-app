@@ -9,7 +9,7 @@ import { randomBytes, randomInt } from "crypto";
 import paymentRouter from "./payment";
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from "./utils/invoice";
-import { sendOtpEmail, sendWelcomeEmail } from "./utils/email.js";
+import { sendOtpEmail, sendWelcomeEmail, sendProviderApplicationReceivedEmail, sendProviderApplicationApprovedEmail, sendProviderApplicationRejectedEmail } from "./utils/email.js";
 import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from "./fayda-verification";
 import multer from "multer";
 import path from "path";
@@ -1969,6 +1969,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({ isServiceProvider: true })
         .where(eq(users.id, userId));
 
+      // Send confirmation email
+      const user = req.user;
+      if (user.email) {
+        await sendProviderApplicationReceivedEmail(
+          user.email,
+          user.firstName || 'Provider',
+          businessName,
+          serviceType
+        );
+      }
+
       res.status(201).json({
         message: "Application submitted successfully",
         provider: newProvider,
@@ -2063,6 +2074,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating service provider:", error);
       res.status(500).json({ message: "Failed to update service provider" });
+    }
+  });
+
+  // ============================================
+  // ADMIN SERVICE PROVIDER VERIFICATION ROUTES
+  // ============================================
+
+  // Helper middleware to check admin/operator role
+  const isAdminOrOperator = (req: any, res: any, next: any) => {
+    if (req.user?.role !== 'admin' && req.user?.role !== 'operator') {
+      return res.status(403).json({ message: "Access denied. Admin or operator role required." });
+    }
+    next();
+  };
+
+  // Approve service provider application
+  app.post('/api/admin/service-providers/:id/approve', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { basePrice } = req.body;
+
+      // Validate base price
+      if (!basePrice || isNaN(parseFloat(basePrice))) {
+        return res.status(400).json({ message: "Valid base price is required" });
+      }
+
+      const provider = await storage.getServiceProvider(id);
+      if (!provider) {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+
+      if (provider.verificationStatus === 'verified') {
+        return res.status(400).json({ message: "Provider is already verified" });
+      }
+
+      // Update provider verification status and pricing
+      const updatedProvider = await storage.updateServiceProvider(id, {
+        verificationStatus: 'verified',
+        basePrice: basePrice.toString(),
+      });
+
+      // Get provider user details for email
+      const providerUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, provider.userId))
+        .limit(1);
+
+      if (providerUser.length > 0 && providerUser[0].email) {
+        await sendProviderApplicationApprovedEmail(
+          providerUser[0].email,
+          providerUser[0].firstName || 'Provider',
+          provider.businessName,
+          provider.serviceType
+        );
+      }
+
+      res.json({
+        message: "Service provider approved successfully",
+        provider: updatedProvider,
+      });
+    } catch (error) {
+      console.error("Error approving service provider:", error);
+      res.status(500).json({ message: "Failed to approve service provider" });
+    }
+  });
+
+  // Reject service provider application
+  app.post('/api/admin/service-providers/:id/reject', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { reason } = req.body;
+
+      if (!reason || reason.trim() === '') {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+
+      const provider = await storage.getServiceProvider(id);
+      if (!provider) {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+
+      if (provider.verificationStatus === 'rejected') {
+        return res.status(400).json({ message: "Provider is already rejected" });
+      }
+
+      // Update provider verification status
+      const updatedProvider = await storage.updateServiceProvider(id, {
+        verificationStatus: 'rejected',
+        rejectionReason: reason,
+      });
+
+      // Get provider user details for email
+      const providerUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, provider.userId))
+        .limit(1);
+
+      if (providerUser.length > 0 && providerUser[0].email) {
+        await sendProviderApplicationRejectedEmail(
+          providerUser[0].email,
+          providerUser[0].firstName || 'Provider',
+          provider.businessName,
+          reason
+        );
+      }
+
+      res.json({
+        message: "Service provider rejected successfully",
+        provider: updatedProvider,
+      });
+    } catch (error) {
+      console.error("Error rejecting service provider:", error);
+      res.status(500).json({ message: "Failed to reject service provider" });
     }
   });
 
