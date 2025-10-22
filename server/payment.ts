@@ -1,5 +1,6 @@
 import express from "express";
 import Stripe from "stripe";
+import Chapa from "chapa-nodejs";
 import { db } from "./db";
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -7,6 +8,11 @@ import { createTelebirrService } from "./services/telebirr.service";
 import { storage } from "./storage";
 
 const router = express.Router();
+
+// Initialize Chapa
+const chapa = process.env.CHAPA_SECRET_KEY
+  ? new Chapa(process.env.CHAPA_SECRET_KEY)
+  : null;
 
 // Helper function to generate 6-digit access code
 async function generateAccessCodeForBooking(bookingId: number): Promise<string> {
@@ -472,6 +478,252 @@ router.post(
     }
   }
 );
+
+// -----------------------------------------------------------------------------
+// CHAPA PAYMENT (Ethiopian Local Payment Gateway)
+// -----------------------------------------------------------------------------
+router.post("/chapa/initiate", async (req, res) => {
+  try {
+    if (!chapa) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Chapa is not configured. Please add CHAPA_SECRET_KEY to environment." 
+      });
+    }
+
+    const { bookingId, amount, currency = "ETB" } = req.body;
+
+    if (!bookingId || !amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: bookingId and amount are required"
+      });
+    }
+
+    // Get booking details
+    const booking = await storage.getBooking(bookingId);
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    // Get guest details
+    const guest = await storage.getUserById(booking.guestId);
+    if (!guest) {
+      return res.status(404).json({
+        success: false,
+        message: "Guest not found"
+      });
+    }
+
+    // Generate unique transaction reference
+    const tx_ref = `ALGA-${bookingId}-${Date.now()}`;
+
+    const baseUrl = process.env.BASE_URL || req.get('origin') || 'http://localhost:5000';
+
+    // Initialize Chapa payment
+    const response = await chapa.initialize({
+      amount: amount.toString(),
+      currency,
+      email: guest.email || `guest${booking.guestId}@algaapp.com`,
+      first_name: guest.firstName || "Guest",
+      last_name: guest.lastName || "User",
+      tx_ref,
+      callback_url: `${baseUrl}/api/payment/chapa/callback`,
+      return_url: `${baseUrl}/booking/success?bookingId=${bookingId}`,
+      customization: {
+        title: "Alga Property Rental",
+        description: `Booking #${bookingId} - Property Payment`
+      }
+    });
+
+    console.log('[Chapa] Payment initiated:', { bookingId, tx_ref, amount });
+
+    // Update booking with payment reference
+    await db.update(bookings)
+      .set({ 
+        paymentStatus: "pending", 
+        paymentRef: tx_ref,
+        paymentMethod: "chapa",
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId));
+
+    return res.status(200).json({
+      success: true,
+      checkout_url: response.data.checkout_url,
+      tx_ref,
+      message: "Chapa payment initialized successfully"
+    });
+  } catch (err: any) {
+    console.error("[Chapa] Payment initialization error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Chapa payment initialization failed",
+      error: err.toString()
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// CHAPA PAYMENT CALLBACK (Webhook)
+// -----------------------------------------------------------------------------
+router.post("/chapa/callback", async (req, res) => {
+  try {
+    console.log('[Chapa] Callback received:', req.body);
+
+    const { tx_ref, status } = req.body;
+
+    if (!tx_ref) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing tx_ref in callback"
+      });
+    }
+
+    // Find booking by payment reference
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.paymentRef, tx_ref))
+      .limit(1);
+
+    if (!booking) {
+      console.error('[Chapa] Booking not found for tx_ref:', tx_ref);
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    // Verify payment with Chapa
+    if (chapa) {
+      const verification = await chapa.verify(tx_ref);
+      
+      console.log('[Chapa] Verification result:', verification);
+
+      if (verification.status === 'success' && verification.data.status === 'success') {
+        // Payment successful
+        await db.update(bookings)
+          .set({ 
+            status: "confirmed",
+            paymentStatus: "paid", 
+            updatedAt: new Date() 
+          })
+          .where(eq(bookings.id, booking.id));
+        
+        // Generate access code for confirmed booking
+        await generateAccessCodeForBooking(booking.id);
+        
+        console.log(`✅ [Chapa] Payment confirmed for booking #${booking.id}`);
+        
+        return res.status(200).json({ 
+          success: true,
+          message: "Payment verified and booking confirmed"
+        });
+      } else {
+        // Payment failed
+        await db.update(bookings)
+          .set({ 
+            status: "cancelled",
+            paymentStatus: "failed", 
+            updatedAt: new Date() 
+          })
+          .where(eq(bookings.id, booking.id));
+        
+        console.log(`❌ [Chapa] Payment failed for booking #${booking.id}`);
+        
+        return res.status(400).json({ 
+          success: false,
+          message: "Payment verification failed"
+        });
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Chapa service not available"
+    });
+  } catch (err: any) {
+    console.error("[Chapa] Callback error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Payment callback processing failed",
+      error: err.toString()
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// CHAPA PAYMENT VERIFICATION (Manual check)
+// -----------------------------------------------------------------------------
+router.get("/chapa/verify/:tx_ref", async (req, res) => {
+  try {
+    if (!chapa) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Chapa is not configured" 
+      });
+    }
+
+    const { tx_ref } = req.params;
+
+    // Verify with Chapa
+    const verification = await chapa.verify(tx_ref);
+    
+    console.log('[Chapa] Manual verification for:', tx_ref, verification);
+
+    // Find booking
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.paymentRef, tx_ref))
+      .limit(1);
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    if (verification.status === 'success' && verification.data.status === 'success') {
+      // Update booking if not already paid
+      if (booking.paymentStatus !== 'paid') {
+        await db.update(bookings)
+          .set({ 
+            status: "confirmed",
+            paymentStatus: "paid", 
+            updatedAt: new Date() 
+          })
+          .where(eq(bookings.id, booking.id));
+        
+        // Generate access code
+        await generateAccessCodeForBooking(booking.id);
+      }
+
+      return res.status(200).json({
+        success: true,
+        status: 'paid',
+        booking_id: booking.id,
+        message: "Payment verified successfully"
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        status: verification.data.status || 'pending',
+        message: "Payment not yet completed"
+      });
+    }
+  } catch (err: any) {
+    console.error("[Chapa] Verification error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Payment verification failed",
+      error: err.toString()
+    });
+  }
+});
 
 // -----------------------------------------------------------------------------
 // EXPORT ROUTER
