@@ -124,6 +124,33 @@ export default function HostDashboard() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <Home className="w-16 h-16 mx-auto mb-4" style={{ color: "#8a6e4b" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+              Host Dashboard
+            </h2>
+            <p className="text-base mb-6" style={{ color: "#5a4a42" }}>
+              Please sign in to access your host dashboard
+            </p>
+            <Button 
+              onClick={() => setLocation("/login")}
+              className="w-full text-lg py-6"
+              style={{ background: "#2d1405" }}
+              data-testid="button-signin"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
     defaultValues: {

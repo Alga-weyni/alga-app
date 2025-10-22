@@ -68,6 +68,14 @@ function Router() {
       {/* My Alga - accessible to all, handles auth internally */}
       <Route path="/my-alga" component={MyAlga} />
       
+      {/* Dashboard routes - accessible to all, each dashboard handles auth */}
+      <Route path="/host/dashboard" component={HostDashboard} />
+      <Route path="/provider/dashboard" component={ProviderDashboard} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/service-providers" component={AdminServiceProviders} />
+      <Route path="/admin/providers" component={AdminServiceProviders} />
+      <Route path="/operator/dashboard" component={OperatorDashboard} />
+      
       <Route path="/" component={Properties} />
       
       {!isLoading && isAuthenticated && (
@@ -77,12 +85,6 @@ function Router() {
           <Route path="/favorites" component={Favorites} />
           <Route path="/my-services" component={MyServices} />
           <Route path="/profile" component={Profile} />
-          <Route path="/host/dashboard" component={HostDashboard} />
-          <Route path="/provider/dashboard" component={ProviderDashboard} />
-          <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/service-providers" component={AdminServiceProviders} />
-          <Route path="/admin/providers" component={AdminServiceProviders} />
-          <Route path="/operator/dashboard" component={OperatorDashboard} />
         </>
       )}
       <Route component={NotFound} />
