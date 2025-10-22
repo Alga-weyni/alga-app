@@ -254,3 +254,334 @@ export async function sendWelcomeEmail(to: string, firstName: string): Promise<v
     // Don't throw - welcome email is nice-to-have, not critical
   }
 }
+
+/**
+ * Send service provider application received confirmation email
+ */
+export async function sendProviderApplicationReceivedEmail(
+  to: string,
+  firstName: string,
+  businessName: string,
+  serviceType: string
+): Promise<void> {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+    
+    const msg = {
+      to,
+      from: fromEmail,
+      subject: 'Application Received - Alga Services',
+      text: `Hi ${firstName},\n\nThank you for applying to join Alga Services with "${businessName}".\n\nWe've received your application for ${serviceType} services. Our team will review your application and get back to you within 24 hours.\n\nWhat happens next?\n- Our verification team will review your application\n- We'll verify your credentials and service quality\n- You'll receive an email with the decision\n- Once approved, you can start accepting bookings\n\nThank you for choosing to partner with Alga!\n\nThe Alga Services Team`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Application Received</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #faf5f0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #faf5f0; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(45, 20, 5, 0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #2d1405 0%, #5a4a42 100%); padding: 40px 30px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; font-family: 'Playfair Display', Georgia, serif;">Alga Services</h1>
+                      <p style="margin: 10px 0 0; color: #f5ece3; font-size: 14px;">Provider Network</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <h2 style="margin: 0 0 20px; color: #2d1405; font-size: 24px; font-weight: 600;">
+                        Hi ${firstName}, 🎉
+                      </h2>
+                      
+                      <p style="margin: 0 0 20px; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        Thank you for applying to join <strong>Alga Services</strong> with <strong>"${businessName}"</strong>!
+                      </p>
+                      
+                      <div style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f5ece3 0%, #faf8f6 100%); border-left: 4px solid #2d1405; border-radius: 8px;">
+                        <p style="margin: 0 0 10px; color: #2d1405; font-size: 16px; font-weight: 600;">
+                          Application Details
+                        </p>
+                        <p style="margin: 0; color: #5a4a42; font-size: 14px;">
+                          <strong>Service Type:</strong> ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/_/g, ' ')}<br>
+                          <strong>Status:</strong> Under Review
+                        </p>
+                      </div>
+                      
+                      <p style="margin: 20px 0; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        Our verification team will review your application and get back to you <strong style="color: #2d1405;">within 24 hours</strong>.
+                      </p>
+                      
+                      <div style="margin-top: 30px; padding: 20px; background-color: #faf8f6; border-left: 4px solid #2d1405; border-radius: 4px;">
+                        <p style="margin: 0 0 10px; color: #2d1405; font-size: 16px; font-weight: 600;">
+                          What Happens Next?
+                        </p>
+                        <ul style="margin: 0; padding-left: 20px; color: #5a4a42; font-size: 14px; line-height: 1.8;">
+                          <li>Our team will review your application</li>
+                          <li>We'll verify your credentials and service quality</li>
+                          <li>You'll receive an email with our decision</li>
+                          <li>Once approved, you can start accepting bookings</li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f5ece3; padding: 30px; text-align: center; border-top: 1px solid #e5ddd5;">
+                      <p style="margin: 0 0 10px; color: #5a4a42; font-size: 14px;">
+                        Thank you for choosing to partner with Alga
+                      </p>
+                      <p style="margin: 0; color: #5a4a42; font-size: 12px;">
+                        Ethiopia's trusted services marketplace
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    };
+
+    await client.send(msg);
+    console.log(`[EMAIL] Provider application received email sent to ${to}`);
+  } catch (error) {
+    console.error('[EMAIL] Failed to send provider application received email:', error);
+    // Don't throw - email is nice-to-have
+  }
+}
+
+/**
+ * Send service provider application approved email
+ */
+export async function sendProviderApplicationApprovedEmail(
+  to: string,
+  firstName: string,
+  businessName: string,
+  serviceType: string
+): Promise<void> {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+    
+    const msg = {
+      to,
+      from: fromEmail,
+      subject: '✅ Application Approved - Welcome to Alga Services!',
+      text: `Congratulations ${firstName}!\n\nYour application for "${businessName}" has been APPROVED! 🎉\n\nYou're now a verified provider in the Alga Services network. You can start accepting bookings immediately.\n\nNext Steps:\n1. Complete your service profile\n2. Set your availability\n3. Start accepting bookings\n4. Earn 85% on every booking\n\nGet Started: ${process.env.REPLIT_DEV_DOMAIN || 'https://alga.com'}/my-alga\n\nWelcome to the Alga Services family!\n\nThe Alga Services Team`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Application Approved</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #faf5f0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #faf5f0; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(45, 20, 5, 0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #2d1405 0%, #5a4a42 100%); padding: 40px 30px; text-align: center;">
+                      <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; font-family: 'Playfair Display', Georgia, serif;">Alga Services</h1>
+                      <p style="margin: 10px 0 0; color: #f5ece3; font-size: 14px;">Application Approved!</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <h2 style="margin: 0 0 20px; color: #2d1405; font-size: 28px; font-weight: 600;">
+                        Congratulations, ${firstName}! 🎉
+                      </h2>
+                      
+                      <p style="margin: 0 0 20px; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        Your application for <strong>"${businessName}"</strong> has been <strong style="color: #2d1405;">APPROVED</strong>!
+                      </p>
+                      
+                      <div style="margin: 20px 0; padding: 24px; background: linear-gradient(135deg, #f5ece3 0%, #faf8f6 100%); border-left: 4px solid #2d1405; border-radius: 8px; text-align: center;">
+                        <p style="margin: 0 0 10px; color: #2d1405; font-size: 20px; font-weight: 700;">
+                          You're Now a Verified Provider!
+                        </p>
+                        <p style="margin: 0; color: #5a4a42; font-size: 14px;">
+                          Service Type: ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                      
+                      <p style="margin: 20px 0; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        You can now start accepting bookings and earning <strong style="color: #2d1405;">85% on every booking</strong>!
+                      </p>
+                      
+                      <!-- CTA Button -->
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="padding: 20px 0;">
+                            <a href="${process.env.REPLIT_DEV_DOMAIN || 'https://alga.com'}/my-alga" 
+                               style="display: inline-block; background-color: #2d1405; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                              Get Started
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <div style="margin-top: 30px; padding: 20px; background-color: #faf8f6; border-left: 4px solid #2d1405; border-radius: 4px;">
+                        <p style="margin: 0 0 10px; color: #2d1405; font-size: 16px; font-weight: 600;">
+                          Next Steps
+                        </p>
+                        <ul style="margin: 0; padding-left: 20px; color: #5a4a42; font-size: 14px; line-height: 1.8;">
+                          <li>Complete your service profile</li>
+                          <li>Set your availability and service areas</li>
+                          <li>Start accepting bookings immediately</li>
+                          <li>Earn 85% on every booking (paid within 24 hours)</li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f5ece3; padding: 30px; text-align: center; border-top: 1px solid #e5ddd5;">
+                      <p style="margin: 0 0 10px; color: #5a4a42; font-size: 14px;">
+                        Welcome to the Alga Services family!
+                      </p>
+                      <p style="margin: 0; color: #5a4a42; font-size: 12px;">
+                        Ethiopia's trusted services marketplace
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    };
+
+    await client.send(msg);
+    console.log(`[EMAIL] Provider application approved email sent to ${to}`);
+  } catch (error) {
+    console.error('[EMAIL] Failed to send provider application approved email:', error);
+    // Don't throw - email is nice-to-have
+  }
+}
+
+/**
+ * Send service provider application rejected email
+ */
+export async function sendProviderApplicationRejectedEmail(
+  to: string,
+  firstName: string,
+  businessName: string,
+  reason: string
+): Promise<void> {
+  try {
+    const { client, fromEmail } = await getUncachableSendGridClient();
+    
+    const msg = {
+      to,
+      from: fromEmail,
+      subject: 'Application Update - Alga Services',
+      text: `Hi ${firstName},\n\nThank you for your interest in joining Alga Services with "${businessName}".\n\nAfter careful review, we're unable to approve your application at this time.\n\nReason: ${reason}\n\nYou're welcome to reapply in the future. If you have questions, please contact our support team.\n\nThank you for your interest in partnering with Alga.\n\nThe Alga Services Team`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Application Update</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #faf5f0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #faf5f0; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(45, 20, 5, 0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #2d1405 0%, #5a4a42 100%); padding: 40px 30px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; font-family: 'Playfair Display', Georgia, serif;">Alga Services</h1>
+                      <p style="margin: 10px 0 0; color: #f5ece3; font-size: 14px;">Application Update</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <h2 style="margin: 0 0 20px; color: #2d1405; font-size: 24px; font-weight: 600;">
+                        Hi ${firstName},
+                      </h2>
+                      
+                      <p style="margin: 0 0 20px; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        Thank you for your interest in joining <strong>Alga Services</strong> with <strong>"${businessName}"</strong>.
+                      </p>
+                      
+                      <p style="margin: 0 0 20px; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        After careful review, we're unable to approve your application at this time.
+                      </p>
+                      
+                      <div style="margin: 20px 0; padding: 20px; background-color: #faf8f6; border-left: 4px solid #5a4a42; border-radius: 8px;">
+                        <p style="margin: 0 0 10px; color: #2d1405; font-size: 16px; font-weight: 600;">
+                          Reason
+                        </p>
+                        <p style="margin: 0; color: #5a4a42; font-size: 14px; line-height: 1.6;">
+                          ${reason}
+                        </p>
+                      </div>
+                      
+                      <p style="margin: 20px 0; color: #5a4a42; font-size: 16px; line-height: 1.6;">
+                        You're welcome to <strong>reapply in the future</strong> after addressing the feedback above. 
+                        If you have any questions, please don't hesitate to contact our support team.
+                      </p>
+                      
+                      <div style="margin-top: 30px; padding: 20px; background-color: #faf8f6; border-left: 4px solid #2d1405; border-radius: 4px;">
+                        <p style="margin: 0; color: #5a4a42; font-size: 14px; line-height: 1.6;">
+                          <strong style="color: #2d1405;">Need Help?</strong> Contact our support team at support@alga.com for assistance.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f5ece3; padding: 30px; text-align: center; border-top: 1px solid #e5ddd5;">
+                      <p style="margin: 0 0 10px; color: #5a4a42; font-size: 14px;">
+                        Thank you for your interest in partnering with Alga
+                      </p>
+                      <p style="margin: 0; color: #5a4a42; font-size: 12px;">
+                        Ethiopia's trusted services marketplace
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    };
+
+    await client.send(msg);
+    console.log(`[EMAIL] Provider application rejected email sent to ${to}`);
+  } catch (error) {
+    console.error('[EMAIL] Failed to send provider application rejected email:', error);
+    // Don't throw - email is nice-to-have
+  }
+}
