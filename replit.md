@@ -12,9 +12,11 @@ Preferred communication style: Simple, everyday language.
 The platform features a **universal accessibility design** optimized for Ethiopian users of all ages, from children to elderly. Uses warm color palette: dark brown (`#2d1405`) for headlines, medium brown (`#5a4a42`, `#8a6e4b`) for text, and cream backgrounds (`#f6f2ec`, `#faf5f0`). Design principles include:
 
 **Navigation & Usability:**
-- **Simplified 4-Route Navigation**: 🏠 Stay (/properties), 🔧 Fix (/services), 👤 Me (/my-alga), 💬 Help (/support)
+- **Airbnb-Style Minimal Navigation**: 🏠 Stays (/properties), 🧰 Services (/services), 👤 Me (/my-alga), 💬 Help (/support)
+- **Soft Cream Header**: Background color #F8F1E7 with subtle border for clean, modern aesthetic
+- **Smooth Underline Animation**: Active states highlighted with deep brown (#3C2313) underline that smoothly animates on hover
 - **Emoji-Enhanced Icons**: Universal visual language with emoji+icon+label pattern for instant recognition
-- **Extra-Large Touch Targets**: 56-80px buttons optimized for mobile and elderly users
+- **Horizontal Clean Layout**: Even spacing (gap-6 lg:gap-8) optimized for desktop and mobile
 - **Welcome Experience**: Post-login /welcome page with 3 clear action cards ("Stay Somewhere", "Fix Something", "Check My Trips")
 - **Smart Role-Based Dashboard**: Unified /my-alga that auto-detects user role (guest/host/provider/admin/operator)
 
