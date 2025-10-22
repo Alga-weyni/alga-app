@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
   // Redirect to properties page where login dialog is available
   useEffect(() => {
-    setLocation("/properties");
-  }, [setLocation]);
+    navigate("/properties");
+  }, [navigate]);
 
   return null;
 }

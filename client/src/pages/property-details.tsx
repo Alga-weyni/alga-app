@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation, useSearch } from "wouter";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -50,21 +50,20 @@ import GoogleMapView from "@/components/google-map-view";
 import type { Property, Review, Booking } from "@shared/schema";
 
 export default function PropertyDetails() {
-  const params = useParams();
-  const [, setLocation] = useLocation();
-  const searchParams = useSearch();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const propertyId = parseInt(params.id || "0");
+  const propertyId = parseInt(id || "0");
   
   // Parse URL parameters for pre-filled booking
-  const urlParams = new URLSearchParams(searchParams);
-  const autoBook = urlParams.get('book') === 'true';
-  const urlCheckIn = urlParams.get('checkIn') || "";
-  const urlCheckOut = urlParams.get('checkOut') || "";
-  const urlGuests = parseInt(urlParams.get('guests') || "1");
+  const autoBook = searchParams.get('book') === 'true';
+  const urlCheckIn = searchParams.get('checkIn') || "";
+  const urlCheckOut = searchParams.get('checkOut') || "";
+  const urlGuests = parseInt(searchParams.get('guests') || "1");
 
   // Scroll to top when page loads or property changes
   useEffect(() => {
@@ -146,7 +145,7 @@ export default function PropertyDetails() {
               description: paymentData.message || "Unable to start Telebirr payment. Please try another method.",
               variant: "destructive",
             });
-            setLocation(`/bookings/${booking.id}`);
+            navigate(`/bookings/${booking.id}`);
           }
         } catch (error) {
           console.error("[Telebirr] Payment error:", error);
@@ -155,7 +154,7 @@ export default function PropertyDetails() {
             description: "Unable to process Telebirr payment.",
             variant: "destructive",
           });
-          setLocation(`/bookings/${booking.id}`);
+          navigate(`/bookings/${booking.id}`);
         }
       }
       // Handle PayPal payment
@@ -175,7 +174,7 @@ export default function PropertyDetails() {
               description: "Unable to start PayPal payment. Please try another method.",
               variant: "destructive",
             });
-            setLocation(`/bookings/${booking.id}`);
+            navigate(`/bookings/${booking.id}`);
           }
         } catch (error) {
           console.error("PayPal payment error:", error);
@@ -184,7 +183,7 @@ export default function PropertyDetails() {
             description: "Unable to process PayPal payment.",
             variant: "destructive",
           });
-          setLocation(`/bookings/${booking.id}`);
+          navigate(`/bookings/${booking.id}`);
         }
       }
       // Handle other payment methods
@@ -193,7 +192,7 @@ export default function PropertyDetails() {
           title: "Booking created successfully!",
           description: "Your booking request has been submitted. You'll receive a confirmation email soon.",
         });
-        setLocation(`/bookings/${booking.id}`);
+        navigate(`/bookings/${booking.id}`);
       }
     },
     onError: () => {
@@ -285,7 +284,7 @@ export default function PropertyDetails() {
               <p className="text-gray-600 mb-6">
                 The property you're looking for doesn't exist or has been removed.
               </p>
-              <Button onClick={() => setLocation("/properties")}>
+              <Button onClick={() => navigate("/properties")}>
                 Browse All Properties
               </Button>
             </CardContent>
@@ -711,7 +710,7 @@ export default function PropertyDetails() {
                   title: "Payment successful!",
                   description: "Your booking has been confirmed.",
                 });
-                setLocation(`/booking/success?bookingId=${currentBooking.id}`);
+                navigate(`/booking/success?bookingId=${currentBooking.id}`);
               }}
               onError={(error) => {
                 toast({
@@ -726,7 +725,7 @@ export default function PropertyDetails() {
                   title: "Payment cancelled",
                   description: "You can retry payment from your bookings page.",
                 });
-                setLocation(`/bookings/${currentBooking.id}`);
+                navigate(`/bookings/${currentBooking.id}`);
               }}
             />
           )}
@@ -750,7 +749,7 @@ export default function PropertyDetails() {
                   title: "Payment successful!",
                   description: "Your booking has been confirmed.",
                 });
-                setLocation(`/booking/success?bookingId=${currentBooking.id}`);
+                navigate(`/booking/success?bookingId=${currentBooking.id}`);
               }}
               onError={(error) => {
                 toast({
@@ -765,7 +764,7 @@ export default function PropertyDetails() {
                   title: "Payment cancelled",
                   description: "You can retry payment from your bookings page.",
                 });
-                setLocation(`/bookings/${currentBooking.id}`);
+                navigate(`/bookings/${currentBooking.id}`);
               }}
             />
           )}
