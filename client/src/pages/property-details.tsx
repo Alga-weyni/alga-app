@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, useSearch } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -52,11 +52,19 @@ import type { Property, Review, Booking } from "@shared/schema";
 export default function PropertyDetails() {
   const params = useParams();
   const [, setLocation] = useLocation();
+  const searchParams = useSearch();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const propertyId = parseInt(params.id || "0");
+  
+  // Parse URL parameters for pre-filled booking
+  const urlParams = new URLSearchParams(searchParams);
+  const autoBook = urlParams.get('book') === 'true';
+  const urlCheckIn = urlParams.get('checkIn') || "";
+  const urlCheckOut = urlParams.get('checkOut') || "";
+  const urlGuests = parseInt(urlParams.get('guests') || "1");
 
   // Scroll to top when page loads or property changes
   useEffect(() => {
@@ -64,9 +72,9 @@ export default function PropertyDetails() {
   }, [propertyId]);
 
   const [bookingData, setBookingData] = useState({
-    checkIn: "",
-    checkOut: "",
-    guests: 1,
+    checkIn: urlCheckIn,
+    checkOut: urlCheckOut,
+    guests: urlGuests,
     specialRequests: "",
     paymentMethod: "",
   });
@@ -80,6 +88,13 @@ export default function PropertyDetails() {
     queryKey: [`/api/properties/${propertyId}`],
     enabled: !!propertyId,
   });
+  
+  // Auto-open booking dialog if URL param is set
+  useEffect(() => {
+    if (autoBook && isAuthenticated && property) {
+      setShowBookingDialog(true);
+    }
+  }, [autoBook, isAuthenticated, property]);
 
   const { data: reviews = [] } = useQuery<Review[]>({
     queryKey: [`/api/properties/${propertyId}/reviews`],
