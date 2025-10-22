@@ -99,10 +99,31 @@
 
 ## 🐛 BUGS FOUND
 
-*(Will be populated as testing progresses)*
+### [ALL ROLES] - [Protected Routes] - 404 Errors Instead of Login Prompts
+**Routes Affected**: `/profile`, `/bookings`, `/favorites`, `/my-services`
+
+**Issue**: These routes are wrapped in `{!isLoading && isAuthenticated && (...)}` in App.tsx, which means they don't render at all when user is logged out. This causes 404 errors instead of showing friendly login prompts.
+
+**Expected Behavior**: Should show login prompt (like dashboards do) when accessed while logged out.
+
+**Solution**: Move routes outside authentication check and add auth guards inside each component.
+
+**Status**: ✅ FIXED AND VERIFIED
 
 ---
 
 ## ✅ FIXES APPLIED
 
-*(Will be populated as bugs are fixed)*
+### Fix #1: Protected Routes Now Show Login Prompts
+**Date Fixed**: Today
+**Files Modified**:
+- `client/src/App.tsx` - Moved protected routes outside auth check
+- `client/src/pages/bookings.tsx` - Added auth guard with login prompt
+- `client/src/pages/favorites.tsx` - Added auth guard with login prompt
+- `client/src/pages/booking-details.tsx` - Added auth guard with login prompt
+- `client/src/pages/profile.tsx` - Already had auth guard ✅
+- `client/src/pages/my-services.tsx` - Already had auth guard ✅
+
+**Result**: All protected routes (`/bookings`, `/favorites`, `/profile`, `/my-services`, `/bookings/:id`) now show friendly, styled login prompts instead of 404 errors when accessed while logged out.
+
+**Verification**: ✅ Tested via screenshots - all routes working correctly

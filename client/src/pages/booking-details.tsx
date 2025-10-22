@@ -1,6 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { type Booking, type Property } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
@@ -24,9 +25,37 @@ import { Calendar, MapPin, Users, Home, CreditCard, FileText, XCircle, ArrowLeft
 import { ReviewDialog } from "@/components/review-dialog";
 
 export default function BookingDetails() {
+  const { user } = useAuth();
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <FileText className="w-16 h-16 mx-auto mb-4" style={{ color: "#8a6e4b" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+              Booking Details
+            </h2>
+            <p className="text-base mb-6" style={{ color: "#5a4a42" }}>
+              Please sign in to view booking details
+            </p>
+            <Button 
+              onClick={() => setLocation("/login")}
+              className="w-full text-lg py-6"
+              style={{ background: "#2d1405" }}
+              data-testid="button-signin"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const { data: booking, isLoading } = useQuery<Booking>({
     queryKey: [`/api/bookings/${id}`],
