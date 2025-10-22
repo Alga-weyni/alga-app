@@ -1928,6 +1928,264 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.use('/api/payment', isAuthenticated, paymentRouter);
 
+  // ============================================
+  // SERVICE PROVIDER ROUTES (Add-On Services)
+  // ============================================
+
+  // Create new service provider (requires authentication)
+  app.post('/api/service-providers', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const providerData = {
+        userId,
+        ...req.body,
+      };
+
+      const newProvider = await storage.createServiceProvider(providerData);
+      res.status(201).json(newProvider);
+    } catch (error) {
+      console.error("Error creating service provider:", error);
+      res.status(500).json({ message: "Failed to create service provider" });
+    }
+  });
+
+  // Get all service providers with filters
+  app.get('/api/service-providers', async (req, res) => {
+    try {
+      const { city, serviceType, verificationStatus } = req.query;
+      const filters: any = {};
+      
+      if (city) filters.city = city as string;
+      if (serviceType) filters.serviceType = serviceType as string;
+      if (verificationStatus) filters.verificationStatus = verificationStatus as string;
+      
+      const providers = await storage.getAllServiceProviders(filters);
+      res.json(providers);
+    } catch (error) {
+      console.error("Error fetching service providers:", error);
+      res.status(500).json({ message: "Failed to fetch service providers" });
+    }
+  });
+
+  // Get service provider by ID
+  app.get('/api/service-providers/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const provider = await storage.getServiceProvider(id);
+      
+      if (!provider) {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+      
+      res.json(provider);
+    } catch (error) {
+      console.error("Error fetching service provider:", error);
+      res.status(500).json({ message: "Failed to fetch service provider" });
+    }
+  });
+
+  // Get current user's service providers
+  app.get('/api/my-service-providers', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const providers = await storage.getServiceProvidersByUser(userId);
+      res.json(providers);
+    } catch (error) {
+      console.error("Error fetching user service providers:", error);
+      res.status(500).json({ message: "Failed to fetch service providers" });
+    }
+  });
+
+  // Update service provider (owner only)
+  app.patch('/api/service-providers/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      const provider = await storage.getServiceProvider(id);
+      if (!provider) {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+      
+      if (provider.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Not authorized to update this service provider" });
+      }
+      
+      const updatedProvider = await storage.updateServiceProvider(id, req.body);
+      res.json(updatedProvider);
+    } catch (error) {
+      console.error("Error updating service provider:", error);
+      res.status(500).json({ message: "Failed to update service provider" });
+    }
+  });
+
+  // ============================================
+  // SERVICE BOOKING ROUTES
+  // ============================================
+
+  // Create service booking
+  app.post('/api/service-bookings', isAuthenticated, async (req: any, res) => {
+    try {
+      const guestId = req.user.id;
+      const bookingData = {
+        ...req.body,
+        guestId,
+      };
+
+      const newBooking = await storage.createServiceBooking(bookingData);
+      res.status(201).json(newBooking);
+    } catch (error) {
+      console.error("Error creating service booking:", error);
+      res.status(500).json({ message: "Failed to create service booking" });
+    }
+  });
+
+  // Get service booking by ID
+  app.get('/api/service-bookings/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const booking = await storage.getServiceBooking(id);
+      
+      if (!booking) {
+        return res.status(404).json({ message: "Service booking not found" });
+      }
+      
+      const userId = req.user.id;
+      if (booking.guestId !== userId && booking.hostId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Not authorized to view this booking" });
+      }
+      
+      res.json(booking);
+    } catch (error) {
+      console.error("Error fetching service booking:", error);
+      res.status(500).json({ message: "Failed to fetch service booking" });
+    }
+  });
+
+  // Get user's service bookings (as guest)
+  app.get('/api/my-service-bookings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookings = await storage.getServiceBookingsByGuest(userId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching service bookings:", error);
+      res.status(500).json({ message: "Failed to fetch service bookings" });
+    }
+  });
+
+  // Get service bookings for host
+  app.get('/api/host-service-bookings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookings = await storage.getServiceBookingsByHost(userId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching host service bookings:", error);
+      res.status(500).json({ message: "Failed to fetch service bookings" });
+    }
+  });
+
+  // Get service bookings for provider
+  app.get('/api/provider-service-bookings/:providerId', isAuthenticated, async (req: any, res) => {
+    try {
+      const providerId = parseInt(req.params.providerId);
+      const provider = await storage.getServiceProvider(providerId);
+      
+      if (!provider) {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+      
+      const userId = req.user.id;
+      if (provider.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Not authorized to view these bookings" });
+      }
+      
+      const bookings = await storage.getServiceBookingsByProvider(providerId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching provider bookings:", error);
+      res.status(500).json({ message: "Failed to fetch provider bookings" });
+    }
+  });
+
+  // Update service booking status
+  app.patch('/api/service-bookings/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      
+      const updatedBooking = await storage.updateServiceBookingStatus(id, status);
+      res.json(updatedBooking);
+    } catch (error) {
+      console.error("Error updating service booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
+    }
+  });
+
+  // Complete service booking
+  app.post('/api/service-bookings/:id/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const completedBooking = await storage.completeServiceBooking(id);
+      res.json(completedBooking);
+    } catch (error) {
+      console.error("Error completing service booking:", error);
+      res.status(500).json({ message: "Failed to complete booking" });
+    }
+  });
+
+  // ============================================
+  // ADMIN: SERVICE PROVIDER VERIFICATION
+  // ============================================
+
+  // Get all service providers for admin review
+  app.get('/api/admin/service-providers', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin' && req.user.role !== 'operator') {
+        return res.status(403).json({ message: "Access denied. Admin or Operator role required." });
+      }
+      
+      const providers = await storage.getAllServiceProviders();
+      res.json(providers);
+    } catch (error) {
+      console.error("Error fetching service providers for admin:", error);
+      res.status(500).json({ message: "Failed to fetch service providers" });
+    }
+  });
+
+  // Verify service provider (admin/operator)
+  app.patch('/api/admin/service-providers/:id/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin' && req.user.role !== 'operator') {
+        return res.status(403).json({ message: "Access denied. Admin or Operator role required." });
+      }
+      
+      const id = parseInt(req.params.id);
+      const { status, rejectionReason } = req.body;
+      
+      if (!status || !['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Valid status (approved/rejected) is required" });
+      }
+      
+      const verifiedProvider = await storage.verifyServiceProvider(
+        id,
+        status,
+        req.user.id,
+        rejectionReason
+      );
+      
+      res.json(verifiedProvider);
+    } catch (error) {
+      console.error("Error verifying service provider:", error);
+      res.status(500).json({ message: "Failed to verify service provider" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
