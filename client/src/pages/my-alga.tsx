@@ -182,6 +182,41 @@ export default function MyAlga() {
 
   const cards = getCardsForRole();
 
+  // Show login prompt for non-authenticated users
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <div className="mb-6">
+              <div 
+                className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-md"
+                style={{ background: "#8a6e4b" }}
+              >
+                👤
+              </div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+                Welcome to Alga
+              </h2>
+              <p className="text-base" style={{ color: "#5a4a42" }}>
+                Please sign in to view your dashboard
+              </p>
+            </div>
+            <Link href="/login">
+              <Button 
+                className="w-full text-lg py-6"
+                style={{ background: "#2d1405" }}
+                data-testid="button-signin"
+              >
+                Sign In
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ background: "#f6f2ec" }}>
       {/* Warm Greeting Header */}

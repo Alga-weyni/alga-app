@@ -65,6 +65,9 @@ function Router() {
       {/* Welcome page - shown after login */}
       <Route path="/welcome" component={Welcome} />
       
+      {/* My Alga - accessible to all, handles auth internally */}
+      <Route path="/my-alga" component={MyAlga} />
+      
       <Route path="/" component={Properties} />
       
       {!isLoading && isAuthenticated && (
@@ -72,7 +75,6 @@ function Router() {
           <Route path="/bookings" component={Bookings} />
           <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/favorites" component={Favorites} />
-          <Route path="/my-alga" component={MyAlga} />
           <Route path="/my-services" component={MyServices} />
           <Route path="/profile" component={Profile} />
           <Route path="/host/dashboard" component={HostDashboard} />
