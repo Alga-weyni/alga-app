@@ -15,6 +15,7 @@ Alga ("bed" in Amharic) is a full-stack web application connecting property owne
 - **Passwordless 4-digit OTP authentication** (phone SMS & email)
 - Role-based access control (Guest, Host, Admin, Operator)
 - Universal ID verification system (QR code scanning for Ethiopians, OCR for foreigners)
+- Fayda ID eKYC integration
 - Secure session management with PostgreSQL storage
 - Rate limiting and CORS protection
 
@@ -24,9 +25,19 @@ Alga ("bed" in Amharic) is a full-stack web application connecting property owne
 - Advanced search & filters (city, type, price, capacity, dates)
 - Real-time availability checking
 - 6-digit auto-generated access codes for property entry
+- **Seamless booking with URL parameters** (/properties/123?book=true&checkIn=date&guests=2)
+- Auto-opening booking dialog with pre-filled dates
+
+### 🛠️ Services Marketplace
+- **11 service categories** (cleaning, laundry, transport, guides, etc.)
+- **Clear guest/provider flow separation** (/services for browsing, /become-provider for applications)
+- Verified provider badges (Verified, Top Rated, Experienced)
+- Admin verification dashboard with approval workflow
+- Email notifications via SendGrid (application received, approved, rejected)
+- Status-based provider dashboard (pending, rejected, approved)
 
 ### 💳 Payment Integration
-- Multiple payment gateways: Stripe, PayPal, Telebirr
+- Multiple payment gateways: Chapa, Stripe, PayPal, Telebirr
 - ERCA-compliant tax system (12% commission + 15% VAT + 2% withholding)
 - Automated PDF invoice generation
 - Secure payment processing and webhooks
@@ -37,10 +48,11 @@ Alga ("bed" in Amharic) is a full-stack web application connecting property owne
 - Auto-recalculation of property ratings
 
 ### 📍 Location Features
-- Google Maps integration with autocomplete
+- Google Maps integration with autocomplete and clustering
+- Property markers with custom Ethiopian theming
+- Map/list view toggle with user location tracking
 - Latitude/longitude storage
-- City-based filtering
-- Area-specific property search
+- City-based filtering across 20 Ethiopian cities
 
 ### 🎨 Design
 - Ethiopian-themed warm brown color palette
