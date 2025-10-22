@@ -1,3 +1,4 @@
+// Simplified Child-Friendly Navigation for Alga
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,19 +18,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, Globe, User, Building2, Wrench, Map } from "lucide-react";
+import { Home, Menu, User, Wrench, HelpCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
-import BecomeHostDialog from "@/components/become-host-dialog";
 
 interface HeaderProps {
   hideNavigation?: boolean;
@@ -40,7 +33,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const [location, navigate] = useLocation();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [becomeHostDialogOpen, setBecomeHostDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
@@ -51,320 +43,164 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       navigate("/");
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out",
+        title: "Signed Out",
+        description: "See you soon! 👋",
       });
     },
   });
 
+  // Navigation items (child-friendly labels with icons)
+  const navItems = [
+    { path: "/properties", icon: Home, label: "Stay", testId: "stay" },
+    { path: "/services", icon: Wrench, label: "Fix", testId: "fix" },
+    ...(isAuthenticated ? [{ path: "/my-alga", icon: User, label: "Me", testId: "me" }] : []),
+    { path: "/support", icon: HelpCircle, label: "Help", testId: "help" },
+  ];
+
   return (
     <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-6 lg:pr-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 cursor-pointer">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-eth-brown rounded-lg flex items-center justify-center">
-              <Home className="text-white text-base sm:text-lg" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 sm:h-20">
+          {/* Logo - Bigger & Friendlier */}
+          <Link href="/" className="flex items-center space-x-3 cursor-pointer">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-eth-brown rounded-2xl flex items-center justify-center shadow-md">
+              <Home className="text-white text-xl" />
             </div>
-            <h1 className="text-lg sm:text-xl font-bold luxury-rich-gold">Alga</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-eth-brown">Alga</h1>
           </Link>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu */}
           {!hideNavigation && (
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
+                <Button 
+                  variant="ghost" 
+                  size="lg" 
+                  className="h-12 w-12"
+                  data-testid="button-mobile-menu"
+                >
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+              <SheetContent side="right" className="w-[300px] sm:w-[350px]">
                 <SheetHeader>
-                  <SheetTitle className="text-left luxury-rich-gold">Navigation</SheetTitle>
+                  <SheetTitle className="text-left text-eth-brown text-xl">Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col space-y-4 mt-8">
-                  {/* My Alga - First (when authenticated) */}
-                  {isAuthenticated && (
-                    <Link 
-                      href="/my-alga"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`text-lg font-bold py-3 px-4 rounded-lg transition-colors ${
-                        location === '/my-alga' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'hover:bg-secondary text-eth-brown'
-                      }`}
-                      data-testid="mobile-link-my-alga"
-                    >
-                      My Alga
-                    </Link>
-                  )}
-
-                  {/* Services - Second */}
-                  <Link 
-                    href="/services"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                      location === '/services' || location.startsWith('/services/') 
-                        ? 'bg-primary text-primary-foreground font-medium' 
-                        : 'hover:bg-secondary'
-                    }`}
-                    data-testid="mobile-link-services"
-                  >
-                    Services
-                  </Link>
-
-                  {/* Discover Map - Last (less prominent) */}
-                  <Link 
-                    href="/discover"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-base py-3 px-4 rounded-lg transition-colors flex items-center gap-2 ${
-                      location === '/discover' 
-                        ? 'bg-primary text-primary-foreground font-medium' 
-                        : 'hover:bg-secondary text-eth-brown/70'
-                    }`}
-                    data-testid="mobile-link-discover"
-                  >
-                    <Map className="h-4 w-4" />
-                    Discover Map
-                  </Link>
-                  
-                  {isAuthenticated && user?.role === 'host' && (
-                    <Link 
-                      href="/host/dashboard"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                        location === '/host/dashboard' 
-                          ? 'bg-primary text-primary-foreground font-medium' 
-                          : 'hover:bg-secondary'
-                      }`}
-                      data-testid="mobile-link-host-dashboard"
-                    >
-                      Host Dashboard
-                    </Link>
-                  )}
-
-                  {isAuthenticated && (
-                    <>
-                      
-                      {(user?.role === 'guest' || user?.role === 'host') && (
-                        <>
-                          <Link 
-                            href="/bookings"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
-                            data-testid="mobile-link-bookings"
-                          >
-                            My Bookings
-                          </Link>
-                          <Link 
-                            href="/favorites"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
-                            data-testid="mobile-link-favorites"
-                          >
-                            My Favorites
-                          </Link>
-                        </>
-                      )}
-
-                      {user?.role === 'admin' && (
-                        <Link 
-                          href="/admin/dashboard"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
-                          data-testid="mobile-link-admin"
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
-
-                      {user?.role === 'operator' && (
-                        <Link 
-                          href="/operator/dashboard"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="text-lg py-3 px-4 rounded-lg hover:bg-secondary transition-colors"
-                          data-testid="mobile-link-operator"
-                        >
-                          Operator Dashboard
-                        </Link>
-                      )}
-
-                      <div className="border-t border-border my-2"></div>
-                      
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-lg py-6"
-                        onClick={() => {
-                          logoutMutation.mutate();
-                          setMobileMenuOpen(false);
-                        }}
-                        data-testid="mobile-button-logout"
+                <nav className="flex flex-col space-y-3 mt-8">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location === item.path || location.startsWith(`${item.path}/`);
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`
+                          flex items-center gap-3 text-lg font-medium py-4 px-5 rounded-xl transition-all
+                          ${isActive 
+                            ? 'bg-eth-brown text-white shadow-md' 
+                            : 'hover:bg-cream-100 text-eth-brown'}
+                        `}
+                        data-testid={`mobile-link-${item.testId}`}
                       >
-                        Sign Out
-                      </Button>
-                    </>
-                  )}
+                        <Icon className="h-6 w-6" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
 
-                  {!isAuthenticated && (
-                    <>
-                      <div className="border-t border-border my-2"></div>
-                      <Button
-                        className="w-full justify-start text-lg py-6"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setAuthDialogOpen(true);
-                        }}
-                        data-testid="mobile-button-signin"
-                      >
-                        Sign In / Register
-                      </Button>
-                    </>
+                  <div className="border-t border-border my-4"></div>
+
+                  {isAuthenticated ? (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full justify-start text-lg py-6 font-medium"
+                      onClick={() => {
+                        logoutMutation.mutate();
+                        setMobileMenuOpen(false);
+                      }}
+                      data-testid="mobile-button-logout"
+                    >
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="w-full text-lg py-6 bg-eth-brown hover:bg-eth-brown/90"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setAuthDialogOpen(true);
+                      }}
+                      data-testid="mobile-button-signin"
+                    >
+                      Sign In
+                    </Button>
                   )}
                 </nav>
               </SheetContent>
             </Sheet>
           )}
 
-          {/* Desktop Navigation - Hidden for operator/admin dashboards */}
+          {/* Desktop Navigation - Clean & Simple */}
           {!hideNavigation && (
-            <nav className="hidden md:flex items-center space-x-8">
-              {/* My Alga - First (when authenticated) - Primary emphasis */}
-              {isAuthenticated && (
-                <Link 
-                  href="/my-alga"
-                  className={`
-                    relative transition-all duration-200 pb-1 font-bold
-                    ${location === '/my-alga' 
-                      ? 'text-eth-brown' 
-                      : 'text-eth-brown/80 hover:text-eth-brown'}
-                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                    ${location === '/my-alga' ? 'after:w-full' : 'hover:after:w-full'}
-                  `}
-                  data-testid="link-my-alga"
-                >
-                  My Alga
-                </Link>
-              )}
-
-              {/* Services - Second - Regular weight */}
-              <Link 
-                href="/services"
-                className={`
-                  relative transition-all duration-200 pb-1
-                  ${location === '/services' || location.startsWith('/services/') 
-                    ? 'text-eth-brown font-medium' 
-                    : 'text-eth-brown/70 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                  ${location === '/services' || location.startsWith('/services/') ? 'after:w-full' : 'hover:after:w-full'}
-                `}
-                data-testid="link-services"
-              >
-                Services
-              </Link>
-
-              {/* Discover Map - Last - Less prominent with icon */}
-              <Link 
-                href="/discover"
-                className={`
-                  relative transition-all duration-200 pb-1 flex items-center gap-1.5 text-sm
-                  ${location === '/discover' 
-                    ? 'text-eth-brown font-medium' 
-                    : 'text-eth-brown/60 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                  ${location === '/discover' ? 'after:w-full' : 'hover:after:w-full'}
-                `}
-                data-testid="link-discover"
-              >
-                <Map className="h-4 w-4" />
-                Discover
-              </Link>
+            <nav className="hidden md:flex items-center space-x-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.path || location.startsWith(`${item.path}/`);
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`
+                      flex items-center gap-2 px-5 py-3 rounded-xl transition-all font-medium
+                      ${isActive 
+                        ? 'bg-eth-brown text-white shadow-md' 
+                        : 'hover:bg-cream-100 text-eth-brown/80 hover:text-eth-brown'}
+                    `}
+                    data-testid={`link-${item.testId}`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
           )}
 
-          {/* User Menu - Desktop Only */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <Globe className="h-5 w-5" />
-            </Button>
-
-            {/* Become Host Button - Only for Guests */}
-            {isAuthenticated && user?.role === 'guest' && (
-              <Button
-                onClick={() => setBecomeHostDialogOpen(true)}
-                variant="outline"
-                className="border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white transition-all"
-                data-testid="button-become-host"
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Become Host
-              </Button>
-            )}
-
+          {/* User Menu - Desktop */}
+          <div className="hidden md:flex items-center">
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="flex items-center space-x-2 bg-secondary rounded-full p-2 hover:bg-secondary/80 transition-colors cursor-pointer">
-                    <Menu className="h-4 w-4 text-foreground" />
-                    <Avatar className="w-8 h-8">
+                  <button className="flex items-center space-x-2 bg-cream-100 rounded-full p-2 pr-4 hover:bg-cream-200 transition-colors cursor-pointer">
+                    <Avatar className="w-10 h-10 border-2 border-eth-brown/20">
                       <AvatarImage src={user?.profileImageUrl || ""} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        <User className="h-4 w-4" />
+                      <AvatarFallback className="bg-eth-brown text-white font-semibold">
+                        {user?.firstName?.[0]}{user?.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
-                  </div>
+                    <span className="text-sm font-medium text-eth-brown hidden lg:block">
+                      {user?.firstName}
+                    </span>
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-3 py-2">
-                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                    <p className="text-xs text-eth-orange font-medium mt-1 capitalize">{user?.role}</p>
+                    <p className="text-sm font-semibold text-eth-brown">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
                   
-                  {/* My Alga Dashboard */}
                   <DropdownMenuItem asChild>
-                    <Link href="/my-alga">My Alga</Link>
+                    <Link href="/my-alga" className="cursor-pointer">My Alga</Link>
                   </DropdownMenuItem>
-
-                  {/* Tenant/Guest options */}
-                  {(user?.role === 'guest' || user?.role === 'host') && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/bookings">My Bookings</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/favorites">My Favorites</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  
-                  {/* Host-specific option */}
-                  {user?.role === 'host' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/host/dashboard">Host Dashboard</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  
-                  {/* Admin option */}
-                  {user?.role === 'admin' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/dashboard">Admin Dashboard</Link>
-                    </DropdownMenuItem>
-                  )}
-                  
-                  {/* Operator option */}
-                  {user?.role === 'operator' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/operator/dashboard">Operator Dashboard</Link>
-                    </DropdownMenuItem>
-                  )}
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={() => logoutMutation.mutate()}
                     data-testid="button-logout"
+                    className="text-red-600 cursor-pointer"
                   >
                     Sign Out
                   </DropdownMenuItem>
@@ -372,15 +208,10 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               </DropdownMenu>
             ) : (
               <Button 
+                size="lg"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-signin-header"
-                className="
-                  bg-eth-brown hover:bg-eth-brown/90 text-white
-                  transition-all duration-200
-                  hover:shadow-lg hover:shadow-eth-brown/30
-                  hover:scale-105
-                  active:scale-95
-                "
+                className="bg-eth-brown hover:bg-eth-brown/90 text-white px-6 py-6 rounded-xl shadow-md hover:shadow-lg transition-all"
               >
                 Sign In
               </Button>
@@ -393,12 +224,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
         open={authDialogOpen} 
         onOpenChange={setAuthDialogOpen}
         defaultMode="login"
-      />
-      
-      <BecomeHostDialog
-        open={becomeHostDialogOpen}
-        onOpenChange={setBecomeHostDialogOpen}
-        user={user}
       />
     </header>
   );
