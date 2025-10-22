@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, Globe, User, Building2, Wrench } from "lucide-react";
+import { Home, Menu, Globe, User, Building2, Wrench, Map } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
@@ -82,19 +82,23 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <SheetTitle className="text-left luxury-rich-gold">Navigation</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col space-y-4 mt-8">
-                  <Link 
-                    href="/discover"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                      location === '/discover' 
-                        ? 'bg-primary text-primary-foreground font-medium' 
-                        : 'hover:bg-secondary'
-                    }`}
-                    data-testid="mobile-link-discover"
-                  >
-                    Discover Map
-                  </Link>
+                  {/* My Alga - First (when authenticated) */}
+                  {isAuthenticated && (
+                    <Link 
+                      href="/my-alga"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`text-lg font-bold py-3 px-4 rounded-lg transition-colors ${
+                        location === '/my-alga' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'hover:bg-secondary text-eth-brown'
+                      }`}
+                      data-testid="mobile-link-my-alga"
+                    >
+                      My Alga
+                    </Link>
+                  )}
 
+                  {/* Services - Second */}
                   <Link 
                     href="/services"
                     onClick={() => setMobileMenuOpen(false)}
@@ -106,6 +110,21 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                     data-testid="mobile-link-services"
                   >
                     Services
+                  </Link>
+
+                  {/* Discover Map - Last (less prominent) */}
+                  <Link 
+                    href="/discover"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-base py-3 px-4 rounded-lg transition-colors flex items-center gap-2 ${
+                      location === '/discover' 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-secondary text-eth-brown/70'
+                    }`}
+                    data-testid="mobile-link-discover"
+                  >
+                    <Map className="h-4 w-4" />
+                    Discover Map
                   </Link>
                   
                   {isAuthenticated && user?.role === 'host' && (
@@ -125,20 +144,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
 
                   {isAuthenticated && (
                     <>
-                      <div className="border-t border-border my-2"></div>
-
-                      <Link 
-                        href="/my-alga"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`text-lg py-3 px-4 rounded-lg transition-colors ${
-                          location === '/my-alga' 
-                            ? 'bg-primary text-primary-foreground font-medium' 
-                            : 'hover:bg-secondary'
-                        }`}
-                        data-testid="mobile-link-my-alga"
-                      >
-                        My Alga
-                      </Link>
                       
                       {(user?.role === 'guest' || user?.role === 'host') && (
                         <>
@@ -222,21 +227,25 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
           {/* Desktop Navigation - Hidden for operator/admin dashboards */}
           {!hideNavigation && (
             <nav className="hidden md:flex items-center space-x-8">
-              <Link 
-                href="/discover"
-                className={`
-                  relative transition-all duration-200 pb-1
-                  ${location === '/discover' 
-                    ? 'text-eth-brown font-medium' 
-                    : 'text-eth-brown/70 hover:text-eth-brown'}
-                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                  ${location === '/discover' ? 'after:w-full' : 'hover:after:w-full'}
-                `}
-                data-testid="link-discover"
-              >
-                Discover Map
-              </Link>
+              {/* My Alga - First (when authenticated) - Primary emphasis */}
+              {isAuthenticated && (
+                <Link 
+                  href="/my-alga"
+                  className={`
+                    relative transition-all duration-200 pb-1 font-bold
+                    ${location === '/my-alga' 
+                      ? 'text-eth-brown' 
+                      : 'text-eth-brown/80 hover:text-eth-brown'}
+                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
+                    ${location === '/my-alga' ? 'after:w-full' : 'hover:after:w-full'}
+                  `}
+                  data-testid="link-my-alga"
+                >
+                  My Alga
+                </Link>
+              )}
 
+              {/* Services - Second - Regular weight */}
               <Link 
                 href="/services"
                 className={`
@@ -252,22 +261,22 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                 Services
               </Link>
 
-              {isAuthenticated && (
-                <Link 
-                  href="/my-alga"
-                  className={`
-                    relative transition-all duration-200 pb-1
-                    ${location === '/my-alga' 
-                      ? 'text-eth-brown font-medium' 
-                      : 'text-eth-brown/70 hover:text-eth-brown'}
-                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
-                    ${location === '/my-alga' ? 'after:w-full' : 'hover:after:w-full'}
-                  `}
-                  data-testid="link-my-alga"
-                >
-                  My Alga
-                </Link>
-              )}
+              {/* Discover Map - Last - Less prominent with icon */}
+              <Link 
+                href="/discover"
+                className={`
+                  relative transition-all duration-200 pb-1 flex items-center gap-1.5 text-sm
+                  ${location === '/discover' 
+                    ? 'text-eth-brown font-medium' 
+                    : 'text-eth-brown/60 hover:text-eth-brown'}
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
+                  ${location === '/discover' ? 'after:w-full' : 'hover:after:w-full'}
+                `}
+                data-testid="link-discover"
+              >
+                <Map className="h-4 w-4" />
+                Discover
+              </Link>
             </nav>
           )}
 
