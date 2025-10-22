@@ -35,3 +35,13 @@ PAYPAL_MODE=live
 TELEBIRR_APP_ID=[YOUR_TELEBIRR_APP_ID]
 TELEBIRR_APP_KEY=[YOUR_TELEBIRR_APP_KEY]
 TELEBIRR_PUBLIC_KEY=[YOUR_TELEBIRR_PUBLIC_KEY]
+
+# Fayda ID Verification (Optional - Sandbox mode if empty)
+# Contact NIDP (National Digital Identity Program) for production credentials
+FAYDA_API_BASE_URL=https://api.fayda.id.et
+FAYDA_CLIENT_ID=[YOUR_NIDP_CLIENT_ID]
+FAYDA_SECRET_KEY=[YOUR_NIDP_SECRET_KEY]
+FAYDA_PARTNER_API_KEY=[YOUR_NIDP_PARTNER_KEY]
+
+# Google Maps (Optional - for backend geocoding)
+GOOGLE_MAPS_API_KEY=[YOUR_GOOGLE_MAPS_KEY]
