@@ -8,7 +8,8 @@ import {
   MessageSquare, 
   Star, 
   Settings,
-  User
+  User,
+  Briefcase
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Booking, ServiceBooking } from "@shared/schema";
@@ -54,6 +55,14 @@ export default function MyAlga() {
       color: "from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900",
       iconColor: "text-orange-600 dark:text-orange-400",
       visible: !!user,
+    },
+    {
+      icon: Briefcase,
+      title: "Provider Dashboard",
+      link: "/provider/dashboard",
+      color: "from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900",
+      iconColor: "text-teal-600 dark:text-teal-400",
+      visible: !!user?.isServiceProvider,
     },
     {
       icon: CreditCard,
