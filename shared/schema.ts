@@ -166,7 +166,7 @@ export const serviceProviders = pgTable("service_providers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   businessName: varchar("business_name", { length: 255 }).notNull(),
-  serviceType: varchar("service_type").notNull(), // cleaning, laundry, airport_pickup, electrical, plumbing, welcome_pack, driver
+  serviceType: varchar("service_type").notNull(), // cleaning, laundry, airport_pickup, electrical, plumbing, driver, welcome_pack, meal_support, local_guide, photography, landscaping
   description: text("description").notNull(),
   pricingModel: varchar("pricing_model").notNull(), // hourly, flat_rate
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
@@ -421,6 +421,21 @@ export const insertAccessCodeSchema = createInsertSchema(accessCodes).omit({
   updatedAt: true,
 });
 
+// Service type validation
+export const serviceTypeEnum = z.enum([
+  "cleaning",
+  "laundry", 
+  "airport_pickup",
+  "electrical",
+  "plumbing",
+  "driver",
+  "welcome_pack",
+  "meal_support",
+  "local_guide",
+  "photography",
+  "landscaping"
+]);
+
 export const insertServiceProviderSchema = createInsertSchema(serviceProviders).omit({
   id: true,
   createdAt: true,
@@ -430,6 +445,8 @@ export const insertServiceProviderSchema = createInsertSchema(serviceProviders).
   verificationStatus: true,
   verifiedBy: true,
   verifiedAt: true,
+}).extend({
+  serviceType: serviceTypeEnum,
 });
 
 export const insertServiceBookingSchema = createInsertSchema(serviceBookings).omit({
@@ -437,6 +454,7 @@ export const insertServiceBookingSchema = createInsertSchema(serviceBookings).om
   createdAt: true,
   updatedAt: true,
 }).extend({
+  serviceType: serviceTypeEnum,
   scheduledDate: z.union([z.string(), z.date()]).transform((val) => 
     typeof val === 'string' ? new Date(val) : val
   ),
@@ -463,6 +481,7 @@ export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertAccessCode = z.infer<typeof insertAccessCodeSchema>;
 export type AccessCode = typeof accessCodes.$inferSelect;
+export type ServiceType = z.infer<typeof serviceTypeEnum>;
 export type InsertServiceProvider = z.infer<typeof insertServiceProviderSchema>;
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
 export type InsertServiceBooking = z.infer<typeof insertServiceBookingSchema>;

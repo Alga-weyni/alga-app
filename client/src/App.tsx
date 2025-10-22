@@ -23,6 +23,11 @@ import BookingCancelled from "@/pages/booking-cancelled";
 import Favorites from "@/pages/favorites";
 import TestIDScanner from "@/pages/test-id-scanner";
 import ScanIDPage from "@/pages/scan-id";
+import Services from "@/pages/services";
+import ServiceCategory from "@/pages/service-category";
+import ServiceProviderDetails from "@/pages/service-provider-details";
+import MyAlga from "@/pages/my-alga";
+import MyServices from "@/pages/my-services";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -42,6 +47,11 @@ function Router() {
       <Route path="/scan-id" component={ScanIDPage} />
       <Route path="/test-id-scanner" component={TestIDScanner} />
       
+      {/* Service marketplace routes - public */}
+      <Route path="/services" component={Services} />
+      <Route path="/services/:type" component={ServiceCategory} />
+      <Route path="/service-providers/:id" component={ServiceProviderDetails} />
+      
       <Route path="/" component={Properties} />
       
       {!isLoading && isAuthenticated && (
@@ -49,6 +59,8 @@ function Router() {
           <Route path="/bookings" component={Bookings} />
           <Route path="/bookings/:id" component={BookingDetails} />
           <Route path="/favorites" component={Favorites} />
+          <Route path="/my-alga" component={MyAlga} />
+          <Route path="/my-services" component={MyServices} />
           <Route path="/host/dashboard" component={HostDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/operator/dashboard" component={OperatorDashboard} />
