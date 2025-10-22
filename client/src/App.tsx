@@ -33,6 +33,7 @@ import MyAlga from "@/pages/my-alga";
 import MyServices from "@/pages/my-services";
 import Profile from "@/pages/profile";
 import Support from "@/pages/support";
+import Welcome from "@/pages/welcome";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -60,6 +61,9 @@ function Router() {
       
       {/* Support/Help - public */}
       <Route path="/support" component={Support} />
+      
+      {/* Welcome page - shown after login */}
+      <Route path="/welcome" component={Welcome} />
       
       <Route path="/" component={Properties} />
       
