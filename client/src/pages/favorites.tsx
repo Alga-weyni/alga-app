@@ -1,11 +1,42 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
 import PropertyCard from "@/components/property-card";
 import { Heart } from "lucide-react";
 
 export default function Favorites() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <Heart className="w-16 h-16 mx-auto mb-4" style={{ color: "#8a6e4b" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+              My Favorites
+            </h2>
+            <p className="text-base mb-6" style={{ color: "#5a4a42" }}>
+              Please sign in to view your favorite properties
+            </p>
+            <Button 
+              onClick={() => setLocation("/login")}
+              className="w-full text-lg py-6"
+              style={{ background: "#2d1405" }}
+              data-testid="button-signin"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   const { data: favorites, isLoading } = useQuery<any[]>({
     queryKey: ["/api/favorites"],

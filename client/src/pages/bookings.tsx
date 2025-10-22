@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { type Booking } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import { BackButton } from "@/components/back-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,36 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
 
 export default function Bookings() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <Calendar className="w-16 h-16 mx-auto mb-4" style={{ color: "#8a6e4b" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+              My Trips
+            </h2>
+            <p className="text-base mb-6" style={{ color: "#5a4a42" }}>
+              Please sign in to view your bookings
+            </p>
+            <Button 
+              onClick={() => setLocation("/login")}
+              className="w-full text-lg py-6"
+              style={{ background: "#2d1405" }}
+              data-testid="button-signin"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const { data: bookings = [], isLoading } = useQuery<Booking[]>({
     queryKey: ["/api/bookings"],
   });

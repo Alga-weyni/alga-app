@@ -76,17 +76,14 @@ function Router() {
       <Route path="/admin/providers" component={AdminServiceProviders} />
       <Route path="/operator/dashboard" component={OperatorDashboard} />
       
-      <Route path="/" component={Properties} />
+      {/* Protected user routes - accessible to all, each page handles auth */}
+      <Route path="/bookings" component={Bookings} />
+      <Route path="/bookings/:id" component={BookingDetails} />
+      <Route path="/favorites" component={Favorites} />
+      <Route path="/my-services" component={MyServices} />
+      <Route path="/profile" component={Profile} />
       
-      {!isLoading && isAuthenticated && (
-        <>
-          <Route path="/bookings" component={Bookings} />
-          <Route path="/bookings/:id" component={BookingDetails} />
-          <Route path="/favorites" component={Favorites} />
-          <Route path="/my-services" component={MyServices} />
-          <Route path="/profile" component={Profile} />
-        </>
-      )}
+      <Route path="/" component={Properties} />
       <Route component={NotFound} />
     </Switch>
   );
