@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, Globe, User, Building2 } from "lucide-react";
+import { Home, Menu, Globe, User, Building2, Wrench } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
@@ -94,6 +94,19 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   >
                     Discover Map
                   </Link>
+
+                  <Link 
+                    href="/services"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                      location === '/services' || location.startsWith('/services/') 
+                        ? 'bg-primary text-primary-foreground font-medium' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    data-testid="mobile-link-services"
+                  >
+                    Services
+                  </Link>
                   
                   {isAuthenticated && user?.role === 'host' && (
                     <Link 
@@ -113,6 +126,19 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   {isAuthenticated && (
                     <>
                       <div className="border-t border-border my-2"></div>
+
+                      <Link 
+                        href="/my-alga"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`text-lg py-3 px-4 rounded-lg transition-colors ${
+                          location === '/my-alga' 
+                            ? 'bg-primary text-primary-foreground font-medium' 
+                            : 'hover:bg-secondary'
+                        }`}
+                        data-testid="mobile-link-my-alga"
+                      >
+                        My Alga
+                      </Link>
                       
                       {(user?.role === 'guest' || user?.role === 'host') && (
                         <>
@@ -210,6 +236,38 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               >
                 Discover Map
               </Link>
+
+              <Link 
+                href="/services"
+                className={`
+                  relative transition-all duration-200 pb-1
+                  ${location === '/services' || location.startsWith('/services/') 
+                    ? 'text-eth-brown font-medium' 
+                    : 'text-eth-brown/70 hover:text-eth-brown'}
+                  after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
+                  ${location === '/services' || location.startsWith('/services/') ? 'after:w-full' : 'hover:after:w-full'}
+                `}
+                data-testid="link-services"
+              >
+                Services
+              </Link>
+
+              {isAuthenticated && (
+                <Link 
+                  href="/my-alga"
+                  className={`
+                    relative transition-all duration-200 pb-1
+                    ${location === '/my-alga' 
+                      ? 'text-eth-brown font-medium' 
+                      : 'text-eth-brown/70 hover:text-eth-brown'}
+                    after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-eth-brown after:transition-all after:duration-200
+                    ${location === '/my-alga' ? 'after:w-full' : 'hover:after:w-full'}
+                  `}
+                  data-testid="link-my-alga"
+                >
+                  My Alga
+                </Link>
+              )}
             </nav>
           )}
 
@@ -253,6 +311,11 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   </div>
                   <DropdownMenuSeparator />
                   
+                  {/* My Alga Dashboard */}
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-alga">My Alga</Link>
+                  </DropdownMenuItem>
+
                   {/* Tenant/Guest options */}
                   {(user?.role === 'guest' || user?.role === 'host') && (
                     <>
