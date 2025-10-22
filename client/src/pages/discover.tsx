@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import GoogleMapReact from "google-map-react";
 import { MapPin, Coffee, Building2, Bus, Star } from "lucide-react";
 import Header from "@/components/header";
@@ -193,7 +193,7 @@ export default function DiscoverPage() {
                       {Number(selectedProperty.rating || 0).toFixed(1)}
                     </div>
                   </div>
-                  <Link href={`/property/${selectedProperty.id}`}>
+                  <Link to={`/property/${selectedProperty.id}`}>
                     <button className="w-full bg-eth-orange text-white py-2 rounded-md hover:bg-eth-orange/90">
                       View Details
                     </button>
@@ -213,7 +213,7 @@ export default function DiscoverPage() {
             </h3>
             <div className="flex gap-4">
               {recommendations.map((property: any) => (
-                <Link key={property.id} href={`/property/${property.id}`}>
+                <Link key={property.id} to={`/property/${property.id}`}>
                   <Card className="min-w-[200px] hover:shadow-md transition-shadow cursor-pointer">
                     <CardContent className="p-3">
                       <div className="relative h-24 mb-2 rounded overflow-hidden">

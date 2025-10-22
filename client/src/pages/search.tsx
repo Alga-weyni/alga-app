@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Search, MapPin, Home, Loader2 } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -183,7 +183,7 @@ export default function PropertySearch() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {results.map((property: any) => (
-              <Link key={property.id} href={`/property/${property.id}`}>
+              <Link key={property.id} to={`/property/${property.id}`}>
                 <Card 
                   className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
                   data-testid={`card-property-${property.id}`}

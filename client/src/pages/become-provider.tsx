@@ -23,7 +23,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useLocation, useSearch } from "wouter";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -45,13 +45,12 @@ export default function BecomeProvider() {
   const { user } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
-  const [, setLocation] = useLocation();
-  const searchParams = useSearch();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   // Parse category from URL query parameter
-  const urlParams = new URLSearchParams(searchParams);
-  const categoryFromUrl = urlParams.get('category');
+  const categoryFromUrl = searchParams.get('category');
   const selectedCategory = SERVICE_CATEGORIES.find(cat => cat.id === categoryFromUrl);
 
   // Form state
@@ -88,9 +87,9 @@ export default function BecomeProvider() {
         title: "ID Verification Required",
         description: "Please verify your identity to complete your application.",
       });
-      setLocation("/scan-id");
+      navigate("/scan-id");
     }
-  }, [user, setLocation, toast, authDialogOpen, showApplicationForm]);
+  }, [user, navigate, toast, authDialogOpen, showApplicationForm]);
 
   const applicationMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -113,7 +112,7 @@ export default function BecomeProvider() {
       
       // Redirect to My Services after 3 seconds
       setTimeout(() => {
-        setLocation("/my-services");
+        navigate("/my-services");
       }, 3000);
     },
     onError: () => {
@@ -134,7 +133,7 @@ export default function BecomeProvider() {
         title: "ID Verification Required",
         description: "Please verify your identity first.",
       });
-      setLocation("/scan-id");
+      navigate("/scan-id");
     } else {
       setShowApplicationForm(true);
       setTimeout(() => {
@@ -152,9 +151,9 @@ export default function BecomeProvider() {
         title: "ID Verification Required",
         description: "Please verify your identity first.",
       });
-      setLocation("/scan-id");
+      navigate("/scan-id");
     } else {
-      setLocation(`/become-provider?category=${serviceId}`);
+      navigate(`/become-provider?category=${serviceId}`);
     }
   };
 
@@ -301,7 +300,7 @@ export default function BecomeProvider() {
                     {selectedCategory && (
                       <button
                         type="button"
-                        onClick={() => setLocation('/become-provider')}
+                        onClick={() => navigate('/become-provider')}
                         className="inline-flex items-center gap-1 text-sm text-eth-brown/70 hover:text-eth-brown mt-3 transition-colors"
                         data-testid="link-choose-different-service"
                       >

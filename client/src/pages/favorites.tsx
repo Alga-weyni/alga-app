@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
@@ -9,7 +9,7 @@ import { Heart } from "lucide-react";
 
 export default function Favorites() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -25,7 +25,7 @@ export default function Favorites() {
               Please sign in to view your favorite properties
             </p>
             <Button 
-              onClick={() => setLocation("/login")}
+              onClick={() => navigate("/login")}
               className="w-full text-lg py-6"
               style={{ background: "#2d1405" }}
               data-testid="button-signin"

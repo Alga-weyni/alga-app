@@ -6,7 +6,7 @@ import PropertyCard from "@/components/property-card";
 import Footer from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Star, TrendingUp, Database, Activity, Bell, Zap, Gift, Key, Apple, MapPin } from "lucide-react";
 import { SiGoogleplay } from "react-icons/si";

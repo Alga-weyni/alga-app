@@ -1,5 +1,5 @@
 // Support & Help Page - Simple & Friendly
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { 
   Phone, 
   Mail, 
@@ -136,7 +136,7 @@ export default function Support() {
                     {content}
                   </a>
                 ) : (
-                  <Link key={index} href={topic.link}>
+                  <Link key={index} to={topic.link}>
                     {content}
                   </Link>
                 );

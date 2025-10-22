@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { XCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +54,7 @@ export default function BookingCancelled() {
 
               <div className="flex gap-4 justify-center pt-4">
                 {bookingId && (
-                  <Link href={`/property/${bookingId}`}>
+                  <Link to={`/property/${bookingId}`}>
                     <Button className="bg-eth-orange hover:bg-eth-orange/90" data-testid="button-try-again">
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Try Again

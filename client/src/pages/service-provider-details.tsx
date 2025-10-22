@@ -1,4 +1,5 @@
-import { useParams, Link, useLocation } from "wouter";
+import { useParams, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Star, MapPin, DollarSign, Calendar, ArrowLeft, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default function ServiceProviderDetails() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
   const [location, setLocationInput] = useState("");
@@ -39,7 +40,7 @@ export default function ServiceProviderDetails() {
         description: "Your service request has been submitted. The provider will confirm shortly.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/my-service-bookings"] });
-      setLocation("/my-alga");
+      navigate("/my-alga");
     },
     onError: (error: Error) => {
       toast({
@@ -57,7 +58,7 @@ export default function ServiceProviderDetails() {
         description: "You need to be signed in to book a service.",
         variant: "destructive",
       });
-      setLocation("/login");
+      navigate("/login");
       return;
     }
 
@@ -117,7 +118,7 @@ export default function ServiceProviderDetails() {
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href={`/services/${provider.serviceType}`}>
+        <Link to={`/services/${provider.serviceType}`}>
           <Button variant="ghost" className="mb-6" data-testid="button-back-category">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to {provider.serviceType}
