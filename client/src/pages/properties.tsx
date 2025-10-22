@@ -98,13 +98,13 @@ export default function Properties() {
     },
   });
 
-  const { data: favorites = [] } = useQuery<Property[]>({
+  const { data: favorites } = useQuery<Property[]>({
     queryKey: ["/api/favorites"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
 
-  const favoriteIds = new Set(favorites.map(fav => fav.id));
+  const favoriteIds = new Set((favorites || []).map(fav => fav.id));
 
   const updateFilter = (key: keyof Filters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));

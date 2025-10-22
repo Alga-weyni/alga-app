@@ -19,13 +19,13 @@ export default function Home() {
     queryKey: ["/api/properties"],
   });
 
-  const { data: favorites = [] } = useQuery<Property[]>({
+  const { data: favorites } = useQuery<Property[]>({
     queryKey: ["/api/favorites"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
   });
 
-  const favoriteIds = new Set(favorites.map(fav => fav.id));
+  const favoriteIds = new Set((favorites || []).map(fav => fav.id));
 
   return (
     <div className="flex min-h-screen bg-eth-warm-tan">
