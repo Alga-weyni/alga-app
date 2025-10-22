@@ -183,8 +183,8 @@ export default function BecomeProvider() {
       />
       
       <div className="pt-24 pb-20">
-        {/* Hero Section - Simplified & Emotional */}
-        <section className="py-20 px-6">
+        {/* Hero Section - Darker header background for provider distinction */}
+        <section className="py-20 px-6" style={{ background: "linear-gradient(to bottom, #f5ece3, #faf5f0)" }}>
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-block mb-6">
               <Sparkles className="h-12 w-12 text-eth-orange mx-auto mb-4" />
