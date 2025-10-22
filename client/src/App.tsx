@@ -41,21 +41,18 @@ import NotFound from "@/pages/not-found";
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 8,
   },
   animate: {
     opacity: 1,
-    y: 0,
     transition: {
-      duration: 0.2,
+      duration: 0.15,
       ease: "easeOut",
     },
   },
   exit: {
     opacity: 0,
-    y: -8,
     transition: {
-      duration: 0.15,
+      duration: 0.1,
       ease: "easeIn",
     },
   },
@@ -81,7 +78,7 @@ function Router() {
   useScrollToTop();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync" initial={false}>
       <Routes location={location} key={location.pathname}>
         {/* Public routes - accessible to everyone */}
         <Route path="/login" element={<AnimatedRoute><LoginPage /></AnimatedRoute>} />
