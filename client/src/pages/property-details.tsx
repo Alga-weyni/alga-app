@@ -45,6 +45,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_METHODS } from "@/lib/constants";
 import StripeCheckout from "@/components/stripe-checkout";
+import ChapaCheckout from "@/components/chapa-checkout";
 import type { Property, Review, Booking } from "@shared/schema";
 
 export default function PropertyDetails() {
@@ -71,6 +72,7 @@ export default function PropertyDetails() {
 
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [showStripeCheckout, setShowStripeCheckout] = useState(false);
+  const [showChapaCheckout, setShowChapaCheckout] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
 
   const { data: property, isLoading } = useQuery<Property>({
@@ -91,6 +93,12 @@ export default function PropertyDetails() {
     onSuccess: async (booking: Booking) => {
       setShowBookingDialog(false);
       setCurrentBooking(booking);
+      
+      // Handle Chapa payment (embedded iframe)
+      if (bookingData.paymentMethod === "chapa") {
+        setShowChapaCheckout(true);
+        return;
+      }
       
       // Handle Stripe payment
       if (bookingData.paymentMethod === "stripe") {
@@ -670,6 +678,45 @@ export default function PropertyDetails() {
               }}
               onCancel={() => {
                 setShowStripeCheckout(false);
+                toast({
+                  title: "Payment cancelled",
+                  description: "You can retry payment from your bookings page.",
+                });
+                setLocation(`/bookings/${currentBooking.id}`);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Chapa Payment Modal */}
+      <Dialog open={showChapaCheckout} onOpenChange={setShowChapaCheckout}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-eth-brown">Chapa Payment</DialogTitle>
+          </DialogHeader>
+          {currentBooking && (
+            <ChapaCheckout
+              amount={parseFloat(currentBooking.totalPrice)}
+              currency="ETB"
+              bookingId={currentBooking.id}
+              onSuccess={() => {
+                setShowChapaCheckout(false);
+                toast({
+                  title: "Payment successful!",
+                  description: "Your booking has been confirmed.",
+                });
+                setLocation(`/booking/success?bookingId=${currentBooking.id}`);
+              }}
+              onError={(error) => {
+                toast({
+                  title: "Payment failed",
+                  description: error,
+                  variant: "destructive",
+                });
+              }}
+              onCancel={() => {
+                setShowChapaCheckout(false);
                 toast({
                   title: "Payment cancelled",
                   description: "You can retry payment from your bookings page.",
