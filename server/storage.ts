@@ -131,7 +131,7 @@ export interface IStorage {
     serviceType?: string;
     verificationStatus?: string;
   }): Promise<ServiceProvider[]>;
-  updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider>;
+  updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider>;
   verifyServiceProvider(providerId: number, status: string, verifierId: string, rejectionReason?: string): Promise<ServiceProvider>;
   updateServiceProviderRating(providerId: number): Promise<void>;
   
@@ -954,7 +954,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(serviceProviders.rating), desc(serviceProviders.totalJobsCompleted));
   }
 
-  async updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider> {
+  async updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider> {
     const [updatedProvider] = await db
       .update(serviceProviders)
       .set({ ...updates, updatedAt: new Date() })
