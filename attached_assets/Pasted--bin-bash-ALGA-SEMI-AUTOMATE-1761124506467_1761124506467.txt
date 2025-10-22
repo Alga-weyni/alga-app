@@ -1,0 +1,95 @@
+#!/bin/bash
+# ==============================================================
+# 🟤 ALGA SEMI-AUTOMATED DEPLOYMENT SCRIPT
+# Author: Weyni Abraha | Version 1.0 | 2025
+# Purpose: Prepare Alga App for secure production deployment
+# ===============================================================
+
+echo "🚀 Starting Alga Semi-Automated Deployment..."
+echo "=============================================================="
+
+# -------------------------------
+# 1️⃣ Verify Environment Variables
+# -------------------------------
+if [ -z "$DATABASE_URL" ]; then
+  echo "❌ ERROR: DATABASE_URL not set."
+  echo "Go to Replit ➜ Tools ➜ Secrets ➜ Add DATABASE_URL first."
+  exit 1
+fi
+
+# -------------------------------
+# 2️⃣ Generate Secure SESSION_SECRET (if missing)
+# -------------------------------
+if [ -z "$SESSION_SECRET" ]; then
+  echo "🔐 Generating SESSION_SECRET..."
+  export SESSION_SECRET=$(openssl rand -hex 32)
+  echo "SESSION_SECRET generated (not printed for security)."
+fi
+
+# -------------------------------
+# 3️⃣ Install Dependencies
+# -------------------------------
+echo "📦 Installing dependencies..."
+npm install
+
+# -------------------------------
+# 4️⃣ Build Production Version
+# -------------------------------
+echo "🧱 Building production version..."
+npm run build || { echo "❌ Build failed."; exit 1; }
+
+# -------------------------------
+# 5️⃣ Initialize Database
+# -------------------------------
+echo "🗄️ Running database migrations..."
+npx drizzle-kit push --config=drizzle.config.ts || { echo "❌ Database push failed."; exit 1; }
+
+# -------------------------------
+# 6️⃣ Seed Data
+# -------------------------------
+echo "🌱 Seeding database..."
+npm run seed || echo "⚠️ Seed script not found or already seeded."
+
+# -------------------------------
+# 7️⃣ Git Commit & Push
+# -------------------------------
+echo "📤 Preparing GitHub push..."
+git add .
+git commit -m "Automated deployment preparation" || echo "ℹ️ No changes to commit."
+git branch -M main
+git push origin main || { echo "❌ Git push failed."; exit 1; }
+
+# -------------------------------
+# 8️⃣ Display Next Deployment Steps
+# -------------------------------
+echo "=============================================================="
+echo "✅ LOCAL TASKS COMPLETED SUCCESSFULLY!"
+echo ""
+echo "🌐 NEXT STEPS (Manual Web-Based Deployment)"
+echo "----------------------------------------------"
+echo "1️⃣ Go to https://render.com ➜ Create Web Service"
+echo "   • Select your GitHub repo (alga-app)"
+echo "   • Environment Variables:"
+echo "       DATABASE_URL = (your Neon DB URL)"
+echo "       SENDGRID_API_KEY = (for OTP emails)"
+echo "       SESSION_SECRET = (use the generated one)"
+echo "       NODE_ENV = production"
+echo "       PORT = 10000"
+echo "   • Start Command: npm start"
+echo ""
+echo "2️⃣ Go to https://vercel.com ➜ Import GitHub Project"
+echo "   • Environment Variables:"
+echo "       VITE_API_BASE_URL = https://<your-render-service>.onrender.com"
+echo "       NODE_ENV = production"
+echo "   • Deploy frontend"
+echo ""
+echo "3️⃣ After both deployments finish:"
+echo "   ✅ Test OTP login (SendGrid)"
+echo "   ✅ Test property add + booking flow"
+echo "   ✅ Test admin verification counts"
+echo ""
+echo "4️⃣ Once confirmed stable, cancel Replit Core Plan to cut costs."
+echo "----------------------------------------------"
+echo "🎉 Deployment Preparation Complete! 🎉"
+echo "Backend: Render   |  Frontend: Vercel   |  Database: Neon"
+echo "=============================================================="
