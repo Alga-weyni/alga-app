@@ -94,6 +94,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
             alt={property.title}
             className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
             data-testid={`img-property-${property.id}`}
           />
           <Button
