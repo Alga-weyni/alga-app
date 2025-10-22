@@ -40,5 +40,53 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
 - **Database & Hosting**: Neon Database (serverless PostgreSQL).
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
 - **Mapping**: `google-map-react`.
+- **File Storage**: Replit App Storage (Google Cloud Storage) for property and service images.
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
+
+## Deployment Guide
+
+### Pre-Deployment Checklist
+Before deploying Alga to production, ensure the following are configured:
+
+#### 1. Environment Variables (Replit Secrets)
+Add these secrets via Replit Secrets tab:
+- `SENDGRID_API_KEY`: Your SendGrid API key for email notifications
+- `GOOGLE_MAPS_API_KEY`: Your Google Maps API key for map features
+- `SESSION_SECRET`: Auto-generated, already configured
+- `DATABASE_URL`: Auto-configured by Replit PostgreSQL
+
+#### 2. Object Storage Setup (Post-Deployment)
+After deploying to production:
+1. Open the **Object Storage** tab in Replit
+2. Create a new bucket (e.g., `alga-production`)
+3. Add these environment variables:
+   - `PRIVATE_OBJECT_DIR`: `/alga-production/private`
+   - `PUBLIC_OBJECT_SEARCH_PATHS`: `/alga-production/public`
+4. The app will automatically use Object Storage for property and service images
+
+#### 3. Database Migration
+Run before first deployment:
+```bash
+npm run db:push
+```
+
+### Deployment Configuration
+The app is configured for **Autoscale** deployment:
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start`
+- **Deployment Type**: Autoscale (scales to zero when idle, cost-efficient)
+- **Port**: 5000 (configured in deployment settings)
+
+### Post-Deployment Steps
+1. **Verify Database**: Check PostgreSQL connection in production
+2. **Test Payment Webhooks**: Update Chapa/Stripe webhook URLs to production domain
+3. **SendGrid Configuration**: Verify sender email is authenticated
+4. **Google Maps**: Ensure API key has production domain whitelisted
+5. **Object Storage**: Confirm image uploads work in production
+
+### Monitoring & Maintenance
+- **Logs**: View via Replit Deployments logs tab
+- **Database**: Access via Replit Database tab
+- **Backups**: Automatic via Neon Database
+- **Scaling**: Automatic via Autoscale (0-N instances based on traffic)
