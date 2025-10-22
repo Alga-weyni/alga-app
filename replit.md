@@ -72,8 +72,10 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
 
 ## Recent Changes (October 2025)
 
-### Navigation Bar UX Refinement (October 22, 2025)
-- **Reordered Navigation Hierarchy** (user-centered design):
+### Navigation & UX Improvements (October 22, 2025)
+
+#### Navigation Hierarchy Refinement
+- **Reordered Top Navigation** (user-centered design):
   - **My Alga** (first) - Bold text for primary emphasis (only when authenticated)
   - **Services** (second) - Regular weight for secondary focus
   - **Discover** (last) - Less prominent with map icon 🗺️, smaller font
@@ -83,6 +85,22 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
   - Services second
   - Discover last with map icon
 - **Design Polish**: Emphasizes personalization (My Alga) while maintaining clean, modern Ethiopian aesthetic
+
+#### My Alga Dashboard Enhancement
+- **Added Profile & Settings Tile**: New sixth tile for user identity and account preferences
+  - Replaces generic "Settings" with more descriptive "Profile & Settings"
+  - Links to `/profile` route with comprehensive user information display
+- **Clarified Navigation Logic**:
+  - `/my-alga` - Main user hub (6 tiles: My Stays, My Services, Payments, Messages, Reviews, Profile & Settings)
+  - `/my-services` - User's service bookings with "Browse All Services" CTA
+  - `/services` - Public service marketplace for discovery
+  - `/profile` - User profile, verification status, and account settings
+- **Profile Page Features**:
+  - Avatar display with user initials
+  - Contact information with verification badges
+  - ID verification status (Ethiopian ID and Fayda ID)
+  - Settings sections (Notifications, Security, Payments, Language)
+  - Back navigation to My Alga dashboard
 
 ### Service Provider Onboarding Page (October 22, 2025)
 - **New Page**: Created `/become-provider` page for service provider registration
