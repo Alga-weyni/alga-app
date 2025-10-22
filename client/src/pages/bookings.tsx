@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { type Booking } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
@@ -11,7 +12,7 @@ import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
 
 export default function Bookings() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -27,7 +28,7 @@ export default function Bookings() {
               Please sign in to view your bookings
             </p>
             <Button 
-              onClick={() => setLocation("/login")}
+              onClick={() => navigate("/login")}
               className="w-full text-lg py-6"
               style={{ background: "#2d1405" }}
               data-testid="button-signin"
@@ -149,7 +150,7 @@ export default function Bookings() {
                           </p>
                         </div>
                         <Button variant="outline" asChild>
-                          <Link href={`/bookings/${booking.id}`} className="flex items-center gap-2" data-testid={`button-view-details-${booking.id}`}>
+                          <Link to={`/bookings/${booking.id}`} className="flex items-center gap-2" data-testid={`button-view-details-${booking.id}`}>
                             View Details
                             <ChevronRight className="h-4 w-4" />
                           </Link>

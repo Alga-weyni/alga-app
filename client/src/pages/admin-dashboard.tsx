@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,7 +71,7 @@ interface AdminStats {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
               Please sign in to access the admin dashboard
             </p>
             <Button 
-              onClick={() => setLocation("/login")}
+              onClick={() => navigate("/login")}
               className="w-full text-lg py-6"
               style={{ background: "#2d1405" }}
               data-testid="button-signin"
@@ -604,7 +604,7 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setLocation(`/properties/${property.id}`)}
+                            onClick={() => navigate(`/properties/${property.id}`)}
                             data-testid={`button-view-property-${property.id}`}
                           >
                             <Eye className="h-4 w-4" />

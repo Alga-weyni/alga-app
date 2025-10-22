@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
@@ -19,7 +20,7 @@ import algaAppDownload from "@assets/alga mobile app image _1760806950707.jpeg";
 export default function Landing() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const openAuthDialog = (mode: "login" | "register") => {
@@ -421,7 +422,7 @@ export default function Landing() {
                 </ul>
                 <div>
                   <Button 
-                    onClick={() => setLocation("/become-host")} 
+                    onClick={() => navigate("/become-host")} 
                     size="lg" 
                     className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-8 py-3 font-medium transition-all hover:shadow-lg"
                     data-testid="button-start-hosting"

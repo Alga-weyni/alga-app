@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,7 +115,7 @@ export default function HostDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [showAddPropertyDialog, setShowAddPropertyDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -138,7 +138,7 @@ export default function HostDashboard() {
               Please sign in to access your host dashboard
             </p>
             <Button 
-              onClick={() => setLocation("/login")}
+              onClick={() => navigate("/login")}
               className="w-full text-lg py-6"
               style={{ background: "#2d1405" }}
               data-testid="button-signin"
@@ -639,7 +639,7 @@ export default function HostDashboard() {
                           size="sm" 
                           variant="outline" 
                           className="flex-1"
-                          onClick={() => setLocation(`/properties/${property.id}`)}
+                          onClick={() => navigate(`/properties/${property.id}`)}
                           data-testid={`button-view-${property.id}`}
                         >
                           <Eye className="h-4 w-4 mr-1" />

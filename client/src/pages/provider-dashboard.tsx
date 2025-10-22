@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ type ServiceBooking = {
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   // Fetch provider profile
   const { data: provider, isLoading: providerLoading } = useQuery<ServiceProvider>({
@@ -59,7 +59,7 @@ export default function ProviderDashboard() {
           <div className="max-w-md mx-auto text-center">
             <h2 className="text-2xl font-bold mb-4 text-eth-brown">Please Sign In</h2>
             <p className="text-eth-brown/70 mb-6">You need to sign in to view your provider dashboard.</p>
-            <Button onClick={() => setLocation("/login")} className="bg-eth-brown hover:bg-eth-brown/90">
+            <Button onClick={() => navigate("/login")} className="bg-eth-brown hover:bg-eth-brown/90">
               Sign In
             </Button>
           </div>
@@ -92,7 +92,7 @@ export default function ProviderDashboard() {
           <div className="max-w-md mx-auto text-center">
             <h2 className="text-2xl font-bold mb-4 text-eth-brown">Not a Service Provider</h2>
             <p className="text-eth-brown/70 mb-6">You haven't applied to become a service provider yet.</p>
-            <Button onClick={() => setLocation("/become-provider")} className="bg-eth-brown hover:bg-eth-brown/90">
+            <Button onClick={() => navigate("/become-provider")} className="bg-eth-brown hover:bg-eth-brown/90">
               Become a Provider
             </Button>
           </div>
@@ -156,7 +156,7 @@ export default function ProviderDashboard() {
                 <div className="text-center pt-4">
                   <Button 
                     variant="outline" 
-                    onClick={() => setLocation("/my-alga")}
+                    onClick={() => navigate("/my-alga")}
                     data-testid="button-back-dashboard"
                   >
                     Back to Dashboard
@@ -221,14 +221,14 @@ export default function ProviderDashboard() {
                 <div className="flex gap-3 pt-4">
                   <Button 
                     variant="outline" 
-                    onClick={() => setLocation("/my-alga")}
+                    onClick={() => navigate("/my-alga")}
                     className="flex-1"
                     data-testid="button-back-dashboard"
                   >
                     Back to Dashboard
                   </Button>
                   <Button 
-                    onClick={() => setLocation("/become-provider")}
+                    onClick={() => navigate("/become-provider")}
                     className="flex-1 bg-eth-brown hover:bg-eth-brown/90"
                     data-testid="button-reapply"
                   >

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { Link, useLocation } from "wouter";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, MapPin, DollarSign, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,7 @@ const statusColors: Record<string, string> = {
 
 export default function MyServices() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<ServiceBookingWithReview | null>(null);
 
@@ -45,7 +46,7 @@ export default function MyServices() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>Please Sign In</h2>
           <p className="mb-4" style={{ color: "#5a4a42" }}>You need to sign in to view your services.</p>
-          <Button onClick={() => setLocation("/login")}>Sign In</Button>
+          <Button onClick={() => navigate("/login")}>Sign In</Button>
         </div>
       </div>
     );

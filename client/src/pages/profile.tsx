@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Link, useLocation } from "wouter";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,7 +23,7 @@ import {
 
 export default function Profile() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -30,7 +31,7 @@ export default function Profile() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>Please Sign In</h2>
           <p className="mb-4" style={{ color: "#5a4a42" }}>You need to sign in to view your profile.</p>
-          <Button onClick={() => setLocation("/")}>Go Home</Button>
+          <Button onClick={() => navigate("/")}>Go Home</Button>
         </div>
       </div>
     );

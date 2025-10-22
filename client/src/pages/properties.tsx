@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
-import { useLocation } from "wouter";
+import { useLocation } from "react-router-dom";
 import Header from "@/components/header";
 import PropertyCard from "@/components/property-card";
 import SearchBanner from "@/components/search-banner";
@@ -47,7 +47,7 @@ interface Filters {
 }
 
 export default function Properties() {
-  const [location] = useLocation();
+  const location = useLocation();
   const [filters, setFilters] = useState<Filters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -57,7 +57,7 @@ export default function Properties() {
 
   // Parse URL params on mount
   useEffect(() => {
-    const params = new URLSearchParams(location.split('?')[1] || '');
+    const params = new URLSearchParams(location.search || '');
     const urlFilters: Filters = {};
     
     if (params.get('destination')) urlFilters.city = params.get('destination')!;

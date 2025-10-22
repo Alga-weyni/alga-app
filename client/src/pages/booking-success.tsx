@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, Link } from "wouter";
+import { useNavigate, Link } from "react-router-dom";
 import { CheckCircle, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import Footer from "@/components/footer";
 import type { AccessCode } from "@shared/schema";
 
 export default function BookingSuccess() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   const bookingId = searchParams.get("bookingId");
 
@@ -112,7 +112,7 @@ export default function BookingSuccess() {
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-4">Booking Reference: #{bookingId}</p>
                   <Button 
-                    onClick={() => setLocation(`/bookings/${bookingId}`)}
+                    onClick={() => navigate(`/bookings/${bookingId}`)}
                     className="bg-eth-orange hover:bg-eth-orange/90"
                     data-testid="button-view-booking"
                   >

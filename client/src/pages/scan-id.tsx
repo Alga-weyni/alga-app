@@ -1,9 +1,9 @@
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import UniversalIDScanner from "@/components/universal-id-scanner";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ScanIDPage() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleVerified = (data: any) => {

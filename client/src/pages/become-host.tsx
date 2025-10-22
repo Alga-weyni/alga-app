@@ -14,14 +14,14 @@ import {
   Banknote
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useToast } from "@/hooks/use-toast";
 
 export default function BecomeHost() {
   const { user } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Auto-redirect after login if ID not verified
@@ -33,7 +33,7 @@ export default function BecomeHost() {
           title: "ID Verification Required",
           description: "Please verify your identity to complete your host application.",
         });
-        setLocation("/scan-id");
+        navigate("/scan-id");
       }, 1000);
     } else if (user && user.idVerified && user.role === 'guest') {
       // User is verified but still a guest - show success message
@@ -45,7 +45,7 @@ export default function BecomeHost() {
         });
       }, 500);
     }
-  }, [user, setLocation, toast, authDialogOpen]);
+  }, [user, navigate, toast, authDialogOpen]);
 
   const handleApplyClick = () => {
     if (!user) {
@@ -58,7 +58,7 @@ export default function BecomeHost() {
         title: "ID Verification Required",
         description: "Please verify your identity to complete your host application.",
       });
-      setLocation("/scan-id");
+      navigate("/scan-id");
     } else if (user.role === 'guest') {
       // ID verified but still guest - show confirmation
       toast({
@@ -72,7 +72,7 @@ export default function BecomeHost() {
         title: "You're Already a Host!",
         description: "You can manage your properties from your host dashboard.",
       });
-      setLocation("/host/dashboard");
+      navigate("/host/dashboard");
     }
   };
 

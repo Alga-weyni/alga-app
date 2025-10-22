@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useParams, useLocation } from "wouter";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { type Booking, type Property } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -27,7 +28,7 @@ import { ReviewDialog } from "@/components/review-dialog";
 export default function BookingDetails() {
   const { user } = useAuth();
   const { id } = useParams();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Redirect to login if not authenticated
@@ -44,7 +45,7 @@ export default function BookingDetails() {
               Please sign in to view booking details
             </p>
             <Button 
-              onClick={() => setLocation("/login")}
+              onClick={() => navigate("/login")}
               className="w-full text-lg py-6"
               style={{ background: "#2d1405" }}
               data-testid="button-signin"
@@ -141,7 +142,7 @@ export default function BookingDetails() {
             <CardContent className="p-12 text-center">
               <h3 className="text-xl font-semibold text-foreground mb-2">Booking not found</h3>
               <p className="text-muted-foreground mb-6">The booking you're looking for doesn't exist.</p>
-              <Button onClick={() => setLocation("/bookings")}>
+              <Button onClick={() => navigate("/bookings")}>
                 Back to Bookings
               </Button>
             </CardContent>

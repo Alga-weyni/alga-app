@@ -1,5 +1,5 @@
 // Welcome Page - Post-Login Orientation for All Ages
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,7 +58,7 @@ export default function Welcome() {
         {/* Action Cards - Extra Large & Touch-Friendly */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {actions.map((action) => (
-            <Link key={action.link} href={action.link}>
+            <Link key={action.link} to={action.link}>
               <Card
                 className={`h-full transition-all duration-200 hover:shadow-2xl hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br ${action.color}`}
                 data-testid={`card-${action.testId}`}
