@@ -2141,6 +2141,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================
+  // SERVICE REVIEWS
+  // ============================================
+
+  // Create service review
+  app.post('/api/service-reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const reviewerId = req.user.id;
+      const reviewData = {
+        ...req.body,
+        reviewerId,
+      };
+      
+      const review = await storage.createServiceReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      console.error("Error creating service review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Get reviews for a service provider
+  app.get('/api/service-providers/:id/reviews', async (req, res) => {
+    try {
+      const providerId = parseInt(req.params.id);
+      const reviews = await storage.getServiceReviewsByProvider(providerId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching provider reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Get review by service booking ID
+  app.get('/api/service-bookings/:id/review', isAuthenticated, async (req: any, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const review = await storage.getServiceReviewByBooking(bookingId);
+      
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Error fetching booking review:", error);
+      res.status(500).json({ message: "Failed to fetch review" });
+    }
+  });
+
+  // ============================================
   // ADMIN: SERVICE PROVIDER VERIFICATION
   // ============================================
 
