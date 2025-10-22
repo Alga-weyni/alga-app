@@ -211,6 +211,24 @@ export const serviceBookings = pgTable("service_bookings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Service Reviews: Reviews for service providers
+export const serviceReviews = pgTable("service_reviews", {
+  id: serial("id").primaryKey(),
+  serviceBookingId: integer("service_booking_id").notNull().references(() => serviceBookings.id),
+  serviceProviderId: integer("service_provider_id").notNull().references(() => serviceProviders.id),
+  reviewerId: varchar("reviewer_id").notNull().references(() => users.id),
+  rating: integer("rating").notNull(), // Overall rating 1-5
+  comment: text("comment"),
+  // Detailed ratings
+  professionalism: integer("professionalism"), // 1-5
+  quality: integer("quality"), // 1-5
+  timeliness: integer("timeliness"), // 1-5
+  communication: integer("communication"), // 1-5
+  value: integer("value"), // 1-5
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties),
@@ -223,6 +241,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   }),
   serviceProviders: many(serviceProviders),
   serviceBookings: many(serviceBookings),
+  serviceReviews: many(serviceReviews),
 }));
 
 export const verificationDocumentsRelations = relations(verificationDocuments, ({ one }) => ({
@@ -312,9 +331,10 @@ export const serviceProvidersRelations = relations(serviceProviders, ({ one, man
     relationName: "verifiedBy"
   }),
   serviceBookings: many(serviceBookings),
+  serviceReviews: many(serviceReviews),
 }));
 
-export const serviceBookingsRelations = relations(serviceBookings, ({ one }) => ({
+export const serviceBookingsRelations = relations(serviceBookings, ({ one, many }) => ({
   serviceProvider: one(serviceProviders, {
     fields: [serviceBookings.serviceProviderId],
     references: [serviceProviders.id],
@@ -331,6 +351,22 @@ export const serviceBookingsRelations = relations(serviceBookings, ({ one }) => 
   booking: one(bookings, {
     fields: [serviceBookings.bookingId],
     references: [bookings.id],
+  }),
+  serviceReviews: many(serviceReviews),
+}));
+
+export const serviceReviewsRelations = relations(serviceReviews, ({ one }) => ({
+  serviceBooking: one(serviceBookings, {
+    fields: [serviceReviews.serviceBookingId],
+    references: [serviceBookings.id],
+  }),
+  serviceProvider: one(serviceProviders, {
+    fields: [serviceReviews.serviceProviderId],
+    references: [serviceProviders.id],
+  }),
+  reviewer: one(users, {
+    fields: [serviceReviews.reviewerId],
+    references: [users.id],
   }),
 }));
 
@@ -463,6 +499,12 @@ export const insertServiceBookingSchema = createInsertSchema(serviceBookings).om
   ),
 });
 
+export const insertServiceReviewSchema = createInsertSchema(serviceReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -486,3 +528,5 @@ export type InsertServiceProvider = z.infer<typeof insertServiceProviderSchema>;
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
 export type InsertServiceBooking = z.infer<typeof insertServiceBookingSchema>;
 export type ServiceBooking = typeof serviceBookings.$inferSelect;
+export type InsertServiceReview = z.infer<typeof insertServiceReviewSchema>;
+export type ServiceReview = typeof serviceReviews.$inferSelect;
