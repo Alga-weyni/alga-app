@@ -1,0 +1,53 @@
+🚀 FINAL ORDER – COMPLETE BUILD AND LAUNCH ALGA APP
+
+Goal: Finish, test, and deploy the full Alga app (frontend + backend + database) by tomorrow. No follow-ups needed. Everything must be production-ready.
+
+🧩 PHASE 1 – VERIFY AND COMPLETE BACKEND
+1. Confirm DATABASE_URL and environment variables are valid (.env).
+2. Finalize all APIs:
+   - Authentication (email + phone OTP)
+   - Property listings, booking, reviews
+   - Service provider (cleaning, laundry, airport pickup, etc.) CRUD routes
+   - Commission and payout logic (15% Alga / 85% provider)
+3. Ensure SendGrid OTP and email system work correctly.
+4. Test endpoints in Postman and confirm responses.
+
+🎨 PHASE 2 – FRONTEND POLISH
+1. Finalize responsive UI for:
+   - Landing page (with tagline: “Stay. Discover. Belong. The Ethiopian Way.”)
+   - Search, booking, and property details
+   - Host dashboard
+   - “Add-On Services” booking option on confirmation page
+   - Admin dashboard for verification and payouts
+2. Remove test data and placeholder buttons.
+3. Integrate OTP and login flow with backend API.
+
+⚙️ PHASE 3 – DATABASE & DEPLOYMENT
+1. Seed initial data (test users, hosts, 3 properties, 3 service providers).
+2. Connect PostgreSQL (Neon or Postgres.app) to production environment.
+3. Deploy:
+   - Backend → Render.com (use `npm install && npm run build` and `npm run start`)
+   - Frontend → Vercel (connect same GitHub repo, set correct API_BASE_URL)
+4. Configure environment variables in both platforms.
+
+🔍 PHASE 4 – TEST & VERIFY
+1. Run full end-to-end test:
+   - User sign-up/login (email + phone OTP)
+   - Property search and booking
+   - Add service during booking
+   - Admin approves provider and payout
+   - Email receipts and confirmations
+2. Fix any visible console or build errors.
+3. Optimize load speed and ensure mobile layout is correct.
+
+🌍 PHASE 5 – GO LIVE
+1. Connect domain `algaapp.com` or temporary Render URL.
+2. Display final hero message:
+   **“Discover authentic Ethiopian stays — powered by Alga.”**
+3. Confirm deployment, send final URL link to dashboard.
+
+🎯 Outcome
+By the end of this task, the app must be live and functional with all features enabled and verified.
+No code placeholders, no unlinked buttons, no console errors.
+
+Deadline: Complete and launch within 24 hours.
