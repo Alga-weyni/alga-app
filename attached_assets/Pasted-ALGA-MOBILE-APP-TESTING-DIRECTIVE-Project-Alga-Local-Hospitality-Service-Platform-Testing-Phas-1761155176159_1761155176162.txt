@@ -1,0 +1,113 @@
+ALGA MOBILE APP TESTING DIRECTIVE
+
+Project: Alga – Local Hospitality & Service Platform
+Testing Phase: Pre-Launch Quality Assurance (Mobile Optimization & Functional Validation)
+Issued By: CEO, Gobez / Alga Group
+Objective: Ensure flawless user experience, visual consistency, and functional integrity across mobile devices (iPhone, Android, and tablets).
+
+1️⃣ GENERAL TESTING SCOPE
+Platforms to Test
+
+✅ Android (Chrome, Samsung Internet)
+
+✅ iOS (Safari, Chrome)
+
+✅ Tablet (iPad Mini / Samsung Tab)
+
+Devices to Simulate
+
+iPhone 13 / 14 / 15
+
+Samsung Galaxy S21 / S22
+
+Pixel 6 / 7
+
+iPad Mini / Pro
+
+2️⃣ CORE TEST MODULES
+
+Each module below must be tested twice: (1) Logged out and (2) Logged in as each user role (Admin, Host, Guest, Service Provider).
+
+Module	What to Verify	Expected Result
+1. Launch & Load	App opens without blank screen or lag	Splash screen shows → Home loads within 3s
+2. Authentication (OTP + Email)	Login / OTP flow works seamlessly	OTP displayed via toast → User redirected correctly
+3. Navigation Bar	All menu links respond correctly	Tapping each icon routes smoothly without reload
+4. Property Cards	Proper display and scroll behavior	No cut-off text, images scale to screen, prices visible
+5. Booking Flow	Search → Select → Book → Confirm	“Booking Successful” message appears, data saved
+6. Service Marketplace	Browse / Apply to offer services	All cards clickable, CTA visible on mobile
+7. Account Settings	Edit profile, logout, password reset	All updates persist; logout redirects home
+8. Multi-Role Access	Role-based dashboards load properly	Each dashboard matches role privilege
+9. Notifications & Toasts	All pop-ups are readable	No off-screen or blocked alerts
+10. Responsiveness & Alignment	Test in portrait & landscape	No overflow, wrapping, or broken elements
+3️⃣ TECHNICAL VALIDATION CHECKLIST
+
+ No React “hydration” or “missing key” warnings
+
+ No console errors when navigating
+
+ Buttons have 40px+ touch target (finger-friendly)
+
+ Input fields auto-scroll into view when typing
+
+ Keyboard doesn’t block submit buttons
+
+ All icons use scalable vector format (SVG)
+
+ Pages load under 3 seconds on 3G connection
+
+4️⃣ USER EXPERIENCE (UX) CHECKLIST
+
+ App color palette (cream & brown) consistent across screens
+
+ Text legible under both dark & light mode
+
+ Sticky header behavior smooth on scroll
+
+ Back button works properly (Android hardware key & iOS swipe)
+
+ Map view (if active) zooms and drags responsively
+
+ Toast messages auto-disappear after 2–3 seconds
+
+5️⃣ REPORTING FORMAT
+
+All bugs must be logged in TESTING_LOG.md or Airtable as follows:
+
+[ROLE] - [DEVICE/OS] - [PAGE] - [ISSUE] - [SEVERITY] - [STATUS]
+Example:
+[GUEST] - [iPhone 13 / iOS 17] - [/booking] - Button not clickable - HIGH - Pending Fix
+
+
+Severity Levels:
+
+HIGH: Blocks function or causes crash
+
+MEDIUM: Visual or layout issue
+
+LOW: Text alignment, font, minor UI inconsistency
+
+6️⃣ SIGN-OFF CRITERIA
+
+App passes mobile readiness if:
+✅ 100% of High Severity issues resolved
+✅ 90%+ of Medium Severity issues resolved
+✅ No console or crash logs
+✅ Fully responsive across top 5 device sizes
+
+7️⃣ FINAL CEO TEST SCRIPT (Short Run)
+
+Before public launch, you personally can run this quick final check:
+
+Open app on iPhone → log in as Guest
+
+Browse → Book → Logout → Log in as Host
+
+Add property → Verify it appears under Admin approval
+
+Switch to Provider → Offer a service
+
+Return as Admin → Approve both
+
+Logout → Clear cache → Reopen app
+
+Confirm all dashboards load clean, no 404 or delay
