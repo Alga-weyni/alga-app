@@ -868,57 +868,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seed database endpoint (admin-only, for production setup)
-  app.post('/api/admin/seed-database', isAuthenticated, async (req: any, res) => {
-    try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      // Check if database already has properties
-      const existingProperties = await storage.getProperties();
-      if (existingProperties.length > 0) {
-        return res.status(400).json({ 
-          message: "Database already contains properties. Seeding skipped to prevent duplicates.",
-          existingCount: existingProperties.length 
-        });
-      }
-
-      // Seed properties (15 approved properties)
-      const sampleProperties = [
-        { hostId: "host-ethiopia-1", title: "Addis View Hotel", description: "Modern hotel with panoramic city views in the heart of Addis Ababa", region: "Addis Ababa", location: "Bole District", city: "Addis Ababa", type: "hotel", pricePerNight: "120.00", maxGuests: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "parking", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-2", title: "Cozy Traditional Ethiopian Home in Addis Ababa", description: "Experience authentic Ethiopian living in this charming traditional home", city: "Addis Ababa", type: "house", pricePerNight: "80.00", capacity: 6, bedrooms: 3, bathrooms: 2, amenities: ["wifi", "kitchen", "garden"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-3", title: "Simien Mountain Lodge", description: "Eco-lodge with breathtaking mountain views near Gondar", city: "Gondar", type: "lodge", pricePerNight: "150.00", capacity: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "restaurant", "hiking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-4", title: "Bishoftu Resort & Spa", description: "Lakeside resort perfect for relaxation and rejuvenation", city: "Bishoftu", type: "resort", pricePerNight: "200.00", capacity: 2, bedrooms: 1, bathrooms: 1, amenities: ["wifi", "spa", "pool", "restaurant"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-5", title: "Blue Nile Retreat", description: "Peaceful retreat near the Blue Nile Falls", city: "Bahir Dar", type: "cottage", pricePerNight: "90.00", capacity: 4, bedrooms: 2, bathrooms: 1, amenities: ["wifi", "garden", "parking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-6", title: "Lalibela Rock Heritage House", description: "Historic stone house near the famous rock-hewn churches", city: "Lalibela", type: "house", pricePerNight: "110.00", capacity: 5, bedrooms: 3, bathrooms: 2, amenities: ["wifi", "cultural-tours", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-7", title: "Hawassa Lakeside Villa", description: "Stunning lakeside villa with private beach access", city: "Hawassa", type: "villa", pricePerNight: "180.00", capacity: 8, bedrooms: 4, bathrooms: 3, amenities: ["wifi", "beach-access", "bbq", "parking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-8", title: "Harar Cultural Guesthouse", description: "Traditional guesthouse in the ancient walled city of Harar", city: "Harar", type: "guesthouse", pricePerNight: "70.00", capacity: 3, bedrooms: 2, bathrooms: 1, amenities: ["wifi", "cultural-experience", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-9", title: "Arba Minch Paradise Lodge", description: "Lodge with spectacular views of the Great Rift Valley lakes", city: "Arba Minch", type: "lodge", pricePerNight: "130.00", capacity: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "restaurant", "wildlife-tours"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-10", title: "Axum Heritage Hotel", description: "Modern hotel near ancient obelisks and archaeological sites", city: "Axum", type: "hotel", pricePerNight: "100.00", capacity: 3, bedrooms: 1, bathrooms: 1, amenities: ["wifi", "breakfast", "parking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-11", title: "Dire Dawa Railway Apartment", description: "Charming apartment near historic railway station", city: "Dire Dawa", type: "apartment", pricePerNight: "60.00", capacity: 2, bedrooms: 1, bathrooms: 1, amenities: ["wifi", "kitchen", "air-conditioning"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-12", title: "Mekele Mountain View Hotel", description: "Modern hotel with views of the Tigray mountains", city: "Mekele", type: "hotel", pricePerNight: "95.00", capacity: 2, bedrooms: 1, bathrooms: 1, amenities: ["wifi", "restaurant", "parking"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-13", title: "Jimma Coffee Farm Stay", description: "Authentic farm experience in Ethiopia's coffee heartland", city: "Jimma", type: "farmstay", pricePerNight: "85.00", capacity: 6, bedrooms: 3, bathrooms: 2, amenities: ["wifi", "coffee-experience", "farm-tours", "breakfast"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-14", title: "Adama Eco Lodge", description: "Sustainable eco-lodge with modern amenities", city: "Adama", type: "lodge", pricePerNight: "105.00", capacity: 4, bedrooms: 2, bathrooms: 2, amenities: ["wifi", "eco-friendly", "restaurant"], images: ["/api/placeholder/800/600"], status: "approved" as const },
-        { hostId: "host-ethiopia-15", title: "Gondar Castle View Guesthouse", description: "Cozy guesthouse with views of the royal enclosure", city: "Gondar", type: "guesthouse", pricePerNight: "75.00", capacity: 3, bedrooms: 2, bathrooms: 1, amenities: ["wifi", "breakfast", "cultural-tours"], images: ["/api/placeholder/800/600"], status: "approved" as const }
-      ];
-
-      const createdProperties = [];
-      for (const property of sampleProperties) {
-        const created = await storage.createProperty(property);
-        createdProperties.push(created);
-      }
-
-      res.json({
-        message: "Database seeded successfully!",
-        propertiesCreated: createdProperties.length,
-        properties: createdProperties.map(p => ({ id: p.id, title: p.title, city: p.city }))
-      });
-    } catch (error) {
-      console.error("Error seeding database:", error);
-      res.status(500).json({ message: "Failed to seed database", error: String(error) });
-    }
+  // Seed database endpoint (production setup - uses Bearer token auth)
+  // Usage: POST /api/admin/seed-database with Authorization: Bearer YOUR_ADMIN_SEED_KEY
+  app.post('/api/admin/seed-database', async (req: any, res) => {
+    const seedHandler = (await import('./api/seed.js')).default;
+    return seedHandler(req, res);
   });
 
   // Document verification routes
