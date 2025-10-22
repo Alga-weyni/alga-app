@@ -50,8 +50,8 @@ export default function Bookings() {
         </div>
         
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">My Bookings</h1>
-          <p className="text-muted-foreground">View and manage your accommodation bookings</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">My Trips</h1>
+          <p className="text-muted-foreground">View and manage your stays</p>
         </div>
 
         {isLoading ? (
@@ -64,9 +64,9 @@ export default function Bookings() {
           <Card>
             <CardContent className="p-12 text-center">
               <Calendar className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">No bookings yet</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No trips yet</h3>
               <p className="text-muted-foreground mb-6">
-                Start exploring properties and make your first booking
+                Start exploring and book your first stay!
               </p>
               <Button asChild>
                 <Link href="/properties" data-testid="button-browse-properties">
