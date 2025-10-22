@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 import Header from "@/components/header";
 import SearchBanner from "@/components/search-banner";
 import PropertyCard from "@/components/property-card";
@@ -20,6 +21,8 @@ export default function Home() {
 
   const { data: favorites = [] } = useQuery<Property[]>({
     queryKey: ["/api/favorites"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
   });
 
   const favoriteIds = new Set(favorites.map(fav => fav.id));

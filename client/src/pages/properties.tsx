@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import Header from "@/components/header";
 import PropertyCard from "@/components/property-card";
@@ -99,6 +100,8 @@ export default function Properties() {
 
   const { data: favorites = [] } = useQuery<Property[]>({
     queryKey: ["/api/favorites"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
   });
 
   const favoriteIds = new Set(favorites.map(fav => fav.id));
