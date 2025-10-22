@@ -32,6 +32,7 @@ import ServiceProviderDetails from "@/pages/service-provider-details";
 import MyAlga from "@/pages/my-alga";
 import MyServices from "@/pages/my-services";
 import Profile from "@/pages/profile";
+import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -56,6 +57,9 @@ function Router() {
       <Route path="/services" component={Services} />
       <Route path="/services/:type" component={ServiceCategory} />
       <Route path="/service-providers/:id" component={ServiceProviderDetails} />
+      
+      {/* Support/Help - public */}
+      <Route path="/support" component={Support} />
       
       <Route path="/" component={Properties} />
       
