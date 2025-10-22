@@ -124,13 +124,36 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 - **UI/UX**: Modal-based checkout with embedded payment iframe, success animation, manual verification button
 - **Payment Priority**: Chapa listed first in payment methods (recommended for Ethiopian users)
 
-### Add-On Services Feature
+### Alga Services Marketplace - Full Implementation (October 22, 2025)
 - **Database Schema**: Created `service_providers` and `service_bookings` tables with full relations
 - **Backend API**: Complete REST API for service provider registration, booking, and admin verification
 - **Revenue Model**: Automated 15% commission calculation, 85% provider payout tracking
-- **Service Types**: Cleaning, laundry, airport pickup/drop-off, electrical, plumbing, driver, welcome packs
+- **Service Types (11 Categories)**: 
+  - Cleaning (professional cleaning during/after stay)
+  - Laundry (laundry and garment care)
+  - Transport (airport pickup, daily drivers, tour cars)
+  - Electrical (repairs and installations)
+  - Plumbing (fixes and maintenance)
+  - Driver Services (personal drivers and transportation)
+  - Meal Support (local cooks and meal delivery partners)
+  - Local Guides (city tours and cultural experiences)
+  - Photography (professional photos and listing optimization)
+  - Landscaping (outdoor maintenance and beautification)
+  - Welcome Pack (curated welcome amenities for guests)
+- **Frontend Pages**:
+  - `/services` - Services marketplace with all 11 category cards
+  - `/services/:type` - Category-specific provider listings with city/sort filters
+  - `/service-providers/:id` - Individual provider profile with booking functionality
+  - `/my-alga` - Unified dashboard showing bookings, services, and favorites
+  - `/my-services` - Service provider view of jobs (bookings, in-progress, completed)
+- **Navigation**: Added "Services" and "My Alga" to main navigation (desktop + mobile)
+- **Role-Based Features**:
+  - Guests can book services for their stays
+  - Hosts can request maintenance/preparation services for properties
+  - Providers can register, manage availability, and track earnings
+  - Admin/Operators verify providers before approval
+- **UI/UX**: Ethiopian color palette (#f6f2ec, #8a6e4b, #86a38f), responsive design, empty states, filter controls
 - **Verification**: Service providers undergo ID verification similar to hosts
-- **Integration Points**: Booking confirmation page, host dashboard, admin panel
 
 ## External Dependencies
 
