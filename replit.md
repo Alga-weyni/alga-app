@@ -119,6 +119,10 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
   - Single "Start Application" CTA reveals form inline (no page navigation)
   - Form fields: Business Name, Service Category, City, Phone, Description
   - Success toast: "🎉 Application Received! Our team will review and get back within 24 hours."
+  - **Backend Integration**: POST `/api/service-provider-applications` endpoint
+    - Creates serviceProvider entry with verificationStatus="pending"
+    - Sets default pricing (hourly, 0.00 - updated during admin verification)
+    - Updates user's isServiceProvider flag
 - **Reduced Visual Density**: More breathing space, larger typography, cleaner gradient backgrounds
 - **Design Philosophy**: Emotionally inviting, professionally concise, reduces friction while maintaining Ethiopian warmth
 

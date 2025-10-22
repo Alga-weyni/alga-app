@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking } from "@shared/schema";
+import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from "@shared/schema";
 import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
@@ -14,6 +14,8 @@ import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from "./f
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -1932,6 +1934,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================
   // SERVICE PROVIDER ROUTES (Add-On Services)
   // ============================================
+
+  // Simplified service provider application endpoint
+  app.post('/api/service-provider-applications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { businessName, serviceType, city, description, phoneNumber } = req.body;
+
+      // Validate required fields
+      if (!businessName || !serviceType || !city || !description) {
+        return res.status(400).json({ 
+          message: "Missing required fields: businessName, serviceType, city, description" 
+        });
+      }
+
+      // Create service provider with defaults for pricing (can be updated later)
+      const providerData = {
+        userId,
+        businessName,
+        serviceType,
+        description,
+        city,
+        region: city, // Use city as region for simplicity
+        pricingModel: "hourly" as const, // Default pricing model
+        basePrice: "0.00", // Default - will be set during verification
+        verificationStatus: "pending",
+      };
+
+      const newProvider = await storage.createServiceProvider(providerData);
+
+      // Update user's isServiceProvider flag
+      await db
+        .update(users)
+        .set({ isServiceProvider: true })
+        .where(eq(users.id, userId));
+
+      res.status(201).json({
+        message: "Application submitted successfully",
+        provider: newProvider,
+      });
+    } catch (error) {
+      console.error("Error submitting service provider application:", error);
+      res.status(500).json({ message: "Failed to submit application" });
+    }
+  });
 
   // Create new service provider (requires authentication)
   app.post('/api/service-providers', isAuthenticated, async (req: any, res) => {
