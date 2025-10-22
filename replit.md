@@ -155,6 +155,33 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 - **UI/UX**: Ethiopian color palette (#f6f2ec, #8a6e4b, #86a38f), responsive design, empty states, filter controls
 - **Verification**: Service providers undergo ID verification similar to hosts
 
+### Quality & Reputation Layer - Service Reviews & Provider Badges (October 22, 2025)
+- **Database Schema**: Created `service_reviews` table with comprehensive rating system
+  - Overall rating (1-5 stars, required)
+  - 5 detailed categories: Professionalism, Quality, Timeliness, Communication, Value for Money
+  - Optional text comments for written feedback
+  - Linked to service bookings, providers, and reviewers
+- **Backend API**: Complete REST API for review management
+  - `POST /api/service-reviews` - Submit review after service completion
+  - `GET /api/service-providers/:id/reviews` - Fetch all reviews for a provider
+  - `GET /api/service-bookings/:id/review` - Check if booking has been reviewed
+  - Auto-calculation of provider rating averages after each review submission
+  - `hasReviewed` flag added to service bookings response
+- **Frontend Components**:
+  - `ServiceReviewForm` - Modal-based review form with 6 rating categories (overall + 5 detailed)
+  - `ServiceProviderReviews` - Display component showing rating summary, breakdown bars, and individual reviews
+  - `ProviderBadge` - Badge system with 3 achievement types:
+    - **Verified** (green) - ID verified by Alga
+    - **Top Rated** (amber) - 4.5+ star rating
+    - **Experienced** (blue) - 5+ jobs completed
+- **Integration Points**:
+  - Provider Details Page: Full reviews section with rating breakdown and badge showcase
+  - My Services Page: "Write a Review" prompt for completed bookings, "Already Reviewed" indicator
+  - Service Category Listings: Provider badges displayed on all provider cards
+  - Sorting: Providers can be sorted by rating (highest first)
+- **User Flow**: Guest books service → Service completed → Review prompt appears → Submit 6-category review → Provider rating auto-updates → Badge eligibility checked
+- **Quality Metrics**: Average ratings calculated across Professionalism, Quality, Timeliness, Communication, and Value dimensions
+
 ## External Dependencies
 
 - **Payment Processors**: Chapa (`chapa-nodejs`), Stripe, PayPal SDK, Telebirr.
