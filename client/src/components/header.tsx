@@ -49,18 +49,18 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
     },
   });
 
-  // Navigation items with emojis for universal recognition
+  // Navigation items with emojis for universal recognition - Airbnb-style minimal
   const navItems = [
-    { path: "/properties", icon: Home, emoji: "🏠", label: "Stay", ariaLabel: "Browse places to stay", testId: "stay" },
-    { path: "/services", icon: Wrench, emoji: "🔧", label: "Fix", ariaLabel: "Get help and services", testId: "fix" },
+    { path: "/properties", icon: Home, emoji: "🏠", label: "Stays", ariaLabel: "Browse places to stay", testId: "stays" },
+    { path: "/services", icon: Wrench, emoji: "🧰", label: "Services", ariaLabel: "Browse services and help", testId: "services" },
+    { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
     { path: "/support", icon: HelpCircle, emoji: "💬", label: "Help", ariaLabel: "Get support and help", testId: "help" },
-    ...(isAuthenticated ? [{ path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" }] : []),
   ];
 
   return (
-    <header className="bg-background shadow-sm sticky top-0 z-50 border-b border-border">
+    <header className="bg-[#F8F1E7] shadow-sm sticky top-0 z-50 border-b border-[#E5D9C8]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+        <div className="flex justify-between items-center h-16 sm:h-18">
           {/* Logo - Bigger & Friendlier */}
           <Link 
             href="/" 
@@ -154,9 +154,9 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
             </Sheet>
           )}
 
-          {/* Desktop Navigation - Larger Icon+Label Buttons */}
+          {/* Desktop Navigation - Airbnb-style Minimal */}
           {!hideNavigation && (
-            <nav className="hidden md:flex items-center gap-3" role="navigation" aria-label="Main navigation">
+            <nav className="hidden md:flex items-center gap-6 lg:gap-8" role="navigation" aria-label="Main navigation">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path || location.startsWith(`${item.path}/`);
@@ -164,18 +164,25 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={`
-                      flex flex-col items-center gap-1 px-6 py-3 rounded-2xl transition-all font-semibold min-w-[80px]
-                      ${isActive 
-                        ? 'bg-eth-brown text-white shadow-lg scale-105' 
-                        : 'hover:bg-cream-100 text-eth-brown/80 hover:text-eth-brown hover:scale-105'}
-                    `}
+                    className="group relative flex items-center gap-2 py-2 transition-all"
                     data-testid={`link-${item.testId}`}
                     aria-label={item.ariaLabel}
                     role="button"
                   >
-                    <span className="text-2xl" aria-hidden="true">{item.emoji}</span>
-                    <span className="text-sm">{item.label}</span>
+                    <span className="text-xl sm:text-2xl" aria-hidden="true">{item.emoji}</span>
+                    <span className={`
+                      text-sm sm:text-base font-medium transition-colors
+                      ${isActive 
+                        ? 'text-[#3C2313]' 
+                        : 'text-[#5a4a42] group-hover:text-[#3C2313]'}
+                    `}>
+                      {item.label}
+                    </span>
+                    {/* Smooth underline animation */}
+                    <span className={`
+                      absolute bottom-0 left-0 h-0.5 bg-[#3C2313] transition-all duration-300 ease-out
+                      ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}
+                    `} aria-hidden="true"></span>
                   </Link>
                 );
               })}
@@ -188,17 +195,17 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button 
-                    className="flex items-center space-x-3 bg-cream-100 rounded-full p-2 pr-5 hover:bg-cream-200 transition-colors cursor-pointer"
+                    className="flex items-center space-x-2 bg-white rounded-full p-1.5 pr-4 hover:shadow-md transition-all border border-[#E5D9C8] cursor-pointer"
                     aria-label="Open user menu"
                     role="button"
                   >
-                    <Avatar className="w-11 h-11 border-2 border-eth-brown/20">
+                    <Avatar className="w-9 h-9">
                       <AvatarImage src={user?.profileImageUrl || ""} alt={`${user?.firstName}'s profile`} />
-                      <AvatarFallback className="bg-eth-brown text-white font-semibold text-lg">
+                      <AvatarFallback className="bg-[#3C2313] text-white font-semibold text-sm">
                         {user?.firstName?.[0]}{user?.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-base font-semibold text-eth-brown hidden lg:block">
+                    <span className="text-sm font-medium text-[#3C2313] hidden lg:block">
                       {user?.firstName}
                     </span>
                   </button>
@@ -230,10 +237,10 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               </DropdownMenu>
             ) : (
               <Button 
-                size="lg"
+                size="default"
                 onClick={() => setAuthDialogOpen(true)}
                 data-testid="button-signin-header"
-                className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6 text-lg rounded-2xl shadow-md hover:shadow-lg transition-all font-semibold"
+                className="bg-[#3C2313] hover:bg-[#3C2313]/90 text-white px-6 py-2 text-sm rounded-full font-medium transition-all hover:shadow-md"
                 aria-label="Sign in to your account"
                 role="button"
               >
