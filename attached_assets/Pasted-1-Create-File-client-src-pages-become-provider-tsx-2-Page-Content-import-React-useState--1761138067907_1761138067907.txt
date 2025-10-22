@@ -1,0 +1,110 @@
+1️⃣ Create File:
+client/src/pages/become-provider.tsx
+
+2️⃣ Page Content:
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function BecomeProvider() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    serviceType: "",
+    experience: "",
+    description: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const response = await fetch("/api/service-providers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (response.ok) {
+      alert("✅ Application submitted successfully! Our team will review it.");
+      navigate("/services");
+    } else {
+      alert("⚠️ Something went wrong. Please try again later.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f6f2ec] flex justify-center py-10">
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-lg">
+        <h1 className="text-2xl font-semibold text-[#4a3b2b] mb-4 text-center">
+          Become a Service Provider
+        </h1>
+        <p className="text-sm text-[#7a6b58] mb-6 text-center">
+          Join Alga’s trusted network of service professionals and grow your business.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input name="name" placeholder="Full Name" value={form.name} onChange={handleChange} className="w-full p-3 border rounded" required />
+          <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} className="w-full p-3 border rounded" required />
+          <input name="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full p-3 border rounded" required />
+          
+          <select name="city" value={form.city} onChange={handleChange} className="w-full p-3 border rounded" required>
+            <option value="">Select City</option>
+            {[
+              "Addis Ababa","Bishoftu","Adama","Hawassa","Bahir Dar","Mekelle","Dire Dawa","Gondar",
+              "Lalibela","Axum","Jimma","Dessie","Shashemene","Arba Minch","Kombolcha","Hossana",
+              "Wolaita Sodo","Nekemte","Debre Birhan","Jijiga"
+            ].map((city) => (
+              <option key={city}>{city}</option>
+            ))}
+          </select>
+
+          <select name="serviceType" value={form.serviceType} onChange={handleChange} className="w-full p-3 border rounded" required>
+            <option value="">Select Service Type</option>
+            {[
+              "Cleaning","Laundry","Transport","Electrical","Plumbing","Driver",
+              "Meal Support","Local Guide","Photography","Landscaping","Welcome Pack"
+            ].map((service) => (
+              <option key={service}>{service}</option>
+            ))}
+          </select>
+
+          <textarea
+            name="description"
+            placeholder="Tell us about your experience or business"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full p-3 border rounded h-28"
+            required
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-[#8a6e4b] text-white py-3 rounded hover:bg-[#4a3b2b]"
+          >
+            Submit Application
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+3️⃣ Register Route:
+In App.tsx (or routes/index.tsx depending on structure)
+Add:
+<Route path="/become-provider" element={<BecomeProvider />} />
+
+4️⃣ Verify Navigation:
+Ensure the button “Apply as Provider” links to:
+<a href="/become-provider" className="btn-primary">Apply as Provider</a>
+
+5️⃣ Expected Result:
+- Button now opens full registration form.
+- Provider fills in contact info, city, service type, and experience.
+- Data sent securely to backend `/api/service-providers`.
+- Success message → Redirect back to Services page.
+- Page follows Alga’s color palette (cream, brown, green).
