@@ -80,9 +80,9 @@ export default function MyAlga() {
       visible: !!user,
     },
     {
-      icon: Settings,
-      title: "Settings",
-      link: "/settings",
+      icon: User,
+      title: "Profile & Settings",
+      link: "/profile",
       color: "from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900",
       iconColor: "text-gray-600 dark:text-gray-400",
       visible: true,
