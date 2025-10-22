@@ -1,18 +1,23 @@
-import { Link } from "wouter";
+// Unified Dashboard - Auto-detects role and shows appropriate content
+import { useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Home, 
   Wrench, 
-  CreditCard, 
-  MessageSquare, 
-  Star, 
-  Settings,
-  User,
-  Briefcase
+  Star,
+  Building2,
+  Calendar,
+  DollarSign,
+  Users,
+  FileCheck,
+  TrendingUp,
+  Settings as SettingsIcon
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Booking, ServiceBooking } from "@shared/schema";
+import { Button } from "@/components/ui/button";
+import type { Booking, ServiceBooking, Property } from "@shared/schema";
 
 interface DashboardCard {
   icon: React.ElementType;
@@ -20,105 +25,172 @@ interface DashboardCard {
   link: string;
   color: string;
   iconColor: string;
+  count?: number;
   visible: boolean;
 }
 
 export default function MyAlga() {
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   const firstName = user?.firstName || "Guest";
 
-  // Fetch user's bookings count
+  // Fetch data based on role
   const { data: bookings } = useQuery<Booking[]>({
     queryKey: ["/api/bookings"],
-    enabled: !!user,
+    enabled: !!user && (user.role === 'guest' || user.role === 'host'),
   });
 
-  // Fetch user's service bookings count
   const { data: serviceBookings } = useQuery<ServiceBooking[]>({
     queryKey: ["/api/my-service-bookings"],
     enabled: !!user,
   });
 
-  const cards: DashboardCard[] = [
-    {
-      icon: Home,
-      title: "My Stays",
-      link: "/bookings",
-      color: "from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900",
-      iconColor: "text-blue-600 dark:text-blue-400",
-      visible: !!user,
-    },
-    {
-      icon: Wrench,
-      title: "My Services",
-      link: "/my-services",
-      color: "from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900",
-      iconColor: "text-orange-600 dark:text-orange-400",
-      visible: !!user,
-    },
-    {
-      icon: Briefcase,
-      title: "Provider Dashboard",
-      link: "/provider/dashboard",
-      color: "from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900",
-      iconColor: "text-teal-600 dark:text-teal-400",
-      visible: !!user?.isServiceProvider,
-    },
-    {
-      icon: CreditCard,
-      title: "Payments & Wallet",
-      link: "/payments",
-      color: "from-green-50 to-green-100 dark:from-green-950 dark:to-green-900",
-      iconColor: "text-green-600 dark:text-green-400",
-      visible: !!user,
-    },
-    {
-      icon: MessageSquare,
-      title: "Messages",
-      link: "/messages",
-      color: "from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900",
-      iconColor: "text-purple-600 dark:text-purple-400",
-      visible: !!user,
-    },
-    {
-      icon: Star,
-      title: "My Reviews",
-      link: "/my-reviews",
-      color: "from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900",
-      iconColor: "text-yellow-600 dark:text-yellow-400",
-      visible: !!user,
-    },
-    {
-      icon: User,
-      title: "Profile & Settings",
-      link: "/profile",
-      color: "from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900",
-      iconColor: "text-gray-600 dark:text-gray-400",
-      visible: true,
-    },
-  ];
+  const { data: properties } = useQuery<Property[]>({
+    queryKey: ["/api/host/properties"],
+    enabled: !!user && user.role === 'host',
+  });
 
-  const visibleCards = cards.filter((card) => card.visible);
+  // Auto-redirect admin/operator to their dashboards
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user?.role === 'operator') {
+      navigate('/operator/dashboard');
+    }
+  }, [user?.role, navigate]);
 
-  const getCardBadge = (title: string) => {
-    if (title === "My Stays" && bookings && bookings.length > 0) {
-      return bookings.length;
+  // Define cards based on user role
+  const getCardsForRole = (): DashboardCard[] => {
+    const role = user?.role || 'guest';
+    
+    if (role === 'host') {
+      return [
+        {
+          icon: Building2,
+          title: "My Properties",
+          link: "/host/dashboard",
+          color: "from-blue-50 to-blue-100",
+          iconColor: "text-blue-600",
+          count: properties?.length || 0,
+          visible: true,
+        },
+        {
+          icon: Calendar,
+          title: "My Trips",
+          link: "/bookings",
+          color: "from-green-50 to-green-100",
+          iconColor: "text-green-600",
+          count: bookings?.length || 0,
+          visible: true,
+        },
+        {
+          icon: DollarSign,
+          title: "Earnings",
+          link: "/host/dashboard",
+          color: "from-yellow-50 to-yellow-100",
+          iconColor: "text-yellow-600",
+          visible: true,
+        },
+        {
+          icon: Star,
+          title: "Reviews",
+          link: "/host/dashboard",
+          color: "from-purple-50 to-purple-100",
+          iconColor: "text-purple-600",
+          visible: true,
+        },
+      ];
     }
-    if (title === "My Services" && serviceBookings && serviceBookings.length > 0) {
-      return serviceBookings.length;
+
+    if (user?.isServiceProvider) {
+      return [
+        {
+          icon: Home,
+          title: "My Trips",
+          link: "/bookings",
+          color: "from-blue-50 to-blue-100",
+          iconColor: "text-blue-600",
+          count: bookings?.length || 0,
+          visible: true,
+        },
+        {
+          icon: Wrench,
+          title: "My Services",
+          link: "/provider/dashboard",
+          color: "from-orange-50 to-orange-100",
+          iconColor: "text-orange-600",
+          count: serviceBookings?.length || 0,
+          visible: true,
+        },
+        {
+          icon: DollarSign,
+          title: "Earnings",
+          link: "/provider/dashboard",
+          color: "from-green-50 to-green-100",
+          iconColor: "text-green-600",
+          visible: true,
+        },
+        {
+          icon: Star,
+          title: "Reviews",
+          link: "/provider/dashboard",
+          color: "from-yellow-50 to-yellow-100",
+          iconColor: "text-yellow-600",
+          visible: true,
+        },
+      ];
     }
-    return null;
+
+    // Default: guest role
+    return [
+      {
+        icon: Home,
+        title: "My Trips",
+        link: "/bookings",
+        color: "from-blue-50 to-blue-100",
+        iconColor: "text-blue-600",
+        count: bookings?.length || 0,
+        visible: true,
+      },
+      {
+        icon: Wrench,
+        title: "My Services",
+        link: "/my-services",
+        color: "from-orange-50 to-orange-100",
+        iconColor: "text-orange-600",
+        count: serviceBookings?.length || 0,
+        visible: true,
+      },
+      {
+        icon: Star,
+        title: "Favorites",
+        link: "/favorites",
+        color: "from-red-50 to-red-100",
+        iconColor: "text-red-600",
+        visible: true,
+      },
+      {
+        icon: SettingsIcon,
+        title: "Settings",
+        link: "/profile",
+        color: "from-gray-50 to-gray-100",
+        iconColor: "text-gray-600",
+        visible: true,
+      },
+    ];
   };
+
+  const cards = getCardsForRole();
 
   return (
     <div className="min-h-screen" style={{ background: "#f6f2ec" }}>
-      {/* Header */}
+      {/* Warm Greeting Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center gap-4">
-            {/* Avatar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex items-center gap-4 sm:gap-6">
+            {/* Avatar - Bigger & Friendlier */}
             <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-white shadow-md"
               style={{ background: "#8a6e4b" }}
             >
               {firstName[0].toUpperCase()}
@@ -126,76 +198,113 @@ export default function MyAlga() {
             
             {/* Greeting */}
             <div>
-              <h1 className="text-3xl font-bold mb-1" style={{ color: "#2d1405" }}>
-                Hello, {firstName} — Welcome back to My Alga!
+              <h1 className="text-2xl sm:text-4xl font-bold mb-1" style={{ color: "#2d1405" }}>
+                Hello, {firstName}! 👋
               </h1>
-              <p className="text-lg" style={{ color: "#5a4a42" }}>
-                Your home for stays, services, and memories.
+              <p className="text-base sm:text-xl" style={{ color: "#5a4a42" }}>
+                Welcome back to your dashboard
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Dashboard Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visibleCards.map((card, index) => {
-            const badge = getCardBadge(card.title);
-            
-            return (
-              <Link key={index} href={card.link}>
-                <Card 
-                  className={`h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer border-0 bg-gradient-to-br ${card.color}`}
-                  data-testid={`card-${card.title.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <CardContent className="p-8 text-center">
-                    <div className="relative inline-block mb-4">
-                      <div className={`p-4 rounded-2xl bg-white/80 dark:bg-black/20 ${card.iconColor}`}>
-                        <card.icon className="w-10 h-10" />
-                      </div>
-                      {badge && (
-                        <div 
-                          className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                          style={{ background: "#2d1405" }}
-                        >
-                          {badge}
-                        </div>
+      {/* Dashboard Grid - Bigger Cards */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {cards.map((card, index) => (
+            <Link key={index} href={card.link}>
+              <Card 
+                className={`h-full transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer border-0 bg-gradient-to-br ${card.color}`}
+                data-testid={`card-${card.title.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <CardContent className="p-8 sm:p-10">
+                  <div className="flex items-center gap-6">
+                    {/* Icon - Bigger */}
+                    <div className={`p-5 rounded-2xl bg-white/80 ${card.iconColor} shadow-md`}>
+                      <card.icon className="w-10 h-10 sm:w-12 sm:h-12" />
+                    </div>
+                    
+                    {/* Title & Count */}
+                    <div className="flex-1">
+                      <h3 className="font-bold text-xl sm:text-2xl mb-1" style={{ color: "#2d1405" }}>
+                        {card.title}
+                      </h3>
+                      {card.count !== undefined && (
+                        <p className="text-3xl sm:text-4xl font-bold" style={{ color: "#8a6e4b" }}>
+                          {card.count}
+                        </p>
                       )}
                     </div>
-                    <h3 className="font-semibold text-xl" style={{ color: "#2d1405" }}>
-                      {card.title}
-                    </h3>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/properties">
-            <div 
-              className="p-6 rounded-xl transition-all hover:shadow-lg cursor-pointer"
-              style={{ background: "#86a38f" }}
-              data-testid="button-browse-properties"
-            >
-              <h3 className="text-xl font-bold text-white mb-2">Browse Properties</h3>
-              <p className="text-white/90">Discover unique stays across Ethiopia</p>
-            </div>
-          </Link>
+        {/* Quick Actions - Bigger Buttons */}
+        <div className="mt-12 space-y-4">
+          <h2 className="text-2xl font-bold mb-6" style={{ color: "#2d1405" }}>
+            Explore More
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link href="/properties">
+              <Button
+                size="lg"
+                className="w-full h-20 text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                style={{ background: "#86a38f" }}
+                data-testid="button-browse-properties"
+              >
+                <Home className="mr-3 h-6 w-6" />
+                Find a Place to Stay
+              </Button>
+            </Link>
 
-          <Link href="/services">
-            <div 
-              className="p-6 rounded-xl transition-all hover:shadow-lg cursor-pointer"
-              style={{ background: "#2d1405" }}
-              data-testid="button-browse-services"
-            >
-              <h3 className="text-xl font-bold text-white mb-2">Browse Services</h3>
-              <p className="text-white/90">Find trusted local service providers</p>
+            <Link href="/services">
+              <Button
+                size="lg"
+                className="w-full h-20 text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                style={{ background: "#8a6e4b" }}
+                data-testid="button-browse-services"
+              >
+                <Wrench className="mr-3 h-6 w-6" />
+                Get Help & Services
+              </Button>
+            </Link>
+          </div>
+
+          {/* Become Host/Provider CTAs - Only for guests */}
+          {user?.role === 'guest' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <Link href="/become-host">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-16 text-lg rounded-2xl border-2 hover:shadow-lg transition-all"
+                  style={{ borderColor: "#2d1405", color: "#2d1405" }}
+                  data-testid="button-become-host"
+                >
+                  <Building2 className="mr-3 h-5 w-5" />
+                  List Your Property
+                </Button>
+              </Link>
+
+              <Link href="/become-provider">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-16 text-lg rounded-2xl border-2 hover:shadow-lg transition-all"
+                  style={{ borderColor: "#2d1405", color: "#2d1405" }}
+                  data-testid="button-become-provider"
+                >
+                  <Wrench className="mr-3 h-5 w-5" />
+                  Offer a Service
+                </Button>
+              </Link>
             </div>
-          </Link>
+          )}
         </div>
       </div>
     </div>
