@@ -890,6 +890,195 @@ export class DatabaseStorage implements IStorage {
         )
       );
   }
+
+  // Service provider operations
+  async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
+    const [newProvider] = await db
+      .insert(serviceProviders)
+      .values(provider)
+      .returning();
+    
+    await db
+      .update(users)
+      .set({ isServiceProvider: true })
+      .where(eq(users.id, provider.userId));
+    
+    return newProvider;
+  }
+
+  async getServiceProvider(id: number): Promise<ServiceProvider | undefined> {
+    const [provider] = await db
+      .select()
+      .from(serviceProviders)
+      .where(eq(serviceProviders.id, id));
+    return provider;
+  }
+
+  async getServiceProvidersByUser(userId: string): Promise<ServiceProvider[]> {
+    return await db
+      .select()
+      .from(serviceProviders)
+      .where(eq(serviceProviders.userId, userId))
+      .orderBy(desc(serviceProviders.createdAt));
+  }
+
+  async getAllServiceProviders(filters?: {
+    city?: string;
+    serviceType?: string;
+    verificationStatus?: string;
+  }): Promise<ServiceProvider[]> {
+    const conditions = [eq(serviceProviders.isActive, true)];
+    
+    if (filters?.city) {
+      conditions.push(eq(serviceProviders.city, filters.city));
+    }
+    if (filters?.serviceType) {
+      conditions.push(eq(serviceProviders.serviceType, filters.serviceType));
+    }
+    if (filters?.verificationStatus) {
+      conditions.push(eq(serviceProviders.verificationStatus, filters.verificationStatus));
+    }
+    
+    return await db
+      .select()
+      .from(serviceProviders)
+      .where(and(...conditions))
+      .orderBy(desc(serviceProviders.rating), desc(serviceProviders.totalJobsCompleted));
+  }
+
+  async updateServiceProvider(id: number, updates: Partial<InsertServiceProvider>): Promise<ServiceProvider> {
+    const [updatedProvider] = await db
+      .update(serviceProviders)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(serviceProviders.id, id))
+      .returning();
+    return updatedProvider;
+  }
+
+  async verifyServiceProvider(providerId: number, status: string, verifierId: string, rejectionReason?: string): Promise<ServiceProvider> {
+    const [updatedProvider] = await db
+      .update(serviceProviders)
+      .set({
+        verificationStatus: status,
+        verifiedBy: verifierId,
+        verifiedAt: new Date(),
+        rejectionReason: rejectionReason || null,
+        updatedAt: new Date()
+      })
+      .where(eq(serviceProviders.id, providerId))
+      .returning();
+    return updatedProvider;
+  }
+
+  async updateServiceProviderRating(providerId: number): Promise<void> {
+    const completedBookings = await db
+      .select()
+      .from(serviceBookings)
+      .where(
+        and(
+          eq(serviceBookings.serviceProviderId, providerId),
+          eq(serviceBookings.status, 'completed')
+        )
+      );
+
+    const totalJobs = completedBookings.length;
+    
+    await db
+      .update(serviceProviders)
+      .set({
+        totalJobsCompleted: totalJobs,
+        updatedAt: new Date()
+      })
+      .where(eq(serviceProviders.id, providerId));
+  }
+
+  // Service booking operations
+  async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
+    const algaCommission = parseFloat(booking.totalPrice) * 0.15;
+    const providerPayout = parseFloat(booking.totalPrice) - algaCommission;
+    
+    const [newBooking] = await db
+      .insert(serviceBookings)
+      .values({
+        ...booking,
+        algaCommission: algaCommission.toFixed(2),
+        providerPayout: providerPayout.toFixed(2),
+      })
+      .returning();
+    return newBooking;
+  }
+
+  async getServiceBooking(id: number): Promise<ServiceBooking | undefined> {
+    const [booking] = await db
+      .select()
+      .from(serviceBookings)
+      .where(eq(serviceBookings.id, id));
+    return booking;
+  }
+
+  async getServiceBookingsByGuest(guestId: string): Promise<ServiceBooking[]> {
+    return await db
+      .select()
+      .from(serviceBookings)
+      .where(eq(serviceBookings.guestId, guestId))
+      .orderBy(desc(serviceBookings.createdAt));
+  }
+
+  async getServiceBookingsByHost(hostId: string): Promise<ServiceBooking[]> {
+    return await db
+      .select()
+      .from(serviceBookings)
+      .where(eq(serviceBookings.hostId, hostId))
+      .orderBy(desc(serviceBookings.createdAt));
+  }
+
+  async getServiceBookingsByProvider(providerId: number): Promise<ServiceBooking[]> {
+    return await db
+      .select()
+      .from(serviceBookings)
+      .where(eq(serviceBookings.serviceProviderId, providerId))
+      .orderBy(desc(serviceBookings.createdAt));
+  }
+
+  async updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking> {
+    const [updatedBooking] = await db
+      .update(serviceBookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(serviceBookings.id, id))
+      .returning();
+    return updatedBooking;
+  }
+
+  async updateServiceBookingPayment(id: number, paymentStatus: string, paymentRef?: string): Promise<ServiceBooking> {
+    const [updatedBooking] = await db
+      .update(serviceBookings)
+      .set({ 
+        paymentStatus, 
+        paymentRef: paymentRef || null,
+        updatedAt: new Date() 
+      })
+      .where(eq(serviceBookings.id, id))
+      .returning();
+    return updatedBooking;
+  }
+
+  async completeServiceBooking(id: number): Promise<ServiceBooking> {
+    const [updatedBooking] = await db
+      .update(serviceBookings)
+      .set({ 
+        status: 'completed',
+        payoutStatus: 'processing',
+        updatedAt: new Date() 
+      })
+      .where(eq(serviceBookings.id, id))
+      .returning();
+    
+    if (updatedBooking) {
+      await this.updateServiceProviderRating(updatedBooking.serviceProviderId);
+    }
+    
+    return updatedBooking;
+  }
 }
 
 export const storage = new DatabaseStorage();
