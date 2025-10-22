@@ -65,7 +65,7 @@ export default function Home() {
                     </span>
                   </p>
                   
-                  <Link href="/properties">
+                  <Link to="/properties">
                     <Button 
                       className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all hover:shadow-md"
                       data-testid="button-explore-map"
@@ -138,7 +138,7 @@ export default function Home() {
                 <h3 className="text-3xl md:text-4xl font-bold text-[#2d1405] mb-2" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>Featured Stays</h3>
                 <p className="text-sm text-[#5a4a42]">Handpicked for you</p>
               </div>
-              <Link href="/properties">
+              <Link to="/properties">
                 <Button variant="outline" className="border-[#d4c4b8] text-[#2d1405] hover:bg-[#2d1405] hover:text-white hover:border-[#2d1405] transition-all">View All</Button>
               </Link>
             </div>

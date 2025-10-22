@@ -122,12 +122,12 @@ export default function BookingSuccess() {
               )}
 
               <div className="flex gap-4 justify-center pt-4">
-                <Link href="/">
+                <Link to="/">
                   <Button variant="outline" className="border-eth-brown text-eth-brown hover:bg-eth-light-tan" data-testid="link-home">
                     Back to Home
                   </Button>
                 </Link>
-                <Link href="/bookings">
+                <Link to="/bookings">
                   <Button className="bg-eth-green hover:bg-eth-green/90" data-testid="link-my-bookings">
                     My Bookings
                   </Button>

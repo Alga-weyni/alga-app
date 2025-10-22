@@ -30,8 +30,8 @@ export default function Footer() {
           <div>
             <h5 className="font-bold text-white mb-4 text-sm">For Guests</h5>
             <ul className="space-y-2.5 text-sm">
-              <li><Link href="/properties" className="text-white/70 hover:text-white transition-colors">Browse Stays</Link></li>
-              <li><Link href="/properties?city=Addis%20Ababa" className="text-white/70 hover:text-white transition-colors">Popular Destinations</Link></li>
+              <li><Link to="/properties" className="text-white/70 hover:text-white transition-colors">Browse Stays</Link></li>
+              <li><Link to="/properties?city=Addis%20Ababa" className="text-white/70 hover:text-white transition-colors">Popular Destinations</Link></li>
               <li><a href="#" className="text-white/70 hover:text-white transition-colors">Travel Guide</a></li>
             </ul>
           </div>
@@ -40,7 +40,7 @@ export default function Footer() {
           <div>
             <h5 className="font-bold text-white mb-4 text-sm">For Hosts</h5>
             <ul className="space-y-2.5 text-sm">
-              <li><Link href="/become-host" className="text-white/70 hover:text-white transition-colors">List Your Property</Link></li>
+              <li><Link to="/become-host" className="text-white/70 hover:text-white transition-colors">List Your Property</Link></li>
               <li><a href="#" className="text-white/70 hover:text-white transition-colors">Host Resources</a></li>
               <li><a href="#" className="text-white/70 hover:text-white transition-colors">Community & Support</a></li>
             </ul>

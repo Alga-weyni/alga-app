@@ -67,7 +67,7 @@ export default function MyServices() {
       {/* Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/my-alga">
+          <Link to="/my-alga">
             <Button variant="ghost" className="mb-4" data-testid="button-back-my-alga">
               <ArrowLeft className="w-4 h-4 mr-2" />
               My Alga
@@ -93,7 +93,7 @@ export default function MyServices() {
               <p className="mb-6" style={{ color: "#5a4a42" }}>
                 You haven't booked any services yet.
               </p>
-              <Link href="/services">
+              <Link to="/services">
                 <Button data-testid="button-browse-services">
                   Browse Services
                 </Button>
@@ -201,7 +201,7 @@ export default function MyServices() {
                 <p className="text-white/90 mb-4">
                   Browse our marketplace for cleaning, repairs, transport, and more
                 </p>
-                <Link href="/services">
+                <Link to="/services">
                   <Button 
                     variant="secondary"
                     className="bg-white hover:bg-gray-100"

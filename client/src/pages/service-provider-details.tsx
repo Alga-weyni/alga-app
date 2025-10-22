@@ -106,7 +106,7 @@ export default function ServiceProviderDetails() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>Provider Not Found</h2>
           <p className="mb-4" style={{ color: "#5a4a42" }}>This service provider doesn't exist or has been removed.</p>
-          <Link href="/services">
+          <Link to="/services">
             <Button>Browse Services</Button>
           </Link>
         </div>

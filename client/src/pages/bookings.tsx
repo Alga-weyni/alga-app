@@ -100,7 +100,7 @@ export default function Bookings() {
                 Start exploring and book your first stay!
               </p>
               <Button asChild>
-                <Link href="/properties" data-testid="button-browse-properties">
+                <Link to="/properties" data-testid="button-browse-properties">
                   Browse Properties
                 </Link>
               </Button>

@@ -97,7 +97,7 @@ export default function DiscoverPage() {
                   VITE_GOOGLE_MAPS_KEY=your_api_key_here
                 </code>
               </div>
-              <Link href="/search">
+              <Link to="/search">
                 <button className="mt-6 bg-eth-orange text-white px-6 py-2 rounded-md hover:bg-eth-orange/90">
                   Use Search Instead
                 </button>

@@ -60,7 +60,7 @@ export default function Profile() {
       {/* Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/my-alga">
+          <Link to="/my-alga">
             <Button variant="ghost" className="mb-4" data-testid="button-back-my-alga">
               <ArrowLeft className="w-4 h-4 mr-2" />
               My Alga

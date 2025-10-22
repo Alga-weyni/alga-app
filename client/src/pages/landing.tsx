@@ -39,7 +39,7 @@ export default function Landing() {
         <header className="bg-white border-b border-[#e5ddd5] sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:pl-6 lg:pr-12">
             <div className="flex justify-between items-center h-16">
-              <Link href="/" className="flex items-center space-x-3 cursor-pointer">
+              <Link to="/" className="flex items-center space-x-3 cursor-pointer">
                 <div className="w-10 h-10 bg-[#2d1405] rounded-lg flex items-center justify-center">
                   <Home className="text-white text-base" />
                 </div>
@@ -49,10 +49,10 @@ export default function Landing() {
               </Link>
 
               <nav className="hidden md:flex items-center space-x-8">
-                <Link href="/" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                <Link to="/" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
                   Home
                 </Link>
-                <Link href="/properties" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
+                <Link to="/properties" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
                   Properties
                 </Link>
                 <a href="#about" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">

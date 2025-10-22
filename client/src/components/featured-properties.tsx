@@ -95,7 +95,7 @@ export function FeaturedProperties() {
         </div>
 
         <div className="text-center">
-          <Link href="/properties">
+          <Link to="/properties">
             <Button 
               className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6 text-lg"
               data-testid="button-explore-all"
