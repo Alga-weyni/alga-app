@@ -135,6 +135,7 @@ export default function Landing() {
                     src={algaMobileHero}
                     alt="Alga Mobile App"
                     className="w-full h-auto drop-shadow-2xl animate-float"
+                    loading="lazy"
                     data-testid="img-hero-phone-mockup"
                   />
                   {/* Decorative glow effect */}

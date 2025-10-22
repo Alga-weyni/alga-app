@@ -336,6 +336,7 @@ export default function PropertyDetails() {
               src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
               alt={property.title}
               className="w-full h-64 sm:h-96 lg:h-[500px] object-cover rounded-lg sm:rounded-xl"
+              loading="lazy"
               data-testid="img-property-main"
             />
           </div>
@@ -357,6 +358,7 @@ export default function PropertyDetails() {
                       src={image}
                       alt={`${property.title} ${index + 1}`}
                       className="w-full h-32 sm:h-40 object-cover"
+                      loading="lazy"
                       data-testid={`img-property-${index}`}
                     />
                     {index === 0 && (

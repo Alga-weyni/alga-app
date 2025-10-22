@@ -45,6 +45,7 @@ export function FeaturedProperties() {
                     src={property.images?.[0] || "/api/placeholder/800/600"}
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
                   <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
