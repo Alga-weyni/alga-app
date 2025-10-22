@@ -1,6 +1,7 @@
 // Unified Dashboard - Auto-detects role and shows appropriate content
 import { useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useNavigate } from "react-router-dom";
+import Header from "@/components/header";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -31,7 +32,7 @@ interface DashboardCard {
 
 export default function MyAlga() {
   const { user } = useAuth();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const firstName = user?.firstName || "Guest";
 
   // Fetch data based on role
@@ -219,6 +220,8 @@ export default function MyAlga() {
 
   return (
     <div className="min-h-screen" style={{ background: "#f6f2ec" }}>
+      <Header />
+      
       {/* Warm Greeting Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -248,7 +251,7 @@ export default function MyAlga() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {cards.map((card, index) => (
-            <Link key={index} href={card.link}>
+            <Link key={index} to={card.link}>
               <Card 
                 className={`h-full transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer border-0 bg-gradient-to-br ${card.color}`}
                 data-testid={`card-${card.title.toLowerCase().replace(/\s+/g, '-')}`}

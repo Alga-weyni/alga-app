@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
+import Header from "@/components/header";
 import { 
   Sparkles, 
   Wrench, 
@@ -110,6 +111,8 @@ export default function Services() {
 
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
+      <Header />
+      
       {/* Contextual Tooltip */}
       {showTooltip && (
         <ContextualTooltip
@@ -156,7 +159,7 @@ export default function Services() {
           {serviceCategories.map((service) => (
             <Link 
               key={service.type} 
-              href={`/services/${service.type}`}
+              to={`/services/${service.type}`}
               data-testid={`link-service-${service.type}`}
             >
               <Card 
