@@ -18,6 +18,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
+import { imageProcessor } from "./imageProcessor";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -122,19 +123,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload endpoint (protected - requires authentication)
-  app.post('/api/upload/property-images', isAuthenticated, upload.array('images', 20), (req: any, res) => {
+  // Now with auto-compression and watermark overlay!
+  app.post('/api/upload/property-images', isAuthenticated, upload.array('images', 20), async (req: any, res) => {
     try {
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: 'No files uploaded' });
       }
 
       const files = req.files as Express.Multer.File[];
-      const imageUrls = files.map(file => `/uploads/properties/${file.filename}`);
+      const processedFiles: Array<{ url: string; stats: any }> = [];
+
+      // Process each image with compression and watermark
+      for (const file of files) {
+        const originalBuffer = fs.readFileSync(file.path);
+        const originalSize = originalBuffer.length;
+
+        // Compress and add watermark
+        const compressedBuffer = await imageProcessor.processImage(originalBuffer, {
+          maxWidth: 1280,
+          maxHeight: 720,
+          quality: 70,
+          addWatermark: true,
+          watermarkOpacity: 0.25,
+        });
+
+        // Overwrite original file with compressed version
+        fs.writeFileSync(file.path, compressedBuffer);
+
+        const stats = imageProcessor.getCompressionStats(originalSize, compressedBuffer.length);
+        processedFiles.push({
+          url: `/uploads/properties/${file.filename}`,
+          stats,
+        });
+      }
 
       res.json({
-        message: 'Files uploaded successfully',
-        urls: imageUrls,
-        count: files.length
+        message: 'Files uploaded and optimized successfully',
+        urls: processedFiles.map((f) => f.url),
+        count: files.length,
+        optimization: {
+          avgReduction: Math.round(
+            processedFiles.reduce((sum, f) => sum + f.stats.reductionPercent, 0) / files.length
+          ),
+          totalSavings: processedFiles.reduce((sum, f) => sum + f.stats.savings, 0),
+        },
       });
     } catch (error: any) {
       console.error('Upload error:', error);
