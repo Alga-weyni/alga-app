@@ -19,10 +19,11 @@ import {
   Zap,
   Sparkles,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -45,16 +46,33 @@ export default function BecomeProvider() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [, setLocation] = useLocation();
+  const searchParams = useSearch();
   const { toast } = useToast();
+
+  // Parse category from URL query parameter
+  const urlParams = new URLSearchParams(searchParams);
+  const categoryFromUrl = urlParams.get('category');
+  const selectedCategory = SERVICE_CATEGORIES.find(cat => cat.id === categoryFromUrl);
 
   // Form state
   const [formData, setFormData] = useState({
     businessName: "",
-    serviceType: "",
+    serviceType: categoryFromUrl || "",
     city: "",
     description: "",
     phoneNumber: user?.phoneNumber || "",
   });
+
+  // Auto-show form if category is selected from URL
+  useEffect(() => {
+    if (categoryFromUrl && user && user.idVerified) {
+      setFormData(prev => ({ ...prev, serviceType: categoryFromUrl }));
+      setShowApplicationForm(true);
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 300);
+    }
+  }, [categoryFromUrl, user]);
 
   // Update phone when user changes
   useEffect(() => {
@@ -92,6 +110,11 @@ export default function BecomeProvider() {
         description: "",
         phoneNumber: user?.phoneNumber || "",
       });
+      
+      // Redirect to My Services after 3 seconds
+      setTimeout(() => {
+        setLocation("/my-services");
+      }, 3000);
     },
     onError: () => {
       toast({
@@ -117,6 +140,21 @@ export default function BecomeProvider() {
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }, 100);
+    }
+  };
+
+  const handleServiceClick = (serviceId: string) => {
+    if (!user) {
+      setAuthDialogOpen(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (!user.idVerified) {
+      toast({
+        title: "ID Verification Required",
+        description: "Please verify your identity first.",
+      });
+      setLocation("/scan-id");
+    } else {
+      setLocation(`/become-provider?category=${serviceId}`);
     }
   };
 
@@ -223,6 +261,7 @@ export default function BecomeProvider() {
               {SERVICE_CATEGORIES.map((service) => (
                 <Card 
                   key={service.id} 
+                  onClick={() => handleServiceClick(service.id)}
                   className="bg-white hover:shadow-lg transition-all duration-200 border-0 hover:scale-105 cursor-pointer"
                   data-testid={`card-service-${service.id}`}
                 >
@@ -244,11 +283,32 @@ export default function BecomeProvider() {
               <Card className="bg-white shadow-2xl border-0">
                 <CardContent className="p-10">
                   <div className="text-center mb-8">
-                    <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+                    {selectedCategory && (
+                      <div className="text-5xl mb-4">{selectedCategory.icon}</div>
+                    )}
+                    {!selectedCategory && (
+                      <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+                    )}
                     <h2 className="text-3xl font-bold text-eth-brown mb-2" style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}>
-                      Service Provider Application
+                      {selectedCategory 
+                        ? `Apply to offer ${selectedCategory.name} Services`
+                        : 'Service Provider Application'
+                      }
                     </h2>
                     <p className="text-eth-brown/70">Tell us about your business</p>
+                    
+                    {/* Back link to choose different service */}
+                    {selectedCategory && (
+                      <button
+                        type="button"
+                        onClick={() => setLocation('/become-provider')}
+                        className="inline-flex items-center gap-1 text-sm text-eth-brown/70 hover:text-eth-brown mt-3 transition-colors"
+                        data-testid="link-choose-different-service"
+                      >
+                        <ArrowLeft className="h-3 w-3" />
+                        Choose a different service
+                      </button>
+                    )}
                   </div>
 
                   <form onSubmit={handleSubmitApplication} className="space-y-6">
@@ -271,22 +331,33 @@ export default function BecomeProvider() {
                       <Label htmlFor="serviceType" className="text-eth-brown font-medium">
                         Service Category *
                       </Label>
-                      <Select 
-                        value={formData.serviceType} 
-                        onValueChange={(value) => setFormData({ ...formData, serviceType: value })}
-                        required
-                      >
-                        <SelectTrigger className="mt-2" data-testid="select-service-type">
-                          <SelectValue placeholder="Select a service category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SERVICE_CATEGORIES.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              {cat.icon} {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {selectedCategory ? (
+                        <div 
+                          className="mt-2 flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm"
+                          data-testid="text-locked-service-type"
+                        >
+                          <span className="text-eth-brown font-medium">
+                            {selectedCategory.icon} {selectedCategory.name}
+                          </span>
+                        </div>
+                      ) : (
+                        <Select 
+                          value={formData.serviceType} 
+                          onValueChange={(value) => setFormData({ ...formData, serviceType: value })}
+                          required
+                        >
+                          <SelectTrigger className="mt-2" data-testid="select-service-type">
+                            <SelectValue placeholder="Select a service category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SERVICE_CATEGORIES.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.icon} {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
 
                     <div>
