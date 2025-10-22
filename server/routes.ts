@@ -868,13 +868,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seed database endpoint (production setup - uses Bearer token auth)
-  // Usage: POST /api/admin/seed-database with Authorization: Bearer YOUR_ADMIN_SEED_KEY
-  app.post('/api/admin/seed-database', async (req: any, res) => {
-    const seedHandler = (await import('./api/seed.js')).default;
-    return seedHandler(req, res);
-  });
-
   // Document verification routes
   app.post('/api/verification-documents/upload', isAuthenticated, async (req: any, res) => {
     try {
