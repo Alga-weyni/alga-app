@@ -29,6 +29,7 @@ import ServiceCategory from "@/pages/service-category";
 import ServiceProviderDetails from "@/pages/service-provider-details";
 import MyAlga from "@/pages/my-alga";
 import MyServices from "@/pages/my-services";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -63,6 +64,7 @@ function Router() {
           <Route path="/favorites" component={Favorites} />
           <Route path="/my-alga" component={MyAlga} />
           <Route path="/my-services" component={MyServices} />
+          <Route path="/profile" component={Profile} />
           <Route path="/host/dashboard" component={HostDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/operator/dashboard" component={OperatorDashboard} />
