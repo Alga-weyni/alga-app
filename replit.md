@@ -74,8 +74,19 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 - **Universal ID Verification System**: Required for all users. Ethiopian citizens use QR code scanning, foreign visitors use photo upload with OCR (passport, driver's license, national ID). Extracts name, DOB, ID number, expiry, and document type. Operator dashboard for manual review and approval.
 - **Payment Gateway**: Integration with Stripe, Telebirr, and PayPal. Includes success/cancellation pages and webhooks.
 - **Commission & Tax System (ERCA Compliant)**: Automated calculation of 12% Alga commission, 15% VAT on commission, and 2% withholding tax from host earnings. Transparent display in host dashboard and admin financial reports. Automated ERCA-compliant invoice generation in PDF format.
+- **Add-On Services Marketplace**: Local service providers (cleaners, laundry, airport pickup, electricians, plumbers, drivers, welcome packs) integrated into booking flow. 15% Alga commission, 85% provider payout. Service provider verification system with ID documents. Available during booking confirmation and in host dashboard for property preparation.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
+
+## Recent Changes (October 2025)
+
+### Add-On Services Feature
+- **Database Schema**: Created `service_providers` and `service_bookings` tables with full relations
+- **Backend API**: Complete REST API for service provider registration, booking, and admin verification
+- **Revenue Model**: Automated 15% commission calculation, 85% provider payout tracking
+- **Service Types**: Cleaning, laundry, airport pickup/drop-off, electrical, plumbing, driver, welcome packs
+- **Verification**: Service providers undergo ID verification similar to hosts
+- **Integration Points**: Booking confirmation page, host dashboard, admin panel
 
 ## External Dependencies
 
