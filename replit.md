@@ -69,3 +69,36 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
 - **Mapping**: `google-map-react`.
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
+
+## Recent Changes (October 2025)
+
+### Service Provider Onboarding Page (October 22, 2025)
+- **New Page**: Created `/become-provider` page for service provider registration
+- **Features**:
+  - Hero section highlighting benefits (85% payout, verified badge, fast payments, customer access)
+  - 11 service categories displayed (Cleaning, Laundry, Transport, Electrical, Plumbing, Driver Services, Meal Support, Local Guides, Photography, Landscaping, Welcome Pack)
+  - 4-step "How It Works" guide (Apply & Verify → Set Prices → Get Bookings → Deliver & Get Paid)
+  - Stats showcase (28 bookings, 4.9★ rating, 12,400 ETB/month earnings)
+  - ID verification flow integration
+  - Ethiopian-themed design matching platform aesthetic
+- **Route**: Fixed 404 error - "Become a Service Provider" button now properly navigates to `/become-provider`
+- **Auth Flow**: Integrated with passwordless OTP authentication and ID verification scanner
+
+### Property Search UX Enhancements (October 22, 2025)
+- **Quick City Filter Chips**: One-click filter buttons for top 5 Ethiopian cities (Addis Ababa, Bishoftu, Adama, Hawassa, Bahir Dar)
+- **Improved Loading State**: Animated spinner with "Searching properties..." message for instant visual feedback
+- **Enhanced Empty State**: Redesigned "No results found" with actionable city suggestions and clear filters button
+- **Active Filter Badges**: Visual chips with individual × buttons for quick filter removal
+- **Mobile Responsiveness**: Collapsible filter panels optimized for mobile screens
+- **TypeScript Safety**: Fixed GoogleMapView type compatibility (null/undefined image handling)
+- **Map/List Toggle**: Verified functionality with proper property data formatting
+
+### City Coverage Expansion (October 22, 2025)
+- **Expanded to 20 Cities**: Updated from 7 to 20 Ethiopian cities (alphabetically sorted):
+  - Adama, Addis Ababa, Arba Minch, Axum, Bahir Dar, Bishoftu, Debre Birhan, Dessie, Dire Dawa, Gondar, Hawassa, Hossana, Jijiga, Jimma, Kombolcha, Lalibela, Mekelle, Nekemte, Shashemene, Wolaita Sodo
+- **Centralized Management**: Created `ETHIOPIAN_CITIES` constant in `lib/constants.ts` for consistency
+- **Platform-Wide Integration**: Updated all city dropdowns across:
+  - Property search and filters
+  - Host dashboard (create/edit property)
+  - Service marketplace (provider location filters)
+  - Search banner and quick filters
