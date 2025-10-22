@@ -1,0 +1,65 @@
+🎯 Objective:
+Optimize all image handling in the Alga web app for professional production performance.
+
+Implement three key upgrades:
+1️⃣ Auto-compression on upload
+2️⃣ Lazy-loading on display
+3️⃣ Alga watermark overlay for brand consistency
+
+---
+
+⚙️ Step 1 — Auto-Compression on Upload
+Goal: Reduce image size by ~60% to improve speed on mobile networks.
+
+1. Update backend image upload route (/api/objects/upload):
+   - Use sharp (image processing library) to compress before uploading.
+   - Example:
+       import sharp from "sharp";
+       const buffer = await sharp(file)
+          .resize(1280, 720, { fit: "inside" })
+          .jpeg({ quality: 70 })
+          .toBuffer();
+       await bucket.upload(buffer, { key: `properties/${filename}` });
+
+2. Apply same logic for service provider logos or photos.
+
+✅ Result:
+All uploaded images are resized and compressed automatically before saving to Replit Object Storage.
+
+---
+
+⚙️ Step 2 — Enable Lazy-Loading on Image Components
+Goal: Load images only when visible on screen (improves first load time).
+
+1. Update all property and service image components:
+   Replace standard <img> with:
+       <img loading="lazy" src={imageUrl} alt={title} className="rounded-lg shadow-sm" />
+   or if using React:
+       <img src={imageUrl} alt={title} loading="lazy" />
+
+2. Apply across:
+   - /properties (list & detail)
+   - /services and /services/:type
+   - /my-alga (dashboard cards)
+
+✅ Result:
+Page loads instantly, images appear smoothly as user scrolls.
+
+---
+
+⚙️ Step 3 — Add Subtle Alga Watermark (Optional)
+Goal: Protect uploaded images and reinforce brand identity.
+
+1. During upload compression (same sharp process):
+   Add watermark overlay:
+       import path from "path";
+       const watermark = path.resolve("public/watermark.png");
+       await sharp(file)
+         .composite([{ input: watermark, gravity: "southeast", blend: "overlay", opacity: 0.3 }])
+         .toBuffer();
+
+2. Use an elegant, semi-transparent “Alga” logo (white or brown tones).
+   Store watermark file under /public/watermark.png
+
+✅ Result:
+All uploaded
