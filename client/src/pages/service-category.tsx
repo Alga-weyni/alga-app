@@ -1,4 +1,5 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link } from "react-router-dom";
+import Header from "@/components/header";
 import { useQuery } from "@tanstack/react-query";
 import { Star, MapPin, Clock, DollarSign, Sparkles, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,6 +68,8 @@ export default function ServiceCategory() {
 
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
+      <Header />
+      
       {/* Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -138,7 +141,7 @@ export default function ServiceCategory() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedProviders.map((provider) => (
-              <Link key={provider.id} href={`/service-providers/${provider.id}`}>
+              <Link key={provider.id} to={`/service-providers/${provider.id}`}>
                 <Card 
                   className="h-full transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
                   style={{ background: "#fff" }}
