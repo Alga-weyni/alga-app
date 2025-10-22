@@ -10,6 +10,11 @@ import { format } from "date-fns";
 import { useState } from "react";
 import ServiceReviewForm from "@/components/service-review-form";
 
+// Extended type to include runtime-added hasReviewed field from backend
+type ServiceBookingWithReview = ServiceBooking & {
+  hasReviewed?: boolean;
+};
+
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100",
   confirmed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100",
@@ -22,14 +27,14 @@ export default function MyServices() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<ServiceBooking | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<ServiceBookingWithReview | null>(null);
 
-  const { data: serviceBookings, isLoading } = useQuery<ServiceBooking[]>({
+  const { data: serviceBookings, isLoading } = useQuery<ServiceBookingWithReview[]>({
     queryKey: ["/api/my-service-bookings"],
     enabled: !!user,
   });
 
-  const handleReviewClick = (booking: ServiceBooking) => {
+  const handleReviewClick = (booking: ServiceBookingWithReview) => {
     setSelectedBooking(booking);
     setReviewModalOpen(true);
   };
