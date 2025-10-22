@@ -102,17 +102,25 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
   - Settings sections (Notifications, Security, Payments, Language)
   - Back navigation to My Alga dashboard
 
-### Service Provider Onboarding Page (October 22, 2025)
-- **New Page**: Created `/become-provider` page for service provider registration
-- **Features**:
-  - Hero section highlighting benefits (85% payout, verified badge, fast payments, customer access)
-  - 11 service categories displayed (Cleaning, Laundry, Transport, Electrical, Plumbing, Driver Services, Meal Support, Local Guides, Photography, Landscaping, Welcome Pack)
-  - 4-step "How It Works" guide (Apply & Verify → Set Prices → Get Bookings → Deliver & Get Paid)
-  - Stats showcase (28 bookings, 4.9★ rating, 12,400 ETB/month earnings)
-  - ID verification flow integration
-  - Ethiopian-themed design matching platform aesthetic
-- **Route**: Fixed 404 error - "Become a Service Provider" button now properly navigates to `/become-provider`
-- **Auth Flow**: Integrated with passwordless OTP authentication and ID verification scanner
+### Service Provider Onboarding - Streamlined Experience (October 22, 2025)
+- **Redesigned `/become-provider` page** with simplified, emotionally inviting UX
+- **Hero Section**: 
+  - Title: "Earn. Connect. Grow with Alga Services."
+  - Subtitle: "Join Ethiopia's trusted network of verified local professionals."
+  - Sparkles icon for visual warmth
+- **Benefits Strip**: Simplified to 3 core benefits with icons:
+  - 💰 Earn More (85% payout)
+  - 🪪 Verified Badge (Build trust)
+  - ⚡ Fast Payments (Within 24 hours)
+- **Service Categories**: Reduced from 11 to 8 focused categories:
+  - Cleaning, Laundry, Drivers & Transport, Electrical, Plumbing, Carpentry, Meal Support, Guest Support
+  - Card-based design with emoji icons for personality
+- **Inline Application Form**: 
+  - Single "Start Application" CTA reveals form inline (no page navigation)
+  - Form fields: Business Name, Service Category, City, Phone, Description
+  - Success toast: "🎉 Application Received! Our team will review and get back within 24 hours."
+- **Reduced Visual Density**: More breathing space, larger typography, cleaner gradient backgrounds
+- **Design Philosophy**: Emotionally inviting, professionally concise, reduces friction while maintaining Ethiopian warmth
 
 ### Property Search UX Enhancements (October 22, 2025)
 - **Quick City Filter Chips**: One-click filter buttons for top 5 Ethiopian cities (Addis Ababa, Bishoftu, Adama, Hawassa, Bahir Dar)
