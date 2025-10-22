@@ -18,6 +18,7 @@ import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
 import OperatorDashboard from "@/pages/operator-dashboard";
+import ProviderDashboard from "@/pages/provider-dashboard";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
 import BookingSuccess from "@/pages/booking-success";
@@ -67,8 +68,10 @@ function Router() {
           <Route path="/my-services" component={MyServices} />
           <Route path="/profile" component={Profile} />
           <Route path="/host/dashboard" component={HostDashboard} />
+          <Route path="/provider/dashboard" component={ProviderDashboard} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/service-providers" component={AdminServiceProviders} />
+          <Route path="/admin/providers" component={AdminServiceProviders} />
           <Route path="/operator/dashboard" component={OperatorDashboard} />
         </>
       )}

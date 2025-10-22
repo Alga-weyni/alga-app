@@ -2077,6 +2077,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's provider profile
+  app.get('/api/my-provider-profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const providers = await storage.getServiceProvidersByUser(userId);
+      
+      // Return the first (and typically only) provider profile
+      if (providers.length === 0) {
+        return res.status(404).json({ message: "No provider profile found" });
+      }
+      
+      res.json(providers[0]);
+    } catch (error) {
+      console.error("Error fetching provider profile:", error);
+      res.status(500).json({ message: "Failed to fetch provider profile" });
+    }
+  });
+
+  // Get current user's provider bookings
+  app.get('/api/my-provider-bookings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // First get the provider profile
+      const providers = await storage.getServiceProvidersByUser(userId);
+      if (providers.length === 0) {
+        return res.json([]);
+      }
+      
+      const providerId = providers[0].id;
+      const bookings = await storage.getServiceBookingsByProvider(providerId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching provider bookings:", error);
+      res.status(500).json({ message: "Failed to fetch provider bookings" });
+    }
+  });
+
   // ============================================
   // ADMIN SERVICE PROVIDER VERIFICATION ROUTES
   // ============================================
