@@ -11,6 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import type { ServiceProvider } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import ProviderBadge from "@/components/provider-badge";
+import ServiceProviderReviews from "@/components/service-provider-reviews";
 
 export default function ServiceProviderDetails() {
   const { id } = useParams<{ id: string }>();
@@ -128,11 +130,11 @@ export default function ServiceProviderDetails() {
             <Card style={{ background: "#fff" }}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="text-2xl mb-2" style={{ color: "#2d1405" }}>
                       {provider.businessName}
                     </CardTitle>
-                    <div className="flex items-center gap-4 text-sm" style={{ color: "#5a4a42" }}>
+                    <div className="flex items-center gap-4 text-sm mb-3" style={{ color: "#5a4a42" }}>
                       <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
                         {provider.city}, {provider.region}
@@ -147,13 +149,8 @@ export default function ServiceProviderDetails() {
                         </div>
                       )}
                     </div>
+                    <ProviderBadge provider={provider} />
                   </div>
-                  {provider.verificationStatus === "approved" && (
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" style={{ background: "#86a38f", color: "#fff" }}>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Verified
-                    </div>
-                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -279,6 +276,12 @@ export default function ServiceProviderDetails() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6" style={{ color: "#2d1405" }}>Reviews & Ratings</h2>
+          <ServiceProviderReviews providerId={provider.id} />
         </div>
       </div>
     </div>
