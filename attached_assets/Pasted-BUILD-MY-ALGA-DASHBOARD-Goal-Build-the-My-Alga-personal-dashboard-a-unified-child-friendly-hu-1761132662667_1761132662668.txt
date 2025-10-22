@@ -1,0 +1,135 @@
+BUILD “MY ALGA” DASHBOARD
+
+Goal: Build the My Alga personal dashboard — a unified, child-friendly hub for users to manage stays, fixes, payments, reviews, and settings.
+Design: Warm Ethiopian palette (cream, brown, green), greeting banner, six rounded cards in 2×3 grid.
+
+⸻
+
+🧱 SETUP
+
+Create route: client/src/pages/my-alga.tsx
+Add navigation bar items:
+🏠 Stay | 🔧 Fix | 👤 My Alga | 💬 Ask
+
+client/
+ └── src/
+     ├── components/
+     │    ├── MyAlgaCard.tsx
+     │    ├── SectionHeader.tsx
+     │    └── ProfileAvatar.tsx
+     ├── pages/
+     │    └── my-alga.tsx
+     └── styles/
+          └── my-alga.css
+
+export function SectionHeader({ title, subtitle, avatar }) {
+  return (
+    <header className="alga-header">
+      {avatar}
+      <div>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+    </header>
+  );
+}
+
+export function ProfileAvatar({ name }) {
+  return <div className="avatar">{name[0]}</div>;
+}
+
+export default function MyAlgaCard({ icon, title, link }) {
+  return (
+    <a href={link} className="my-alga-card">
+      <div className="icon">{icon}</div>
+      <p className="title">{title}</p>
+    </a>
+  );
+}
+
+import MyAlgaCard from "../components/MyAlgaCard";
+import { SectionHeader } from "../components/SectionHeader";
+import { ProfileAvatar } from "../components/ProfileAvatar";
+import "../styles/my-alga.css";
+import { useUserContext } from "../context/UserContext";
+
+export default function MyAlga() {
+  const { user } = useUserContext();
+  const name = user?.name || "Guest";
+
+  const sections = [
+    { icon: "🏠", title: "My Stays", link: "/stays", visible: user.role !== "external_client" },
+    { icon: "🔧", title: "My Fixes", link: "/homecare", visible: true },
+    { icon: "💳", title: "Payments & Wallet", link: "/wallet", visible: true },
+    { icon: "💬", title: "Messages", link: "/messages", visible: true },
+    { icon: "⭐", title: "My Reviews", link: "/reviews", visible: user.role !== "external_client" },
+    { icon: "⚙️", title: "Settings", link: "/settings", visible: true },
+  ];
+
+  return (
+    <div className="my-alga">
+      <SectionHeader
+        title={`Hello, ${name} — Welcome back to My Alga!`}
+        subtitle="Your home for stays, fixes, and memories."
+        avatar={<ProfileAvatar name={name} />}
+      />
+      <div className="my-alga-grid">
+        {sections.filter(s => s.visible).map((s, i) => (
+          <MyAlgaCard key={i} icon={s.icon} title={s.title} link={s.link} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+.my-alga { background:#f6f2ec; min-height:100vh; padding:20px; }
+
+.alga-header { display:flex; align-items:center; margin-bottom:20px; }
+.alga-header .avatar {
+  width:50px; height:50px; border-radius:50%; background:#8a6e4b;
+  color:#fff; font-size:22px; display:flex; align-items:center;
+  justify-content:center; margin-right:12px;
+}
+.alga-header h2 { font-weight:700; color:#4a3b2b; }
+.alga-header p { color:#7a6b58; font-size:14px; }
+
+.my-alga-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+}
+
+.my-alga-card {
+  background:#fffaf5;
+  border-radius:18px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  transition:all .2s ease-in-out;
+  color:#4a3b2b;
+}
+.my-alga-card:hover { background:#f6f2ec; transform:translateY(-2px); }
+.my-alga-card .icon { font-size:32px; margin-bottom:12px; }
+.my-alga-card .title { font-size:16px; font-weight:600; }
+
+{
+ "id":1,
+ "name":"Weyni",
+ "role":"guest",
+ "language":"EN"
+}
+
+<nav className="nav">
+  <a href="/stays">🏠 Stay</a>
+  <a href="/homecare">🔧 Fix</a>
+  <a href="/my-alga">👤 My Alga</a>
+  <a href="/support">💬 Ask</a>
+</nav>
+
+EXPECTED RESULT
+	•	“My Alga” page identical to the approved wireframe
+	•	Greeting banner + avatar
+	•	2×3 grid of rounded cards
+	•	Warm, child-friendly design
+	•	Role-based visibility
+	•	Fully integrated navigation
