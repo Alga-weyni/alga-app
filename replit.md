@@ -9,14 +9,30 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Design
-The platform features a **child-friendly, minimal** design optimized for Ethiopian users of all ages. Uses warm color palette: dark brown (`#2d1405`) for headlines, medium brown (`#5a4a42`, `#8a6e4b`) for text, and cream backgrounds (`#f6f2ec`, `#faf5f0`). Design principles include:
-- **Simplified 4-Route Navigation**: Stay (/properties), Fix (/services), Me (/my-alga), Help (/support)
-- **Bigger UI Elements**: 48px+ buttons, larger touch targets for mobile users
-- **Icon + Label Pattern**: Simple icons paired with clear, accessible labels
-- **Child-Friendly Terminology**: "My Trips" (not "Bookings"), "List Your Property" (not "Become Host"), "Offer a Service" (not "Provider Application")
+The platform features a **universal accessibility design** optimized for Ethiopian users of all ages, from children to elderly. Uses warm color palette: dark brown (`#2d1405`) for headlines, medium brown (`#5a4a42`, `#8a6e4b`) for text, and cream backgrounds (`#f6f2ec`, `#faf5f0`). Design principles include:
+
+**Navigation & Usability:**
+- **Simplified 4-Route Navigation**: 🏠 Stay (/properties), 🔧 Fix (/services), 👤 Me (/my-alga), 💬 Help (/support)
+- **Emoji-Enhanced Icons**: Universal visual language with emoji+icon+label pattern for instant recognition
+- **Extra-Large Touch Targets**: 56-80px buttons optimized for mobile and elderly users
+- **Welcome Experience**: Post-login /welcome page with 3 clear action cards ("Stay Somewhere", "Fix Something", "Check My Trips")
 - **Smart Role-Based Dashboard**: Unified /my-alga that auto-detects user role (guest/host/provider/admin/operator)
+
+**Accessibility Features:**
+- **Full ARIA Support**: aria-labels, role="button", aria-describedby throughout
+- **Contextual Tooltips**: Auto-fading helper tips (💡 "Need help at home? Tap a service below") with 5s duration
+- **High Contrast**: Text-to-background ratios exceed WCAG AA standards
+- **Keyboard Navigation**: Tab-friendly interface for screen reader users
+
+**Terminology & Language:**
+- **Child-Friendly Wording**: "My Trips" (not "Bookings"), "List Your Property" (not "Become Host"), "Offer a Service" (not "Provider Application")
+- **Simple, Warm Microcopy**: "Hi {name}! What would you like to do today?" instead of technical jargon
 - **Ethiopian Colors**: Warm browns (#8a6e4b), sage greens (#86a38f), cream backgrounds
-- Fully responsive, mobile-optimized with lazy-loaded images and 60-80% compression for Ethiopian 3G/4G networks
+
+**Performance:**
+- Fully responsive, mobile-optimized with lazy-loaded images
+- 60-80% image compression for Ethiopian 3G/4G networks
+- Progressive JPEG with mozjpeg optimization
 
 ### Technical Implementation
 - **Frontend**: React with TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, React Hook Form with Zod for validation.
