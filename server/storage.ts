@@ -8,6 +8,7 @@ import {
   accessCodes,
   serviceProviders,
   serviceBookings,
+  serviceReviews,
   type User,
   type UpsertUser,
   type Property,
@@ -24,6 +25,8 @@ import {
   type InsertServiceProvider,
   type ServiceBooking,
   type InsertServiceBooking,
+  type ServiceReview,
+  type InsertServiceReview,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -141,6 +144,11 @@ export interface IStorage {
   updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking>;
   updateServiceBookingPayment(id: number, paymentStatus: string, paymentRef?: string): Promise<ServiceBooking>;
   completeServiceBooking(id: number): Promise<ServiceBooking>;
+  
+  // Service review operations
+  createServiceReview(review: InsertServiceReview): Promise<ServiceReview>;
+  getServiceReviewsByProvider(providerId: number): Promise<ServiceReview[]>;
+  getServiceReviewByBooking(bookingId: number): Promise<ServiceReview | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1078,6 +1086,35 @@ export class DatabaseStorage implements IStorage {
     }
     
     return updatedBooking;
+  }
+
+  // Service review operations
+  async createServiceReview(review: InsertServiceReview): Promise<ServiceReview> {
+    const [newReview] = await db
+      .insert(serviceReviews)
+      .values(review)
+      .returning();
+    
+    // Update provider rating after new review
+    await this.updateServiceProviderRating(review.serviceProviderId);
+    
+    return newReview;
+  }
+
+  async getServiceReviewsByProvider(providerId: number): Promise<ServiceReview[]> {
+    return await db
+      .select()
+      .from(serviceReviews)
+      .where(eq(serviceReviews.serviceProviderId, providerId))
+      .orderBy(desc(serviceReviews.createdAt));
+  }
+
+  async getServiceReviewByBooking(bookingId: number): Promise<ServiceReview | undefined> {
+    const [review] = await db
+      .select()
+      .from(serviceReviews)
+      .where(eq(serviceReviews.serviceBookingId, bookingId));
+    return review;
   }
 }
 
