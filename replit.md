@@ -21,18 +21,18 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
 ### Key Features
 - **Property Management**: CRUD operations for listings, image uploads.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters (city, type, price, capacity, dates), sorting, collapsible filter panel, active filter badges, city filter chips.
-- **Booking System**: Full workflow with date validation and conflict prevention.
+- **Booking System**: Full workflow with date validation and conflict prevention. Supports URL parameters for seamless booking (/properties/123?book=true&checkIn=date&checkOut=date&guests=2) with auto-opening dialog and pre-filled dates.
 - **6-Digit Access Code System**: Automated, auto-generated codes for property access upon payment confirmation.
 - **Advanced Weighted Review System (ALGA Review Engine)**: Time-decay algorithm, 6 rating categories.
 - **Universal ID Verification System**: QR code scanning for Ethiopians, OCR for foreign visitors (passport, license, national ID). Operator dashboard for manual review. Integrated with Fayda ID for eKYC.
 - **Payment Gateway**: Integration with Chapa, Stripe, Telebirr, and PayPal, including webhooks.
 - **Commission & Tax System (ERCA Compliant)**: Automated calculation of Alga commission (12%), VAT on commission (15%), and withholding tax from host earnings (2%). Automated ERCA-compliant PDF invoice generation.
-- **Add-On Services Marketplace**: Integration of local service providers (cleaning, laundry, transport, etc.) with commission tracking and provider verification. Includes 11 service categories with reviews and provider badges (Verified, Top Rated, Experienced).
+- **Add-On Services Marketplace**: Clear separation between guest browsing (/services) and provider application (/become-provider). Includes 11 service categories with reviews and provider badges (Verified, Top Rated, Experienced). Clean top-right CTA banner on services page, darker header on provider page for visual distinction.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
 - **Google Maps Integration**: Interactive map with property markers, map/list view toggle, user location tracking, clustering, custom Ethiopian-themed markers.
-- **Provider Onboarding Flow**: Streamlined application process with email notifications (SendGrid) and an admin verification dashboard.
-- **Provider Dashboard**: Status-based UX for pending, rejected, and approved providers, showing application status or full dashboard features (stats, bookings, ratings).
+- **Provider Onboarding Flow**: Complete application process with category pre-selection from URL (/become-provider?category=slug), locked form fields, automated email notifications (SendGrid: received, approved, rejected), and admin verification dashboard.
+- **Provider Dashboard**: Status-based UX for pending (shows "Under Review"), rejected (shows reason with reapply option), and approved providers (shows full dashboard with stats, bookings, ratings).
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
