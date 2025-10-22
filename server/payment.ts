@@ -1,6 +1,6 @@
 import express from "express";
 import Stripe from "stripe";
-import Chapa from "chapa-nodejs";
+import { Chapa } from "chapa-nodejs";
 import { db } from "./db";
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Initialize Chapa
 const chapa = process.env.CHAPA_SECRET_KEY
-  ? new Chapa(process.env.CHAPA_SECRET_KEY)
+  ? new Chapa({ secretKey: process.env.CHAPA_SECRET_KEY })
   : null;
 
 // Helper function to generate 6-digit access code
@@ -510,7 +510,7 @@ router.post("/chapa/initiate", async (req, res) => {
     }
 
     // Get guest details
-    const guest = await storage.getUserById(booking.guestId);
+    const guest = await storage.getUser(booking.guestId);
     if (!guest) {
       return res.status(404).json({
         success: false,
@@ -540,6 +540,11 @@ router.post("/chapa/initiate", async (req, res) => {
     });
 
     console.log('[Chapa] Payment initiated:', { bookingId, tx_ref, amount });
+
+    // Check if we have a valid response
+    if (!response.data || !response.data.checkout_url) {
+      throw new Error("Invalid response from Chapa: missing checkout URL");
+    }
 
     // Update booking with payment reference
     await db.update(bookings)
@@ -599,7 +604,7 @@ router.post("/chapa/callback", async (req, res) => {
 
     // Verify payment with Chapa
     if (chapa) {
-      const verification = await chapa.verify(tx_ref);
+      const verification = await chapa.verify({ tx_ref });
       
       console.log('[Chapa] Verification result:', verification);
 
@@ -670,7 +675,7 @@ router.get("/chapa/verify/:tx_ref", async (req, res) => {
     const { tx_ref } = req.params;
 
     // Verify with Chapa
-    const verification = await chapa.verify(tx_ref);
+    const verification = await chapa.verify({ tx_ref });
     
     console.log('[Chapa] Manual verification for:', tx_ref, verification);
 
