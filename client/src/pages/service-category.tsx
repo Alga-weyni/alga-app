@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import type { ServiceProvider } from "@shared/schema";
+import ProviderBadge from "@/components/provider-badge";
 
 const serviceTitles: Record<string, string> = {
   cleaning: "Cleaning Services",
@@ -157,6 +158,10 @@ export default function ServiceCategory() {
                           </span>
                         </div>
                       )}
+                    </div>
+
+                    <div className="mb-3">
+                      <ProviderBadge provider={provider} size="sm" />
                     </div>
 
                     <p className="text-sm mb-4 line-clamp-2" style={{ color: "#5a4a42" }}>

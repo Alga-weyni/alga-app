@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ServiceBooking } from "@shared/schema";
 import { format } from "date-fns";
+import { useState } from "react";
+import ServiceReviewForm from "@/components/service-review-form";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100",
@@ -19,11 +21,18 @@ const statusColors: Record<string, string> = {
 export default function MyServices() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<ServiceBooking | null>(null);
 
   const { data: serviceBookings, isLoading } = useQuery<ServiceBooking[]>({
     queryKey: ["/api/my-service-bookings"],
     enabled: !!user,
   });
+
+  const handleReviewClick = (booking: ServiceBooking) => {
+    setSelectedBooking(booking);
+    setReviewModalOpen(true);
+  };
 
   if (!user) {
     return (
@@ -151,6 +160,29 @@ export default function MyServices() {
                       </p>
                     </div>
                   )}
+
+                  {/* Review Button for Completed Services */}
+                  {booking.status === "completed" && !booking.hasReviewed && (
+                    <div className="mt-4 pt-4 border-t" style={{ borderColor: "#e5d9ce" }}>
+                      <Button
+                        onClick={() => handleReviewClick(booking)}
+                        className="w-full sm:w-auto"
+                        variant="outline"
+                        data-testid={`button-review-${booking.id}`}
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Write a Review
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Already Reviewed Badge */}
+                  {booking.status === "completed" && booking.hasReviewed && (
+                    <div className="mt-4 pt-4 border-t flex items-center gap-2 text-sm" style={{ borderColor: "#e5d9ce", color: "#86a38f" }}>
+                      <Star className="w-4 h-4 fill-current" />
+                      <span>You reviewed this service</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -178,6 +210,15 @@ export default function MyServices() {
           </div>
         )}
       </div>
+
+      {/* Review Modal */}
+      {selectedBooking && (
+        <ServiceReviewForm
+          open={reviewModalOpen}
+          onOpenChange={setReviewModalOpen}
+          booking={selectedBooking}
+        />
+      )}
     </div>
   );
 }
