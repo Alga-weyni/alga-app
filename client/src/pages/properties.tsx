@@ -25,10 +25,13 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Filter, SlidersHorizontal, Search, Map as MapIcon, LayoutGrid } from "lucide-react";
+import { Filter, SlidersHorizontal, Search, Map as MapIcon, LayoutGrid, Loader2, X } from "lucide-react";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES } from "@/lib/constants";
 import GoogleMapView from "@/components/google-map-view";
 import type { Property } from "@shared/schema";
+
+// Top 5 popular Ethiopian cities for quick filters
+const TOP_CITIES = ["Addis Ababa", "Bishoftu", "Adama", "Hawassa", "Bahir Dar"];
 
 interface Filters {
   city?: string;
@@ -210,6 +213,27 @@ export default function Properties() {
                   </Button>
                 </div>
 
+                {/* Quick City Filters */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="text-xs text-eth-brown/60 hidden sm:inline">Quick filters:</span>
+                  {TOP_CITIES.map((city) => (
+                    <Button
+                      key={city}
+                      variant={filters.city === city ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => updateFilter('city', filters.city === city ? undefined : city)}
+                      className={`text-xs ${
+                        filters.city === city 
+                          ? 'bg-eth-brown hover:bg-eth-brown/90 text-white' 
+                          : 'border-eth-brown/30 text-eth-brown hover:bg-eth-brown/10'
+                      }`}
+                      data-testid={`button-quick-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {city}
+                    </Button>
+                  ))}
+                </div>
+
                 {/* Sort Dropdown */}
                 <Select value={filters.sort || 'recommended'} onValueChange={(value) => updateFilter('sort', value)}>
                   <SelectTrigger className="w-full sm:w-[200px] bg-white border-eth-brown/20">
@@ -383,11 +407,18 @@ export default function Properties() {
               )}
             </div>
 
-            {/* Results Count */}
+            {/* Results Count & Loading State */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-eth-brown" style={{ fontSize: '87%' }}>
-                🏠 {properties.length} {properties.length === 1 ? 'Stay' : 'Stays'} Available
-              </h2>
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-eth-brown">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-lg font-semibold">Searching properties...</span>
+                </div>
+              ) : (
+                <h2 className="text-lg font-semibold text-eth-brown" style={{ fontSize: '87%' }}>
+                  🏠 {properties.length} {properties.length === 1 ? 'Stay' : 'Stays'} Available
+                </h2>
+              )}
             </div>
 
             {isLoading ? (
@@ -399,24 +430,50 @@ export default function Properties() {
                     <div className="mb-4 text-6xl">🔍</div>
                     <h3 className="text-xl font-semibold text-eth-brown mb-2">No properties found</h3>
                     <p className="text-eth-brown/60 mb-6">
-                      We couldn't find any properties matching your search criteria. Try adjusting your filters or search terms.
+                      We couldn't find any properties matching your search criteria.
                     </p>
-                    {activeFilterCount > 0 && (
-                      <Button
-                        onClick={clearFilters}
-                        className="bg-eth-brown hover:bg-eth-brown/90"
-                        data-testid="button-clear-filters-empty"
-                      >
-                        Clear All Filters
-                      </Button>
-                    )}
+                    
+                    {/* Suggestions */}
+                    <div className="space-y-4">
+                      {activeFilterCount > 0 && (
+                        <Button
+                          onClick={clearFilters}
+                          className="bg-eth-brown hover:bg-eth-brown/90"
+                          data-testid="button-clear-filters-empty"
+                        >
+                          Clear All Filters
+                        </Button>
+                      )}
+                      
+                      {/* City Suggestions */}
+                      <div className="pt-4 border-t border-eth-brown/10">
+                        <p className="text-sm text-eth-brown/60 mb-3">Try searching in popular cities:</p>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {TOP_CITIES.map((city) => (
+                            <Button
+                              key={city}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                clearFilters();
+                                updateFilter('city', city);
+                              }}
+                              className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown/10"
+                              data-testid={`button-suggest-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
+                            >
+                              {city}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ) : viewMode === 'map' ? (
               <>
                 <GoogleMapView
-                  properties={properties}
+                  properties={properties.map(p => ({ ...p, images: p.images || [] }))}
                   selectedPropertyId={selectedPropertyId}
                   onPropertySelect={setSelectedPropertyId}
                   height="600px"
