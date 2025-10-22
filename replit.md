@@ -144,3 +144,51 @@ The platform features a clean, minimal aesthetic with a primary dark brown (`#2d
   - Host dashboard (create/edit property)
   - Service marketplace (provider location filters)
   - Search banner and quick filters
+
+### Service Provider Email Notification System (October 22, 2025)
+- **SendGrid Integration**: Automated email notifications for provider application lifecycle
+- **Email Templates** (Ethiopian-themed HTML with #2d1405 primary color, #f6f2ec backgrounds):
+  - **Application Received**: Instant confirmation email upon submission with 24-hour review timeline
+  - **Application Approved**: Congratulations email with login instructions and next steps
+  - **Application Rejected**: Professional rejection email with specific reasons and reapplication guidance
+- **Email Functions** (`server/utils/email.ts`):
+  - `sendProviderApplicationReceivedEmail()`: Triggered on POST `/api/service-provider-applications`
+  - `sendProviderApprovalEmail()`: Triggered on PATCH `/api/admin/service-providers/:id/approve`
+  - `sendProviderRejectionEmail()`: Triggered on PATCH `/api/admin/service-providers/:id/reject`
+- **Email Content Features**:
+  - Warm, professional Ethiopian tone
+  - Playfair Display headings matching brand typography
+  - Clear CTAs (View Dashboard, Learn More, Reapply)
+  - Contact support information
+  - Responsive HTML formatting
+
+### Admin Service Provider Verification Dashboard (October 22, 2025)
+- **New Admin Interface** (`/admin/service-providers`):
+  - Pending applications list with provider details (business name, service type, city, submitted date)
+  - Search functionality by business name
+  - Filter by verification status (All, Pending, Approved, Rejected)
+  - Approve/Reject modals with inline forms
+- **Approval Workflow**:
+  - Admin sets pricing model (hourly/flat rate) and base price
+  - Updates verificationStatus to "approved"
+  - Records verifiedBy (admin user ID) and verifiedAt timestamp
+  - Triggers automated approval email
+- **Rejection Workflow**:
+  - Admin provides rejection reason (required text field)
+  - Updates verificationStatus to "rejected"
+  - Stores rejectionReason for provider reference
+  - Triggers automated rejection email with reason
+- **Backend API Endpoints**:
+  - `PATCH /api/admin/service-providers/:id/approve`: Approve with pricing
+  - `PATCH /api/admin/service-providers/:id/reject`: Reject with reason
+  - Both endpoints require admin/operator role authentication
+- **Storage Interface Updates**:
+  - Changed `updateServiceProvider()` signature to accept `Partial<ServiceProvider>` instead of `Partial<InsertServiceProvider>`
+  - Allows updating admin-controlled fields: verificationStatus, rejectionReason, verifiedBy, verifiedAt
+  - Maintains type safety while supporting flexible partial updates
+
+### Technical Implementation Details
+- **Role-Based Access Control**: Admin dashboard protected by authentication middleware and admin/operator role check
+- **Email Reliability**: All status changes trigger immediate email notifications via SendGrid API
+- **Database Schema**: Existing serviceProviders table supports verification workflow (no migrations required)
+- **User Experience**: Providers receive instant feedback at every step (submit → confirm email → admin review → approval/rejection email)

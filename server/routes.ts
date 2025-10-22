@@ -2485,7 +2485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const isVerified = await isFaydaVerified(userId);
       
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       
       res.json({
         verified: isVerified,
