@@ -10,6 +10,7 @@ import paymentRouter from "./payment";
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from "./utils/invoice";
 import { sendOtpEmail, sendWelcomeEmail } from "./utils/email.js";
+import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from "./fayda-verification";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -2183,6 +2184,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error verifying service provider:", error);
       res.status(500).json({ message: "Failed to verify service provider" });
+    }
+  });
+
+  // ============================================
+  // FAYDA ID VERIFICATION
+  // ============================================
+
+  // Verify Fayda ID (Ethiopia's National Digital ID)
+  app.post('/api/fayda/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { faydaId, dateOfBirth, phoneNumber } = req.body;
+
+      if (!faydaId) {
+        return res.status(400).json({ message: "Fayda ID is required" });
+      }
+
+      // Validate format
+      if (!/^\d{12}$/.test(faydaId)) {
+        return res.status(400).json({ 
+          message: "Invalid Fayda ID format. Must be exactly 12 digits." 
+        });
+      }
+
+      // Call Fayda verification service
+      const verificationResult = await verifyFaydaId({
+        faydaId,
+        dateOfBirth,
+        phoneNumber: phoneNumber || req.user.phoneNumber,
+      });
+
+      if (!verificationResult.success || !verificationResult.kycStatus) {
+        return res.status(400).json({
+          message: verificationResult.message || "Fayda ID verification failed",
+          error: verificationResult.error,
+        });
+      }
+
+      // Update user with verified Fayda data
+      await updateUserFaydaVerification(userId, faydaId, verificationResult);
+
+      res.json({
+        success: true,
+        message: "Fayda ID verified successfully",
+        identity: verificationResult.identity,
+      });
+    } catch (error) {
+      console.error("Error verifying Fayda ID:", error);
+      res.status(500).json({ 
+        message: "An error occurred during verification. Please try again." 
+      });
+    }
+  });
+
+  // Check Fayda verification status
+  app.get('/api/fayda/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const isVerified = await isFaydaVerified(userId);
+      
+      const user = await storage.getUserById(userId);
+      
+      res.json({
+        verified: isVerified,
+        faydaId: user?.faydaId || null,
+        verifiedAt: user?.faydaVerifiedAt || null,
+      });
+    } catch (error) {
+      console.error("Error checking Fayda status:", error);
+      res.status(500).json({ message: "Failed to check verification status" });
     }
   });
 

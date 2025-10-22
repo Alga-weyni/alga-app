@@ -44,6 +44,11 @@ export const users = pgTable("users", {
   idDocumentUrl: varchar("id_document_url"), // URL to uploaded ID image
   idExpiryDate: varchar("id_expiry_date"), // Store expiry date
   idCountry: varchar("id_country"), // Country of issue
+  // Fayda ID verification (Ethiopia's national digital ID)
+  faydaId: varchar("fayda_id", { length: 12 }), // 12-digit Fayda national ID number
+  faydaVerified: boolean("fayda_verified").default(false),
+  faydaVerifiedAt: timestamp("fayda_verified_at"),
+  faydaVerificationData: jsonb("fayda_verification_data"), // Stores encrypted identity data from Fayda API
   isServiceProvider: boolean("is_service_provider").default(false), // Add-on services
   otp: varchar("otp", { length: 4 }),
   otpExpiry: timestamp("otp_expiry"),
