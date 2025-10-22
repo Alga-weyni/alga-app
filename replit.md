@@ -9,7 +9,14 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Design
-The platform features a clean, minimal aesthetic with a primary dark brown (`#2d1405`) for headlines, medium brown (`#5a4a42`) for body text, and cream backgrounds (`#faf5f0`, `#f5ece3`, `#faf8f6`). Typography uses Playfair Display for headings and system fonts for body text. Design principles include minimal design with subtle shadows, a clean white header, dark brown buttons, soft color transitions, and fully responsive, mobile-optimized dashboards. Ethiopian-themed design elements and color palettes are integrated throughout.
+The platform features a **child-friendly, minimal** design optimized for Ethiopian users of all ages. Uses warm color palette: dark brown (`#2d1405`) for headlines, medium brown (`#5a4a42`, `#8a6e4b`) for text, and cream backgrounds (`#f6f2ec`, `#faf5f0`). Design principles include:
+- **Simplified 4-Route Navigation**: Stay (/properties), Fix (/services), Me (/my-alga), Help (/support)
+- **Bigger UI Elements**: 48px+ buttons, larger touch targets for mobile users
+- **Icon + Label Pattern**: Simple icons paired with clear, accessible labels
+- **Child-Friendly Terminology**: "My Trips" (not "Bookings"), "List Your Property" (not "Become Host"), "Offer a Service" (not "Provider Application")
+- **Smart Role-Based Dashboard**: Unified /my-alga that auto-detects user role (guest/host/provider/admin/operator)
+- **Ethiopian Colors**: Warm browns (#8a6e4b), sage greens (#86a38f), cream backgrounds
+- Fully responsive, mobile-optimized with lazy-loaded images and 60-80% compression for Ethiopian 3G/4G networks
 
 ### Technical Implementation
 - **Frontend**: React with TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, React Hook Form with Zod for validation.
