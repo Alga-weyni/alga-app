@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -69,11 +70,39 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
   const { toast } = useToast();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f6f2ec" }}>
+        <Card className="max-w-md w-full mx-4" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
+          <CardContent className="p-8 text-center">
+            <ShieldCheck className="w-16 h-16 mx-auto mb-4" style={{ color: "#8a6e4b" }} />
+            <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>
+              Admin Dashboard
+            </h2>
+            <p className="text-base mb-6" style={{ color: "#5a4a42" }}>
+              Please sign in to access the admin dashboard
+            </p>
+            <Button 
+              onClick={() => setLocation("/login")}
+              className="w-full text-lg py-6"
+              style={{ background: "#2d1405" }}
+              data-testid="button-signin"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Sign out mutation
   const signOutMutation = useMutation({
