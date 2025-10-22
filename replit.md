@@ -72,13 +72,26 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 - **6-Digit Access Code System**: Automated, auto-generated codes for property access upon payment confirmation, valid from check-in to check-out.
 - **Advanced Weighted Review System (ALGA Review Engine)**: Time-decay algorithm (recent reviews weighted more), auto-recalculation of property ratings, 6 rating categories (overall, cleanliness, communication, accuracy, location, value).
 - **Universal ID Verification System**: Required for all users. Ethiopian citizens use QR code scanning, foreign visitors use photo upload with OCR (passport, driver's license, national ID). Extracts name, DOB, ID number, expiry, and document type. Operator dashboard for manual review and approval.
-- **Payment Gateway**: Integration with Stripe, Telebirr, and PayPal. Includes success/cancellation pages and webhooks.
+- **Payment Gateway**: Integration with **Chapa** (embedded iframe), Stripe, Telebirr, and PayPal. Includes success/cancellation pages and webhooks.
 - **Commission & Tax System (ERCA Compliant)**: Automated calculation of 12% Alga commission, 15% VAT on commission, and 2% withholding tax from host earnings. Transparent display in host dashboard and admin financial reports. Automated ERCA-compliant invoice generation in PDF format.
 - **Add-On Services Marketplace**: Local service providers (cleaners, laundry, airport pickup, electricians, plumbers, drivers, welcome packs) integrated into booking flow. 15% Alga commission, 85% provider payout. Service provider verification system with ID documents. Available during booking confirmation and in host dashboard for property preparation.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
 
 ## Recent Changes (October 2025)
+
+### Chapa Payment Integration (Embedded Iframe)
+- **Implementation**: Embedded iframe checkout (no redirect) for seamless payment experience
+- **Backend Routes**: `/api/payment/chapa/initiate` and `/api/payment/chapa/verify/:tx_ref`
+- **Frontend Component**: `ChapaCheckout` component with auto-verification polling
+- **Features**: 
+  - Real-time payment status verification (polling every 3 seconds)
+  - Auto-close on successful payment with visual feedback
+  - Support for all Chapa payment methods (cards, mobile money)
+  - Booking status auto-update to 'paid' upon verification
+  - Transaction reference (`tx_ref`) stored in booking records
+- **UI/UX**: Modal-based checkout with embedded payment iframe, success animation, manual verification button
+- **Payment Priority**: Chapa listed first in payment methods (recommended for Ethiopian users)
 
 ### Add-On Services Feature
 - **Database Schema**: Created `service_providers` and `service_bookings` tables with full relations
@@ -90,7 +103,7 @@ The platform employs a clean and minimal aesthetic with a primary dark brown (`#
 
 ## External Dependencies
 
-- **Payment Processors**: Stripe, PayPal SDK, Telebirr.
+- **Payment Processors**: Chapa (`chapa-nodejs`), Stripe, PayPal SDK, Telebirr.
 - **Communication Services**: Ethiopian Telecom SMS (for phone verification).
 - **Database & Hosting**: Neon Database (serverless PostgreSQL).
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
