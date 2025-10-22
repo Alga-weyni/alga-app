@@ -70,6 +70,14 @@ export const AMENITIES = [
 
 export const PAYMENT_METHODS = [
   {
+    id: "chapa",
+    name: "Chapa",
+    description: "Ethiopian payment gateway - Cards & Mobile Money",
+    icon: "💰",
+    recommended: true,
+    local: true,
+  },
+  {
     id: "stripe",
     name: "Credit/Debit Card",
     description: "Global cards (Visa, Mastercard, Alipay, CNY)",
