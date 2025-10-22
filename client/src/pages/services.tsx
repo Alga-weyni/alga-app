@@ -107,9 +107,25 @@ const serviceCategories = [
 export default function Services() {
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
-      {/* Header */}
+      {/* Header with Provider CTA */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Provider CTA Banner - Top Right */}
+          <div className="flex justify-end mb-4">
+            <Link href="/become-provider">
+              <div 
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity cursor-pointer"
+                style={{ background: "#2d1405" }}
+                data-testid="banner-become-provider"
+              >
+                <Wrench className="h-4 w-4" />
+                <span className="hidden sm:inline">Want to join Alga as a service provider?</span>
+                <span className="sm:hidden">Become a Provider</span>
+                <span className="ml-1">→</span>
+              </div>
+            </Link>
+          </div>
+          
           <div className="text-center">
             <h1 className="text-4xl font-bold mb-3" style={{ color: "#2d1405" }}>
               Alga Services Marketplace
@@ -151,27 +167,6 @@ export default function Services() {
               </Card>
             </Link>
           ))}
-        </div>
-
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <div className="inline-block p-8 rounded-2xl" style={{ background: "#fff" }}>
-            <h2 className="text-2xl font-bold mb-3" style={{ color: "#2d1405" }}>
-              Become a Service Provider
-            </h2>
-            <p className="mb-6" style={{ color: "#5a4a42" }}>
-              Join Alga's trusted network of service professionals and grow your business
-            </p>
-            <Link href="/become-provider">
-              <button 
-                className="px-8 py-3 rounded-lg font-semibold text-white transition-colors"
-                style={{ background: "#2d1405" }}
-                data-testid="button-become-provider"
-              >
-                Apply as Provider
-              </button>
-            </Link>
-          </div>
         </div>
       </div>
     </div>
