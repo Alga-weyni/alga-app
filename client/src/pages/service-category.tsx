@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import type { ServiceProvider } from "@shared/schema";
 import ProviderBadge from "@/components/provider-badge";
+import { ETHIOPIAN_CITIES } from "@/lib/constants";
 
 const serviceTitles: Record<string, string> = {
   cleaning: "Cleaning Services",
@@ -97,13 +98,11 @@ export default function ServiceCategory() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Cities</SelectItem>
-                <SelectItem value="Addis Ababa">Addis Ababa</SelectItem>
-                <SelectItem value="Gondar">Gondar</SelectItem>
-                <SelectItem value="Bahir Dar">Bahir Dar</SelectItem>
-                <SelectItem value="Lalibela">Lalibela</SelectItem>
-                <SelectItem value="Hawassa">Hawassa</SelectItem>
-                <SelectItem value="Dire Dawa">Dire Dawa</SelectItem>
-                <SelectItem value="Harar">Harar</SelectItem>
+                {ETHIOPIAN_CITIES.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -2,25 +2,29 @@ import addisAbabaImg from "@assets/stock_images/addis_ababa_ethiopia_ab074746.jp
 import bahirDarImg from "@assets/stock_images/bahir_dar_ethiopia_l_aa3e2250.jpg";
 import gondarImg from "@assets/stock_images/gondar_ethiopia_roya_bce991b8.jpg";
 
+// 20 Major Ethiopian Cities (Alphabetically sorted for dropdown consistency)
 export const ETHIOPIAN_CITIES = [
-  "Addis Ababa",
-  "Bahir Dar",
-  "Gondar",
-  "Lalibela",
-  "Hawassa",
-  "Dire Dawa",
-  "Mekelle",
-  "Jimma",
   "Adama",
-  "Awassa",
-  "Harar",
+  "Addis Ababa",
+  "Arba Minch",
   "Axum",
+  "Bahir Dar",
+  "Bishoftu",
+  "Debre Birhan",
   "Dessie",
-  "Gambela",
+  "Dire Dawa",
+  "Gondar",
+  "Hawassa",
+  "Hossana",
   "Jijiga",
-  "Assosa",
-  "Semera",
-];
+  "Jimma",
+  "Kombolcha",
+  "Lalibela",
+  "Mekelle",
+  "Nekemte",
+  "Shashemene",
+  "Wolaita Sodo",
+] as const;
 
 export const PROPERTY_TYPES = [
   { value: "hotel", label: "Hotel" },
