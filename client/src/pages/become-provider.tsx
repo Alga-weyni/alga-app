@@ -398,8 +398,9 @@ export default function BecomeProvider() {
                         id="phoneNumber"
                         type="tel"
                         value={formData.phoneNumber}
+                        maxLength={10}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
                           setFormData({ ...formData, phoneNumber: value });
                         }}
                         placeholder="09XX XXX XXX"

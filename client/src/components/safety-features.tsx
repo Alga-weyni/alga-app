@@ -146,8 +146,9 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
               type="tel"
               placeholder="09XX-XXX-XXX"
               value={emergencyContact}
+              maxLength={10}
               onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, '');
+                const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
                 setEmergencyContact(value);
               }}
             />
