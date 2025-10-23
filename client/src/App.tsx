@@ -37,6 +37,10 @@ import Profile from "@/pages/profile";
 import Support from "@/pages/support";
 import Welcome from "@/pages/welcome";
 import NotFound from "@/pages/not-found";
+import NotificationsSettings from "@/pages/settings/notifications";
+import SecuritySettings from "@/pages/settings/security";
+import PaymentSettings from "@/pages/settings/payment";
+import LanguageSettings from "@/pages/settings/language";
 
 const pageVariants = {
   initial: {
@@ -121,6 +125,12 @@ function Router() {
         <Route path="/favorites" element={<AnimatedRoute><Favorites /></AnimatedRoute>} />
         <Route path="/my-services" element={<AnimatedRoute><MyServices /></AnimatedRoute>} />
         <Route path="/profile" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
+        
+        {/* Settings routes - accessible to authenticated users */}
+        <Route path="/settings/notifications" element={<AnimatedRoute><NotificationsSettings /></AnimatedRoute>} />
+        <Route path="/settings/security" element={<AnimatedRoute><SecuritySettings /></AnimatedRoute>} />
+        <Route path="/settings/payment" element={<AnimatedRoute><PaymentSettings /></AnimatedRoute>} />
+        <Route path="/settings/language" element={<AnimatedRoute><LanguageSettings /></AnimatedRoute>} />
         
         <Route path="/" element={<AnimatedRoute><Properties /></AnimatedRoute>} />
         <Route path="*" element={<AnimatedRoute><NotFound /></AnimatedRoute>} />

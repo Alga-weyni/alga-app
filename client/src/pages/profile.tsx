@@ -220,6 +220,7 @@ export default function Profile() {
                   variant="outline" 
                   className="w-full justify-start"
                   data-testid="button-notifications"
+                  onClick={() => navigate("/settings/notifications")}
                 >
                   <Bell className="w-4 h-4 mr-3" />
                   Notifications
@@ -228,6 +229,7 @@ export default function Profile() {
                   variant="outline" 
                   className="w-full justify-start"
                   data-testid="button-security"
+                  onClick={() => navigate("/settings/security")}
                 >
                   <Lock className="w-4 h-4 mr-3" />
                   Security & Privacy
@@ -236,6 +238,7 @@ export default function Profile() {
                   variant="outline" 
                   className="w-full justify-start"
                   data-testid="button-payments"
+                  onClick={() => navigate("/settings/payment")}
                 >
                   <CreditCard className="w-4 h-4 mr-3" />
                   Payment Methods
@@ -244,6 +247,7 @@ export default function Profile() {
                   variant="outline" 
                   className="w-full justify-start"
                   data-testid="button-language"
+                  onClick={() => navigate("/settings/language")}
                 >
                   <Globe className="w-4 h-4 mr-3" />
                   Language & Region
