@@ -144,7 +144,7 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
             <Input
               id="emergency-contact"
               type="tel"
-              placeholder="+251-9XX-XXX-XXX"
+              placeholder="09XX-XXX-XXX"
               value={emergencyContact}
               onChange={(e) => setEmergencyContact(e.target.value)}
             />
