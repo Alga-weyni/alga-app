@@ -29,6 +29,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ETHIOPIAN_CITIES } from "@/lib/constants";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { Upload } from "lucide-react";
+import type { UploadResult } from "@uppy/core";
 
 const SERVICE_CATEGORIES = [
   { id: "cleaning", name: "Cleaning", icon: "🧹", description: "Professional home and property cleaning" },
@@ -62,6 +65,7 @@ export default function BecomeProvider() {
     city: "",
     description: "",
     phoneNumber: user?.phoneNumber || "",
+    portfolioImages: [] as string[],
   });
 
   // Auto-show form if category is selected from URL
@@ -114,6 +118,7 @@ export default function BecomeProvider() {
         city: "",
         description: "",
         phoneNumber: user?.phoneNumber || "",
+        portfolioImages: [],
       });
       
       // Redirect to My Services after 3 seconds
@@ -198,6 +203,50 @@ export default function BecomeProvider() {
     }
 
     applicationMutation.mutate(formData);
+  };
+
+  // Image upload handlers for Self Care providers
+  const handleGetUploadParameters = async () => {
+    try {
+      const response = await fetch('/api/objects/upload', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to get upload URL');
+      const { uploadURL } = await response.json();
+      return {
+        method: 'PUT' as const,
+        url: uploadURL,
+      };
+    } catch (error) {
+      toast({
+        title: "Upload Error",
+        description: "Failed to prepare image upload. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (!result.successful) return;
+    
+    const uploadedUrls = result.successful.map((file: any) => file.uploadURL);
+    setFormData(prev => ({
+      ...prev,
+      portfolioImages: [...prev.portfolioImages, ...uploadedUrls],
+    }));
+    toast({
+      title: "Images Uploaded",
+      description: `Successfully uploaded ${uploadedUrls.length} image(s).`,
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      portfolioImages: prev.portfolioImages.filter((_, i) => i !== index),
+    }));
   };
 
   return (
@@ -442,6 +491,59 @@ export default function BecomeProvider() {
                         data-testid="textarea-description"
                       />
                     </div>
+
+                    {/* Image Upload for Self Care Providers */}
+                    {formData.serviceType === "self_care" && (
+                      <div>
+                        <Label className="text-eth-brown font-medium">
+                          Insert Image of Your Work
+                        </Label>
+                        <p className="text-sm text-gray-600 mt-1 mb-3">
+                          Upload photos of your previous work (hair, makeup, or nail services)
+                        </p>
+                        
+                        <div className="mt-2">
+                          <ObjectUploader
+                            maxNumberOfFiles={5}
+                            maxFileSize={10485760}
+                            onGetUploadParameters={handleGetUploadParameters}
+                            onComplete={handleUploadComplete}
+                            buttonClassName="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                          >
+                            <div className="flex items-center gap-2 justify-center">
+                              <Upload className="h-4 w-4" />
+                              <span>Upload Images (Max 5)</span>
+                            </div>
+                          </ObjectUploader>
+                        </div>
+
+                        {/* Display uploaded images */}
+                        {formData.portfolioImages.length > 0 && (
+                          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {formData.portfolioImages.map((imageUrl, index) => (
+                              <div key={index} className="relative group">
+                                <img 
+                                  src={imageUrl} 
+                                  alt={`Portfolio ${index + 1}`}
+                                  className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                                  data-testid={`image-portfolio-${index}`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(index)}
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  data-testid={`button-remove-image-${index}`}
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <div className="flex gap-4 pt-4">
                       <Button
