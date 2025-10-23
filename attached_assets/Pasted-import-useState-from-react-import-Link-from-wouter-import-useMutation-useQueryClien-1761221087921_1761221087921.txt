@@ -50,7 +50,6 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent card click
     if (!isAuthenticated) {
       window.location.href = "/api/login";
       return;
@@ -88,10 +87,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
   const topAmenities = (property.amenities || []).slice(0, 3);
 
   return (
-    <Card 
-      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" 
-      data-testid={`card-property-${property.id}`}
-    >
+    <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" data-testid={`card-property-${property.id}`}>
       <Link href={`/properties/${property.id}`}>
         <div className="relative">
           <img
