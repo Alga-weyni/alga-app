@@ -166,7 +166,7 @@ export const serviceProviders = pgTable("service_providers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   businessName: varchar("business_name", { length: 255 }).notNull(),
-  serviceType: varchar("service_type").notNull(), // cleaning, laundry, airport_pickup, electrical, plumbing, driver, welcome_pack, meal_support, local_guide, photography, landscaping
+  serviceType: varchar("service_type").notNull(), // cleaning, laundry, airport_pickup, electrical, plumbing, driver, welcome_pack, meal_support, local_guide, photography, landscaping, self_care
   description: text("description").notNull(),
   pricingModel: varchar("pricing_model").notNull(), // hourly, flat_rate
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
@@ -175,6 +175,7 @@ export const serviceProviders = pgTable("service_providers", {
   region: varchar("region").notNull(),
   address: text("address"),
   availability: text("availability"), // JSON string for schedule
+  portfolioImages: text("portfolio_images").array(), // Array of image URLs for self_care providers
   idDocumentUrl: varchar("id_document_url"), // ID verification for service provider
   verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, approved, rejected
   verifiedBy: varchar("verified_by").references(() => users.id),
