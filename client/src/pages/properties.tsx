@@ -26,9 +26,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Filter, SlidersHorizontal, Search, Map as MapIcon, LayoutGrid, Loader2, X } from "lucide-react";
+import { Filter, SlidersHorizontal, Search, Loader2, X } from "lucide-react";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES } from "@/lib/constants";
-import GoogleMapView from "@/components/google-map-view";
 import type { Property } from "@shared/schema";
 
 // Top 5 popular Ethiopian cities for quick filters
@@ -52,8 +51,6 @@ export default function Properties() {
   const [showFilters, setShowFilters] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [selectedPropertyId, setSelectedPropertyId] = useState<number | null>(null);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -249,28 +246,6 @@ export default function Properties() {
                     <SelectItem value="rating_desc">Highest Rated</SelectItem>
                   </SelectContent>
                 </Select>
-
-                {/* View Mode Toggle */}
-                <div className="flex border border-eth-brown/30 rounded-lg overflow-hidden">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className={viewMode === 'grid' ? 'bg-eth-brown hover:bg-eth-brown/90' : 'text-eth-brown'}
-                    data-testid="button-view-grid"
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'map' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('map')}
-                    className={viewMode === 'map' ? 'bg-eth-brown hover:bg-eth-brown/90' : 'text-eth-brown'}
-                    data-testid="button-view-map"
-                  >
-                    <MapIcon className="h-4 w-4" />
-                  </Button>
-                </div>
 
                 {/* Filter Toggle */}
                 <Button
@@ -473,19 +448,6 @@ export default function Properties() {
                   </div>
                 </CardContent>
               </Card>
-            ) : viewMode === 'map' ? (
-              <>
-                <GoogleMapView
-                  properties={properties.map(p => ({ ...p, images: p.images || [] }))}
-                  selectedPropertyId={selectedPropertyId}
-                  onPropertySelect={setSelectedPropertyId}
-                  height="600px"
-                  zoom={11}
-                />
-                <p className="text-center text-sm text-eth-brown/40 mt-6 italic">
-                  Explore {properties.length} verified Ethiopian stays on the map
-                </p>
-              </>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
