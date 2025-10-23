@@ -213,27 +213,6 @@ export default function Properties() {
                   </Button>
                 </div>
 
-                {/* Quick City Filters */}
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-xs text-eth-brown/60 hidden sm:inline">Quick filters:</span>
-                  {TOP_CITIES.map((city) => (
-                    <Button
-                      key={city}
-                      variant={filters.city === city ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => updateFilter('city', filters.city === city ? undefined : city)}
-                      className={`text-xs ${
-                        filters.city === city 
-                          ? 'bg-eth-brown hover:bg-eth-brown/90 text-white' 
-                          : 'border-eth-brown/30 text-eth-brown hover:bg-eth-brown/10'
-                      }`}
-                      data-testid={`button-quick-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {city}
-                    </Button>
-                  ))}
-                </div>
-
                 {/* Sort Dropdown */}
                 <Select value={filters.sort || 'recommended'} onValueChange={(value) => updateFilter('sort', value)}>
                   <SelectTrigger className="w-full sm:w-[200px] bg-white border-eth-brown/20">
@@ -263,6 +242,29 @@ export default function Properties() {
               {showFilters && (
                 <Card className="border-eth-brown/20">
                   <CardContent className="pt-4">
+                    {/* Quick City Filters */}
+                    <div className="mb-4">
+                      <Label className="text-xs font-semibold text-eth-brown mb-2 block">Quick filters:</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {TOP_CITIES.map((city) => (
+                          <Button
+                            key={city}
+                            variant={filters.city === city ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => updateFilter('city', filters.city === city ? undefined : city)}
+                            className={`text-xs ${
+                              filters.city === city 
+                                ? 'bg-eth-brown hover:bg-eth-brown/90 text-white' 
+                                : 'border-eth-brown/30 text-eth-brown hover:bg-eth-brown/10'
+                            }`}
+                            data-testid={`button-quick-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            {city}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {/* City Filter */}
                       <div>
