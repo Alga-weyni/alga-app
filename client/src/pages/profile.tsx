@@ -353,8 +353,12 @@ export default function Profile() {
               <Label htmlFor="phoneNumber" style={{ color: "#2d1405" }}>Phone Number</Label>
               <Input
                 id="phoneNumber"
+                type="tel"
                 value={editForm.phoneNumber}
-                onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  setEditForm({ ...editForm, phoneNumber: value });
+                }}
                 placeholder="091 234 5678"
                 data-testid="input-phone"
               />

@@ -351,9 +351,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         <FormControl>
                           <Input 
                             {...field} 
+                            type="tel"
                             placeholder="0912345678" 
                             className="bg-white border-eth-brown/20 text-eth-brown" 
                             data-testid="input-phone"
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, '');
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <p className="text-xs text-eth-brown/60 mt-1">Format: 09XXXXXXXX (10 digits)</p>

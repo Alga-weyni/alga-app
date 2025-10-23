@@ -396,8 +396,12 @@ export default function BecomeProvider() {
                       </Label>
                       <Input
                         id="phoneNumber"
+                        type="tel"
                         value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setFormData({ ...formData, phoneNumber: value });
+                        }}
                         placeholder="09XX XXX XXX"
                         className="mt-2"
                         data-testid="input-phone"
