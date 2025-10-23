@@ -146,7 +146,10 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
               type="tel"
               placeholder="09XX-XXX-XXX"
               value={emergencyContact}
-              onChange={(e) => setEmergencyContact(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setEmergencyContact(value);
+              }}
             />
             <p className="text-xs text-muted-foreground mt-1">
               This contact will receive your location and safety updates
