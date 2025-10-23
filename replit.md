@@ -46,6 +46,7 @@ The platform features a **universal accessibility design** optimized for Ethiopi
 ### Key Features
 - **Property Management**: CRUD operations for listings, image uploads.
 - **Enhanced Host Dashboard**: Ethiopian-context property title suggestions (8 preset options like "Traditional Ethiopian Home", "Eco Stay & Coffee Farm") with searchable dropdown, auto-suggested culturally relevant descriptions, and helpful hint text ("Choose a name that reflects your stay's character"). Reduces typing, increases consistency, and guides hosts toward globally attractive listings.
+- **User Settings Pages**: Complete settings functionality with 4 dedicated pages for Notifications, Security & Privacy, Payment Methods, and Language & Region preferences. All pages feature warm Ethiopian design, toast confirmations, and mobile-optimized layouts.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters (city, type, price, capacity, dates), sorting, collapsible filter panel, active filter badges, city filter chips.
 - **Booking System**: Full workflow with date validation and conflict prevention. Supports URL parameters for seamless booking (/properties/123?book=true&checkIn=date&checkOut=date&guests=2) with auto-opening dialog and pre-filled dates.
 - **6-Digit Access Code System**: Automated, auto-generated codes for property access upon payment confirmation.
