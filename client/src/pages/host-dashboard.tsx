@@ -81,6 +81,7 @@ import type { Property, Booking } from "@shared/schema";
 const propertyFormSchema = insertPropertySchema.omit({
   hostId: true,
 }).extend({
+  description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
   images: z.array(z.string()).min(5, "At least 5 property images are required"),
 });
@@ -967,13 +968,12 @@ export default function HostDashboard() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-eth-brown">Description <span className="text-red-600">*</span></FormLabel>
+                    <FormLabel className="text-eth-brown">Description <span className="text-eth-brown/50">(optional)</span></FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Describe your property, its unique features, and what makes it special..."
                         className="min-h-[100px]"
                         {...field}
-                        required
                       />
                     </FormControl>
                     <FormMessage />
