@@ -87,13 +87,13 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
   const topAmenities = (property.amenities || []).slice(0, 3);
 
   return (
-    <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" data-testid={`card-property-${property.id}`}>
-      <Link href={`/properties/${property.id}`}>
+    <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer" data-testid={`card-property-${property.id}`}>
+      <Link href={`/properties/${property.id}`} className="block cursor-pointer">
         <div className="relative">
           <img
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
             alt={property.title}
-            className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
             loading="lazy"
             data-testid={`img-property-${property.id}`}
           />
