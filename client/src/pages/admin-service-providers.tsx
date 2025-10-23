@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BackButton } from "@/components/back-button";
 import { CheckCircle, XCircle, Clock, Building2, MapPin, Mail, Phone, DollarSign } from "lucide-react";
 
 type ServiceProvider = {
@@ -233,6 +234,11 @@ export default function AdminServiceProviders() {
   return (
     <div className="min-h-screen bg-[#faf5f0] pt-24 pb-12">
       <div className="container max-w-7xl mx-auto px-4">
+        {/* Back Button */}
+        <div className="mb-6">
+          <BackButton />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#2d1405] mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
