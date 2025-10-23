@@ -398,7 +398,7 @@ export default function BecomeProvider() {
                         id="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        placeholder="+251 9XX XXX XXX"
+                        placeholder="09XX XXX XXX"
                         className="mt-2"
                         data-testid="input-phone"
                         required

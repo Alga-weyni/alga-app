@@ -15,7 +15,7 @@ import { Loader2, Phone, Mail } from "lucide-react";
 
 // Passwordless schemas - OTP only
 const requestPhoneOtpSchema = z.object({
-  phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone must be in format +251XXXXXXXXX"),
+  phoneNumber: z.string().regex(/^09[0-9]{8}$/, "Phone must be in format 09XXXXXXXX"),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
 });
@@ -351,19 +351,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         <FormControl>
                           <Input 
                             {...field} 
-                            placeholder="+251912345678" 
+                            placeholder="0912345678" 
                             className="bg-white border-eth-brown/20 text-eth-brown" 
                             data-testid="input-phone"
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              if (value && !value.startsWith('+')) {
-                                value = '+' + value;
-                              }
-                              field.onChange(value);
-                            }}
                           />
                         </FormControl>
-                        <p className="text-xs text-eth-brown/60 mt-1">Format: +251XXXXXXXXX (9 digits after 251)</p>
+                        <p className="text-xs text-eth-brown/60 mt-1">Format: 09XXXXXXXX (10 digits)</p>
                         <FormMessage />
                       </FormItem>
                     )}

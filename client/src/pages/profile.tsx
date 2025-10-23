@@ -355,7 +355,7 @@ export default function Profile() {
                 id="phoneNumber"
                 value={editForm.phoneNumber}
                 onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
-                placeholder="+251 91 234 5678"
+                placeholder="091 234 5678"
                 data-testid="input-phone"
               />
             </div>
