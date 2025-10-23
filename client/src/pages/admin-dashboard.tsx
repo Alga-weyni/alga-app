@@ -683,7 +683,9 @@ export default function AdminDashboard() {
                           <img
                             src={property.images?.[0] || '/placeholder-property.png'}
                             alt={property.title}
-                            className="h-12 w-12 rounded object-cover"
+                            className="h-12 w-12 rounded object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                            onClick={() => navigate(`/properties/${property.id}`)}
+                            data-testid={`img-property-${property.id}`}
                           />
                           <div>
                             <div className="font-medium">{property.title}</div>
