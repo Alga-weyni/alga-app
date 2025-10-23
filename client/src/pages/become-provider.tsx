@@ -70,7 +70,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -200; // Add more space above the form
+          const yOffset = -280; // Show background space above the form card
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
@@ -143,7 +143,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -200; // Add more space above the form
+          const yOffset = -280; // Show background space above the form card
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
