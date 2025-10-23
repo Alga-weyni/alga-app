@@ -22,7 +22,7 @@ import {
   ArrowRight,
   ArrowLeft
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +48,7 @@ export default function BecomeProvider() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const formSectionRef = useRef<HTMLElement>(null);
 
   // Parse category from URL query parameter
   const categoryFromUrl = searchParams.get('category');
@@ -68,7 +69,7 @@ export default function BecomeProvider() {
       setFormData(prev => ({ ...prev, serviceType: categoryFromUrl }));
       setShowApplicationForm(true);
       setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
     }
   }, [categoryFromUrl, user]);
@@ -137,7 +138,7 @@ export default function BecomeProvider() {
     } else {
       setShowApplicationForm(true);
       setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
   };
@@ -277,7 +278,7 @@ export default function BecomeProvider() {
 
         {/* Inline Application Form - Reveals on CTA Click */}
         {showApplicationForm && (
-          <section className="py-16 px-6 animate-in slide-in-from-bottom duration-500">
+          <section ref={formSectionRef} className="py-16 px-6 animate-in slide-in-from-bottom duration-500">
             <div className="max-w-2xl mx-auto">
               <Card className="bg-white shadow-2xl border-0">
                 <CardContent className="p-10">
