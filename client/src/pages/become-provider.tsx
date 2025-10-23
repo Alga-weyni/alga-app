@@ -39,6 +39,7 @@ const SERVICE_CATEGORIES = [
   { id: "carpentry", name: "Carpentry", icon: "🪚", description: "Furniture and woodwork services" },
   { id: "meal_support", name: "Meal Support", icon: "🍽️", description: "Meal prep and catering services" },
   { id: "guest_support", name: "Guest Support", icon: "🤝", description: "Welcome packs and concierge services" },
+  { id: "self_care", name: "Self Care", icon: "💅", description: "Hair, makeup, and nail services" },
 ];
 
 export default function BecomeProvider() {

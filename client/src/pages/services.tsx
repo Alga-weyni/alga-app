@@ -10,7 +10,8 @@ import {
   UtensilsCrossed, 
   Map, 
   Camera, 
-  Trees 
+  Trees,
+  Scissors
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ContextualTooltip, useContextualTooltip } from "@/components/contextual-tooltip";
@@ -103,6 +104,14 @@ const serviceCategories = [
     description: "Curated welcome amenities for guests",
     color: "from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900",
     iconColor: "text-amber-600 dark:text-amber-400"
+  },
+  {
+    type: "self_care",
+    icon: Scissors,
+    title: "Self Care",
+    description: "Hair, makeup, and nail services",
+    color: "from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900",
+    iconColor: "text-pink-600 dark:text-pink-400"
   }
 ];
 
