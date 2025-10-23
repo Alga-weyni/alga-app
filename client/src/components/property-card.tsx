@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(isFavorite);
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -87,13 +88,17 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const topAmenities = (property.amenities || []).slice(0, 3);
 
+  const handleCardClick = () => {
+    navigate(`/properties/${property.id}`);
+  };
+
   return (
     <Card 
-      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" 
+      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer" 
       data-testid={`card-property-${property.id}`}
+      onClick={handleCardClick}
     >
-      <Link to={`/properties/${property.id}`}>
-        <div className="relative">
+      <div className="relative">
           <img
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
             alt={property.title}
@@ -186,7 +191,6 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
             </div>
           </div>
         </CardContent>
-      </Link>
     </Card>
   );
 }
