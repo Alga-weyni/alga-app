@@ -70,7 +70,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -150; // Offset to show top of form including icon and heading
+          const yOffset = -200; // Add more space above the form
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
@@ -143,7 +143,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -150; // Offset to show top of form including icon and heading
+          const yOffset = -200; // Add more space above the form
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
