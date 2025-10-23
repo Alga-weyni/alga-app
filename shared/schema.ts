@@ -469,7 +469,8 @@ export const serviceTypeEnum = z.enum([
   "meal_support",
   "local_guide",
   "photography",
-  "landscaping"
+  "landscaping",
+  "self_care"
 ]);
 
 export const insertServiceProviderSchema = createInsertSchema(serviceProviders).omit({

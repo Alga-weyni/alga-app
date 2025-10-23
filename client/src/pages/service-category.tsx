@@ -21,7 +21,8 @@ const serviceTitles: Record<string, string> = {
   local_guide: "Local Guides & Tours",
   photography: "Photography Services",
   landscaping: "Landscaping & Gardening",
-  welcome_pack: "Welcome Pack Services"
+  welcome_pack: "Welcome Pack Services",
+  self_care: "Self Care Services"
 };
 
 export default function ServiceCategory() {
