@@ -355,8 +355,9 @@ export default function Profile() {
                 id="phoneNumber"
                 type="tel"
                 value={editForm.phoneNumber}
+                maxLength={10}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
                   setEditForm({ ...editForm, phoneNumber: value });
                 }}
                 placeholder="091 234 5678"
