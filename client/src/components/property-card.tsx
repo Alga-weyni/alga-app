@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(isFavorite);
+  const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -86,9 +88,9 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const topAmenities = (property.amenities || []).slice(0, 3);
 
-  const handleCardClick = () => {
-    console.log('Card clicked, navigating to:', `/properties/${property.id}`);
-    window.location.href = `/properties/${property.id}`;
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLocation(`/properties/${property.id}`);
   };
 
   return (
