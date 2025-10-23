@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
       className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group" 
       data-testid={`card-property-${property.id}`}
     >
-      <Link href={`/properties/${property.id}`}>
+      <Link to={`/properties/${property.id}`}>
         <div className="relative">
           <img
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
