@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import UniversalIDScanner from "@/components/universal-id-scanner";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 export default function ScanIDPage() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export default function ScanIDPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2]">
+      <Header />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -72,6 +75,8 @@ export default function ScanIDPage() {
           </p>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

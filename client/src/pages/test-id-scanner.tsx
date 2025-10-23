@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 export default function TestIDScannerPage() {
   const [verificationResult, setVerificationResult] = useState<any>(null);
@@ -104,7 +106,9 @@ Birth: 15/03/1985`,
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen" style={{ background: "#f6f2ec" }}>
+      <Header />
+      <div className="container mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
@@ -282,6 +286,9 @@ Birth: 15/03/1985`,
           </ul>
         </Card>
       </div>
+      </div>
+      
+      <Footer />
     </div>
   );
 }
