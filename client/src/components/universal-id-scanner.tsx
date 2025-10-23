@@ -419,6 +419,33 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
             <p className="text-red-900 dark:text-red-100 font-medium">{message}</p>
+            
+            {scanMethod === "qr" && message.includes("Camera") && (
+              <div className="mt-4">
+                <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                  No worries! You can upload a photo of your ID instead.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                <Button 
+                  onClick={() => {
+                    reset();
+                    setTimeout(() => fileInputRef.current?.click(), 100);
+                  }}
+                  className="bg-eth-brown hover:bg-eth-brown/90"
+                  size="lg"
+                  data-testid="button-switch-to-upload"
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload Photo Instead
+                </Button>
+              </div>
+            )}
           </div>
 
           <Button 
@@ -428,7 +455,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
             size="lg"
             data-testid="button-try-again"
           >
-            Try Again
+            {scanMethod === "qr" && message.includes("Camera") ? "Back to Options" : "Try Again"}
           </Button>
         </div>
       )}
