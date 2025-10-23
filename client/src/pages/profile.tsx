@@ -1,11 +1,19 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   ArrowLeft, 
   User, 
@@ -25,6 +33,14 @@ import {
 export default function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    bio: "",
+    phoneNumber: ""
+  });
 
   if (!user) {
     return (
@@ -56,6 +72,37 @@ export default function Profile() {
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
     }
   };
+
+  const openEditDialog = () => {
+    setEditForm({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      bio: user.bio || "",
+      phoneNumber: user.phoneNumber || ""
+    });
+    setEditDialogOpen(true);
+  };
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof editForm) => {
+      return await apiRequest("PATCH", "/api/profile", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "✅ Profile Updated",
+        description: "Your profile has been successfully updated"
+      });
+      setEditDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Update Failed",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    }
+  });
 
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
@@ -113,6 +160,7 @@ export default function Profile() {
               <Button 
                 className="w-full"
                 variant="outline"
+                onClick={openEditDialog}
                 data-testid="button-edit-profile"
               >
                 <Edit className="w-4 h-4 mr-2" />
@@ -266,6 +314,84 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]" style={{ background: "#fff" }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: "#2d1405" }}>Edit Profile</DialogTitle>
+            <DialogDescription style={{ color: "#5a4a42" }}>
+              Update your personal information
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" style={{ color: "#2d1405" }}>First Name</Label>
+                <Input
+                  id="firstName"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                  placeholder="Enter first name"
+                  data-testid="input-firstname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" style={{ color: "#2d1405" }}>Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                  placeholder="Enter last name"
+                  data-testid="input-lastname"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" style={{ color: "#2d1405" }}>Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                value={editForm.phoneNumber}
+                onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                placeholder="+251 91 234 5678"
+                data-testid="input-phone"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio" style={{ color: "#2d1405" }}>Bio</Label>
+              <Textarea
+                id="bio"
+                value={editForm.bio}
+                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                placeholder="Tell us about yourself..."
+                rows={4}
+                data-testid="input-bio"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              data-testid="button-cancel-edit"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => updateProfileMutation.mutate(editForm)}
+              disabled={updateProfileMutation.isPending}
+              style={{ background: "#2d1405" }}
+              data-testid="button-save-profile"
+            >
+              {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
