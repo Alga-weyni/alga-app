@@ -178,6 +178,24 @@ export default function BecomeProvider() {
       return;
     }
 
+    if (!formData.phoneNumber || formData.phoneNumber.length !== 10) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Phone number must be exactly 10 digits.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.phoneNumber.startsWith('09')) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Phone number must start with 09.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     applicationMutation.mutate(formData);
   };
 
