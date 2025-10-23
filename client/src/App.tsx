@@ -41,6 +41,8 @@ import NotificationsSettings from "@/pages/settings/notifications";
 import SecuritySettings from "@/pages/settings/security";
 import PaymentSettings from "@/pages/settings/payment";
 import LanguageSettings from "@/pages/settings/language";
+import PaymentsHelp from "@/pages/help/payments";
+import SafetyHelp from "@/pages/help/safety";
 
 const pageVariants = {
   initial: {
@@ -131,6 +133,10 @@ function Router() {
         <Route path="/settings/security" element={<AnimatedRoute><SecuritySettings /></AnimatedRoute>} />
         <Route path="/settings/payment" element={<AnimatedRoute><PaymentSettings /></AnimatedRoute>} />
         <Route path="/settings/language" element={<AnimatedRoute><LanguageSettings /></AnimatedRoute>} />
+        
+        {/* Help/Support detail pages - public */}
+        <Route path="/help/payments" element={<AnimatedRoute><PaymentsHelp /></AnimatedRoute>} />
+        <Route path="/help/safety" element={<AnimatedRoute><SafetyHelp /></AnimatedRoute>} />
         
         <Route path="/" element={<AnimatedRoute><Properties /></AnimatedRoute>} />
         <Route path="*" element={<AnimatedRoute><NotFound /></AnimatedRoute>} />
