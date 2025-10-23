@@ -51,6 +51,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent card click
     if (!isAuthenticated) {
       window.location.href = "/api/login";
       return;
@@ -87,11 +88,7 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const topAmenities = (property.amenities || []).slice(0, 3);
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking the favorite button
-    if ((e.target as HTMLElement).closest('button[data-testid^="button-favorite"]')) {
-      return;
-    }
+  const handleCardClick = () => {
     setLocation(`/properties/${property.id}`);
   };
 
