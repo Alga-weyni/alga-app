@@ -70,7 +70,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -350; // Show background space and full form top including icon and heading
+          const yOffset = -450; // Show complete form top with icon fully visible
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
@@ -143,7 +143,7 @@ export default function BecomeProvider() {
       setShowApplicationForm(true);
       setTimeout(() => {
         if (formSectionRef.current) {
-          const yOffset = -350; // Show background space and full form top including icon and heading
+          const yOffset = -450; // Show complete form top with icon fully visible
           const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
