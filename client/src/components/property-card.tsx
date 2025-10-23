@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(isFavorite);
+  const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -86,10 +87,21 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
 
   const topAmenities = (property.amenities || []).slice(0, 3);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking the favorite button
+    if ((e.target as HTMLElement).closest('button[data-testid^="button-favorite"]')) {
+      return;
+    }
+    setLocation(`/properties/${property.id}`);
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer" data-testid={`card-property-${property.id}`}>
-      <Link href={`/properties/${property.id}`} className="block cursor-pointer">
-        <div className="relative">
+    <Card 
+      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer" 
+      data-testid={`card-property-${property.id}`}
+      onClick={handleCardClick}
+    >
+      <div className="relative">
           <img
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
             alt={property.title}
@@ -183,7 +195,6 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
             </div>
           </div>
         </CardContent>
-      </Link>
     </Card>
   );
 }
