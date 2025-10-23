@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,10 +73,24 @@ interface AdminStats {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
   const { toast } = useToast();
+  
+  // Get active tab from URL search params, default to 'overview'
+  const searchParams = new URLSearchParams(location.search);
+  const activeTab = searchParams.get('tab') || 'overview';
+  
+  // Handle tab navigation
+  const handleTabChange = (value: string) => {
+    if (value === 'service-providers') {
+      navigate('/admin/service-providers');
+    } else {
+      navigate(`/admin/dashboard?tab=${value}`);
+    }
+  };
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -346,13 +360,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-5 h-auto overflow-x-auto">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">Overview</TabsTrigger>
-          <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap">Users</TabsTrigger>
-          <TabsTrigger value="properties" className="text-xs sm:text-sm whitespace-nowrap">Properties</TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap">ID Verify</TabsTrigger>
-          <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap">Config</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-6 h-auto overflow-x-auto">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-overview">Overview</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="properties" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-properties">Properties</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-documents">ID Verify</TabsTrigger>
+          <TabsTrigger value="service-providers" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-service-providers">Service Providers</TabsTrigger>
+          <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-config">Config</TabsTrigger>
         </TabsList>
 
         {/* System Overview Tab */}

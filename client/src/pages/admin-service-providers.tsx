@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BackButton } from "@/components/back-button";
 import { CheckCircle, XCircle, Clock, Building2, MapPin, Mail, Phone, DollarSign } from "lucide-react";
 
 type ServiceProvider = {
@@ -34,6 +34,7 @@ type ServiceProvider = {
 };
 
 export default function AdminServiceProviders() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
@@ -41,6 +42,16 @@ export default function AdminServiceProviders() {
   const [basePrice, setBasePrice] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
+  
+  // Handle tab navigation
+  const handleTabChange = (value: string) => {
+    if (value === 'service-providers') {
+      // Already on service providers page
+      return;
+    } else {
+      navigate(`/admin/dashboard?tab=${value}`);
+    }
+  };
 
   // Fetch all service providers
   const { data: allProviders = [], isLoading } = useQuery<ServiceProvider[]>({
@@ -234,9 +245,18 @@ export default function AdminServiceProviders() {
   return (
     <div className="min-h-screen bg-[#faf5f0] pt-24 pb-12">
       <div className="container max-w-7xl mx-auto px-4">
-        {/* Back Button */}
-        <div className="mb-6">
-          <BackButton />
+        {/* Admin Navigation Tabs */}
+        <div className="mb-8">
+          <Tabs value="service-providers" onValueChange={handleTabChange} className="w-full">
+            <TabsList className="grid w-full grid-cols-6 h-auto overflow-x-auto mb-6">
+              <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-overview">Overview</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-users">Users</TabsTrigger>
+              <TabsTrigger value="properties" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-properties">Properties</TabsTrigger>
+              <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-documents">ID Verify</TabsTrigger>
+              <TabsTrigger value="service-providers" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-service-providers">Service Providers</TabsTrigger>
+              <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-config">Config</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Header */}
@@ -249,7 +269,7 @@ export default function AdminServiceProviders() {
           </p>
         </div>
 
-        {/* Tabs */}
+        {/* Provider Status Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="pending" data-testid="tab-pending">
