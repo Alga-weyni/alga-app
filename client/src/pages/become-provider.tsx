@@ -169,7 +169,7 @@ export default function BecomeProvider() {
   const handleSubmitApplication = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.businessName || !formData.serviceType || !formData.city || !formData.description) {
+    if (!formData.businessName || !formData.serviceType || !formData.city) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -430,7 +430,7 @@ export default function BecomeProvider() {
 
                     <div>
                       <Label htmlFor="description" className="text-eth-brown font-medium">
-                        About Your Service *
+                        About Your Service <span className="text-gray-500">(optional)</span>
                       </Label>
                       <Textarea
                         id="description"
@@ -439,7 +439,6 @@ export default function BecomeProvider() {
                         placeholder="Describe your experience, specialties, and what makes your service unique..."
                         className="mt-2 min-h-32"
                         data-testid="textarea-description"
-                        required
                       />
                     </div>
 
