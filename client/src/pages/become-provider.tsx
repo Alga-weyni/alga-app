@@ -190,7 +190,7 @@ export default function BecomeProvider() {
         onOpenChange={setAuthDialogOpen}
       />
       
-      <div className="pt-24 pb-20">
+      <div className="pb-20">
         {/* Hero Section - Darker header background for provider distinction */}
         <section className="py-20 px-6" style={{ background: "linear-gradient(to bottom, #f5ece3, #faf5f0)" }}>
           <div className="max-w-4xl mx-auto text-center">
