@@ -1,13 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Star, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Property } from "@shared/schema";
 
 export function FeaturedProperties() {
+  const [location, setLocation] = useLocation();
   const { data: properties = [], isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
   });
+
+  const handleExploreClick = () => {
+    // If already on properties page, scroll to all properties
+    if (location === "/properties") {
+      const element = document.querySelector('[data-section="all-properties"]');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Navigate to properties page
+      setLocation("/properties");
+    }
+  };
 
   // Get top-rated properties
   const featured = properties
@@ -95,14 +109,13 @@ export function FeaturedProperties() {
         </div>
 
         <div className="text-center">
-          <Link href="/properties">
-            <Button 
-              className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6 text-lg cursor-pointer"
-              data-testid="button-explore-all"
-            >
-              Explore All Properties
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleExploreClick}
+            className="bg-eth-brown hover:bg-eth-brown/90 text-white px-8 py-6 text-lg cursor-pointer"
+            data-testid="button-explore-all"
+          >
+            Explore All Properties
+          </Button>
         </div>
       </div>
     </div>

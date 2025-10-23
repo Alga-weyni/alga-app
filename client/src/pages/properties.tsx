@@ -411,7 +411,7 @@ export default function Properties() {
             </div>
 
             {/* Results Count & Loading State */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4" data-section="all-properties">
               {isLoading ? (
                 <div className="flex items-center gap-2 text-eth-brown">
                   <Loader2 className="h-5 w-5 animate-spin" />
