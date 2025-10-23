@@ -251,7 +251,11 @@ export default function BecomeHost() {
             <div className="grid md:grid-cols-3 gap-8">
               {/* Step 1 */}
               <div className="relative">
-                <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full">
+                <Card 
+                  className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  onClick={handleApplyClick}
+                  data-testid="card-step-1"
+                >
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 bg-eth-orange rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                       1
@@ -271,7 +275,11 @@ export default function BecomeHost() {
 
               {/* Step 2 */}
               <div className="relative">
-                <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full">
+                <Card 
+                  className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  onClick={handleApplyClick}
+                  data-testid="card-step-2"
+                >
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 bg-eth-orange rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                       2
@@ -291,7 +299,11 @@ export default function BecomeHost() {
 
               {/* Step 3 */}
               <div>
-                <Card className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full">
+                <Card 
+                  className="bg-gradient-to-br from-[#f9e9d8] to-[#f6d8c2] border-eth-orange/20 shadow-lg h-full cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  onClick={handleApplyClick}
+                  data-testid="card-step-3"
+                >
                   <CardContent className="p-8 text-center">
                     <div className="w-16 h-16 bg-eth-orange rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                       3
