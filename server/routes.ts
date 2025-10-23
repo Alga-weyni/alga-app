@@ -290,6 +290,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.patch('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const { firstName, lastName, bio, phoneNumber } = req.body;
+      const userId = req.user.id;
+
+      // Update user in database
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          firstName: firstName || req.user.firstName,
+          lastName: lastName || req.user.lastName,
+          bio: bio !== undefined ? bio : req.user.bio,
+          phoneNumber: phoneNumber || req.user.phoneNumber,
+        })
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update session user data
+      req.user = updatedUser;
+
+      res.json(updatedUser);
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ message: error.message || 'Failed to update profile' });
+    }
+  });
+
   // === PASSWORDLESS OTP AUTHENTICATION ===
   
   // Request OTP for Phone Registration (Passwordless)

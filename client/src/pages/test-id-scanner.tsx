@@ -286,9 +286,9 @@ Birth: 15/03/1985`,
           </ul>
         </Card>
       </div>
-      </div>
-      
-      <Footer />
+    </div>
+    
+    <Footer />
     </div>
   );
 }
