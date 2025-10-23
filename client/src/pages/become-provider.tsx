@@ -69,7 +69,11 @@ export default function BecomeProvider() {
       setFormData(prev => ({ ...prev, serviceType: categoryFromUrl }));
       setShowApplicationForm(true);
       setTimeout(() => {
-        formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (formSectionRef.current) {
+          const yOffset = -100; // Offset for fixed header
+          const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
       }, 300);
     }
   }, [categoryFromUrl, user]);
@@ -138,7 +142,11 @@ export default function BecomeProvider() {
     } else {
       setShowApplicationForm(true);
       setTimeout(() => {
-        formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (formSectionRef.current) {
+          const yOffset = -100; // Offset for fixed header
+          const y = formSectionRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
       }, 100);
     }
   };
