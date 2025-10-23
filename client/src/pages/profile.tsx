@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   ArrowLeft, 
   User, 
@@ -209,50 +210,58 @@ export default function Profile() {
               </CardContent>
             </Card>
 
-            {/* Settings Sections */}
+            {/* Settings Sections - Dropdown */}
             <Card style={{ background: "#fff" }} data-testid="card-settings">
-              <CardHeader>
-                <CardTitle style={{ color: "#2d1405" }}>Settings</CardTitle>
-                <CardDescription>Manage your account preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  data-testid="button-notifications"
-                  onClick={() => navigate("/settings/notifications")}
-                >
-                  <Bell className="w-4 h-4 mr-3" />
-                  Notifications
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  data-testid="button-security"
-                  onClick={() => navigate("/settings/security")}
-                >
-                  <Lock className="w-4 h-4 mr-3" />
-                  Security & Privacy
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  data-testid="button-payments"
-                  onClick={() => navigate("/settings/payment")}
-                >
-                  <CreditCard className="w-4 h-4 mr-3" />
-                  Payment Methods
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  data-testid="button-language"
-                  onClick={() => navigate("/settings/language")}
-                >
-                  <Globe className="w-4 h-4 mr-3" />
-                  Language & Region
-                </Button>
-              </CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="settings" className="border-none">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex flex-col items-start">
+                      <CardTitle style={{ color: "#2d1405" }}>Settings</CardTitle>
+                      <CardDescription>Manage your account preferences</CardDescription>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-4">
+                    <div className="space-y-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-notifications"
+                        onClick={() => navigate("/settings/notifications")}
+                      >
+                        <Bell className="w-4 h-4 mr-3" />
+                        Notifications
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-security"
+                        onClick={() => navigate("/settings/security")}
+                      >
+                        <Lock className="w-4 h-4 mr-3" />
+                        Security & Privacy
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-payments"
+                        onClick={() => navigate("/settings/payment")}
+                      >
+                        <CreditCard className="w-4 h-4 mr-3" />
+                        Payment Methods
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-language"
+                        onClick={() => navigate("/settings/language")}
+                      >
+                        <Globe className="w-4 h-4 mr-3" />
+                        Language & Region
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </Card>
           </div>
         </div>
