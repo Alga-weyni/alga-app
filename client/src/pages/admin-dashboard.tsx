@@ -30,7 +30,8 @@ import {
   Eye,
   UserX,
   Settings,
-  LogOut
+  LogOut,
+  Briefcase
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -139,6 +140,11 @@ export default function AdminDashboard() {
   // Fetch verification documents
   const { data: documents = [], isLoading: documentsLoading } = useQuery<VerificationDocument[]>({
     queryKey: ['/api/admin/verification-documents'],
+  });
+
+  // Fetch service providers
+  const { data: serviceProviders = [] } = useQuery<any[]>({
+    queryKey: ['/api/service-providers'],
   });
 
   // Fetch system statistics
@@ -266,7 +272,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* System Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -302,6 +308,25 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">{stats?.pendingDocuments || 0}</div>
             <p className="text-xs text-muted-foreground">
               Documents awaiting review
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/admin/service-providers')}
+          data-testid="card-service-providers"
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Service Providers</CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {serviceProviders.filter((p: any) => p.verificationStatus === 'pending').length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Pending approval
             </p>
           </CardContent>
         </Card>
@@ -450,6 +475,49 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Briefcase className="h-5 w-5 mr-2" style={{ color: "#d97706" }} />
+                  Service Provider Applications
+                </CardTitle>
+                <CardDescription>
+                  Review and approve service provider applications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Pending</p>
+                    <p className="text-3xl font-bold" style={{ color: "#d97706" }}>
+                      {serviceProviders.filter((p: any) => p.verificationStatus === 'pending').length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Verified</p>
+                    <p className="text-3xl font-bold text-eth-green">
+                      {serviceProviders.filter((p: any) => p.verificationStatus === 'verified').length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                    <p className="text-sm text-gray-600 mb-1">Rejected</p>
+                    <p className="text-3xl font-bold text-eth-red">
+                      {serviceProviders.filter((p: any) => p.verificationStatus === 'rejected').length}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate('/admin/service-providers')} 
+                  className="w-full"
+                  style={{ background: "#2d1405" }}
+                  data-testid="button-manage-providers"
+                >
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  Manage Service Provider Applications
+                </Button>
               </CardContent>
             </Card>
           </div>
