@@ -587,7 +587,9 @@ export default function HostDashboard() {
                     <img
                       src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
                       alt={property.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                      onClick={() => navigate(`/properties/${property.id}`)}
+                      data-testid={`img-property-${property.id}`}
                     />
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
