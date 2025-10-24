@@ -70,7 +70,7 @@ export default function BecomeProvider() {
 
   // Auto-show form if category is selected from URL
   useEffect(() => {
-    if (categoryFromUrl && user && user.idVerified) {
+    if (categoryFromUrl && user) {
       setFormData(prev => ({ ...prev, serviceType: categoryFromUrl }));
       setShowApplicationForm(true);
       setTimeout(() => {
@@ -90,16 +90,7 @@ export default function BecomeProvider() {
     }
   }, [user]);
 
-  // Auto-redirect after login if ID not verified
-  useEffect(() => {
-    if (user && !user.idVerified && !authDialogOpen && showApplicationForm) {
-      toast({
-        title: "ID Verification Required",
-        description: "Please verify your identity to complete your application.",
-      });
-      navigate("/scan-id");
-    }
-  }, [user, navigate, toast, authDialogOpen, showApplicationForm]);
+  // Auto-redirect after login removed - no ID verification required
 
   const applicationMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -139,12 +130,6 @@ export default function BecomeProvider() {
     if (!user) {
       setAuthDialogOpen(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (!user.idVerified) {
-      toast({
-        title: "ID Verification Required",
-        description: "Please verify your identity first.",
-      });
-      navigate("/scan-id");
     } else {
       setShowApplicationForm(true);
       setTimeout(() => {
@@ -161,12 +146,6 @@ export default function BecomeProvider() {
     if (!user) {
       setAuthDialogOpen(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (!user.idVerified) {
-      toast({
-        title: "ID Verification Required",
-        description: "Please verify your identity first.",
-      });
-      navigate("/scan-id");
     } else {
       navigate(`/become-provider?category=${serviceId}`);
     }
