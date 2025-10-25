@@ -79,10 +79,10 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
   - Uses Noto Sans Ethiopic font for authentic script rendering
   - Orange gradient (from #F49F0A to #CD7F32) with hover effects
   - Scales on hover with glowing shadow effect
-  - Tooltip: "Get help with Lemlem (ልምልም) — our AI assistant named after my grandmother"
+  - Tooltip: "Get help with Lemlem (ልምልም) — your AI assistant named after my grandmother"
 - **Chat Header**:
-  - Title: "Lemlem (ልምልም) - AI Agent"
-  - Subtitle: "Named after my beautiful grandma 💚"
+  - Title: "Lemlem (ልምልም), your AI Assistant"
+  - Subtitle: "Named after my beautiful grandma! 💚"
   - Grandmother emoji (👵🏾) for visual identity
 - **Welcome Message**: Introduces heritage story in all 5 languages
 - **Language Switcher**: Dropdown menu with 5 language options
