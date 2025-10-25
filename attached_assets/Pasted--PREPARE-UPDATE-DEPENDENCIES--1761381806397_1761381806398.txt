@@ -1,0 +1,165 @@
+# ===============================
+#  PREPARE & UPDATE DEPENDENCIES
+# ===============================
+git pull origin main || true
+npm install
+
+# ===============================
+#  FRONTEND: MULTILINGUAL + VOICE CHAT
+# ===============================
+echo "Creating multilingual, talking Lemlem widget..."
+cat > client/src/components/LemlemChat.tsx <<'EOF'
+import React,{useState,useEffect,Suspense} from 'react';
+import {Button,Card} from '@/components/ui';
+import {useUser} from '@/hooks/useUser';
+import {useQuery} from '@tanstack/react-query';
+
+const LemlemChatBody = React.lazy(()=>import('./LemlemChatBody'));
+
+const LANGUAGES = [
+ { code:'en-US', label:'English', flag:'🇬🇧' },
+ { code:'am-ET', label:'Amharic', flag:'🇪🇹' },
+ { code:'ti-ER', label:'Tigrigna', flag:'🇪🇷' },
+ { code:'om-ET', label:'Afaan Oromo', flag:'🌾' },
+ { code:'zh-CN', label:'中文 Chinese', flag:'🇨🇳' },
+];
+
+export default function LemlemChatWidget(){
+ const [open,setOpen]=useState(false);
+ const [voiceOn,setVoiceOn]=useState(true);
+ const [lang,setLang]=useState('en-US');
+ const [speaking,setSpeaking]=useState(false);
+ const {user}=useUser();
+ const {data:context}=useQuery(['lemlemContext'],()=>fetch('/api/lemlem/context',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({propertyId:user?.activePropertyId})}).then(r=>r.json()));
+
+ const toggle=()=>setOpen(!open);
+
+ const speak=(text:string)=>{
+   if(!voiceOn||!window.speechSynthesis)return;
+   const utter=new SpeechSynthesisUtterance(text);
+   utter.lang=lang;
+   utter.onstart=()=>setSpeaking(true);
+   utter.onend=()=>setSpeaking(false);
+   speechSynthesis.speak(utter);
+ };
+
+ return (
+  <div className="fixed bottom-4 right-4 z-50">
+   <Button onClick={toggle} className="rounded-full bg-[#CD7F32] text-white p-3 shadow-lg">{open?'✖':'💬'}</Button>
+   {open&&(
+    <Suspense fallback={<Card className='p-4 bg-[#f9e9d8]'>Loading Lemlem...</Card>}>
+     <Card className="p-0 w-80 sm:w-96 bg-[#f9e9d8] border border-[#CD7F32] shadow-xl">
+      <div className="flex justify-between items-center p-2 bg-[#CD7F32] text-white">
+        <span>🧕 Lemlem AI Assistant</span>
+        <Button onClick={()=>setVoiceOn(!voiceOn)} className="bg-transparent hover:bg-[#a95f20] text-white text-sm">
+          {voiceOn?'🔊 On':'🔇 Off'}
+        </Button>
+      </div>
+
+      {/* Language selector */}
+      <div className="flex flex-wrap justify-center gap-1 p-2 bg-[#f1d9c0] text-[#2d1405] text-sm">
+        {LANGUAGES.map(l=>(
+          <Button key={l.code} onClick={()=>setLang(l.code)}
+           className={`px-2 py-1 rounded ${lang===l.code?'bg-[#CD7F32] text-white':'bg-[#f9e9d8] text-[#2d1405]'}`}>
+            {l.flag} {l.label}
+          </Button>
+        ))}
+      </div>
+
+      <LemlemChatBody context={context} onSpeak={speak} lang={lang}/>
+     </Card>
+    </Suspense>
+   )}
+  </div>
+ );
+}
+EOF
+
+# ===============================
+#  CHAT BODY UPDATE: SPEAKER ICON
+# ===============================
+cat > client/src/components/LemlemChatBody.tsx <<'EOF'
+import React,{useState,useEffect,useRef} from 'react';
+import {Button,Card} from '@/components/ui';
+
+export default function LemlemChatBody({context,onSpeak,lang}){
+ const [messages,setMessages]=useState([{from:'lemlem',text:'Hello dear! Select a language above and I’ll speak with you in your preferred tongue.'}]);
+ const [input,setInput]=useState('');
+ const bottomRef=useRef(null);
+
+ useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:'smooth'});},[messages]);
+
+ const sendMessage=async()=>{
+  if(!input.trim())return;
+  const userMsg={from:'user',text:input};
+  setMessages(m=>[...m,userMsg]);
+  setInput('');
+  const res=await fetch('/api/lemlem/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:input,lang})});
+  const data=await res.json();
+  const reply={from:'lemlem',text:data.reply};
+  setMessages(m=>[...m,reply]);
+  onSpeak(data.reply);
+ };
+
+ return (
+  <div className="flex flex-col h-96 justify-between">
+   <div className="overflow-y-auto p-3 space-y-2">
+     {messages.map((m,i)=>(
+       <div key={i} className={`flex ${m.from==='lemlem'?'justify-start':'justify-end'}`}>
+         <Card className={`p-2 rounded-md max-w-[75%] ${m.from==='lemlem'?'bg-[#f1d9c0] text-[#2d1405]':'bg-[#CD7F32] text-white'}`}>
+           {m.text}
+           {m.from==='lemlem'&&<Button onClick={()=>onSpeak(m.text)} className="ml-2 bg-transparent hover:bg-[#f9e9d8] text-[#2d1405] text-xs">🔊</Button>}
+         </Card>
+       </div>
+     ))}
+     <div ref={bottomRef}></div>
+   </div>
+   <div className="flex border-t border-[#CD7F32]">
+     <input value={input} onChange={e=>setInput(e.target.value)} className="flex-grow p-2 bg-[#f9e9d8] text-[#2d1405]" placeholder="Type your message here..."/>
+     <Button onClick={sendMessage} className="bg-[#CD7F32] text-white">Send</Button>
+   </div>
+  </div>
+ );
+}
+EOF
+
+# ===============================
+#  SERVER ENDPOINT UPDATE (LANG PASS-THROUGH)
+# ===============================
+cat >> server/routes/lemlem.ts <<'EOF'
+
+// Lemlem v4.0 – Language aware message route
+router.post('/api/lemlem/message',async(req,res)=>{
+ try{
+   const {text,lang}=req.body;
+   // Use template first
+   const reply=await getTemplateReply(text,lang)||await getAIReply(text,lang);
+   res.json({reply});
+ }catch(e){
+   res.json({reply:"Hmm… something went wrong, dear. Try again please."});
+ }
+});
+EOF
+
+# ===============================
+#  REBUILD & DEPLOY
+# ===============================
+npm run build
+npm run start
+
+# ===============================
+#  DOCUMENTATION
+# ===============================
+cat >> replit.md <<'EOF'
+# Lemlem v4.0 — Talking Grandmother Edition
+- Added visible language selector (Amharic, Tigrigna, Oromo, Chinese, English)
+- Added browser Text-to-Speech voice output for Lemlem’s messages
+- Added 🔊 speaker icon for replay
+- Added Admin Voice On/Off toggle
+- Preserved cost-saving template system
+- UI uses Alga theme colors (#f9e9d8 tan, #CD7F32 orange, #2d1405 brown)
+EOF
+
+git add .
+git commit -m "Lemlem v4.0 – Talking Grandmother Edition with Multilingual TTS and Language Selector"
+git push origin main

@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Volume2, VolumeX } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface Message {
   id: string;
@@ -18,6 +19,14 @@ interface LemlemChatProps {
   propertyId?: number;
   bookingId?: number;
 }
+
+// Language code mapping for Text-to-Speech
+const LANGUAGE_VOICES: Record<string, string> = {
+  'en': 'en-US',
+  'am': 'am-ET',
+  'ti': 'ti-ER',
+  'om': 'om-ET',
+};
 
 export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,8 +42,18 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Get user's language preference
+  const { data: profile } = useQuery<any>({
+    queryKey: ['/api/profile'],
+    enabled: isOpen, // Only load when chat is open
+  });
+
+  const userLanguage = (profile?.preferences?.language || 'en') as string;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,6 +62,33 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Text-to-Speech function
+  const speak = (text: string) => {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = LANGUAGE_VOICES[userLanguage] || 'en-US';
+    utterance.rate = 0.9; // Slightly slower for grandmother feel
+    utterance.pitch = 1.1; // Slightly higher for warm, friendly tone
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Auto-speak Lemlem's responses
+  const speakLastMessage = (messageText: string) => {
+    if (voiceEnabled) {
+      // Small delay to ensure message is displayed first
+      setTimeout(() => speak(messageText), 100);
+    }
+  };
 
   const quickQuestions = [
     "What's the lockbox code?",
@@ -82,6 +128,9 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
       };
 
       setMessages((prev) => [...prev, lemlemMessage]);
+
+      // Auto-speak Lemlem's response
+      speakLastMessage(response.message);
 
       // Track costs
       if (response.cost && response.cost > 0) {
@@ -141,18 +190,38 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
           </div>
           <div>
             <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem</h3>
-            <p className="text-xs opacity-90">Your AI Grandmother Assistant</p>
+            <p className="text-xs opacity-90">
+              Your AI Grandmother Assistant
+              {isSpeaking && <span className="ml-2 animate-pulse">🔊</span>}
+            </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsOpen(false)}
-          className="text-white hover:bg-white/20"
-          data-testid="button-close-lemlem"
-        >
-          <X className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setVoiceEnabled(!voiceEnabled);
+              if (!voiceEnabled) {
+                window.speechSynthesis.cancel();
+              }
+            }}
+            className="text-white hover:bg-white/20"
+            data-testid="button-toggle-voice"
+            title={voiceEnabled ? "Voice On" : "Voice Off"}
+          >
+            {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            className="text-white hover:bg-white/20"
+            data-testid="button-close-lemlem"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Cost Indicator */}
@@ -170,23 +239,37 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
             className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
             data-testid={`message-${message.isUser ? "user" : "lemlem"}-${message.id}`}
           >
-            <div
-              className={`max-w-[80%] rounded-lg p-3 ${
-                message.isUser
-                  ? "bg-[#CD7F32] text-white"
-                  : "bg-white border border-[#CD7F32]/20"
-              }`}
-            >
-              <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-              {!message.isUser && message.usedTemplate && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✅ Answered instantly (no AI cost)
-                </p>
-              )}
-              {!message.isUser && !message.usedTemplate && message.cost && message.cost > 0 && (
-                <p className="text-xs text-yellow-600 mt-1">
-                  💰 AI used (${message.cost.toFixed(6)})
-                </p>
+            <div className="flex items-start gap-2">
+              <div
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.isUser
+                    ? "bg-[#CD7F32] text-white"
+                    : "bg-white border border-[#CD7F32]/20"
+                }`}
+              >
+                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                {!message.isUser && message.usedTemplate && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ✅ Answered instantly (no AI cost)
+                  </p>
+                )}
+                {!message.isUser && !message.usedTemplate && message.cost && message.cost > 0 && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    💰 AI used (${message.cost.toFixed(6)})
+                  </p>
+                )}
+              </div>
+              {!message.isUser && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => speak(message.text)}
+                  className="h-8 w-8 text-[#CD7F32] hover:text-[#B87333] hover:bg-[#f9e9d8]"
+                  data-testid={`button-speak-${message.id}`}
+                  title="Listen to this message"
+                >
+                  <Volume2 className="h-4 w-4" />
+                </Button>
               )}
             </div>
           </div>
