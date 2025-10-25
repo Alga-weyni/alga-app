@@ -421,6 +421,8 @@ export default function Profile() {
                           <SelectContent>
                             <SelectItem value="en">English</SelectItem>
                             <SelectItem value="am">አማርኛ (Amharic)</SelectItem>
+                            <SelectItem value="ti">ትግርኛ (Tigrinya)</SelectItem>
+                            <SelectItem value="om">Afaan Oromoo (Oromo)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
