@@ -189,6 +189,7 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
         message: messageText,
         propertyId,
         bookingId,
+        language: selectedLanguage, // Pass selected language to backend
       });
 
       const lemlemMessage: Message = {
