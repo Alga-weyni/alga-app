@@ -1,0 +1,66 @@
+# ===================================================
+# 🕵🏾‍♀️  ALGA PAY – HIDDEN INTERMEDIARY SETUP
+# ===================================================
+
+echo "🧩 Creating Alga Pay internal payment service..."
+
+# 1️⃣  Backend wrapper (no third-party exposure)
+mkdir -p server
+cat <<'EOF' > server/algaPay.ts
+import axios from "axios";
+
+export const algaPayHandler = async (req, res) => {
+  const { amount, email, order_id } = req.body;
+  try {
+    const tx_ref = "ALG-" + Date.now();
+
+    // Hidden call to your payment processor (never exposed)
+    await axios.post(process.env.ALGA_PAYMENT_RAIL, {
+      amount,
+      currency: "ETB",
+      email,
+      tx_ref,
+      callback_url: process.env.ALGA_CALLBACK_URL
+    }, {
+      headers: { Authorization: \`Bearer \${process.env.ALGA_PAYMENT_KEY}\` }
+    });
+
+    // Return Alga-branded response only
+    res.json({ status: "initiated", tx_ref });
+  } catch {
+    res.status(500).json({ error: "Payment failed internally" });
+  }
+};
+EOF
+
+# 2️⃣  Callback endpoint (private confirmation)
+cat <<'EOF' > server/algaCallback.ts
+export const algaCallback = async (req, res) => {
+  const { tx_ref, status } = req.body;
+  if (status === "success") {
+    // update DB: mark order as paid
+    console.log("✅ Alga Pay confirmed:", tx_ref);
+  }
+  res.sendStatus(200);
+};
+EOF
+
+# 3️⃣  API routes registration
+sed -i '' '/app.listen/i\
+import { algaPayHandler } from "./server/algaPay.ts";\
+import { algaCallback } from "./server/algaCallback.ts";\
+app.post("/api/algaPay", algaPayHandler);\
+app.post("/api/payment-callback", algaCallback);' server/index.ts || true
+
+# 4️⃣  Environment variables (rename generically)
+echo "Set these in Replit Secrets:"
+echo "ALGA_PAYMENT_KEY=your_internal_key_here"
+echo "ALGA_PAYMENT_RAIL=https://api.hidden-processor.com/pay"
+echo "ALGA_CALLBACK_URL=https://alga.app/api/payment-callback"
+
+# 5️⃣  Front-end payment button text
+grep -rl "Chapa" client | xargs sed -i '' 's/Chapa/Alga Pay/g' || true
+
+echo "✅ Alga Pay hidden intermediary configured successfully.
+Users and providers will only ever see: “Pay with Alga Pay”."
+# ===================================================
