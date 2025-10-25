@@ -124,31 +124,38 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     scrollToBottom();
   }, [messages]);
 
-  // Clean text for speech - remove emojis and symbols, keep only letters and numbers
+  // Clean text for speech - remove ALL emojis, symbols, and special characters
   const cleanTextForSpeech = (text: string): string => {
     return text
-      // Remove common emojis by replacing them with empty string
-      .replace(/[\u2600-\u27BF]/g, '')
-      .replace(/[\uE000-\uF8FF]/g, '')
-      .replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]/g, '')
+      // Remove emojis and special symbols
+      .replace(/[\u2600-\u27BF]/g, '')         // Miscellaneous Symbols  
+      .replace(/[\uE000-\uF8FF]/g, '')         // Private Use Area
+      .replace(/[\u2700-\u27BF]/g, '')         // Dingbats
+      .replace(/[\uD800-\uDFFF]/g, '')         // Surrogate pairs (emojis)
+      // Remove common special symbols explicitly
+      .replace(/[☕✨🔑📶⏰🚨🏠🎉📞🚗🌡📺🍳💰🙏🎯🌍🇪🇹🇪🇷🇨🇳🌾🇬🇧]/g, '')
       // Remove markdown formatting
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/##/g, '')
       .replace(/#/g, '')
-      // Clean up multiple spaces
+      .replace(/`/g, '')
+      // Remove extra punctuation that sounds awkward
+      .replace(/[|]/g, '')
+      // Clean up multiple spaces and newlines
+      .replace(/\n+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   };
 
-  // Text-to-Speech function - Warm Grandmother Voice
+  // Text-to-Speech function - Soft, Loving Grandmother Voice
   const speak = (text: string) => {
     if (!voiceEnabled || !window.speechSynthesis) return;
 
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
 
-    // Clean text - remove emojis and symbols, keep only words and numbers
+    // Clean text - remove ALL emojis and symbols
     const cleanText = cleanTextForSpeech(text);
     if (!cleanText) return; // Don't speak if nothing left after cleaning
 
@@ -156,20 +163,60 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     const langCode = LANGUAGE_VOICES[userLanguage] || 'en-US';
     utterance.lang = langCode;
     
-    // Soft, loving grandmother voice settings (like speaking to a beloved grandchild)
-    utterance.rate = 0.84; // Warm, patient pace with gentle energy
-    utterance.pitch = 1.2; // Soft, sweet, and gentle tone
-    utterance.volume = 0.95; // Gentle presence, not overwhelming
+    // Very soft, gentle grandmother voice - extra soft and loving
+    utterance.rate = 0.75;   // Slower, more patient (was 0.84)
+    utterance.pitch = 1.35;  // Higher, softer, more feminine (was 1.2)
+    utterance.volume = 0.90; // Slightly quieter, gentler (was 0.95)
     
-    // Try to select a female voice for grandmother feel
+    // Select the BEST native voice for each language
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.lang.startsWith(langCode.split('-')[0]) && 
-      (voice.name.toLowerCase().includes('female') || 
-       voice.name.toLowerCase().includes('woman'))
-    ) || voices.find(voice => 
-      voice.lang.startsWith(langCode.split('-')[0])
-    );
+    
+    // Language-specific voice selection for natural pronunciation
+    let preferredVoice = null;
+    
+    if (userLanguage === 'zh') {
+      // Chinese: Find Mandarin female voice
+      preferredVoice = voices.find(voice => 
+        (voice.lang.includes('zh-CN') || voice.lang.includes('zh')) &&
+        (voice.name.includes('Female') || voice.name.includes('Ting-Ting') || voice.name.includes('Mei'))
+      );
+    } else if (userLanguage === 'am') {
+      // Amharic: Find Ethiopian/Amharic voice or fallback to similar
+      preferredVoice = voices.find(voice => 
+        voice.lang.includes('am') || voice.lang.includes('AM')
+      );
+    } else if (userLanguage === 'ti') {
+      // Tigrinya: Find Tigrinya voice or fallback
+      preferredVoice = voices.find(voice => 
+        voice.lang.includes('ti') || voice.lang.includes('TI')
+      );
+    } else if (userLanguage === 'om') {
+      // Oromo: Find Oromo voice or fallback
+      preferredVoice = voices.find(voice => 
+        voice.lang.includes('om') || voice.lang.includes('OM')
+      );
+    } else {
+      // English: Find female English voice
+      preferredVoice = voices.find(voice => 
+        voice.lang.startsWith('en') &&
+        (voice.name.includes('Female') || voice.name.includes('Samantha') || voice.name.includes('Victoria'))
+      );
+    }
+    
+    // Fallback: Any voice matching the language
+    if (!preferredVoice) {
+      preferredVoice = voices.find(voice => 
+        voice.lang.startsWith(langCode.split('-')[0])
+      );
+    }
+    
+    // Final fallback: Any female-sounding voice
+    if (!preferredVoice) {
+      preferredVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman')
+      );
+    }
     
     if (preferredVoice) {
       utterance.voice = preferredVoice;
@@ -179,10 +226,10 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
-    // Natural pause before speaking to sound calm and thoughtful (like a grandmother taking a breath)
+    // Natural pause before speaking (grandmother taking a gentle breath)
     setTimeout(() => {
       window.speechSynthesis.speak(utterance);
-    }, 250);
+    }, 300);
   };
 
   // Auto-speak Lemlem's responses
