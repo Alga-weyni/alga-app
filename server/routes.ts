@@ -7,6 +7,8 @@ import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
 import paymentRouter from "./payment";
+import { algaPayHandler } from "./algaPay";
+import { algaCallback } from "./algaCallback";
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from "./utils/invoice";
 import { sendOtpEmail, sendWelcomeEmail, sendProviderApplicationReceivedEmail, sendProviderApplicationApprovedEmail, sendProviderApplicationRejectedEmail } from "./utils/email.js";
@@ -2069,6 +2071,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : 'Missing required environment variables for Telebirr',
     });
   });
+
+  // Alga Pay - Unified payment interface (white-labeled)
+  app.post('/api/alga-pay', isAuthenticated, algaPayHandler);
+  app.post('/api/payment-callback', algaCallback);
 
   app.use('/api/payment', isAuthenticated, paymentRouter);
 
