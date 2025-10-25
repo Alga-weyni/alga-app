@@ -7,9 +7,11 @@
 ---
 
 ## 🎯 Purpose
-Lemlem is an intelligent voice system designed to communicate with users in **five native languages** —  
+Lemlem is an intelligent voice system **named after my grandmother**, designed to communicate with users in **five native languages** —  
 🇬🇧 English, 🇪🇹 Amharic (አማርኛ), 🇪🇷 Tigrinya (ትግርኛ), Afaan Oromoo, and 🇨🇳 Chinese (中文) —  
 using a **soft, grandmotherly female voice** that reflects empathy, warmth, and cultural respect.  
+
+This personal heritage connection ensures every interaction carries the warmth and wisdom of Ethiopian hospitality.
 
 It operates **fully offline and free**, powered by the browser's built-in Text-to-Speech (TTS) engine.  
 
@@ -77,6 +79,12 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
   - Uses Noto Sans Ethiopic font for authentic script rendering
   - Orange gradient (from #F49F0A to #CD7F32) with hover effects
   - Scales on hover with glowing shadow effect
+  - Tooltip: "Get help with Lemlem (ልምልም) — our AI assistant named after my grandmother"
+- **Chat Header**:
+  - Title: "Lemlem (ልምልም)"
+  - Subtitle: "Named after my grandmother 💚"
+  - Grandmother emoji (👵🏾) for visual identity
+- **Welcome Message**: Introduces heritage story in all 5 languages
 - **Language Switcher**: Dropdown menu with 5 language options
 - **Voice Configuration**:
   - Rate: 0.75 (slower, patient grandmother pace)
