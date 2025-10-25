@@ -1,5 +1,5 @@
 import { Building, Calendar, TrendingUp, Star, CheckCircle, AlertCircle, DollarSign, Package } from "lucide-react";
-import { formatETB } from "@/lib/utils";
+import { formatETB } from "@/lib/formatCurrency";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface PropertyInsightsProps {
