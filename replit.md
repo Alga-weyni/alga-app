@@ -6,7 +6,20 @@ Alga is a full-stack web application designed for the Ethiopian property rental 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Code Quality Improvements (October 25, 2025)
+## Recent Updates (October 25, 2025)
+
+### Alga Pay - White-Labeled Payment System (Latest)
+Implemented unified payment gateway that abstracts all underlying payment processors behind "Alga Pay" branding:
+- Created `server/algaPay.ts` unified payment handler with single `/api/alga-pay` endpoint
+- Created `server/algaCallback.ts` for processor-agnostic payment confirmations
+- Built `client/src/components/alga-pay-checkout.tsx` with full Alga branding
+- Updated all frontend references: "Chapa" → "Alga Pay", removed processor exposure
+- Updated payment methods in constants to show only "Alga Pay" and "Alga Pay (International)"
+- Users never see Chapa, Stripe, or other processor names throughout platform
+- Maintained backend flexibility to route payments based on user location/preference
+- Complete documentation in `docs/ALGA_PAY_SETUP.md`
+
+### Code Quality Improvements
 Completed comprehensive platform optimization across all areas:
 
 ### Performance Enhancements
@@ -58,7 +71,8 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Access Management**: 6-digit access code system for properties.
 - **Review System**: Advanced weighted review system (ALGA Review Engine) with time-decay algorithm.
 - **ID Verification**: Universal system with QR code scanning, OCR for foreign visitors, operator review dashboard, and integration with Fayda ID for eKYC.
-- **Payment Gateway**: Integration with Chapa, Stripe, Telebirr, and PayPal, including webhooks.
+- **Alga Pay (White-Labeled Payment System)**: Unified payment gateway that abstracts underlying processors (Chapa, Stripe, Telebirr) from users. All payment interactions show only "Alga Pay" branding, never exposing third-party processor names. Provides single API endpoint (`/api/alga-pay`) that routes to appropriate processor based on method, maintains flexibility to switch processors without user-facing changes, and includes automated callback handling for payment confirmations. See `docs/ALGA_PAY_SETUP.md` for complete documentation.
+- **Payment Gateway**: Backend integration with Chapa (Ethiopian), Stripe (International), Telebirr, and PayPal, all accessible through the white-labeled Alga Pay interface.
 - **Commission & Tax System**: Automated calculation of Alga commission, VAT, and withholding tax, with ERCA-compliant PDF invoice generation.
 - **Add-On Services Marketplace**: Separate browsing for guests and application for providers, featuring 11 service categories, reviews, and provider badges.
 - **International Support**: Multi-language (Amharic, English) and localization.
