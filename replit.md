@@ -8,7 +8,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 25, 2025)
 
-### Alga Pay - White-Labeled Payment System (Latest)
+### Property Insights Dashboard Widget (Latest)
+Implemented comprehensive analytics widget for host dashboard with real-time backend data:
+- **Backend**: Created `/api/host/stats` endpoint with `getHostStats()` method in storage
+- **Frontend**: Built `PropertyInsights` component with 8 key metrics in responsive grid
+- **Metrics Displayed**:
+  - Active Listings (with total count)
+  - Upcoming Bookings (with total bookings)
+  - Total Earnings (with last payout amount)
+  - Average Rating (with total reviews)
+  - Completed Bookings (with occupancy rate %)
+  - Occupancy Rate percentage
+  - Pending Reviews (action needed)
+  - Total Bookings (all-time)
+- **Features**: Skeleton loading states, color-coded icons, hover effects, fully responsive
+- **Integration**: Displays below HostBanner on `/host/dashboard` page
+- **Tech**: Real PostgreSQL queries using Drizzle ORM, React Query for data fetching
+
+### Alga Pay - White-Labeled Payment System
 Implemented unified payment gateway that abstracts all underlying payment processors behind "Alga Pay" branding:
 - Created `server/algaPay.ts` unified payment handler with single `/api/alga-pay` endpoint
 - Created `server/algaCallback.ts` for processor-agnostic payment confirmations
