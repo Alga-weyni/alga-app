@@ -24,6 +24,70 @@ const EMERGENCY_CONTACTS = {
   touristPolice: "+251-11-155-0202",
 };
 
+// Multilingual messages for ALL templates
+const MESSAGES = {
+  en: {
+    emergency: (info: any) => `🚨 **Emergency Contacts in Ethiopia:**\n\n🚓 Police: ${EMERGENCY_CONTACTS.police}\n🚑 Ambulance: ${EMERGENCY_CONTACTS.ambulance}\n🔥 Fire Department: ${EMERGENCY_CONTACTS.fire}\n👮 Tourist Police: ${EMERGENCY_CONTACTS.touristPolice}\n\n${info.nearestHospital ? `Nearest Hospital: ${info.nearestHospital}\n\n` : ""}${info.hostPhone ? `Host/Manager: ${info.hostPhone}\n\n` : ""}Stay safe! Help is on the way. 🙏`,
+    lockboxCode: (code: string, location: string, instructions?: string) => `🔑 **Access Information:**\n\n**Lockbox Code:** ${code}\n**Location:** ${location || "At the property entrance"}\n\n${instructions ? `**Instructions:** ${instructions}\n\n` : ""}Welcome to your stay! ✨`,
+    lockboxMissing: (phone?: string) => `I don't have the lockbox code in my records yet, dear. ${phone ? `You can call the host at ${phone}` : "Please contact the host directly."}`,
+    wifi: (network: string, password: string) => `📶 **WiFi Information:**\n\n**Network Name:** ${network}\n**Password:** ${password}\n\nEnjoy your stay online! ✨`,
+    wifiMissing: `I don't have the WiFi details yet, dear. Please ask your host for the network name and password.`,
+    checkout: (time: string) => `⏰ **Check-out Time:** ${time}\n\nPlease ensure you leave by this time. Have a safe journey! ✨`,
+    checkoutMissing: `Check-out time isn't in my records yet. Please check with your host for the exact time.`,
+    checkin: (time: string) => `⏰ **Check-in Time:** ${time}\n\nLooking forward to welcoming you! ✨`,
+    checkinMissing: `Check-in time isn't in my records yet. Please check with your host for arrival details.`,
+    host: (phone: string, email?: string) => `📞 **Host Contact:**\n\n${phone ? `Phone: ${phone}\n` : ""}${email ? `Email: ${email}\n` : ""}\nFeel free to reach out anytime!`,
+  },
+  am: { // Amharic
+    emergency: (info: any) => `🚨 **የአደጋ ጊዜ እውቂያዎች በኢትዮጵያ:**\n\n🚓 ፖሊስ: ${EMERGENCY_CONTACTS.police}\n🚑 አምቡላንስ: ${EMERGENCY_CONTACTS.ambulance}\n🔥 የእሳት አደጋ: ${EMERGENCY_CONTACTS.fire}\n👮 የቱሪስት ፖሊስ: ${EMERGENCY_CONTACTS.touristPolice}\n\n${info.nearestHospital ? `ቅርብ ሆስፒታል: ${info.nearestHospital}\n\n` : ""}${info.hostPhone ? `አስተናጋጅ/ስራ አስኪያጅ: ${info.hostPhone}\n\n` : ""}ደህንነትዎን ይጠብቁ! እገዛ በመንገድ ላይ ነው። 🙏`,
+    lockboxCode: (code: string, location: string, instructions?: string) => `🔑 **የመግቢያ መረጃ:**\n\n**የመቆለፊያ ሳጥን ኮድ:** ${code}\n**ቦታ:** ${location || "በንብረቱ መግቢያ"}\n\n${instructions ? `**መመሪያዎች:** ${instructions}\n\n` : ""}እንኳን ደህና መጡ! ✨`,
+    lockboxMissing: (phone?: string) => `የመቆለፊያ ሳጥን ኮድ በመዝገቦቼ ውስጥ የለም። ${phone ? `አስተናጋጁን በ${phone} ይደውሉ` : "እባክዎን አስተናጋጁን በቀጥታ ያነጋግሩ።"}`,
+    wifi: (network: string, password: string) => `📶 **WiFi መረጃ:**\n\n**የኔትወርክ ስም:** ${network}\n**የይለፍ ቃል:** ${password}\n\nየመስመር ላይ ቆይታዎን ይደሰቱ! ✨`,
+    wifiMissing: `የWiFi ዝርዝሮች ገና የሉም። እባክዎን አስተናጋጅዎን ይጠይቁ።`,
+    checkout: (time: string) => `⏰ **የመውጫ ሰዓት:** ${time}\n\nበዚህ ጊዜ መውጣትዎን ያረጋግጡ። ደህንነቱ የተጠበቀ ጉዞ! ✨`,
+    checkoutMissing: `የመውጫ ሰዓት በመዝገቦቼ ውስጥ የለም። እባክዎን አስተናጋጅዎን ይጠይቁ።`,
+    checkin: (time: string) => `⏰ **የመግቢያ ሰዓት:** ${time}\n\nእናመሰግናለን እናንተን እንቀበላለን! ✨`,
+    checkinMissing: `የመግቢያ ሰዓት በመዝገቦቼ ውስጥ የለም። እባክዎን አስተናጋጅዎን ይጠይቁ።`,
+    host: (phone: string, email?: string) => `📞 **የአስተናጋጅ እውቂያ:**\n\n${phone ? `ስልክ: ${phone}\n` : ""}${email ? `ኢሜይል: ${email}\n` : ""}\nየትኛውንም ጊዜ ያነጋግሩ!`,
+  },
+  ti: { // Tigrinya
+    emergency: (info: any) => `🚨 **ህጹጽ ርክባት ኣብ ኢትዮጵያ:**\n\n🚓 ፖሊስ: ${EMERGENCY_CONTACTS.police}\n🚑 ኣምቡላንስ: ${EMERGENCY_CONTACTS.ambulance}\n🔥 ሓዊ: ${EMERGENCY_CONTACTS.fire}\n👮 ቱሪስት ፖሊስ: ${EMERGENCY_CONTACTS.touristPolice}\n\n${info.nearestHospital ? `ቀረባ ሆስፒታል: ${info.nearestHospital}\n\n` : ""}${info.hostPhone ? `ኣስተናጋዲ/ኣካየዲ: ${info.hostPhone}\n\n` : ""}ድሕነትኩም ተሓልዉ! ሓገዝ ኣብ መንገዲ ኣሎ። 🙏`,
+    lockboxCode: (code: string, location: string, instructions?: string) => `🔑 **ናይ መእተዊ ሓበሬታ:**\n\n**ናይ መቆልፊ ሳጹን ኮድ:** ${code}\n**ቦታ:** ${location || "ኣብ መእተዊ ናይቲ ንብረት"}\n\n${instructions ? `**መምርሒታት:** ${instructions}\n\n` : ""}እንቛዕ ደሓን መጻእኩም! ✨`,
+    lockboxMissing: (phone?: string) => `ናይ መቆልፊ ሳጹን ኮድ ኣብ መዝገበይ የለን። ${phone ? `ንኣስተናጋዲ ብ${phone} ደውሉ` : "በጃኹም ንኣስተናጋዲ ብቐጥታ ርከቡ።"}`,
+    wifi: (network: string, password: string) => `📶 **WiFi ሓበሬታ:**\n\n**ስም ኔትወርክ:** ${network}\n**ፓስዎርድ:** ${password}\n\nኣብ መስመር ምህላውኩም ኣስተማቕሩ! ✨`,
+    wifiMissing: `ዝርዝር WiFi ገና የለን። በጃኹም ንኣስተናጋዲኹም ሓቱ።`,
+    checkout: (time: string) => `⏰ **ናይ ምውጻእ ሰዓት:** ${time}\n\nብዚ ሰዓት ምውጻእኩም ኣረጋግጹ። ድሕነት ዘለዎ ጕዕዞ! ✨`,
+    checkoutMissing: `ናይ ምውጻእ ሰዓት ኣብ መዝገበይ የለን። በጃኹም ንኣስተናጋዲኹም ሓቱ።`,
+    checkin: (time: string) => `⏰ **ናይ መእተዊ ሰዓት:** ${time}\n\nንቕበልኩም ብምዃን ንሓጎስ! ✨`,
+    checkinMissing: `ናይ መእተዊ ሰዓት ኣብ መዝገበይ የለን። በጃኹም ንኣስተናጋዲኹም ሓቱ።`,
+    host: (phone: string, email?: string) => `📞 **ናይ ኣስተናጋዲ ርክብ:**\n\n${phone ? `ተሌፎን: ${phone}\n` : ""}${email ? `ኢመይል: ${email}\n` : ""}\nኣብ ዝኾነ ግዜ ርከቡ!`,
+  },
+  om: { // Afaan Oromoo
+    emergency: (info: any) => `🚨 **Quunnamtii Ariifachiisaa Itoophiyaa Keessatti:**\n\n🚓 Poolisii: ${EMERGENCY_CONTACTS.police}\n🚑 Ambulaansii: ${EMERGENCY_CONTACTS.ambulance}\n🔥 Ibidda: ${EMERGENCY_CONTACTS.fire}\n👮 Poolisii Turiizimii: ${EMERGENCY_CONTACTS.touristPolice}\n\n${info.nearestHospital ? `Hospitaala Dhiyoo: ${info.nearestHospital}\n\n` : ""}${info.hostPhone ? `Keessummeessaa/Hogganaa: ${info.hostPhone}\n\n` : ""}Nageenya keessan eegaa! Gargaarsi karaa irra jira። 🙏`,
+    lockboxCode: (code: string, location: string, instructions?: string) => `🔑 **Odeeffannoo Seensaa:**\n\n**Koodii Sanduqa Cufsaa:** ${code}\n**Bakka:** ${location || "Balbala dhuunfaa irratti"}\n\n${instructions ? `**Qajeelfama:** ${instructions}\n\n` : ""}Baga nagaan dhuftan! ✨`,
+    lockboxMissing: (phone?: string) => `Koodiin sanduqa cufsaa galmee koo keessa hin jiru। ${phone ? `Keessummeessaa ${phone} irratti bilbilaa` : "Maaloo keessummeessaa kallattiin quunnamaa።"}`,
+    wifi: (network: string, password: string) => `📶 **Odeeffannoo WiFi:**\n\n**Maqaa Networki:** ${network}\n**Jecha Icciitii:** ${password}\n\nTursiimii online keessan itti gammadaa! ✨`,
+    wifiMissing: `Qindominni WiFi amma hin jiru। Maaloo keessummeessaa keessan gaafadhaa።`,
+    checkout: (time: string) => `⏰ **Sa'aatii Bahuu:** ${time}\n\nMaaloo yeroo kanatti bahuu keessan mirkaneessaa። Imala nagaa! ✨`,
+    checkoutMissing: `Sa'aatii bahuu galmee koo keessa hin jiru። Maaloo keessummeessaa keessan gaafadhaa।`,
+    checkin: (time: string) => `⏰ **Sa'aatii Seensaa:** ${time}\n\nIsin simachuuf abdii guddaa qabna! ✨`,
+    checkinMissing: `Sa'aatii seensaa galmee koo keessa hin jiru। Maaloo keessummeessaa keessan gaafadhaa।`,
+    host: (phone: string, email?: string) => `📞 **Quunnamtii Keessummeessaa:**\n\n${phone ? `Bilbilaa: ${phone}\n` : ""}${email ? `Email: ${email}\n` : ""}\nYeroo kamiyyuu quunnamaa!`,
+  },
+  zh: { // Chinese (Mandarin)
+    emergency: (info: any) => `🚨 **埃塞俄比亚紧急联系方式:**\n\n🚓 警察: ${EMERGENCY_CONTACTS.police}\n🚑 救护车: ${EMERGENCY_CONTACTS.ambulance}\n🔥 消防: ${EMERGENCY_CONTACTS.fire}\n👮 旅游警察: ${EMERGENCY_CONTACTS.touristPolice}\n\n${info.nearestHospital ? `最近医院: ${info.nearestHospital}\n\n` : ""}${info.hostPhone ? `房东/经理: ${info.hostPhone}\n\n` : ""}请注意安全！救援正在路上。🙏`,
+    lockboxCode: (code: string, location: string, instructions?: string) => `🔑 **入住信息:**\n\n**密码箱密码:** ${code}\n**位置:** ${location || "在房屋入口处"}\n\n${instructions ? `**说明:** ${instructions}\n\n` : ""}欢迎入住！✨`,
+    lockboxMissing: (phone?: string) => `我的记录中还没有密码箱密码。${phone ? `您可以拨打 ${phone} 联系房东` : "请直接联系房东。"}`,
+    wifi: (network: string, password: string) => `📶 **WiFi信息:**\n\n**网络名称:** ${network}\n**密码:** ${password}\n\n祝您上网愉快！✨`,
+    wifiMissing: `我还没有WiFi详细信息。请向您的房东询问网络名称和密码。`,
+    checkout: (time: string) => `⏰ **退房时间:** ${time}\n\n请确保在此时间前离开。祝您旅途平安！✨`,
+    checkoutMissing: `我的记录中还没有退房时间。请向您的房东确认具体时间。`,
+    checkin: (time: string) => `⏰ **入住时间:** ${time}\n\n期待欢迎您的到来！✨`,
+    checkinMissing: `我的记录中还没有入住时间。请向您的房东确认到达详情。`,
+    host: (phone: string, email?: string) => `📞 **房东联系方式:**\n\n${phone ? `电话: ${phone}\n` : ""}${email ? `邮箱: ${email}\n` : ""}\n随时欢迎您联系!`,
+  },
+};
+
 // Keywords for pattern matching
 const PATTERNS = {
   lockbox: /lockbox|lock box|code|entry code|door code|access code|get in|enter/i,
@@ -50,19 +114,20 @@ export function matchTemplate(
   context: LemlemContext
 ): LemlemResponse | null {
   const lowerMessage = message.toLowerCase();
+  
+  // Get user's language preference
+  const userPreferences = (context?.user as any)?.preferences || {};
+  const language = userPreferences.language || 'en';
+  const msg = MESSAGES[language as keyof typeof MESSAGES] || MESSAGES.en;
 
   // EMERGENCY - Highest priority (instant response)
   if (PATTERNS.emergency.test(message)) {
+    const info = {
+      nearestHospital: context.propertyInfo?.nearestHospital,
+      hostPhone: context.propertyInfo?.hostEmergencyPhone || context.propertyInfo?.propertyManagerPhone,
+    };
     return {
-      message: `🚨 **Emergency Contacts in Ethiopia:**\n\n🚓 Police: ${EMERGENCY_CONTACTS.police}\n🚑 Ambulance: ${EMERGENCY_CONTACTS.ambulance}\n🔥 Fire Department: ${EMERGENCY_CONTACTS.fire}\n👮 Tourist Police: ${EMERGENCY_CONTACTS.touristPolice}\n\n${
-        context.propertyInfo?.nearestHospital
-          ? `Nearest Hospital: ${context.propertyInfo.nearestHospital}\n\n`
-          : ""
-      }${
-        context.propertyInfo?.hostEmergencyPhone || context.propertyInfo?.propertyManagerPhone
-          ? `Host/Manager: ${context.propertyInfo?.hostEmergencyPhone || context.propertyInfo?.propertyManagerPhone}\n\n`
-          : ""
-      }Stay safe! Help is on the way. 🙏`,
+      message: msg.emergency(info),
       usedTemplate: true,
       confidence: 1.0,
     };
@@ -72,27 +137,17 @@ export function matchTemplate(
   if (PATTERNS.lockbox.test(message)) {
     if (context.propertyInfo?.lockboxCode) {
       return {
-        message: `🔑 **Access Information:**\n\n**Lockbox Code:** ${context.propertyInfo.lockboxCode}\n**Location:** ${context.propertyInfo.lockboxLocation || "At the property entrance"}\n\n${
-          context.propertyInfo.entryInstructions
-            ? `**Instructions:** ${context.propertyInfo.entryInstructions}\n\n`
-            : ""
-        }${
-          context.propertyInfo.parkingInstructions
-            ? `**Parking:** ${context.propertyInfo.parkingInstructions}\n\n`
-            : ""
-        }If you have any trouble getting in, call ${
-          context.propertyInfo.propertyManagerPhone || "the host"
-        }. Welcome to your stay! ✨`,
+        message: msg.lockboxCode(
+          context.propertyInfo.lockboxCode,
+          context.propertyInfo.lockboxLocation || "",
+          context.propertyInfo.entryInstructions || undefined
+        ),
         usedTemplate: true,
         confidence: 1.0,
       };
     } else {
       return {
-        message: `I don't have the lockbox code in my records yet, dear. Let me connect you with the host who can share it with you. ${
-          context.propertyInfo?.hostEmergencyPhone
-            ? `You can call them at ${context.propertyInfo.hostEmergencyPhone}`
-            : "Check your booking confirmation or contact the host directly."
-        }`,
+        message: msg.lockboxMissing(context.propertyInfo?.hostEmergencyPhone || undefined),
         usedTemplate: true,
         confidence: 0.9,
       };
@@ -103,23 +158,13 @@ export function matchTemplate(
   if (PATTERNS.wifi.test(message)) {
     if (context.propertyInfo?.wifiPassword && context.propertyInfo?.wifiNetwork) {
       return {
-        message: `📶 **WiFi Information:**\n\n**Network Name:** ${context.propertyInfo.wifiNetwork}\n**Password:** ${context.propertyInfo.wifiPassword}\n\nJust connect to the network and enter the password. You should be online in no time! ☕️`,
+        message: msg.wifi(context.propertyInfo.wifiNetwork, context.propertyInfo.wifiPassword),
         usedTemplate: true,
         confidence: 1.0,
       };
-    } else if (context.propertyInfo?.wifiPassword) {
-      return {
-        message: `📶 The WiFi password is: **${context.propertyInfo.wifiPassword}**\n\nLook for the wireless network and use this password to connect. Enjoy! ✨`,
-        usedTemplate: true,
-        confidence: 0.9,
-      };
     } else {
       return {
-        message: `I don't have the WiFi information in my records, dear. The host should have shared it in your booking details, or you can ask them directly. ${
-          context.propertyInfo?.hostEmergencyPhone
-            ? `Call them at ${context.propertyInfo.hostEmergencyPhone}`
-            : ""
-        }`,
+        message: msg.wifiMissing,
         usedTemplate: true,
         confidence: 0.8,
       };
@@ -129,33 +174,37 @@ export function matchTemplate(
   // CHECK-OUT TIME
   if (PATTERNS.checkout.test(message)) {
     const checkoutTime = context.propertyInfo?.checkOutTime || "11:00 AM";
-    return {
-      message: `🏠 **Check-out is at ${checkoutTime}**\n\n${
-        context.propertyInfo?.checkOutChecklist
-          ? `**Before you leave:**\n${context.propertyInfo.checkOutChecklist}\n\n`
-          : "Please make sure to:\n- Turn off all lights and AC\n- Lock all doors and windows\n- Return the keys to the lockbox\n\n"
-      }Thank you for staying with us! We hope you had a wonderful experience. 🌟\n\nWould you mind leaving us a review? It helps future guests!`,
-      usedTemplate: true,
-      confidence: 1.0,
-    };
+    if (checkoutTime) {
+      return {
+        message: msg.checkout(checkoutTime),
+        usedTemplate: true,
+        confidence: 1.0,
+      };
+    } else {
+      return {
+        message: msg.checkoutMissing,
+        usedTemplate: true,
+        confidence: 0.8,
+      };
+    }
   }
 
   // CHECK-IN TIME
   if (PATTERNS.checkin.test(message)) {
     const checkinTime = context.propertyInfo?.checkInTime || "2:00 PM";
-    return {
-      message: `🎉 **Check-in is at ${checkinTime}**\n\n${
-        context.propertyInfo?.checkInNotes
-          ? `${context.propertyInfo.checkInNotes}\n\n`
-          : ""
-      }${
-        context.propertyInfo?.lockboxCode
-          ? `The lockbox code is **${context.propertyInfo.lockboxCode}** (${context.propertyInfo.lockboxLocation || "at the entrance"}).\n\n`
-          : ""
-      }We can't wait to welcome you! Safe travels! ✨`,
-      usedTemplate: true,
-      confidence: 1.0,
-    };
+    if (checkinTime) {
+      return {
+        message: msg.checkin(checkinTime),
+        usedTemplate: true,
+        confidence: 1.0,
+      };
+    } else {
+      return {
+        message: msg.checkinMissing,
+        usedTemplate: true,
+        confidence: 0.8,
+      };
+    }
   }
 
   // HOST CONTACT
@@ -163,17 +212,13 @@ export function matchTemplate(
     const phone = context.propertyInfo?.hostEmergencyPhone || context.propertyInfo?.propertyManagerPhone;
     if (phone) {
       return {
-        message: `📞 **Contact Information:**\n\n${
-          context.propertyInfo?.propertyManager
-            ? `Property Manager: ${context.propertyInfo.propertyManager}\n`
-            : "Host: "
-        }${phone}\n\nFeel free to call or text! They're here to help make your stay comfortable. 😊`,
+        message: msg.host(phone, undefined),
         usedTemplate: true,
         confidence: 1.0,
       };
     } else {
       return {
-        message: `I don't have the host's contact information in my records. Please check your booking confirmation email, or I can help you with your question directly. What do you need help with?`,
+        message: msg.lockboxMissing(), // Reuse same pattern for "missing info"
         usedTemplate: true,
         confidence: 0.7,
       };
