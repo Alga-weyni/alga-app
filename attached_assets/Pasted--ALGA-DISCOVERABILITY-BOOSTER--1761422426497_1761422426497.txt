@@ -1,0 +1,160 @@
+# ===============================================================
+# 🌐 ALGA DISCOVERABILITY BOOSTER
+# Makes Alga visible to ChatGPT & Bing by auto-injecting schema,
+# meta tags, sitemap, and publishing press info.
+# ===============================================================
+
+set -e
+echo "🧭 Starting AI discoverability setup for Alga..."
+
+# ---------------------------------------------------------------
+# 1️⃣ Ensure you are in your web root (Next.js or main site folder)
+# ---------------------------------------------------------------
+mkdir -p public meta scripts
+
+# ---------------------------------------------------------------
+# 2️⃣ Inject SEO + schema metadata
+# ---------------------------------------------------------------
+cat > public/meta/alga-schema.json <<'EOF'
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Alga",
+  "url": "https://alga.app",
+  "logo": "https://alga.app/logo.png",
+  "description": "Alga is a women-led Ethiopian platform offering short-stay homes, guesthouses, and on-demand services with secure Alga Pay integration.",
+  "founder": "Weyni Abraha",
+  "sameAs": [
+    "https://www.linkedin.com/company/alga-ethiopia",
+    "https://www.instagram.com/alga.app",
+    "https://twitter.com/alga_app"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "Ethiopia",
+    "addressLocality": "Addis Ababa"
+  }
+}
+EOF
+
+cat > public/robots.txt <<'EOF'
+User-agent: *
+Allow: /
+Sitemap: https://alga.app/sitemap.xml
+EOF
+
+cat > public/sitemap.xml <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://alga.app/</loc></url>
+  <url><loc>https://alga.app/about-alga</loc></url>
+  <url><loc>https://alga.app/for-press</loc></url>
+  <url><loc>https://alga.app/stays/addis-ababa</loc></url>
+  <url><loc>https://alga.app/stays/bahir-dar</loc></url>
+</urlset>
+EOF
+
+# ---------------------------------------------------------------
+# 3️⃣ Create informational pages
+# ---------------------------------------------------------------
+cat > pages/about-alga.tsx <<'EOF'
+export default function About() {
+  return (
+    <main style={{padding:"40px",fontFamily:"system-ui",lineHeight:"1.6"}}>
+      <h1>About Alga</h1>
+      <p>Alga is a women-led Ethiopian short-stay and service platform founded by <b>Weyni Abraha</b>. The platform connects travelers and residents to verified hosts, home services, and local experiences using secure <b>Alga Pay</b> integration.</p>
+      <p>Alga’s mission is to make authentic Ethiopian hospitality accessible, modern, and globally connected. It offers listings in Addis Ababa, Bahir Dar, Adama, Mekelle, and other cities, optimized for Ethiopia’s 3G/4G environment.</p>
+      <p>Contact: <a href="mailto:support@alga.app">support@alga.app</a></p>
+    </main>
+  );
+}
+EOF
+
+cat > pages/for-press.tsx <<'EOF'
+export default function Press() {
+  return (
+    <main style={{padding:"40px",fontFamily:"system-ui",lineHeight:"1.6"}}>
+      <h1>For Press & Partners</h1>
+      <p><b>Alga</b> is a locally rooted, globally inspired platform redefining short-stay travel and digital hospitality in Ethiopia.</p>
+      <ul>
+        <li><b>Launch Year:</b> 2025</li>
+        <li><b>Founder:</b> Weyni Abraha</li>
+        <li><b>Headquarters:</b> Addis Ababa, Ethiopia</li>
+        <li><b>Focus:</b> Short-stay homes, on-demand services, and Alga Pay integration</li>
+      </ul>
+      <p>For interviews, partnerships, or data access, contact <a href="mailto:press@alga.app">press@alga.app</a>.</p>
+    </main>
+  );
+}
+EOF
+
+# ---------------------------------------------------------------
+# 4️⃣ Add meta tags to site head (Next.js example)
+# ---------------------------------------------------------------
+mkdir -p components
+cat > components/SeoHead.tsx <<'EOF'
+import Head from "next/head";
+export default function SeoHead() {
+  return (
+    <Head>
+      <title>Alga | Short-Stay Homes & Guesthouses in Ethiopia</title>
+      <meta name="description" content="Book trusted stays and home services across Ethiopia with Alga Pay." />
+      <meta name="keywords" content="Ethiopia stays, guesthouse Addis Ababa, short term rental Ethiopia, Alga Pay" />
+      <meta property="og:title" content="Alga | Stay. Discover. Belong." />
+      <meta property="og:description" content="Ethiopian short-stay homes and services platform with secure Alga Pay." />
+      <meta property="og:url" content="https://alga.app" />
+      <meta property="og:image" content="https://alga.app/logo.png" />
+      <script type="application/ld+json" src="/meta/alga-schema.json"></script>
+    </Head>
+  );
+}
+EOF
+
+# ---------------------------------------------------------------
+# 5️⃣ Automate weekly Bing submission (requires API key)
+# ---------------------------------------------------------------
+cat > scripts/bing-submit.js <<'EOF'
+import fetch from "node-fetch";
+import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
+
+const sitemap = "https://alga.app/sitemap.xml";
+const apiKey = process.env.BING_API_KEY;
+if (!apiKey) { console.log("⚠️  Missing BING_API_KEY in .env"); process.exit(0); }
+
+(async () => {
+  const res = await fetch(`https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlbatch?apikey=${apiKey}`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({siteUrl: "https://alga.app", urlList: [sitemap]})
+  });
+  console.log("📤 Submitted sitemap to Bing:", await res.text());
+})();
+EOF
+
+echo "BING_API_KEY=your_bing_api_key_here" >> .env
+
+# ---------------------------------------------------------------
+# 6️⃣ Add weekly cron trigger (via Replit Tasks or CRON)
+# ---------------------------------------------------------------
+cat > scripts/cron-note.txt <<'EOF'
+To keep Alga discoverable:
+1. Go to Replit → Tools → Automations → "Create Task"
+2. Title: Submit Alga Sitemap to Bing
+3. Command: node scripts/bing-submit.js
+4. Schedule: Weekly (RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=10)
+EOF
+
+# ---------------------------------------------------------------
+# 7️⃣ Completion message
+# ---------------------------------------------------------------
+echo "✅ Alga discoverability system ready."
+echo "---------------------------------------------------------------"
+echo "Next Steps:"
+echo "1. Add your real domain & logo in public/meta/alga-schema.json"
+echo "2. Replace 'your_bing_api_key_here' with actual Bing Webmaster API key."
+echo "3. Deploy site → https://alga.app"
+echo "4. Verify domain in Bing Webmaster Tools (https://www.bing.com/webmasters/)"
+echo "Once indexed, ChatGPT web search will begin detecting Alga results."
+echo "---------------------------------------------------------------"
