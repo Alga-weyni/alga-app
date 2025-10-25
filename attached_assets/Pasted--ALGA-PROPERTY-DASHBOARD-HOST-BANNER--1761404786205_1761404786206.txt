@@ -1,0 +1,77 @@
+# =======================================================
+# 🏠  ALGA PROPERTY DASHBOARD HOST BANNER
+# =======================================================
+
+echo "🎨 Adding professional Alga Host Banner to Property Dashboard..."
+
+# 1️⃣  Create a dedicated PropertyHostBanner component (reuses design cues)
+mkdir -p client/src/components
+cat <<'EOF' > client/src/components/property-host-banner.tsx
+import React from "react";
+import { Home, CreditCard, CalendarCheck } from "lucide-react";
+
+const PropertyHostBanner = ({ hostName }: { hostName?: string }) => (
+  <div
+    style={{
+      background: "linear-gradient(90deg, #704d2a, #e0ad60)",
+      color: "#fff",
+      padding: "20px 24px",
+      borderRadius: "10px",
+      marginBottom: "24px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+    }}
+  >
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <h3 style={{ margin: 0, fontWeight: 600, fontSize: "1.2rem" }}>
+        🏠 Welcome back, {hostName || "Host"}!
+      </h3>
+      <span
+        style={{
+          background: "rgba(255,255,255,0.2)",
+          backdropFilter: "blur(5px)",
+          padding: "6px 12px",
+          borderRadius: "8px",
+          fontSize: "0.85rem",
+          fontWeight: 500,
+        }}
+      >
+        Alga Property Portal
+      </span>
+    </div>
+
+    <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
+      Manage your properties, track <b>Alga Pay</b> payouts, and monitor guest bookings here.
+    </p>
+
+    <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <CreditCard size={18} /> <span style={{ fontSize: "0.85rem" }}>Secure Payments</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <CalendarCheck size={18} /> <span style={{ fontSize: "0.85rem" }}>Real-time Bookings</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <Home size={18} /> <span style={{ fontSize: "0.85rem" }}>Easy Listing Management</span>
+      </div>
+    </div>
+  </div>
+);
+
+export default PropertyHostBanner;
+EOF
+
+# 2️⃣  Integrate banner into the Property Dashboard
+sed -i '' '/import React/a\
+import PropertyHostBanner from "../../components/property-host-banner";' client/src/pages/host/property-dashboard.tsx || true
+sed -i '' '/return (/a\
+  <PropertyHostBanner hostName={user?.name} />' client/src/pages/host/property-dashboard.tsx || true
+
+# 3️⃣  Build for confirmation
+npm run build || true
+
+echo "✅ Property Dashboard banner added successfully.
+Hosts now see a consistent brown-gold Alga banner across both dashboards."
+# =======================================================

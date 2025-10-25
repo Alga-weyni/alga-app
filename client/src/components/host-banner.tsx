@@ -1,7 +1,7 @@
-import { Home, CreditCard, Calendar } from "lucide-react";
+import { Home, CreditCard, Calendar, CheckCircle } from "lucide-react";
 
 interface HostBannerProps {
-  hostName?: string;
+  hostName?: string | null;
 }
 
 /**
@@ -28,7 +28,7 @@ export default function HostBanner({ hostName }: HostBannerProps) {
             </h2>
           </div>
           <p className="text-white/90 text-sm md:text-base m-0 max-w-2xl">
-            Manage your listings, track payments via <span className="font-semibold">Alga Pay</span>, and view bookings here.
+            Manage your properties, track <span className="font-semibold">Alga Pay</span> payouts, and monitor guest bookings here.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function HostBanner({ hostName }: HostBannerProps) {
               Alga Host Portal
             </span>
           </div>
-          <div className="flex items-center gap-3 text-white/80 text-xs">
+          <div className="flex items-center gap-3 text-white/80 text-xs flex-wrap">
             <div className="flex items-center gap-1">
               <CreditCard className="w-3.5 h-3.5" />
               <span>Secure Payments</span>
@@ -47,6 +47,10 @@ export default function HostBanner({ hostName }: HostBannerProps) {
             <div className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
               <span>Real-time Bookings</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Easy Management</span>
             </div>
           </div>
         </div>
