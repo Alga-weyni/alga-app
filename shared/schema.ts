@@ -249,6 +249,8 @@ export const serviceProviders = pgTable("service_providers", {
   city: varchar("city").notNull(),
   region: varchar("region").notNull(),
   address: text("address"),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
   availability: text("availability"), // JSON string for schedule
   portfolioImages: text("portfolio_images").array(), // Array of image URLs for self_care providers
   idDocumentUrl: varchar("id_document_url"), // ID verification for service provider
@@ -259,6 +261,11 @@ export const serviceProviders = pgTable("service_providers", {
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   totalJobsCompleted: integer("total_jobs_completed").default(0),
   isActive: boolean("is_active").default(true),
+  // Meal support specific fields
+  providerType: varchar("provider_type"), // home_cook, restaurant (for meal_support)
+  cuisine: varchar("cuisine"), // ethiopian, italian, chinese, etc. (for meal_support)
+  specialties: text("specialties").array(), // Array of dish names (for meal_support)
+  deliveryRadiusKm: integer("delivery_radius_km"), // Delivery range in km (for meal_support)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
