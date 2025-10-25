@@ -1,119 +1,48 @@
 # Alga
 
 ## Overview
-Alga is a full-stack web application designed for the Ethiopian property rental market. It connects property owners with travelers, offering diverse accommodations from traditional homes to modern hotels, with a strong emphasis on local culture, safety, and multi-city support across Ethiopia. The platform provides a secure and culturally immersive rental experience through features like host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga aims to be the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities.
+Alga is a full-stack web application for the Ethiopian property rental market, connecting property owners with travelers. It offers diverse accommodations, emphasizing local culture, safety, and multi-city support across Ethiopia. The platform provides a secure, culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga aims to be the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Updates (October 25, 2025)
-
-### Property Insights Dashboard Widget (Latest)
-Implemented comprehensive analytics widget for host dashboard with real-time backend data:
-- **Backend**: Created `/api/host/stats` endpoint with `getHostStats()` method in storage
-- **Frontend**: Built `PropertyInsights` component with 8 key metrics in responsive grid
-- **Metrics Displayed**:
-  - Active Listings (with total count)
-  - Upcoming Bookings (with total bookings)
-  - Total Earnings (with last payout amount)
-  - Average Rating (with total reviews)
-  - Completed Bookings (with occupancy rate %)
-  - Occupancy Rate percentage
-  - Pending Reviews (action needed)
-  - Total Bookings (all-time)
-- **Features**: Skeleton loading states, color-coded icons, hover effects, fully responsive
-- **Integration**: Displays below HostBanner on `/host/dashboard` page
-- **Tech**: Real PostgreSQL queries using Drizzle ORM, React Query for data fetching
-
-### Alga Pay - White-Labeled Payment System
-Implemented unified payment gateway that abstracts all underlying payment processors behind "Alga Pay" branding:
-- Created `server/algaPay.ts` unified payment handler with single `/api/alga-pay` endpoint
-- Created `server/algaCallback.ts` for processor-agnostic payment confirmations
-- Built `client/src/components/alga-pay-checkout.tsx` with full Alga branding
-- Updated all frontend references: "Chapa" → "Alga Pay", removed processor exposure
-- Updated payment methods in constants to show only "Alga Pay" and "Alga Pay (International)"
-- Users never see Chapa, Stripe, or other processor names throughout platform
-- Maintained backend flexibility to route payments based on user location/preference
-- Complete documentation in `docs/ALGA_PAY_SETUP.md`
-
-### Code Quality Improvements
-Completed comprehensive platform optimization across all areas:
-
-### Performance Enhancements
-- Removed unused components (google-map-view.tsx, property-map.tsx, backup files), reduced bundle size
-- Optimized images with lazy loading and descriptive alt text
-- Implemented React.memo() for PropertyCard component to prevent unnecessary re-renders
-- Added Web Vitals tracking (LCP, FID, CLS) for performance monitoring
-- Created lightweight mini-map component using Google Maps Static API (200px vs 400px, ~50KB vs ~500KB)
-
-### SEO & Discoverability
-- Added SEO meta tags to services and service-category pages
-- Implemented structured data (JSON-LD) for properties and services for rich search results
-- Created robots.txt with proper crawl directives
-- Created comprehensive sitemap.xml with all public pages
-- Enhanced property pages with proper meta descriptions and Open Graph tags
-
-### User Experience
-- Added global keyboard shortcuts (Alt+H for home, Alt+P for properties, Alt+S for services, Alt+F for favorites, Alt+B for bookings, Ctrl+/ for search)
-- Enhanced keyboard navigation for better accessibility
-- Confirmed loading states and skeleton screens working optimally
-- Platform fully responsive with touch-optimized interactions
-
-### Production Readiness
-- Cleaned up all console.log statements across codebase
-- Verified error boundaries properly implemented
-- Enhanced accessibility with detailed image alt text for screen readers
-- Optimized error handling with silent fail for non-critical operations
-
-## Administrative Features
-The platform includes comprehensive administrative tools for managing the entire system:
-- **Roles & Permissions Management**: Dedicated page explaining all platform roles (Tenant, Guesthouse Owner, Operator, Admin) with detailed permissions and restrictions for each role. Includes user search/filter, bulk actions, and role assignment capabilities.
-- **User Management**: Full control over user roles, status (active/suspended), and verification states with search and filtering capabilities.
-
 ## System Architecture
 
 ### UI/UX Design
-The platform features a universal accessibility design optimized for Ethiopian users, utilizing a warm color palette (dark brown, medium brown, cream backgrounds). Key design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations for active states, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and simple, warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded and compressed images for performance on Ethiopian networks.
+The platform features a universal accessibility design optimized for Ethiopian users, utilizing a warm color palette (dark brown, medium brown, cream backgrounds). Key design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks.
 
 ### Technical Implementation
 The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend uses Node.js with Express.js and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL is the database, hosted on Neon, managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control for Guest, Host, Admin, and Operator roles. Security measures include Helmet.js, CORS protection, rate limiting, and robust validation.
 
-### Key Features
-- **Ask Lemlem Help Page**: The platform's help/support page has been completely transformed into "Ask Lemlem (ልምልም)" — a warm, culturally authentic experience where Lemlem (the AI agent named after my grandmother) guides users through all help topics with grandmother wisdom. Features daily Ethiopian proverbs, Lemlem's voice on every help card, and direct chat integration. Navigation shows "Ask Lemlem" instead of generic "Help" to reinforce the AI agent presence.
-- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with Ethiopian-context title and description suggestions.
-- **User Profiles & Personalization**: Complete user profile system with preferences (notifications, language, currency, search settings) and activity tracking. Stores user preferences in JSONB field for flexible personalization. Activity log tracks user actions (property views, bookings, searches) for analytics and personalized recommendations.
-- **User Settings**: Comprehensive notification, security, payment, and language preferences.
+### Feature Specifications
+- **Ask Lemlem Help Page**: A culturally authentic AI agent named Lemlem (after a grandmother) guides users through help topics with Ethiopian proverbs and a direct chat integration. Navigation shows "Ask Lemlem."
+- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with Ethiopian-context suggestions.
+- **User Profiles & Personalization**: Comprehensive user profiles with preferences (notifications, language, currency, search settings) and activity tracking stored in JSONB for personalized recommendations.
+- **User Settings**: Notification, security, payment, and language preferences.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters, sorting, and city filter chips.
-- **Booking System**: Full workflow with date validation, conflict prevention, and seamless URL parameter integration.
+- **Booking System**: Full workflow with date validation and conflict prevention.
 - **Access Management**: 6-digit access code system for properties.
 - **Review System**: Advanced weighted review system (ALGA Review Engine) with time-decay algorithm.
 - **ID Verification**: Universal system with QR code scanning, OCR for foreign visitors, operator review dashboard, and integration with Fayda ID for eKYC.
-- **Alga Pay (White-Labeled Payment System)**: Unified payment gateway that abstracts underlying processors (Chapa, Stripe, Telebirr) from users. All payment interactions show only "Alga Pay" branding, never exposing third-party processor names. Provides single API endpoint (`/api/alga-pay`) that routes to appropriate processor based on method, maintains flexibility to switch processors without user-facing changes, and includes automated callback handling for payment confirmations. See `docs/ALGA_PAY_SETUP.md` for complete documentation.
-- **Payment Gateway**: Backend integration with Chapa (Ethiopian), Stripe (International), Telebirr, and PayPal, all accessible through the white-labeled Alga Pay interface.
+- **Alga Pay**: A white-labeled, unified payment gateway abstracting underlying processors (Chapa, Stripe, Telebirr) from users. All payment interactions show only "Alga Pay" branding.
 - **Commission & Tax System**: Automated calculation of Alga commission, VAT, and withholding tax, with ERCA-compliant PDF invoice generation.
-- **Add-On Services Marketplace**: Separate browsing for guests and application for providers, featuring 11 service categories, reviews, and provider badges.
+- **Add-On Services Marketplace**: Browsing for guests and application for providers, featuring 11 service categories, reviews, and provider badges.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
-- **Google Maps Integration**: Lightweight mini-map on property details pages showing property location with GPS-calculated distance from user ("X km away from [Area]"). Uses static map API for fast load times and improved mobile performance. Full interactive maps removed from listing pages to optimize page speed.
+- **Google Maps Integration**: Lightweight mini-map on property details pages showing location and GPS-calculated distance from user, using the static map API.
 - **Provider Onboarding & Dashboard**: Complete application process with admin verification, automated email notifications, and status-based UX.
-- **Self-Care at Home**: Dedicated mobile beauty services category with specialty filtering (Hair Styling, Pedicure, Manicure, Waxing, Upper Lip, Facial, Massage, Eyebrow Shaping), time slot booking (Now, Today AM/PM/Evening, Tomorrow, This Week), and **GPS-powered neighborhood search** for hyper-local service discovery. Features one-click location detection with 24-hour caching (minimizes API costs to ~1 call per user/day), manual input fallback, and warm, inviting language optimized for the Ethiopian beauty and wellness market.
-- **Meal Support (On-Demand Food Delivery)**: Complete meal delivery marketplace connecting guests with local home cooks and restaurants. Features GPS-based 5km radius filtering using browser geolocation, provider type filtering (Home Cooks vs Restaurants), cuisine categories, dish specialties display, verified provider badges, rating system, delivery radius tracking, and integrated payment via Chapa/Stripe. Built on existing serviceProviders infrastructure with meal-specific fields (providerType, cuisine, specialties, deliveryRadiusKm, lat/lng). Includes placeholder integration points for Ride/Feres delivery service API.
-- **Lemlem AI Agent**: A 24/7 cost-optimized **AI agent named after my grandmother**, utilizing a smart template system (90% free responses) with an optional AI fallback for complex queries. It handles common inquiries like lockbox codes, WiFi, and local recommendations. **Personalization**: Lemlem adapts greetings and responses based on user's language preference (English/አማርኛ/ትግርኛ/Afaan Oromoo/中文), providing localized hospitality in all major Ethiopian languages plus Chinese for international visitors. The heritage story is elegantly presented through the button tooltip, chat header subtitle, and welcome message in all languages.
-  - **Bilingual Chat Button**: Beautiful floating button displaying "Lemlem / ልምልም" in both English and Amharic with authentic Ethiopic font (Noto Sans Ethiopic). Features orange gradient design with hover animations and glow effect for cultural authenticity.
-  - **In-Chat Language Dropdown**: Professional dropdown menu allowing instant language switching between English, አማርኛ (Amharic), ትግርኛ (Tigrinya), Afaan Oromoo (Oromo), and 中文 (Chinese). Selected language changes both text responses AND voice language in real-time.
-  - **Multilingual Grandmother Voice**: Browser-based Text-to-Speech with authentic language pronunciation (speaks actual language content, not just accents). Soft, loving grandmother voice (rate: 0.75, pitch: 1.35, volume: 0.90) with female voice preference across all languages. Natural pause before speaking, working voice toggle button, speaker icon on each message for replay, auto-speak new responses, and speaking indicator. Text cleaning removes ALL emojis/symbols for natural speech. Creates a warm, trusting, caring experience like being welcomed by an Ethiopian grandmother. 100% FREE - uses browser's native Speech Synthesis API with zero external costs.
-  - **Complete Documentation**: See `/docs/Lemlem_Multilingual_Grandmother_Voice_README.md` for full technical documentation, deployment checklist, and maintenance guidelines.
-  - **Property Information Form**: 14 comprehensive fields for hosts to configure Lemlem responses (lockbox codes, WiFi, emergency contacts, house rules, local recommendations, appliance instructions).
-  - **Admin Lemlem Insights Dashboard**: Analytics tracking total chats, template vs AI usage, cost per property, monthly spending, top questions, and cost trends. **Impact Metrics**: Tracks bookings after Lemlem interactions, conversion rates, and properties with highest engagement. Displays cost savings and ROI achieved through the template system.
-  - **Admin AI Control Panel**: Platform-wide AI management with enable/disable toggles, monthly budget caps (USD), alert thresholds, and budget tracking. Prevents AI overspending with automatic cutoffs.
+- **Self-Care at Home**: Mobile beauty services category with specialty filtering, time slot booking, and GPS-powered neighborhood search for hyper-local service discovery.
+- **Meal Support**: On-demand food delivery marketplace connecting guests with local home cooks and restaurants, featuring GPS-based filtering, cuisine categories, and integrated payment.
+- **Lemlem AI Agent**: A 24/7, cost-optimized AI agent with a smart template system and optional AI fallback. Personalization includes greetings and responses in English, Amharic, Tigrinya, Afaan Oromoo, and Chinese. Features a bilingual chat button, in-chat language dropdown, and multilingual grandmother voice using browser-based Text-to-Speech. Hosts configure Lemlem's responses via a 14-field form. Admin features include an insights dashboard for analytics and an AI control panel for budget management.
+- **Administrative Features**: Roles & Permissions Management, and User Management with full control over user roles, status, and verification states.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
-- **Communication Services**: Ethiopian Telecom SMS, SendGrid (for emails).
+- **Communication Services**: Ethiopian Telecom SMS, SendGrid.
 - **Database & Hosting**: Neon Database (serverless PostgreSQL).
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
-- **Mapping & Location**: `google-map-react` (property maps), Google Maps Geocoding API (GPS neighborhood detection with smart 24-hour caching).
-- **File Storage**: Replit App Storage (Google Cloud Storage) for property and service images.
-- **AI Services**: Replit AI Integration (optional, for Lemlem complex queries).
+- **Mapping & Location**: Google Maps Geocoding API.
+- **File Storage**: Replit App Storage (Google Cloud Storage).
+- **AI Services**: Replit AI Integration.
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
