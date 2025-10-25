@@ -95,6 +95,21 @@ export interface IStorage {
     reviewCount: number;
   }>;
   
+  getHostStats(hostId: string): Promise<{
+    activeListings: number;
+    totalListings: number;
+    totalBookings: number;
+    upcomingBookings: number;
+    completedBookings: number;
+    totalEarnings: number;
+    lastPayout: number | null;
+    lastPayoutDate: Date | null;
+    avgRating: number;
+    totalReviews: number;
+    occupancyRate: number;
+    pendingReviews: number;
+  }>;
+  
   // Verification document operations
   createVerificationDocument(document: any): Promise<any>;
   getVerificationDocumentsByUser(userId: string): Promise<any[]>;
@@ -635,6 +650,120 @@ export class DatabaseStorage implements IStorage {
       totalRevenue: bookingStats.totalRevenue || 0,
       averageRating: reviewStats.averageRating || 0,
       reviewCount: reviewStats.reviewCount || 0,
+    };
+  }
+
+  async getHostStats(hostId: string): Promise<{
+    activeListings: number;
+    totalListings: number;
+    totalBookings: number;
+    upcomingBookings: number;
+    completedBookings: number;
+    totalEarnings: number;
+    lastPayout: number | null;
+    lastPayoutDate: Date | null;
+    avgRating: number;
+    totalReviews: number;
+    occupancyRate: number;
+    pendingReviews: number;
+  }> {
+    // Get all properties for this host
+    const hostProperties = await db
+      .select()
+      .from(properties)
+      .where(eq(properties.hostId, hostId));
+
+    const propertyIds = hostProperties.map(p => p.id);
+
+    // If no properties, return zeros
+    if (propertyIds.length === 0) {
+      return {
+        activeListings: 0,
+        totalListings: 0,
+        totalBookings: 0,
+        upcomingBookings: 0,
+        completedBookings: 0,
+        totalEarnings: 0,
+        lastPayout: null,
+        lastPayoutDate: null,
+        avgRating: 0,
+        totalReviews: 0,
+        occupancyRate: 0,
+        pendingReviews: 0,
+      };
+    }
+
+    // Count active and total listings
+    const activeListings = hostProperties.filter(p => p.isActive && p.status === 'approved').length;
+    const totalListings = hostProperties.length;
+
+    // Get booking stats across all properties
+    const [bookingStats] = await db
+      .select({
+        totalBookings: sql<number>`COUNT(${bookings.id})`,
+        upcomingBookings: sql<number>`COUNT(*) FILTER (WHERE ${bookings.checkIn} > NOW() AND ${bookings.status} != 'cancelled')`,
+        completedBookings: sql<number>`COUNT(*) FILTER (WHERE ${bookings.status} = 'completed')`,
+        totalEarnings: sql<number>`COALESCE(SUM(${bookings.hostPayout}), 0)`,
+      })
+      .from(bookings)
+      .where(inArray(bookings.propertyId, propertyIds));
+
+    // Get last payout info
+    const lastCompletedBooking = await db
+      .select({
+        payout: bookings.hostPayout,
+        date: bookings.updatedAt,
+      })
+      .from(bookings)
+      .where(and(
+        inArray(bookings.propertyId, propertyIds),
+        eq(bookings.status, 'completed'),
+        sql`${bookings.hostPayout} IS NOT NULL`
+      ))
+      .orderBy(desc(bookings.updatedAt))
+      .limit(1);
+
+    // Get review stats across all properties
+    const [reviewStats] = await db
+      .select({
+        avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+        totalReviews: sql<number>`COUNT(${reviews.id})`,
+      })
+      .from(reviews)
+      .where(inArray(reviews.propertyId, propertyIds));
+
+    // Count pending reviews (completed bookings without reviews)
+    const [pendingReviewsCount] = await db
+      .select({
+        count: sql<number>`COUNT(${bookings.id})`,
+      })
+      .from(bookings)
+      .leftJoin(reviews, eq(bookings.id, reviews.bookingId))
+      .where(and(
+        inArray(bookings.propertyId, propertyIds),
+        eq(bookings.status, 'completed'),
+        sql`${reviews.id} IS NULL`
+      ));
+
+    // Calculate occupancy rate (simplified: completed bookings / total days available)
+    // For now, use a simple metric: completed bookings vs total bookings
+    const occupancyRate = bookingStats.totalBookings > 0
+      ? Math.round((bookingStats.completedBookings / bookingStats.totalBookings) * 100)
+      : 0;
+
+    return {
+      activeListings,
+      totalListings,
+      totalBookings: bookingStats.totalBookings || 0,
+      upcomingBookings: bookingStats.upcomingBookings || 0,
+      completedBookings: bookingStats.completedBookings || 0,
+      totalEarnings: parseFloat(String(bookingStats.totalEarnings || 0)),
+      lastPayout: lastCompletedBooking[0] ? parseFloat(String(lastCompletedBooking[0].payout)) : null,
+      lastPayoutDate: lastCompletedBooking[0]?.date || null,
+      avgRating: parseFloat(String(reviewStats.avgRating || 0)),
+      totalReviews: reviewStats.totalReviews || 0,
+      occupancyRate,
+      pendingReviews: pendingReviewsCount.count || 0,
     };
   }
 
