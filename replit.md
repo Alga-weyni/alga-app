@@ -8,7 +8,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 25, 2025)
 
-### Progressive Web App (PWA) Implementation (Latest)
+### Capacitor Native App Integration (Latest)
+Extended Alga to support native Android and iOS apps for app store distribution:
+- **Native Projects**: Generated `android/` and `ios/` folders with full Capacitor configuration
+- **6 Native Plugins**: Pre-configured Geolocation (GPS search), Camera (ID verification), Push Notifications (booking alerts), Share (viral marketing), Browser (payment links), and App (lifecycle management)
+- **Ready for Stores**: Complete setup for Google Play Store and Apple App Store submission
+- **Live Reload**: Development mode allows instant testing on real devices
+- **Build Scripts**: Automated workflows for APK/AAB (Android) and IPA (iOS) generation
+- **Code Signing**: Documentation for release signing and app store deployment
+- **Multi-Platform**: Same React codebase powers web (PWA), Android, and iOS
+- **Documentation**: Step-by-step guide in `docs/MOBILE_APP_SETUP.md` with prerequisites, build instructions, and troubleshooting
+- **Deployment Strategy**: PWA-first (live now, $0 cost) → Native apps when ready for app stores ($25 Play Store + $99/year App Store)
+
+### Progressive Web App (PWA) Implementation
 Alga is now a fully installable Progressive Web App optimized for Ethiopian mobile networks:
 - **Installable**: Users can add Alga to home screen (iOS & Android) without app stores
 - **Offline Support**: Service worker caches pages, images, and API responses for offline access
@@ -76,5 +88,6 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Mapping & Location**: Google Maps Geocoding API.
 - **File Storage**: Replit App Storage (Google Cloud Storage).
 - **AI Services**: Replit AI Integration.
+- **Mobile Frameworks**: Capacitor (native iOS/Android), vite-plugin-pwa (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
