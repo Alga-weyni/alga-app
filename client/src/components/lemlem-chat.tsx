@@ -75,6 +75,23 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     scrollToBottom();
   }, [messages]);
 
+  // Clean text for speech - remove emojis and symbols, keep only letters and numbers
+  const cleanTextForSpeech = (text: string): string => {
+    return text
+      // Remove common emojis by replacing them with empty string
+      .replace(/[\u2600-\u27BF]/g, '')
+      .replace(/[\uE000-\uF8FF]/g, '')
+      .replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]/g, '')
+      // Remove markdown formatting
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/##/g, '')
+      .replace(/#/g, '')
+      // Clean up multiple spaces
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // Text-to-Speech function - Warm Grandmother Voice
   const speak = (text: string) => {
     if (!voiceEnabled || !window.speechSynthesis) return;
@@ -82,12 +99,16 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Clean text - remove emojis and symbols, keep only words and numbers
+    const cleanText = cleanTextForSpeech(text);
+    if (!cleanText) return; // Don't speak if nothing left after cleaning
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     const langCode = LANGUAGE_VOICES[userLanguage] || 'en-US';
     utterance.lang = langCode;
     
     // Soft, loving grandmother voice settings (like speaking to a beloved grandchild)
-    utterance.rate = 0.84; // Warm, patient pace with gentle energy (20% faster)
+    utterance.rate = 0.84; // Warm, patient pace with gentle energy
     utterance.pitch = 1.2; // Soft, sweet, and gentle tone
     utterance.volume = 0.95; // Gentle presence, not overwhelming
     
