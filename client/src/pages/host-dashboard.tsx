@@ -68,12 +68,14 @@ import {
   X,
   Image as ImageIcon,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
 import { HostEarnings } from "@/components/host-earnings";
+import { PropertyInfoForm } from "@/components/property-info-form";
 import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
@@ -123,6 +125,7 @@ export default function HostDashboard() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [lemlemPropertyId, setLemlemPropertyId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect to login if not authenticated
@@ -637,7 +640,7 @@ export default function HostDashboard() {
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 mb-2">
                         <Button 
                           size="sm" 
                           variant="outline" 
@@ -684,6 +687,17 @@ export default function HostDashboard() {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
+
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="w-full border-[#CD7F32] text-[#CD7F32] hover:bg-[#f9e9d8]"
+                        onClick={() => setLemlemPropertyId(property.id)}
+                        data-testid={`button-configure-lemlem-${property.id}`}
+                      >
+                        <Sparkles className="h-4 w-4 mr-1" />
+                        Configure Lemlem AI
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -1253,6 +1267,21 @@ export default function HostDashboard() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lemlem AI Configuration Dialog */}
+      <Dialog open={lemlemPropertyId !== null} onOpenChange={() => setLemlemPropertyId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#CD7F32]" />
+              Configure Lemlem AI Assistant
+            </DialogTitle>
+          </DialogHeader>
+          {lemlemPropertyId && (
+            <PropertyInfoForm propertyId={lemlemPropertyId} />
+          )}
         </DialogContent>
       </Dialog>
 
