@@ -76,6 +76,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
 import { HostEarnings } from "@/components/host-earnings";
 import { PropertyInfoForm } from "@/components/property-info-form";
+import HostBanner from "@/components/host-banner";
 import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
@@ -485,12 +486,15 @@ export default function HostDashboard() {
         <div className="mb-4 sm:mb-6">
           <BackButton />
         </div>
+
+        {/* Professional Host Banner */}
+        <HostBanner hostName={user?.firstName || user?.name} />
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-dark">Host Dashboard</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
-              Welcome back, {user?.firstName}! Manage your properties and bookings.
+              Manage your properties and bookings.
             </p>
           </div>
           <Button onClick={handleAddNew} className="bg-eth-green hover:bg-green-700 w-full sm:w-auto">
