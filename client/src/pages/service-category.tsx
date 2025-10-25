@@ -22,13 +22,39 @@ const serviceTitles: Record<string, string> = {
   photography: "Photography Services",
   landscaping: "Landscaping & Gardening",
   welcome_pack: "Welcome Pack Services",
-  self_care: "Self Care Services"
+  self_care: "Self-Care at Home"
 };
+
+const selfCareSpecialties = [
+  "Hair Styling",
+  "Pedicure",
+  "Manicure",
+  "Waxing",
+  "Upper Lip",
+  "Facial",
+  "Massage",
+  "Eyebrow Shaping",
+];
+
+const timeSlotOptions = [
+  { value: "all", label: "Anytime" },
+  { value: "now", label: "Available Now" },
+  { value: "today_am", label: "Today Morning (8AM-12PM)" },
+  { value: "today_pm", label: "Today Afternoon (12PM-6PM)" },
+  { value: "today_evening", label: "Today Evening (6PM-10PM)" },
+  { value: "tomorrow", label: "Tomorrow" },
+  { value: "this_week", label: "This Week" },
+];
 
 export default function ServiceCategory() {
   const { type } = useParams<{ type: string }>();
   const [cityFilter, setCityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("rating");
+  
+  // Self-Care specific filters
+  const [selfCareSpecialty, setSelfCareSpecialty] = useState<string>("all");
+  const [selfCareTimeSlot, setSelfCareTimeSlot] = useState<string>("all");
+  const [neighborhoodSearch, setNeighborhoodSearch] = useState<string>("");
 
   const { data: providers, isLoading } = useQuery<ServiceProvider[]>({
     queryKey: ["/api/service-providers", type, cityFilter],
@@ -81,16 +107,84 @@ export default function ServiceCategory() {
             </Button>
           </Link>
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#2d1405" }}>
-            {serviceTitles[type || ""] || "Service Providers"}
+            {serviceTitles[type || ""] || "Service Providers"} {type === "self_care" && "💅"}
           </h1>
           <p style={{ color: "#5a4a42" }}>
-            {sortedProviders.length} verified providers available
+            {type === "self_care" 
+              ? "Let the beauty come to you — trusted professionals at your doorstep" 
+              : `${sortedProviders.length} verified providers available`
+            }
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
+        {/* Self-Care Specific Filters */}
+        {type === "self_care" && (
+          <div className="mb-6 p-6 rounded-xl shadow-lg border-2 border-[#F49F0A]/20" style={{ background: "#FFF6EA" }}>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: "#2d1405" }}>
+              ✨ Find Your Perfect Beauty Professional
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Specialty Filter */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: "#2d1405" }}>
+                  What service do you need?
+                </label>
+                <Select value={selfCareSpecialty} onValueChange={setSelfCareSpecialty}>
+                  <SelectTrigger data-testid="select-selfcare-specialty">
+                    <SelectValue placeholder="All services" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    {selfCareSpecialties.map((specialty) => (
+                      <SelectItem key={specialty} value={specialty.toLowerCase().replace(/\s+/g, '_')}>
+                        {specialty}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Neighborhood Search */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: "#2d1405" }}>
+                  Your area (e.g., Bole, Sarbet)
+                </label>
+                <input
+                  type="text"
+                  value={neighborhoodSearch}
+                  onChange={(e) => setNeighborhoodSearch(e.target.value)}
+                  placeholder="Enter your neighborhood"
+                  className="w-full px-3 py-2 rounded-lg border border-[#e5d9ce] focus:outline-none focus:ring-2 focus:ring-[#F49F0A]"
+                  data-testid="input-neighborhood-search"
+                />
+              </div>
+
+              {/* Time Slot */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: "#2d1405" }}>
+                  When do you need them?
+                </label>
+                <Select value={selfCareTimeSlot} onValueChange={setSelfCareTimeSlot}>
+                  <SelectTrigger data-testid="select-time-slot">
+                    <SelectValue placeholder="Anytime" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeSlotOptions.map((slot) => (
+                      <SelectItem key={slot.value} value={slot.value}>
+                        {slot.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Standard Filters */}
         <div className="flex flex-wrap gap-4 mb-8 p-4 rounded-lg" style={{ background: "#fff" }}>
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium mb-2" style={{ color: "#2d1405" }}>
@@ -133,10 +227,13 @@ export default function ServiceCategory() {
           <div className="text-center py-16 px-4 rounded-lg" style={{ background: "#fff" }}>
             <Sparkles className="w-16 h-16 mx-auto mb-4" style={{ color: "#2d1405", opacity: 0.3 }} />
             <h3 className="text-xl font-semibold mb-2" style={{ color: "#2d1405" }}>
-              No providers found
+              {type === "self_care" ? "No beauty professionals found yet in your area" : "No providers found"}
             </h3>
             <p style={{ color: "#5a4a42" }}>
-              Try adjusting your filters or check back later for new providers.
+              {type === "self_care" 
+                ? "💇‍♀️ We're onboarding mobile beauty experts near you. Check back soon!" 
+                : "Try adjusting your filters or check back later for new providers."
+              }
             </p>
           </div>
         ) : (
