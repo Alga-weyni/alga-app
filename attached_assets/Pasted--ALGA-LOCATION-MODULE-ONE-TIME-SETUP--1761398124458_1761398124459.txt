@@ -1,0 +1,99 @@
+# =========================================
+# 🌍 ALGA LOCATION MODULE – ONE-TIME SETUP
+# =========================================
+echo "📦 Installing location + geocoding dependencies..."
+npm install --save react-geolocated
+
+echo "🧭 Creating shared Location Module files..."
+
+# 1️⃣ Location Context
+mkdir -p client/components client/hooks client/utils
+cat <<'EOF' > client/components/LocationContext.tsx
+import React, { createContext, useState } from "react";
+export const LocationContext = createContext({ location: null, setLocation: () => {} });
+export const LocationProvider = ({ children }) => {
+  const [location, setLocation] = useState(null);
+  return (
+    <LocationContext.Provider value={{ location, setLocation }}>
+      {children}
+    </LocationContext.Provider>
+  );
+};
+EOF
+
+# 2️⃣ Reverse Geocoding Utility
+cat <<'EOF' > client/utils/geocode.ts
+export const reverseGeocode = async (lat: number, lng: number) => {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const res = await fetch(
+    \`https://maps.googleapis.com/maps/api/geocode/json?latlng=\${lat},\${lng}&key=\${apiKey}\`
+  );
+  const data = await res.json();
+  if (data.results?.length) {
+    const areaComponent = data.results[0].address_components.find(
+      (c) => c.types.includes("neighborhood") || c.types.includes("sublocality")
+    );
+    return areaComponent ? areaComponent.long_name : "Your Area";
+  }
+  return "Unknown Area";
+};
+EOF
+
+# 3️⃣ Location Picker Component
+cat <<'EOF' > client/components/LocationPicker.tsx
+import React, { useContext, useState } from "react";
+import { LocationContext } from "./LocationContext";
+import { reverseGeocode } from "../utils/geocode";
+
+const LocationPicker = () => {
+  const { location, setLocation } = useContext(LocationContext);
+  const [loading, setLoading] = useState(false);
+
+  const handleGetLocation = async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported by your browser.");
+      return;
+    }
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const area = await reverseGeocode(latitude, longitude);
+        setLocation({ latitude, longitude, area });
+        alert(\`📍 Found: \${area}\`);
+        setLoading(false);
+      },
+      () => {
+        alert("Unable to retrieve your location.");
+        setLoading(false);
+      }
+    );
+  };
+
+  return (
+    <div className="location-picker" style={{ display: "flex", gap: "0.5rem" }}>
+      <input
+        type="text"
+        placeholder="Enter your area (e.g. Bole, Sarbet)"
+        value={location?.area || ""}
+        onChange={(e) => setLocation({ ...location, area: e.target.value })}
+        className="location-input"
+      />
+      <button onClick={handleGetLocation} className="location-btn">
+        {loading ? "Finding..." : "📍 Use My Location"}
+      </button>
+    </div>
+  );
+};
+export default LocationPicker;
+EOF
+
+# 4️⃣ Integrate Context Globally
+sed -i '' 's#<AppRoutes />#<LocationProvider><AppRoutes /></LocationProvider>#' client/App.tsx || true
+
+# 5️⃣ Export Ready Environment Key
+echo '✅ Add this to your Replit Secrets:'
+echo 'VITE_GOOGLE_MAPS_API_KEY=your_google_api_key_here'
+
+echo "✅ Location module installed successfully."
+echo "You can now import <LocationPicker /> into: /services/self_care, /stays, /home, /movements"
