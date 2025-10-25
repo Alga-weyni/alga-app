@@ -274,14 +274,17 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
             variant="ghost"
             size="icon"
             onClick={() => {
-              setVoiceEnabled(!voiceEnabled);
-              if (!voiceEnabled) {
+              const newVoiceState = !voiceEnabled;
+              setVoiceEnabled(newVoiceState);
+              if (!newVoiceState) {
+                // If turning OFF voice, cancel any ongoing speech
                 window.speechSynthesis.cancel();
+                setIsSpeaking(false);
               }
             }}
             className="text-white hover:bg-white/20"
             data-testid="button-toggle-voice"
-            title={voiceEnabled ? "Voice On" : "Voice Off"}
+            title={voiceEnabled ? "Turn Voice Off" : "Turn Voice On"}
           >
             {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
           </Button>
