@@ -38,7 +38,7 @@ export const cacheLocation = (location: LocationData): void => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(location));
   } catch {
-    console.warn('Failed to cache location');
+    // Silent fail - caching is optional
   }
 };
 
@@ -50,7 +50,6 @@ export const reverseGeocode = async (
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   
   if (!apiKey) {
-    console.warn('Google Maps API key not configured');
     return { area: 'Your Area', city: 'Addis Ababa' };
   }
 
@@ -86,8 +85,7 @@ export const reverseGeocode = async (
       area: areaComponent?.long_name || 'Your Area',
       city: cityComponent?.long_name || 'Addis Ababa',
     };
-  } catch (error) {
-    console.error('Geocoding error:', error);
+  } catch {
     return { area: 'Your Area', city: 'Addis Ababa' };
   }
 };

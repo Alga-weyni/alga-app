@@ -124,22 +124,16 @@ export default function PropertyDetails() {
       // Handle Telebirr payment
       if (bookingData.paymentMethod === "telebirr") {
         try {
-          console.log("[Telebirr] Initiating payment for booking:", booking.id);
-          
           const paymentData = await apiRequest("POST", "/api/payment/telebirr", {
             bookingId: booking.id,
             amount: parseFloat(booking.totalPrice),
             customerPhone: user?.phoneNumber || "+251912345678",
           });
           
-          console.log("[Telebirr] Payment data:", paymentData);
-          
           if (paymentData.success && paymentData.redirectUrl) {
-            console.log("[Telebirr] Redirecting to:", paymentData.redirectUrl);
             // Redirect to Telebirr checkout
             window.location.href = paymentData.redirectUrl;
           } else {
-            console.error("[Telebirr] Payment failed:", paymentData);
             toast({
               title: "Payment initiation failed",
               description: paymentData.message || "Unable to start Telebirr payment. Please try another method.",
@@ -147,8 +141,7 @@ export default function PropertyDetails() {
             });
             navigate(`/bookings/${booking.id}`);
           }
-        } catch (error) {
-          console.error("[Telebirr] Payment error:", error);
+        } catch {
           toast({
             title: "Payment error",
             description: "Unable to process Telebirr payment.",
@@ -176,8 +169,7 @@ export default function PropertyDetails() {
             });
             navigate(`/bookings/${booking.id}`);
           }
-        } catch (error) {
-          console.error("PayPal payment error:", error);
+        } catch {
           toast({
             title: "Payment error",
             description: "Unable to process PayPal payment.",
