@@ -19,6 +19,8 @@ import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
+import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings } from "@shared/schema";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -2671,6 +2673,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking Fayda status:", error);
       res.status(500).json({ message: "Failed to check verification status" });
+    }
+  });
+
+  // ============================================================
+  // LEMLEM AI ASSISTANT ROUTES (Cost-Optimized)
+  // ============================================================
+
+  // Send message to Lemlem (uses templates first, AI only if needed)
+  app.post('/api/lemlem/chat', async (req: any, res) => {
+    try {
+      const { message, propertyId, bookingId } = req.body;
+      const userId = req.user?.id;
+
+      if (!message || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Get context for better responses
+      const context: LemlemContext = {
+        user: req.user,
+      };
+
+      if (propertyId) {
+        const [property] = await db.select().from(properties).where(eq(properties.id, parseInt(propertyId)));
+        context.property = property;
+
+        const [propInfo] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+        context.propertyInfo = propInfo;
+      }
+
+      if (bookingId) {
+        const [booking] = await db.select().from(bookings).where(eq(bookings.id, parseInt(bookingId)));
+        context.booking = booking;
+      }
+
+      // Try template matching first (NO AI COST!)
+      let response = matchTemplate(message, context);
+
+      // If no template match, try general help
+      if (!response || response.confidence < 0.7) {
+        const generalResponse = getGeneralHelp(message);
+        if (generalResponse) {
+          response = generalResponse;
+        }
+      }
+
+      // If still no match, use fallback message (NO AI COST!)
+      if (!response) {
+        response = {
+          message: `I understand you need help, dear! I can assist you with:\n\n🔑 Lockbox codes & access\n📶 WiFi passwords\n🏠 Check-in/Check-out times\n📞 Host contact information\n🚨 Emergency contacts\n🍽️ Restaurant recommendations\n🗺️ Local attractions\n\nWhat would you like to know? You can also contact the host directly if you need immediate assistance!`,
+          usedTemplate: true,
+          confidence: 0.5,
+        };
+      }
+
+      // Save conversation to database (for history and cost tracking)
+      await db.insert(lemlemChats).values({
+        userId,
+        propertyId: propertyId ? parseInt(propertyId) : undefined,
+        bookingId: bookingId ? parseInt(bookingId) : undefined,
+        message,
+        isUser: true,
+        usedTemplate: true,
+      });
+
+      await db.insert(lemlemChats).values({
+        userId,
+        propertyId: propertyId ? parseInt(propertyId) : undefined,
+        bookingId: bookingId ? parseInt(bookingId) : undefined,
+        message: response.message,
+        isUser: false,
+        usedTemplate: response.usedTemplate,
+        aiModel: response.usedTemplate ? null : undefined,
+        tokensUsed: response.usedTemplate ? null : undefined,
+        estimatedCost: response.usedTemplate ? "0" : undefined,
+      });
+
+      res.json({
+        message: response.message,
+        usedTemplate: response.usedTemplate,
+        confidence: response.confidence,
+        cost: response.usedTemplate ? 0 : undefined, // $0 for template responses!
+      });
+    } catch (error) {
+      console.error("Error in Lemlem chat:", error);
+      res.status(500).json({ 
+        message: "I'm having trouble right now, dear. Please try again in a moment or contact the host directly." 
+      });
+    }
+  });
+
+  // Get chat history
+  app.get('/api/lemlem/history', async (req: any, res) => {
+    try {
+      const { propertyId, bookingId, limit = 50 } = req.query;
+      const userId = req.user?.id;
+
+      const conditions = [];
+      if (userId) {
+        conditions.push(eq(lemlemChats.userId, userId));
+      }
+      if (propertyId) {
+        conditions.push(eq(lemlemChats.propertyId, parseInt(propertyId)));
+      }
+      if (bookingId) {
+        conditions.push(eq(lemlemChats.bookingId, parseInt(bookingId)));
+      }
+
+      const history = await db.select().from(lemlemChats).where(conditions.length > 0 ? conditions[0] : undefined).limit(parseInt(limit));
+
+      // Calculate total cost for this conversation
+      const totalCost = history.reduce((sum, chat) => {
+        if (chat.estimatedCost) {
+          return sum + parseFloat(chat.estimatedCost);
+        }
+        return sum;
+      }, 0);
+
+      res.json({
+        history,
+        stats: {
+          totalMessages: history.length,
+          templateResponses: history.filter(c => c.usedTemplate).length,
+          aiResponses: history.filter(c => !c.usedTemplate).length,
+          totalCost: totalCost.toFixed(6), // Cost in dollars
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching Lemlem history:", error);
+      res.status(500).json({ message: "Failed to fetch chat history" });
+    }
+  });
+
+  // Get property info for Lemlem
+  app.get('/api/property-info/:propertyId', async (req: any, res) => {
+    try {
+      const { propertyId } = req.params;
+      const [info] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      
+      if (!info) {
+        return res.json({ message: "No property info available yet" });
+      }
+
+      res.json(info);
+    } catch (error) {
+      console.error("Error fetching property info:", error);
+      res.status(500).json({ message: "Failed to fetch property info" });
+    }
+  });
+
+  // Create/Update property info (for hosts)
+  app.put('/api/property-info/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { propertyId } = req.params;
+      const userId = req.user.id;
+
+      // Verify user owns this property
+      const [property] = await db.select().from(properties).where(eq(properties.id, parseInt(propertyId)));
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      if (property.hostId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Not authorized to update this property info" });
+      }
+
+      // Check if property info exists
+      const [existing] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+
+      if (existing) {
+        // Update existing
+        await db.update(propertyInfo)
+          .set({ ...req.body, updatedAt: new Date() })
+          .where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      } else {
+        // Create new
+        await db.insert(propertyInfo).values({
+          propertyId: parseInt(propertyId),
+          ...req.body,
+        });
+      }
+
+      const [updated] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating property info:", error);
+      res.status(500).json({ message: "Failed to update property info" });
     }
   });
 
