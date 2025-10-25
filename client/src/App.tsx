@@ -50,6 +50,8 @@ import LanguageSettings from "@/pages/settings/language";
 import PaymentsHelp from "@/pages/help/payments";
 import SafetyHelp from "@/pages/help/safety";
 import { LemlemChat } from "@/components/lemlem-chat";
+import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import OfflineIndicator from "@/components/offline-indicator";
 
 const pageVariants = {
   initial: {
@@ -170,6 +172,8 @@ function App() {
           <Toaster />
           <Router />
           <LemlemChat />
+          <PWAInstallPrompt />
+          <OfflineIndicator />
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
