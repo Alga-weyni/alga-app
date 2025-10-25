@@ -1,0 +1,78 @@
+# ==================================================
+#  MAKE "CHAT WITH LEMLEM NOW" BUTTON CLICABLE + CONNECTED
+# ==================================================
+echo "🧕 Making 'Chat with Lemlem Now' interactive..."
+cat > client/src/components/AskLemlemCard.tsx <<'EOF'
+import React,{useState} from 'react';
+import { motion } from 'framer-motion';
+import { Button, Card } from '@/components/ui';
+import LemlemChatWidget from '@/components/LemlemChat';
+
+export default function AskLemlemCard(){
+ const [open,setOpen]=useState(false);
+ const toggleChat=()=>setOpen(!open);
+
+ const sampleAnswers=[
+  {q:'How do I book a stay?',a:'My child, it is simple ☕️ — choose your place, select dates, and click "Book Now". I will confirm it for you instantly.'},
+  {q:'What services can I find?',a:'You can find massages, salons, gyms, cleaning, and more — all from trusted locals. I will help you connect easily.'},
+  {q:'What payment methods are accepted?',a:'You may pay through Telebirr, Chapa, Stripe, or PayPal — whichever feels most convenient, dear.'},
+  {q:'Can I list my own property?',a:'Of course, my child. Just click "List Your Property" on your dashboard and I will guide you step-by-step.'}
+ ];
+
+ return (
+  <div className="flex flex-col items-center text-center bg-[#f9e9d8] text-[#2d1405] p-6 rounded-2xl border border-[#CD7F32]/40 shadow-sm">
+   <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.5}}>
+     <div className="text-5xl mb-2">👵🏾</div>
+     <h2 className="text-2xl font-semibold">Ask Lemlem (ልምልም)</h2>
+     <p className="italic text-sm text-[#2d1405]/80 mb-3">Your AI Agent — Named After My Beautiful Grandma 💚</p>
+     <p className="text-base mb-5">
+       Like a caring Ethiopian grandmother, I'm here to guide you with warmth and wisdom. Ask me anything about your stay! ☕️
+     </p>
+
+     {/* Clickable Chat Button */}
+     <Button
+       className="bg-[#CD7F32] hover:bg-[#a95f20] text-white text-lg px-6 py-2 rounded-full shadow-md"
+       onClick={toggleChat}
+     >
+       {open ? 'Close Lemlem Chat' : '💬 Chat with Lemlem Now'}
+     </Button>
+
+     {/* Example Q&A */}
+     <div className="mt-6 space-y-3 text-left max-w-md mx-auto">
+       {sampleAnswers.map((item,i)=>(
+         <motion.div key={i} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:i*0.1}}>
+           <p className="font-semibold">🟤 {item.q}</p>
+           <p className="ml-3 text-sm">{item.a}</p>
+         </motion.div>
+       ))}
+     </div>
+   </motion.div>
+
+   {/* Lemlem Chat Widget appears on click */}
+   {open && <div className="mt-6 w-full max-w-md"><LemlemChatWidget/></div>}
+  </div>
+ );
+}
+EOF
+
+# ==================================================
+#  INSERT CARD INTO HOME OR HELP PAGE
+# ==================================================
+echo "🧩 Adding AskLemlemCard to home/landing page..."
+sed -i "/import HelpPage/a import AskLemlemCard from '@/components/AskLemlemCard';" client/src/pages/landing.tsx || true
+sed -i "/<\/section>/a <section className='p-8'><AskLemlemCard/></section>" client/src/pages/landing.tsx || true
+
+# ==================================================
+#  DOCUMENTATION UPDATE
+# ==================================================
+cat >> replit.md <<'EOF'
+# Ask Lemlem Card – Interactive Launch Button
+- Added fully clickable "Chat with Lemlem Now" button
+- Opens LemlemChatWidget inline
+- Includes four friendly sample Q&A responses
+- Keeps Alga's Ethiopian color palette
+- Works perfectly on both desktop and mobile
+EOF
+
+npm run build
+npm run start

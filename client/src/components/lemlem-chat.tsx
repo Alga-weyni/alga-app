@@ -25,6 +25,7 @@ interface Message {
 interface LemlemChatProps {
   propertyId?: number;
   bookingId?: number;
+  defaultOpen?: boolean;
 }
 
 // Language code mapping for Text-to-Speech
@@ -54,8 +55,8 @@ const WELCOME_MESSAGES: Record<string, string> = {
   'zh': "您好！我是 Lemlem — 以我祖母的名字命名的AI智能助理。💚\n\n我可以帮您提供密码箱密码、WiFi密码、入住/退房时间、紧急联系方式和当地推荐。今天我能帮您什么？☕️",
 };
 
-export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: LemlemChatProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [messages, setMessages] = useState<Message[]>([
     {
