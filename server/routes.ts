@@ -2806,7 +2806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get property info for Lemlem
+  // Get property info for Lemlem (public - for chat)
   app.get('/api/property-info/:propertyId', async (req: any, res) => {
     try {
       const { propertyId } = req.params;
@@ -2823,7 +2823,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create/Update property info (for hosts)
+  // Get property info for editing (authenticated)
+  app.get('/api/lemlem/property-info/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { propertyId } = req.params;
+      const [info] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      
+      if (!info) {
+        // Return empty object if no info exists yet
+        return res.json({});
+      }
+
+      res.json(info);
+    } catch (error) {
+      console.error("Error fetching property info:", error);
+      res.status(500).json({ message: "Failed to fetch property info" });
+    }
+  });
+
+  // Create/Update property info (for hosts) - POST version
+  app.post('/api/lemlem/property-info/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { propertyId } = req.params;
+      const userId = req.user.id;
+
+      // Verify user owns this property
+      const [property] = await db.select().from(properties).where(eq(properties.id, parseInt(propertyId)));
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      if (property.hostId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Not authorized to update this property info" });
+      }
+
+      // Check if property info exists
+      const [existing] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+
+      if (existing) {
+        // Update existing
+        await db.update(propertyInfo)
+          .set({ ...req.body, updatedAt: new Date() })
+          .where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      } else {
+        // Create new
+        await db.insert(propertyInfo).values({
+          propertyId: parseInt(propertyId),
+          ...req.body,
+        });
+      }
+
+      const [updated] = await db.select().from(propertyInfo).where(eq(propertyInfo.propertyId, parseInt(propertyId)));
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating property info:", error);
+      res.status(500).json({ message: "Failed to update property info" });
+    }
+  });
+
+  // Create/Update property info (for hosts) - PUT version
   app.put('/api/property-info/:propertyId', isAuthenticated, async (req: any, res) => {
     try {
       const { propertyId } = req.params;
