@@ -102,6 +102,71 @@ export const properties = pgTable("properties", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Property Information for Lemlem AI Assistant
+export const propertyInfo = pgTable("property_info", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull().references(() => properties.id).unique(),
+  
+  // Access Information
+  lockboxCode: varchar("lockbox_code", { length: 20 }),
+  lockboxLocation: text("lockbox_location"),
+  parkingInstructions: text("parking_instructions"),
+  entryInstructions: text("entry_instructions"),
+  
+  // Connectivity
+  wifiNetwork: varchar("wifi_network", { length: 100 }),
+  wifiPassword: varchar("wifi_password", { length: 100 }),
+  
+  // Contacts
+  hostEmergencyPhone: varchar("host_emergency_phone", { length: 20 }),
+  propertyManager: varchar("property_manager", { length: 100 }),
+  propertyManagerPhone: varchar("property_manager_phone", { length: 20 }),
+  
+  // Local Information
+  nearestHospital: text("nearest_hospital"),
+  nearestRestaurants: text("nearest_restaurants"),
+  nearestAttractions: text("nearest_attractions"),
+  transportationTips: text("transportation_tips"),
+  
+  // Appliance Instructions
+  heatingInstructions: text("heating_instructions"),
+  acInstructions: text("ac_instructions"),
+  tvInstructions: text("tv_instructions"),
+  kitchenAppliances: text("kitchen_appliances"),
+  otherInstructions: text("other_instructions"),
+  
+  // Check-in/Check-out
+  checkInTime: varchar("check_in_time", { length: 10 }).default("2:00 PM"),
+  checkOutTime: varchar("check_out_time", { length: 10 }).default("11:00 AM"),
+  checkInNotes: text("check_in_notes"),
+  checkOutChecklist: text("checkout_checklist"),
+  
+  // House Rules
+  quietHours: varchar("quiet_hours", { length: 50 }),
+  smokingAllowed: boolean("smoking_allowed").default(false),
+  petsAllowed: boolean("pets_allowed").default(false),
+  partiesAllowed: boolean("parties_allowed").default(false),
+  additionalRules: text("additional_rules"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Lemlem Chat Conversations (for context & cost tracking)
+export const lemlemChats = pgTable("lemlem_chats", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  bookingId: integer("booking_id").references(() => bookings.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  message: text("message").notNull(),
+  isUser: boolean("is_user").notNull(),
+  usedTemplate: boolean("used_template").default(true), // Track if template was used (no AI cost)
+  aiModel: varchar("ai_model", { length: 50 }), // Only if AI was used
+  tokensUsed: integer("tokens_used"), // Only if AI was used
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 6 }), // Only if AI was used
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
   propertyId: integer("property_id").notNull().references(() => properties.id),
@@ -265,6 +330,32 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   bookings: many(bookings),
   reviews: many(reviews),
   favorites: many(favorites),
+  propertyInfo: one(propertyInfo, {
+    fields: [properties.id],
+    references: [propertyInfo.propertyId],
+  }),
+}));
+
+export const propertyInfoRelations = relations(propertyInfo, ({ one }) => ({
+  property: one(properties, {
+    fields: [propertyInfo.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const lemlemChatsRelations = relations(lemlemChats, ({ one }) => ({
+  user: one(users, {
+    fields: [lemlemChats.userId],
+    references: [users.id],
+  }),
+  booking: one(bookings, {
+    fields: [lemlemChats.bookingId],
+    references: [bookings.id],
+  }),
+  property: one(properties, {
+    fields: [lemlemChats.propertyId],
+    references: [properties.id],
+  }),
 }));
 
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
@@ -507,6 +598,17 @@ export const insertServiceReviewSchema = createInsertSchema(serviceReviews).omit
   updatedAt: true,
 });
 
+export const insertPropertyInfoSchema = createInsertSchema(propertyInfo).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLemlemChatSchema = createInsertSchema(lemlemChats).omit({
+  id: true,
+  timestamp: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -532,3 +634,7 @@ export type InsertServiceBooking = z.infer<typeof insertServiceBookingSchema>;
 export type ServiceBooking = typeof serviceBookings.$inferSelect;
 export type InsertServiceReview = z.infer<typeof insertServiceReviewSchema>;
 export type ServiceReview = typeof serviceReviews.$inferSelect;
+export type InsertPropertyInfo = z.infer<typeof insertPropertyInfoSchema>;
+export type PropertyInfo = typeof propertyInfo.$inferSelect;
+export type InsertLemlemChat = z.infer<typeof insertLemlemChatSchema>;
+export type LemlemChat = typeof lemlemChats.$inferSelect;
