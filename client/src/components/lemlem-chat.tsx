@@ -26,6 +26,7 @@ const LANGUAGE_VOICES: Record<string, string> = {
   'am': 'am-ET',
   'ti': 'ti-ER',
   'om': 'om-ET',
+  'zh': 'zh-CN', // Mandarin Chinese
 };
 
 export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {

@@ -321,6 +321,10 @@ const GREETINGS = {
     hello: `Nagaa! Ani Lemlem jedhama, gargaaraa AI keessan. Yeroo turisimii keessan keessatti waan kamiyyuu isin gargaaruuf asitti argama. Maal isin gargaaruu danda'a? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`,
     thanks: `Baay'ee galatoomaa! Waan biraa yoo barbaaddan, 24/7 asittin jira. Turizimii keessan itti gammadaa! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`,
   },
+  zh: { // Chinese (Mandarin)
+    hello: `您好！我是 Lemlem，您的人工智能助手。我在这里帮助您解决住宿期间的任何问题——从门锁密码到当地推荐。我能帮您什么？😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with?)`,
+    thanks: `非常欢迎！如果您需要其他帮助，我全天候在这里。祝您入住愉快！☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`,
+  },
 };
 
 export function getGeneralHelp(message: string, context?: LemlemContext): LemlemResponse | null {
@@ -329,9 +333,10 @@ export function getGeneralHelp(message: string, context?: LemlemContext): Lemlem
   const language = userPreferences.language || 'en';
   const greetings = GREETINGS[language as keyof typeof GREETINGS] || GREETINGS.en;
 
-  // Greeting detection (works in all Ethiopian languages)
+  // Greeting detection (works in all Ethiopian languages + Chinese)
   if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || 
-      lower.includes("selam") || lower.includes("ሰላም") || lower.includes("nagaa")) {
+      lower.includes("selam") || lower.includes("ሰላም") || lower.includes("nagaa") ||
+      lower.includes("你好") || lower.includes("您好") || lower.includes("nihao")) {
     return {
       message: greetings.hello,
       usedTemplate: true,
@@ -339,9 +344,10 @@ export function getGeneralHelp(message: string, context?: LemlemContext): Lemlem
     };
   }
 
-  // Thank you detection (works in all Ethiopian languages)
+  // Thank you detection (works in all Ethiopian languages + Chinese)
   if (lower.includes("thank") || lower.includes("thanks") || 
       lower.includes("ameseginalehu") || lower.includes("አመሰግናለሁ") ||
+      lower.includes("谢谢") || lower.includes("感谢") || lower.includes("xiexie") ||
       lower.includes("yeqenyeley") || lower.includes("galatoomaa")) {
     return {
       message: greetings.thanks,
