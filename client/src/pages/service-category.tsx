@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/header";
+import { SEOHead } from "@/components/seo-head";
 import { useQuery } from "@tanstack/react-query";
 import { Star, MapPin, Clock, DollarSign, Sparkles, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";

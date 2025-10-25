@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/header";
+import { SEOHead } from "@/components/seo-head";
 import { 
   Sparkles, 
   Wrench, 

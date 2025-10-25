@@ -101,7 +101,8 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
       <div className="relative">
           <img
             src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
-            alt={property.title}
+            alt={`${property.title} in ${property.city} - ${property.type} accommodation`}
+            loading="lazy"
             className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
             data-testid={`img-property-${property.id}`}
           />
