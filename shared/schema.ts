@@ -54,6 +54,7 @@ export const users = pgTable("users", {
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
   bio: text("bio"),
+  preferences: jsonb("preferences").default('{}'), // User preferences for personalization
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -70,6 +71,15 @@ export const verificationDocuments = pgTable("verification_documents", {
   rejectionReason: text("rejection_reason"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User Activity Log for personalization and analytics
+export const userActivityLog = pgTable("user_activity_log", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: varchar("action").notNull(), // viewed_property, made_booking, searched, chatted_lemlem, etc.
+  metadata: jsonb("metadata").default('{}'), // Additional context (property_id, search_query, etc.)
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const properties = pgTable("properties", {
@@ -628,6 +638,11 @@ export const insertPlatformSettingsSchema = createInsertSchema(platformSettings)
   updatedAt: true,
 });
 
+export const insertUserActivitySchema = createInsertSchema(userActivityLog).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -659,3 +674,5 @@ export type InsertLemlemChat = z.infer<typeof insertLemlemChatSchema>;
 export type LemlemChat = typeof lemlemChats.$inferSelect;
 export type InsertPlatformSettings = z.infer<typeof insertPlatformSettingsSchema>;
 export type PlatformSettings = typeof platformSettings.$inferSelect;
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
+export type UserActivity = typeof userActivityLog.$inferSelect;
