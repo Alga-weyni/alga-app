@@ -2,6 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MessageCircle, X, Send, Volume2, VolumeX } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,13 +36,13 @@ const LANGUAGE_VOICES: Record<string, string> = {
   'zh': 'zh-CN', // Mandarin Chinese
 };
 
-// Language options for switcher
+// Language options for dropdown
 const LANGUAGE_OPTIONS = [
-  { code: 'en', flag: '🇬🇧', label: 'English' },
-  { code: 'am', flag: '🇪🇹', label: 'አማርኛ' },
-  { code: 'ti', flag: '🇪🇷', label: 'ትግርኛ' },
-  { code: 'om', flag: '🌾', label: 'Afaan Oromoo' },
-  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'en', label: 'English' },
+  { code: 'am', label: 'አማርኛ (Amharic)' },
+  { code: 'ti', label: 'ትግርኛ (Tigrinya)' },
+  { code: 'om', label: 'Afaan Oromoo (Oromo)' },
+  { code: 'zh', label: '中文 (Chinese)' },
 ];
 
 // Welcome messages in all languages
@@ -325,25 +332,27 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
       </div>
 
       {/* Language Switcher */}
-      <div className="px-3 py-2 border-b bg-[#f9e9d8]/50 flex items-center justify-center gap-2">
-        <span className="text-xs text-[#2d1405] font-medium">Language:</span>
-        <div className="flex gap-1">
-          {LANGUAGE_OPTIONS.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => setSelectedLanguage(lang.code)}
-              className={`px-2 py-1 text-xs rounded transition-all ${
-                selectedLanguage === lang.code
-                  ? 'bg-[#CD7F32] text-white shadow-sm'
-                  : 'bg-white text-[#2d1405] hover:bg-[#CD7F32]/10'
-              }`}
-              data-testid={`button-lang-${lang.code}`}
-              title={lang.label}
-            >
-              {lang.flag}
-            </button>
-          ))}
-        </div>
+      <div className="px-4 py-3 border-b bg-[#f9e9d8]/50 flex items-center justify-center gap-3">
+        <span className="text-sm text-[#2d1405] font-medium">Language:</span>
+        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+          <SelectTrigger 
+            className="w-[200px] bg-white border-[#CD7F32]/30 text-[#2d1405] focus:ring-[#CD7F32]"
+            data-testid="select-language"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LANGUAGE_OPTIONS.map((lang) => (
+              <SelectItem 
+                key={lang.code} 
+                value={lang.code}
+                data-testid={`option-lang-${lang.code}`}
+              >
+                {lang.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Cost Indicator */}
