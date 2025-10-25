@@ -86,10 +86,10 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     const langCode = LANGUAGE_VOICES[userLanguage] || 'en-US';
     utterance.lang = langCode;
     
-    // Warm, caring grandmother voice settings
-    utterance.rate = 0.75; // Slower, patient speaking pace
-    utterance.pitch = 1.15; // Warm, gentle tone
-    utterance.volume = 1.0; // Clear but not overwhelming
+    // Soft, loving grandmother voice settings (like speaking to a beloved grandchild)
+    utterance.rate = 0.70; // Very slow, patient, and loving pace
+    utterance.pitch = 1.2; // Soft, sweet, and gentle tone
+    utterance.volume = 0.95; // Gentle presence, not overwhelming
     
     // Try to select a female voice for grandmother feel
     const voices = window.speechSynthesis.getVoices();
