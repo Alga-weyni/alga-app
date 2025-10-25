@@ -2990,6 +2990,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(sql`DATE(timestamp) DESC`)
         .limit(30);
 
+      // Lemlem Impact Analytics - Track bookings after Lemlem interactions
+      const lemlemImpact = await db.select({
+        totalChatsWithBookings: sql<number>`COUNT(DISTINCT ${lemlemChats.userId})`,
+        totalBookingsAfterChat: sql<number>`COUNT(DISTINCT ${bookings.id})`,
+      })
+        .from(lemlemChats)
+        .leftJoin(bookings, sql`${bookings.guestId} = ${lemlemChats.userId} AND ${bookings.createdAt} > ${lemlemChats.timestamp}`)
+        .where(sql`${lemlemChats.timestamp} >= NOW() - INTERVAL '90 days'`);
+
+      // Properties with highest Lemlem engagement
+      const topPropertiesByEngagement = await db.select({
+        propertyId: lemlemChats.propertyId,
+        title: properties.title,
+        totalChats: sql<number>`COUNT(*)`,
+        uniqueUsers: sql<number>`COUNT(DISTINCT ${lemlemChats.userId})`,
+        bookingsAfterChat: sql<number>`COUNT(DISTINCT ${bookings.id})`,
+        conversionRate: sql<number>`ROUND(CAST(COUNT(DISTINCT ${bookings.id}) AS NUMERIC) / NULLIF(COUNT(DISTINCT ${lemlemChats.userId}), 0) * 100, 2)`,
+      })
+        .from(lemlemChats)
+        .leftJoin(properties, eq(lemlemChats.propertyId, properties.id))
+        .leftJoin(bookings, sql`${bookings.propertyId} = ${lemlemChats.propertyId} AND ${bookings.guestId} = ${lemlemChats.userId} AND ${bookings.createdAt} > ${lemlemChats.timestamp}`)
+        .where(sql`${lemlemChats.propertyId} IS NOT NULL AND ${lemlemChats.timestamp} >= NOW() - INTERVAL '90 days'`)
+        .groupBy(lemlemChats.propertyId, properties.title)
+        .orderBy(sql`COUNT(DISTINCT ${bookings.id}) DESC`)
+        .limit(10);
+
       res.json({
         totalChats: totalChats[0].count,
         templateChats: templateChats[0].count,
@@ -2999,6 +3025,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         topQuestions,
         mostActiveProperties,
         costByDay,
+        impact: {
+          usersWithChats: lemlemImpact[0]?.totalChatsWithBookings || 0,
+          bookingsAfterChats: lemlemImpact[0]?.totalBookingsAfterChat || 0,
+          conversionRate: lemlemImpact[0]?.totalBookingsAfterChat && lemlemImpact[0]?.totalChatsWithBookings
+            ? ((lemlemImpact[0].totalBookingsAfterChat / lemlemImpact[0].totalChatsWithBookings) * 100).toFixed(1)
+            : '0.0',
+          topPropertiesByEngagement,
+        },
       });
     } catch (error) {
       console.error("Error fetching Lemlem insights:", error);

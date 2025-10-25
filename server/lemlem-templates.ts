@@ -301,30 +301,50 @@ export function matchTemplate(
 /**
  * Fallback responses when no property info is available
  */
+/**
+ * Multilingual greetings for Ethiopia's major languages
+ */
+const GREETINGS = {
+  en: {
+    hello: `Hello, dear! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with? 😊`,
+    thanks: `You're very welcome, dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`,
+  },
+  am: { // Amharic
+    hello: `ሰላም! እኔ ለምለም ነኝ፣ የእርስዎ AI ረዳት። በእርስዎ ቆይታ ላይ ማንኛውንም ነገር ለመርዳት እዚህ ነኝ። ምን ልረዳዎ? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`,
+    thanks: `በጣም እናመሰግናለን! ሌላ ነገር ከፈለጉ፣ 24/7 እዚህ ነኝ። ቆይታዎን ይደሰቱ! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`,
+  },
+  ti: { // Tigrinya
+    hello: `ሰላም! ኣነ ለምለም እየ፣ AI ሓጋዚኽን። ኣብ ምጽናሕኩም ዝኾነ ነገር ንምሕጋዝ ኣብዚ ኣለኹ። እንታይ ክሕግዘኩም? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`,
+    thanks: `ብጣዕሚ እየ ዘመስግነኩም! ካልእ ነገር እንተደሊኹም፣ 24/7 ኣብዚ ኣለኹ። ምጽናሕኩም ኣስተማቕሩ! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`,
+  },
+  om: { // Afaan Oromo
+    hello: `Nagaa! Ani Lemlem jedhama, gargaaraa AI keessan. Yeroo turisimii keessan keessatti waan kamiyyuu isin gargaaruuf asitti argama. Maal isin gargaaruu danda'a? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`,
+    thanks: `Baay'ee galatoomaa! Waan biraa yoo barbaaddan, 24/7 asittin jira. Turizimii keessan itti gammadaa! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`,
+  },
+};
+
 export function getGeneralHelp(message: string, context?: LemlemContext): LemlemResponse | null {
   const lower = message.toLowerCase();
   const userPreferences = (context?.user as any)?.preferences || {};
-  const isAmharic = userPreferences.language === 'am';
+  const language = userPreferences.language || 'en';
+  const greetings = GREETINGS[language as keyof typeof GREETINGS] || GREETINGS.en;
 
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || lower.includes("selam")) {
-    const greeting = isAmharic 
-      ? `ሰላም! እኔ ለምለም ነኝ፣ የእርስዎ AI ረዳት። በእርስዎ ቆይታ ላይ ማንኛውንም ነገር ለመርዳት እዚህ ነኝ። ምን ልረዳዎ? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`
-      : `Hello, dear! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with? 😊`;
-    
+  // Greeting detection (works in all Ethiopian languages)
+  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || 
+      lower.includes("selam") || lower.includes("ሰላም") || lower.includes("nagaa")) {
     return {
-      message: greeting,
+      message: greetings.hello,
       usedTemplate: true,
       confidence: 1.0,
     };
   }
 
-  if (lower.includes("thank") || lower.includes("thanks") || lower.includes("ameseginalehu")) {
-    const thankYou = isAmharic
-      ? `በጣም እናመሰግናለን! ሌላ ነገር ከፈለጉ፣ 24/7 እዚህ ነኝ። ቆይታዎን ይደሰቱ! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`
-      : `You're very welcome, dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`;
-    
+  // Thank you detection (works in all Ethiopian languages)
+  if (lower.includes("thank") || lower.includes("thanks") || 
+      lower.includes("ameseginalehu") || lower.includes("አመሰግናለሁ") ||
+      lower.includes("yeqenyeley") || lower.includes("galatoomaa")) {
     return {
-      message: thankYou,
+      message: greetings.thanks,
       usedTemplate: true,
       confidence: 1.0,
     };

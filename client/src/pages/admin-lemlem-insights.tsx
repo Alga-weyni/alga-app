@@ -73,13 +73,14 @@ export default function AdminLemlemInsights() {
   const topQuestions = insights?.topQuestions || [];
   const costByDay = insights?.costByDay || [];
   const mostActiveProperties = insights?.mostActiveProperties || [];
+  const impact = (insights as any)?.impact || {};
 
   const templatePercentage = totalChats > 0 ? ((templateChats / totalChats) * 100).toFixed(1) : 0;
   const aiPercentage = totalChats > 0 ? ((aiChats / totalChats) * 100).toFixed(1) : 0;
   const avgCostPerAI = aiChats > 0 ? (totalCost / aiChats).toFixed(6) : 0;
 
   const budgetUsed = settings?.monthlyBudgetUSD
-    ? ((thisMonthCost / parseFloat(settings.monthlyBudgetUSD)) * 100).toFixed(1)
+    ? (thisMonthCost / parseFloat(settings.monthlyBudgetUSD)) * 100
     : 0;
 
   return (
@@ -175,9 +176,10 @@ export default function AdminLemlemInsights() {
         </div>
 
         <Tabs defaultValue="questions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="questions">Top Questions</TabsTrigger>
             <TabsTrigger value="properties">Properties</TabsTrigger>
+            <TabsTrigger value="impact">Impact</TabsTrigger>
             <TabsTrigger value="trends">Trends</TabsTrigger>
           </TabsList>
 
@@ -253,6 +255,72 @@ export default function AdminLemlemInsights() {
                           </p>
                           <p className="text-sm text-yellow-600">
                             {prop.aiCount} AI
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Impact Tab */}
+          <TabsContent value="impact" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Lemlem Impact Metrics</CardTitle>
+                <CardDescription>
+                  How Lemlem interactions drive bookings and engagement
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="bg-[#f9e9d8] p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Users with Lemlem Chats</p>
+                    <p className="text-3xl font-bold text-[#2d1405]">
+                      {impact.usersWithChats || 0}
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Bookings After Chats</p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {impact.bookingsAfterChats || 0}
+                    </p>
+                  </div>
+                  <div className="bg-[#CD7F32]/10 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">Conversion Rate</p>
+                    <p className="text-3xl font-bold text-[#CD7F32]">
+                      {impact.conversionRate || '0.0'}%
+                    </p>
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-semibold text-[#2d1405] mb-3">
+                  Top Properties by Engagement
+                </h3>
+                {!impact.topPropertiesByEngagement || impact.topPropertiesByEngagement.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">No engagement data yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {impact.topPropertiesByEngagement.map((prop: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 bg-[#f9e9d8] rounded-lg"
+                        data-testid={`engagement-${index}`}
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-[#2d1405]">{prop.title || `Property #${prop.propertyId}`}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {prop.totalChats} chats • {prop.uniqueUsers} unique visitors
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">
+                            {prop.bookingsAfterChat || 0} bookings
+                          </p>
+                          <p className="text-sm text-[#CD7F32] font-bold">
+                            {prop.conversionRate || '0.0'}% conversion
                           </p>
                         </div>
                       </div>
