@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MessageCircle, X, Send, Volume2, VolumeX } from "lucide-react";
+import { X, Send, Volume2, VolumeX } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -321,13 +321,22 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
 
   if (!isOpen) {
     return (
-      <Button
+      <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-lg bg-gradient-to-r from-[#CD7F32] to-[#FF8C00] hover:from-[#B87333] hover:to-[#FF7F00] text-white z-50"
+        title="Lemlem (ልምልም) AI Assistant"
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-[#F49F0A] via-[#FF8C00] to-[#CD7F32] hover:from-[#FFB020] hover:via-[#FFA500] hover:to-[#DAA520] text-white z-50 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_30px_rgba(244,159,10,0.5)] border-2 border-white/20"
         data-testid="button-open-lemlem"
+        style={{
+          fontFamily: "'Noto Sans Ethiopic', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
       >
-        <MessageCircle className="h-7 w-7" />
-      </Button>
+        <span className="text-[10px] font-semibold leading-tight tracking-wide" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+          Lemlem
+        </span>
+        <span className="text-base font-bold leading-tight mt-0.5" style={{ fontFamily: "'Noto Sans Ethiopic', serif" }}>
+          ልምልም
+        </span>
+      </button>
     );
   }
 
