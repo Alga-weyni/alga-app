@@ -6,13 +6,13 @@ interface PropertyStructuredDataProps {
     title: string;
     description: string;
     pricePerNight: string;
-    images?: string[];
-    rating?: string;
-    reviewCount?: number;
+    images?: string[] | null;
+    rating?: string | null;
+    reviewCount?: number | null;
     city: string;
-    address?: string;
-    latitude?: string;
-    longitude?: string;
+    address?: string | null;
+    latitude?: string | null;
+    longitude?: string | null;
   };
 }
 
