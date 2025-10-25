@@ -1,0 +1,170 @@
+# ===========================================================
+# 🏗️ ALGA MULTI-PLATFORM STACK INITIALIZER (WEB + MOBILE + OPS)
+# Sets up: Node.js API + PostgreSQL + Next.js Web + React Native Mobile + Capacitor iOS
+# Integrates Alga Pay gateway, Operator Dashboard, and Call/Chat Desk placeholder
+# ===========================================================
+
+set -e
+echo "🚀 Starting Alga unified platform setup..."
+
+# -----------------------------------------------------------
+# 1️⃣  Create monorepo structure
+# -----------------------------------------------------------
+mkdir -p alga-platform/{api,web,mobile,operator,shared}
+cd alga-platform
+
+# -----------------------------------------------------------
+# 2️⃣  Initialize shared database + backend API (Node.js + PostgreSQL)
+# -----------------------------------------------------------
+cd api
+npm init -y
+npm install express pg cors dotenv axios
+cat > server.js <<'EOF'
+import express from "express";
+import cors from "cors";
+import pkg from "pg";
+const { Pool } = pkg;
+import dotenv from "dotenv";
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+app.get("/", (_, res) => res.send("🌍 Alga API running"));
+app.get("/health", async (_, res) => {
+  try {
+    const db = await pool.query("SELECT NOW()");
+    res.json({ status: "ok", db_time: db.rows[0].now });
+  } catch (e) {
+    res.status(500).json({ status: "db_error", error: e.message });
+  }
+});
+
+// Payment proxy
+app.post("/api/alga-pay", async (req, res) => {
+  const { amount, currency } = req.body;
+  console.log("💳 Alga Pay transaction:", amount, currency);
+  res.json({ status: "initiated", provider: "Alga Pay" });
+});
+
+app.listen(5000, () => console.log("✅ API live on port 5000"));
+EOF
+echo "DATABASE_URL=postgresql://user:password@localhost:5432/alga_db" > .env
+cd ..
+
+# -----------------------------------------------------------
+# 3️⃣  Web / PWA client (Next.js + TypeScript)
+# -----------------------------------------------------------
+cd web
+npx create-next-app@latest . --typescript --eslint --no-tailwind --use-npm --skip-install
+npm install axios
+cat > pages/_app.tsx <<'EOF'
+import "../styles/globals.css";
+import type { AppProps } from "next/app";
+export default function App({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
+}
+EOF
+cat > pages/index.tsx <<'EOF'
+import axios from "axios";
+export default function Home() {
+  const ping = async () => {
+    const res = await axios.get("/api/ping");
+    alert(res.data.status);
+  };
+  return (
+    <main style={{padding:"40px",fontFamily:"system-ui"}}>
+      <h1>🏠 Alga Web Portal</h1>
+      <button onClick={ping}>Ping Server</button>
+    </main>
+  );
+}
+EOF
+cd ..
+
+# -----------------------------------------------------------
+# 4️⃣  Mobile layer (React Native + Capacitor iOS)
+# -----------------------------------------------------------
+cd mobile
+npx react-native init AlgaMobile --version 0.74.0 || true
+npm install @capacitor/core @capacitor/cli
+npx cap init "Alga" com.alga.app --web-dir=../web/out
+cat > capacitor.config.ts <<'EOF'
+import { CapacitorConfig } from "@capacitor/cli";
+const config: CapacitorConfig = {
+  appId: "com.alga.app",
+  appName: "Alga",
+  webDir: "../web/out",
+  bundledWebRuntime: false,
+  server: { androidScheme: "https" }
+};
+export default config;
+EOF
+cd ..
+
+# -----------------------------------------------------------
+# 5️⃣  Operator Dashboard (React Admin)
+# -----------------------------------------------------------
+cd operator
+npm init -y
+npm install react react-dom vite @mui/material @mui/icons-material react-admin
+mkdir -p src
+cat > src/main.jsx <<'EOF'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Admin, Resource, ListGuesser } from "react-admin";
+const dataProvider = { getList: async () => ({ data: [], total: 0 }) };
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Admin dataProvider={dataProvider}>
+    <Resource name="bookings" list={ListGuesser} />
+  </Admin>
+);
+EOF
+echo '<!doctype html><div id="root"></div>' > index.html
+cd ..
+
+# -----------------------------------------------------------
+# 6️⃣  Shared modules (API client + utils)
+# -----------------------------------------------------------
+cd shared
+cat > apiClient.js <<'EOF'
+import axios from "axios";
+const api = axios.create({ baseURL: "http://localhost:5000" });
+export default api;
+EOF
+cd ..
+
+# -----------------------------------------------------------
+# 7️⃣  Add unified start script
+# -----------------------------------------------------------
+cat > start-all.sh <<'EOF'
+#!/bin/bash
+echo "🚦 Running API + Web concurrently"
+( cd api && node server.js ) &
+( cd web && npm run dev )
+EOF
+chmod +x start-all.sh
+
+# -----------------------------------------------------------
+# 8️⃣  Ready messages
+# -----------------------------------------------------------
+echo "=========================================================="
+echo "✅ Alga Unified Platform Scaffold Complete"
+echo "Structure:"
+echo "  api/       → Node.js + PostgreSQL backend"
+echo "  web/       → Next.js PWA frontend"
+echo "  mobile/    → React Native + Capacitor wrapper"
+echo "  operator/  → Internal dashboard (UI placeholder)"
+echo "  shared/    → Shared modules (API client, utils)"
+echo ""
+echo "Run backend + web dev mode:"
+echo "   ./start-all.sh"
+echo ""
+echo "Next steps:"
+echo "  • Add real PostgreSQL credentials to api/.env"
+echo "  • Build mobile project in Android Studio or Xcode"
+echo "  • Extend Alga Pay gateway and Operator Dashboard"
+echo "=========================================================="
