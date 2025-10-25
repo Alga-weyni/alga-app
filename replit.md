@@ -1,7 +1,7 @@
 # Alga
 
 ## Overview
-Alga is a full-stack web application for the Ethiopian property rental market, connecting property owners with travelers. It offers diverse accommodations, emphasizing local culture, safety, and multi-city support across Ethiopia. The platform provides a secure, culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga aims to be the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities.
+Alga (አልጋ - "bed" in Amharic) is a full-stack web application for the Ethiopian property rental market, connecting property owners with travelers. It offers diverse accommodations, emphasizing local culture, safety, and multi-city support across Ethiopia. The platform provides a secure, culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga aims to be the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
