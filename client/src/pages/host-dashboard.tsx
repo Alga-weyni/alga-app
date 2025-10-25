@@ -77,6 +77,7 @@ import { BackButton } from "@/components/back-button";
 import { HostEarnings } from "@/components/host-earnings";
 import { PropertyInfoForm } from "@/components/property-info-form";
 import HostBanner from "@/components/host-banner";
+import PropertyInsights from "@/components/property-insights";
 import { insertPropertySchema } from "@shared/schema";
 import { PROPERTY_TYPES, ETHIOPIAN_CITIES, ETHIOPIAN_REGIONS, AMENITIES } from "@/lib/constants";
 import type { Property, Booking } from "@shared/schema";
@@ -184,6 +185,24 @@ export default function HostDashboard() {
   // Fetch all bookings for host properties
   const { data: allBookings = [], isLoading: bookingsLoading } = useQuery<Booking[]>({
     queryKey: ["/api/bookings"],
+  });
+
+  // Fetch host dashboard stats
+  const { data: hostStats, isLoading: statsLoading } = useQuery<{
+    activeListings: number;
+    totalListings: number;
+    totalBookings: number;
+    upcomingBookings: number;
+    completedBookings: number;
+    totalEarnings: number;
+    lastPayout: number | null;
+    lastPayoutDate: Date | null;
+    avgRating: number;
+    totalReviews: number;
+    occupancyRate: number;
+    pendingReviews: number;
+  }>({
+    queryKey: ["/api/host/stats"],
   });
 
   // Create property mutation
@@ -489,6 +508,9 @@ export default function HostDashboard() {
 
         {/* Professional Host Banner */}
         <HostBanner hostName={user?.firstName} />
+        
+        {/* Property Insights Widget */}
+        <PropertyInsights stats={hostStats} isLoading={statsLoading} />
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
