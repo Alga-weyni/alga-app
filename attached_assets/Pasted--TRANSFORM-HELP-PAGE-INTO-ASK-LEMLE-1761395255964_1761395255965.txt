@@ -1,0 +1,105 @@
+# ============================================================
+# TRANSFORM HELP PAGE INTO “ASK LEMLEM (ልምልም)” EXPERIENCE
+# ============================================================
+
+echo "💬 Redesigning Help section to highlight Lemlem (ልምልም) — our AI agent named after my grandmother..."
+
+# 1️⃣  Create or update Help page component
+mkdir -p client/pages
+cat > client/pages/Help.jsx <<'EOF'
+import React, { useEffect } from 'react';
+import { lemlemFirstGreeting } from '../utils/lemlemGreeting';
+
+export default function Help() {
+  useEffect(() => {
+    // Lemlem greets user softly in English and Amharic the first time
+    lemlemFirstGreeting("en");
+  }, []);
+
+  return (
+    <div style={{
+      padding: '40px 20px',
+      fontFamily: 'Noto Sans Ethiopic, sans-serif',
+      color: '#3c2f2f',
+      lineHeight: '1.6'
+    }}>
+      <h1 style={{
+        fontWeight: '700',
+        color: '#F49F0A',
+        marginBottom: '10px'
+      }}>
+        Ask Lemlem (ልምልም)
+      </h1>
+      <p style={{ fontSize: '16px', marginBottom: '25px' }}>
+        Get help with <strong>Lemlem (ልምልም)</strong> — our AI agent named after my grandmother.<br/>
+        I’m here to guide you, just like a caring Ethiopian grandmother would.  
+      </p>
+
+      <section style={{ marginTop: '30px' }}>
+        <h2>🛡️ Lemlem’s Safety Advice</h2>
+        <p>“Let’s make sure your stay feels safe and sound.”</p>
+      </section>
+
+      <section style={{ marginTop: '25px' }}>
+        <h2>🔧 Help for Hosts</h2>
+        <p>“I’ll walk you through offering your services with confidence.”</p>
+      </section>
+
+      <section style={{ marginTop: '25px' }}>
+        <h2>💰 Lemlem on Money Matters</h2>
+        <p>“Don’t worry, we’ll make sense of your payments together.”</p>
+      </section>
+
+      <section style={{ marginTop: '25px' }}>
+        <h2>🔐 Your Account, Your Space</h2>
+        <p>“I’ll help you keep your account safe and tidy.”</p>
+      </section>
+
+      <div style={{
+        marginTop: '40px',
+        padding: '20px',
+        backgroundColor: '#FFF6EA',
+        borderRadius: '8px',
+        fontStyle: 'italic',
+        color: '#5c4a2f'
+      }}>
+        <strong>Lemlem’s Tip of the Day:</strong><br/>
+        “When you travel, keep your ID and your smile ready — one keeps you safe, the other opens hearts.”
+      </div>
+
+      <footer style={{
+        marginTop: '60px',
+        fontSize: '14px',
+        color: '#7a6b56'
+      }}>
+        <hr style={{ borderColor: '#F49F0A', marginBottom: '10px' }} />
+        <p><strong>Lemlem (ልምልም)</strong> — our AI agent, inspired by the wisdom and gentleness of Ethiopian grandmothers.</p>
+      </footer>
+    </div>
+  );
+}
+EOF
+
+# 2️⃣  Add Lemlem Greeting Utility if not existing
+mkdir -p client/utils
+cat > client/utils/lemlemGreeting.js <<'EOF'
+export function lemlemFirstGreeting(lang="en") {
+  const greetings = {
+    en: "Hello! I’m Lemlem — your AI agent named after my grandmother. How can I help you today?",
+    am: "ሰላም፣ እኔ ልምልም ነኝ። በአያቴ ስም የተሰየመ የአኢ አገልጋይዎ ነኝ። እንዴት ልረዳዎ?",
+  };
+  const message = greetings[lang] || greetings.en;
+  if (!localStorage.getItem("lemlemHelpIntro")) {
+    alert(message);
+    localStorage.setItem("lemlemHelpIntro", true);
+  }
+}
+EOF
+
+# 3️⃣  Update navigation link label from “Help” to “Ask Lemlem (ልምልም)”
+sed -i 's/Help/Ask Lemlem (ልምልም)/g' client/components/NavBar.jsx || true
+
+# 4️⃣  Confirmation
+echo "✅ Help page redesigned!"
+echo "✨ Now titled “Ask Lemlem (ልምልም)” with heritage story, grandmotherly voice, and daily wisdom."
+echo "💬 Tooltip and intro updated to: “Get help with Lemlem (ልምልም) — our AI agent named after my grandmother.”"
