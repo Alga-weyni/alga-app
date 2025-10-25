@@ -2714,7 +2714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If no template match, try general help
       if (!response || response.confidence < 0.7) {
-        const generalResponse = getGeneralHelp(message);
+        const generalResponse = getGeneralHelp(message, context);
         if (generalResponse) {
           response = generalResponse;
         }
