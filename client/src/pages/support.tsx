@@ -26,7 +26,7 @@ interface HelpCard {
 }
 
 export default function Support() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showLemlem, setShowLemlem] = useState(false);
 
   const helpTopics: HelpCard[] = [
     {
@@ -136,7 +136,7 @@ export default function Support() {
           <div className="mt-8">
             <Button
               size="lg"
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => setShowLemlem(true)}
               className="h-16 px-10 text-xl rounded-full shadow-2xl hover:shadow-[0_8px_30px_rgba(244,159,10,0.5)] transition-all hover:scale-105 bg-gradient-to-r from-[#F49F0A] to-[#CD7F32] hover:from-[#FFB020] hover:to-[#DAA520] text-white border-2 border-white/30"
               data-testid="button-chat-with-lemlem"
             >
@@ -284,7 +284,7 @@ export default function Support() {
               </p>
               <Button
                 size="lg"
-                onClick={() => setIsChatOpen(true)}
+                onClick={() => setShowLemlem(true)}
                 className="h-16 px-10 text-lg rounded-full shadow-xl hover:shadow-2xl transition-all hover:scale-105 bg-white text-[#CD7F32] hover:bg-[#FFF6EA]"
                 data-testid="button-chat-lemlem-cta"
               >
@@ -296,8 +296,8 @@ export default function Support() {
         </section>
       </div>
 
-      {/* Lemlem Chat Integration */}
-      {isChatOpen && <LemlemChat propertyId={undefined} bookingId={undefined} />}
+      {/* Lemlem Chat Integration - Opens automatically when button clicked */}
+      {showLemlem && <LemlemChat propertyId={undefined} bookingId={undefined} defaultOpen={true} />}
 
       <Footer />
     </div>
