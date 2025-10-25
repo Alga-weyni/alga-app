@@ -6,6 +6,38 @@ Alga is a full-stack web application for the Ethiopian property rental market, c
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Updates (October 25, 2025)
+
+### Progressive Web App (PWA) Implementation (Latest)
+Alga is now a fully installable Progressive Web App optimized for Ethiopian mobile networks:
+- **Installable**: Users can add Alga to home screen (iOS & Android) without app stores
+- **Offline Support**: Service worker caches pages, images, and API responses for offline access
+- **Network Optimization**: 12-second API timeouts for 3G/4G, aggressive image caching (30 days)
+- **Install Prompt**: Auto-prompts users to install app (dismissible)
+- **Offline Indicator**: Visual banner shows connection status
+- **App Store Compliance**: Privacy, Terms, and Account Deletion policy pages created
+- **Ethiopia-Optimized**: Cache-first for images, network-first for APIs with fallback
+- **Tech Stack**: vite-plugin-pwa, Workbox service worker, manifest.json with Alga branding
+- **Icons**: AI-generated app icon (brown/gold Ethiopian home design) at 192x192 and 512x512
+- **Documentation**: Complete PWA implementation guide in `docs/PWA_IMPLEMENTATION.md`
+
+### Property Insights Dashboard Widget
+Implemented comprehensive analytics widget for host dashboard with real-time backend data:
+- **Backend**: Created `/api/host/stats` endpoint with `getHostStats()` method in storage
+- **Frontend**: Built `PropertyInsights` component with 8 key metrics in responsive grid
+- **Metrics Displayed**:
+  - Active Listings (with total count)
+  - Upcoming Bookings (with total bookings)
+  - Total Earnings (with last payout amount)
+  - Average Rating (with total reviews)
+  - Completed Bookings (with occupancy rate %)
+  - Occupancy Rate percentage
+  - Pending Reviews (action needed)
+  - Total Bookings (all-time)
+- **Features**: Skeleton loading states, color-coded icons, hover effects, fully responsive
+- **Integration**: Displays below HostBanner on `/host/dashboard` page
+- **Tech**: Real PostgreSQL queries using Drizzle ORM, React Query for data fetching
+
 ## System Architecture
 
 ### UI/UX Design
