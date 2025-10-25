@@ -20,7 +20,8 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings } from "@shared/schema";
+import { sql } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -2920,6 +2921,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating property info:", error);
       res.status(500).json({ message: "Failed to update property info" });
+    }
+  });
+
+  // ===============================
+  // ADMIN LEMLEM INSIGHTS & AI CONTROL
+  // ===============================
+
+  // Get Lemlem insights (admin only)
+  app.get('/api/admin/lemlem-insights', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Total chats
+      const totalChats = await db.select({ count: sql<number>`count(*)` }).from(lemlemChats);
+      const templateChats = await db.select({ count: sql<number>`count(*)` }).from(lemlemChats).where(eq(lemlemChats.usedTemplate, true));
+      const aiChats = await db.select({ count: sql<number>`count(*)` }).from(lemlemChats).where(eq(lemlemChats.usedTemplate, false));
+
+      // Total cost (all time)
+      const costData = await db.select({ total: sql<number>`COALESCE(SUM(CAST(estimated_cost AS NUMERIC)), 0)` }).from(lemlemChats);
+      const totalCost = parseFloat(costData[0].total.toString());
+
+      // This month's cost
+      const thisMonthData = await db.select({ total: sql<number>`COALESCE(SUM(CAST(estimated_cost AS NUMERIC)), 0)` })
+        .from(lemlemChats)
+        .where(sql`EXTRACT(MONTH FROM timestamp) = EXTRACT(MONTH FROM NOW()) AND EXTRACT(YEAR FROM timestamp) = EXTRACT(YEAR FROM NOW())`);
+      const thisMonthCost = parseFloat(thisMonthData[0].total.toString());
+
+      // Top questions (most asked)
+      const topQuestions = await db.select({
+        message: lemlemChats.message,
+        count: sql<number>`count(*)`,
+        usedTemplate: lemlemChats.usedTemplate,
+      })
+        .from(lemlemChats)
+        .where(eq(lemlemChats.isUser, true))
+        .groupBy(lemlemChats.message, lemlemChats.usedTemplate)
+        .orderBy(sql`count(*) DESC`)
+        .limit(10);
+
+      // Most active properties
+      const mostActiveProperties = await db.select({
+        propertyId: lemlemChats.propertyId,
+        title: properties.title,
+        chatCount: sql<number>`count(*)`,
+        templateCount: sql<number>`SUM(CASE WHEN ${lemlemChats.usedTemplate} THEN 1 ELSE 0 END)`,
+        aiCount: sql<number>`SUM(CASE WHEN NOT ${lemlemChats.usedTemplate} THEN 1 ELSE 0 END)`,
+        totalCost: sql<number>`COALESCE(SUM(CAST(${lemlemChats.estimatedCost} AS NUMERIC)), 0)`,
+      })
+        .from(lemlemChats)
+        .leftJoin(properties, eq(lemlemChats.propertyId, properties.id))
+        .where(sql`${lemlemChats.propertyId} IS NOT NULL`)
+        .groupBy(lemlemChats.propertyId, properties.title)
+        .orderBy(sql`count(*) DESC`)
+        .limit(10);
+
+      // Cost by day (last 30 days)
+      const costByDay = await db.select({
+        date: sql<string>`DATE(timestamp)`,
+        count: sql<number>`count(*)`,
+        cost: sql<number>`COALESCE(SUM(CAST(estimated_cost AS NUMERIC)), 0)`,
+      })
+        .from(lemlemChats)
+        .where(sql`timestamp >= NOW() - INTERVAL '30 days'`)
+        .groupBy(sql`DATE(timestamp)`)
+        .orderBy(sql`DATE(timestamp) DESC`)
+        .limit(30);
+
+      res.json({
+        totalChats: totalChats[0].count,
+        templateChats: templateChats[0].count,
+        aiChats: aiChats[0].count,
+        totalCost,
+        thisMonthCost,
+        topQuestions,
+        mostActiveProperties,
+        costByDay,
+      });
+    } catch (error) {
+      console.error("Error fetching Lemlem insights:", error);
+      res.status(500).json({ message: "Failed to fetch insights" });
+    }
+  });
+
+  // Get platform settings (admin only)
+  app.get('/api/admin/platform-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const [settings] = await db.select().from(platformSettings).limit(1);
+      
+      if (!settings) {
+        // Create default settings if none exist
+        const [newSettings] = await db.insert(platformSettings).values({
+          aiEnabled: true,
+          monthlyBudgetUSD: "20.00",
+          currentMonthSpend: "0",
+          alertsEnabled: true,
+          alertThreshold: 80,
+        }).returning();
+        return res.json(newSettings);
+      }
+
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching platform settings:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  // Update platform settings (admin only)
+  app.post('/api/admin/platform-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const [existing] = await db.select().from(platformSettings).limit(1);
+
+      if (existing) {
+        const [updated] = await db.update(platformSettings)
+          .set({
+            ...req.body,
+            updatedAt: new Date(),
+          })
+          .where(eq(platformSettings.id, existing.id))
+          .returning();
+        res.json(updated);
+      } else {
+        const [created] = await db.insert(platformSettings)
+          .values(req.body)
+          .returning();
+        res.json(created);
+      }
+    } catch (error) {
+      console.error("Error updating platform settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
     }
   });
 

@@ -19,6 +19,7 @@ import BecomeProvider from "@/pages/become-provider";
 import HostDashboard from "@/pages/host-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
+import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import ProviderDashboard from "@/pages/provider-dashboard";
 import Bookings from "@/pages/bookings";
@@ -120,6 +121,7 @@ function Router() {
         <Route path="/admin/dashboard" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
         <Route path="/admin/service-providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
         <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
+        <Route path="/admin/lemlem-insights" element={<AnimatedRoute><AdminLemlemInsights /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
         
         {/* Protected user routes - accessible to all, each page handles auth */}
