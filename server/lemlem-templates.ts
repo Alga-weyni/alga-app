@@ -352,7 +352,7 @@ export function matchTemplate(
 const GREETINGS = {
   en: {
     hello: `Hello, dear! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with? 😊`,
-    thanks: `You're very welcome, dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`,
+    thanks: `You're very welcome,dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`,
   },
   am: { // Amharic
     hello: `ሰላም! እኔ ለምለም ነኝ፣ የእርስዎ AI ረዳት። በእርስዎ ቆይታ ላይ ማንኛውንም ነገር ለመርዳት እዚህ ነኝ። ምን ልረዳዎ? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`,
