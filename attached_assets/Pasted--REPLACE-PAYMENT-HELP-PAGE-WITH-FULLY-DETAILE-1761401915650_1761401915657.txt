@@ -1,0 +1,65 @@
+# ==================================================
+#  REPLACE PAYMENT HELP PAGE WITH FULLY DETAILED VERSION
+# ==================================================
+echo "💳 Upgrading Payments Help Page with detailed content and Ethiopian-friendly design..."
+
+cat > client/src/pages/help/payments.tsx <<'EOF'
+import React from "react";
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+
+export default function PaymentsHelp() {
+  return (
+    <div className="max-w-4xl mx-auto p-6 text-[#2d1405]">
+      <h1 className="text-3xl font-semibold mb-4">💳 Payments</h1>
+      <p className="text-gray-700 mb-8">
+        Everything about payment methods, refunds, and how Alga keeps your money safe and secure. 🇪🇹
+      </p>
+
+      {/* Payment Methods */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3">📱 Payment Methods</h2>
+        <p className="mb-2 text-gray-700">
+          Choose the option most convenient for you. Ethiopian and international users have flexible choices:
+        </p>
+        <ul className="space-y-3 text-gray-800">
+          <li><strong>Telebirr:</strong> Pay instantly using your mobile wallet. Low fees for local users.</li>
+          <li><strong>CBE Birr:</strong> Secure transfers for Commercial Bank of Ethiopia customers.</li>
+          <li><strong>Chapa:</strong> Recommended for Ethiopians — save up to 40% on fees!</li>
+          <li><strong>M-Pesa:</strong> Fast for Safaricom users in Ethiopia and Kenya.</li>
+          <li><strong>Stripe / PayPal:</strong> For international guests using Visa, MasterCard, or AMEX.</li>
+        </ul>
+      </section>
+
+      {/* Currency & Pricing */}
+      <section className="mb-10 bg-[#f9e9d8] p-5 rounded-xl border border-[#CD7F32]/40">
+        <h2 className="text-2xl font-semibold mb-3">💵 Currency & Pricing Transparency</h2>
+        <p>All prices are shown in <strong>Ethiopian Birr (ETB)</strong>. International guests see prices converted automatically (2.5% bank fee applies).</p>
+        <ul className="mt-3 list-disc list-inside text-gray-700">
+          <li>Property Price</li>
+          <li>Alga Service Fee (10%)</li>
+          <li>VAT (15%)</li>
+          <li>Payment Processing Fees (based on method)</li>
+        </ul>
+        <p className="mt-3 font-semibold text-[#CD7F32]">Transparency Promise: No hidden charges!</p>
+      </section>
+
+      {/* Refund Policy */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3">🔄 Refund Policy</h2>
+        <div className="space-y-4">
+          <div className="bg-green-50 border-l-4 border-green-600 p-3">
+            🟢 <strong>Free Cancellation:</strong> 100% refund if canceled before check-in.
+          </div>
+          <div className="bg-yellow-50 border-l-4 border-yellow-600 p-3">
+            🟡 <strong>Partial Refund:</strong> 50% refund if canceled within 24 hours of check-in.
+          </div>
+          <div className="bg-red-50 border-l-4 border-red-600 p-3">
+            🔴 <strong>No Refund:</strong> For cancellations after check-in.
+          </div>
+        </div>
+        <p className="mt-4 text-gray-700">Refunds are processed within 1–10 business days depending on payment method.</p>
+      </section>
+
+      {/* Payment Security */}
+      <section className="mb-10
