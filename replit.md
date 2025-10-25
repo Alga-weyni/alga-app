@@ -6,6 +6,11 @@ Alga is a full-stack web application designed for the Ethiopian property rental 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Administrative Features
+The platform includes comprehensive administrative tools for managing the entire system:
+- **Roles & Permissions Management**: Dedicated page explaining all platform roles (Tenant, Guesthouse Owner, Operator, Admin) with detailed permissions and restrictions for each role. Includes user search/filter, bulk actions, and role assignment capabilities.
+- **User Management**: Full control over user roles, status (active/suspended), and verification states with search and filtering capabilities.
+
 ## System Architecture
 
 ### UI/UX Design

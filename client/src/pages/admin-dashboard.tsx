@@ -22,7 +22,8 @@ import {
   Home, 
   FileCheck, 
   UserCheck, 
-  ShieldCheck, 
+  ShieldCheck,
+  Shield,
   Activity,
   CheckCircle,
   XCircle,
@@ -972,6 +973,59 @@ export default function AdminDashboard() {
                           </div>
                         ))
                     )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2 border-2 border-[#CD7F32]">
+              <CardHeader className="bg-gradient-to-br from-[#f9e9d8] to-white">
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-[#CD7F32]" />
+                  Roles & Permissions
+                </CardTitle>
+                <CardDescription>
+                  Manage user access levels and understand role capabilities
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <User className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-blue-600">{users.filter((u: any) => u.role === 'guest').length}</p>
+                      <p className="text-xs text-gray-600 mt-1">Tenants</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <Home className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-green-600">{users.filter((u: any) => u.role === 'host').length}</p>
+                      <p className="text-xs text-gray-600 mt-1">Guesthouse Owners</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <ShieldCheck className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-purple-600">{users.filter((u: any) => u.role === 'operator').length}</p>
+                      <p className="text-xs text-gray-600 mt-1">Operators</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                      <Shield className="h-6 w-6 text-red-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-red-600">{users.filter((u: any) => u.role === 'admin').length}</p>
+                      <p className="text-xs text-gray-600 mt-1">Admins</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#f9e9d8] p-4 rounded-lg">
+                    <p className="text-sm text-gray-700 mb-3">
+                      View detailed permissions for each role, manage user access levels, and understand what each role can do in the platform.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/admin/roles-permissions')} 
+                      className="w-full"
+                      style={{ background: "#CD7F32" }}
+                      data-testid="button-manage-roles"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Manage Roles & Permissions
+                    </Button>
                   </div>
                 </div>
               </CardContent>
