@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useWebVitals } from "@/hooks/useWebVitals";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import LoginPage from "@/pages/login";
@@ -153,6 +155,12 @@ function Router() {
 }
 
 function App() {
+  // Enable keyboard shortcuts globally
+  useKeyboardShortcuts();
+  
+  // Track Web Vitals for performance monitoring
+  useWebVitals();
+  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
