@@ -301,20 +301,30 @@ export function matchTemplate(
 /**
  * Fallback responses when no property info is available
  */
-export function getGeneralHelp(message: string): LemlemResponse | null {
+export function getGeneralHelp(message: string, context?: LemlemContext): LemlemResponse | null {
   const lower = message.toLowerCase();
+  const userPreferences = (context?.user as any)?.preferences || {};
+  const isAmharic = userPreferences.language === 'am';
 
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
+  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || lower.includes("selam")) {
+    const greeting = isAmharic 
+      ? `ሰላም! እኔ ለምለም ነኝ፣ የእርስዎ AI ረዳት። በእርስዎ ቆይታ ላይ ማንኛውንም ነገር ለመርዳት እዚህ ነኝ። ምን ልረዳዎ? 😊\n\n(Hello! I'm Lemlem, your AI assistant. I'm here to help with anything during your stay. What can I help you with?)`
+      : `Hello, dear! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with? 😊`;
+    
     return {
-      message: `Hello, dear! I'm Lemlem, your AI assistant. I'm here to help you with anything during your stay - from lockbox codes to local recommendations. What can I help you with? 😊`,
+      message: greeting,
       usedTemplate: true,
       confidence: 1.0,
     };
   }
 
-  if (lower.includes("thank") || lower.includes("thanks")) {
+  if (lower.includes("thank") || lower.includes("thanks") || lower.includes("ameseginalehu")) {
+    const thankYou = isAmharic
+      ? `በጣም እናመሰግናለን! ሌላ ነገር ከፈለጉ፣ 24/7 እዚህ ነኝ። ቆይታዎን ይደሰቱ! ☕️✨\n\n(You're very welcome! If you need anything else, I'm here 24/7. Enjoy your stay!)`
+      : `You're very welcome, dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`;
+    
     return {
-      message: `You're very welcome, dear! If you need anything else, I'm here 24/7. Enjoy your stay! ☕️✨`,
+      message: thankYou,
       usedTemplate: true,
       confidence: 1.0,
     };
