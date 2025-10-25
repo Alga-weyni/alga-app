@@ -101,7 +101,7 @@ Need help? Lemlem is available 24/7 in the app, or contact us:
 
 🏆 ABOUT ALGA
 
-Alga (ልጋ) means "hospitality" in Amharic. We're building Ethiopia's leading platform for authentic travel experiences, connecting global travelers with local hosts while supporting Ethiopian communities.
+Alga (አልጋ) means "bed" in Amharic. We're building Ethiopia's leading platform for authentic travel experiences, connecting global travelers with local hosts while supporting Ethiopian communities.
 
 Stay. Discover. Belong. The Ethiopian Way.
 
