@@ -43,6 +43,7 @@ import PaymentSettings from "@/pages/settings/payment";
 import LanguageSettings from "@/pages/settings/language";
 import PaymentsHelp from "@/pages/help/payments";
 import SafetyHelp from "@/pages/help/safety";
+import { LemlemChat } from "@/components/lemlem-chat";
 
 const pageVariants = {
   initial: {
@@ -152,6 +153,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <LemlemChat />
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
