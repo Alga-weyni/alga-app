@@ -36,6 +36,7 @@ import ScanIDPage from "@/pages/scan-id";
 import Services from "@/pages/services";
 import ServiceCategory from "@/pages/service-category";
 import ServiceProviderDetails from "@/pages/service-provider-details";
+import MealSupport from "@/pages/services/meal-support";
 import MyAlga from "@/pages/my-alga";
 import MyServices from "@/pages/my-services";
 import Profile from "@/pages/profile";
@@ -107,6 +108,7 @@ function Router() {
         
         {/* Service marketplace routes - public */}
         <Route path="/services" element={<AnimatedRoute><Services /></AnimatedRoute>} />
+        <Route path="/services/meal-support" element={<AnimatedRoute><MealSupport /></AnimatedRoute>} />
         <Route path="/services/:type" element={<AnimatedRoute><ServiceCategory /></AnimatedRoute>} />
         <Route path="/service-providers/:id" element={<AnimatedRoute><ServiceProviderDetails /></AnimatedRoute>} />
         
