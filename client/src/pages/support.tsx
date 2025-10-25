@@ -90,7 +90,7 @@ export default function Support() {
     "When you travel, keep your ID and your smile ready — one keeps you safe, the other opens hearts.",
     "A guest is a gift from God — treat them with warmth and they'll carry your kindness home.",
     "The best coffee is shared with good conversation — take time to connect with your host.",
-    "Trust is built slowly, like good injera — give it time to rise.",
+    "Trust is built slowly, like a strong foundation — give it time to grow.",
     "A locked door is safer than a worried mind — always secure your space.",
   ];
 
@@ -244,7 +244,7 @@ export default function Support() {
               },
               {
                 question: "How do I become a host on Alga?",
-                answer: "Wonderful! Click 'List Your Property' on your dashboard. I'll walk you through it step by step, just like teaching you to make injera! 🌾",
+                answer: "Wonderful! Click 'List Your Property' on your dashboard. I'll walk you through it step by step, with care and patience. 🏡",
               },
             ].map((faq, index) => (
               <Card 
