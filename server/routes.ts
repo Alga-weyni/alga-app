@@ -20,8 +20,8 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings } from "@shared/schema";
-import { sql } from "drizzle-orm";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog } from "@shared/schema";
+import { sql, desc } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -3061,6 +3061,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating platform settings:", error);
       res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
+  // User Profile Routes
+  
+  // Get current user profile with preferences
+  app.get('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.id, req.user.id));
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get recent activity for personalization
+      const recentActivity = await db.select()
+        .from(userActivityLog)
+        .where(eq(userActivityLog.userId, req.user.id))
+        .orderBy(desc(userActivityLog.createdAt))
+        .limit(20);
+
+      res.json({
+        ...user,
+        password: undefined, // Don't send password
+        otp: undefined, // Don't send OTP
+        recentActivity,
+      });
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  // Update user profile
+  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const updateData: any = {};
+      
+      // Only allow specific fields to be updated
+      const allowedFields = ['firstName', 'lastName', 'bio', 'profileImageUrl', 'phoneNumber'];
+      
+      for (const field of allowedFields) {
+        if (req.body[field] !== undefined) {
+          updateData[field] = req.body[field];
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "No valid fields to update" });
+      }
+
+      updateData.updatedAt = new Date();
+
+      const [updated] = await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, req.user.id))
+        .returning();
+
+      res.json({
+        ...updated,
+        password: undefined,
+        otp: undefined,
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Update user preferences
+  app.post('/api/profile/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.id, req.user.id));
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Merge existing preferences with new ones
+      const currentPreferences = user.preferences || {};
+      const updatedPreferences = {
+        ...currentPreferences,
+        ...req.body,
+      };
+
+      const [updated] = await db.update(users)
+        .set({
+          preferences: updatedPreferences,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, req.user.id))
+        .returning();
+
+      res.json({
+        preferences: updated.preferences,
+      });
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Log user activity (for personalization)
+  app.post('/api/activity', isAuthenticated, async (req: any, res) => {
+    try {
+      const { action, metadata } = req.body;
+
+      if (!action) {
+        return res.status(400).json({ message: "Action is required" });
+      }
+
+      await db.insert(userActivityLog).values({
+        userId: req.user.id,
+        action,
+        metadata: metadata || {},
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error logging activity:", error);
+      res.status(500).json({ message: "Failed to log activity" });
     }
   });
 
