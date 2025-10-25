@@ -236,7 +236,7 @@ export default function Support() {
               },
               {
                 question: "What payment methods can I use?",
-                answer: "We welcome Chapa, Telebirr, Stripe, and PayPal. Choose whichever makes you comfortable, my child. 💳",
+                answer: "We welcome Chapa, Telebirr, Stripe, and PayPal. Choose whichever makes you comfortable, my dear. 💳",
               },
               {
                 question: "Can I cancel my booking?",
