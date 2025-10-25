@@ -12,12 +12,14 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
     "@capacitor/app": "^7.1.0",
     "@capacitor/browser": "^7.0.2",
     "@capacitor/camera": "^7.0.2",
     "@capacitor/cli": "^7.4.4",
     "@capacitor/core": "^7.4.4",
     "@capacitor/geolocation": "^7.1.5",
+    "@capacitor/ios": "^7.4.4",
     "@capacitor/push-notifications": "^7.0.3",
     "@capacitor/share": "^7.0.2",
     "@google-cloud/storage": "^7.17.2",
