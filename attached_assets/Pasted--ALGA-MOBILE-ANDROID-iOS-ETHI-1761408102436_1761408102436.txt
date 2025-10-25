@@ -1,0 +1,238 @@
+# ==========================================================
+# 📱 ALGA MOBILE (ANDROID + iOS) — ETHIOPIA-READY BUILD KIT
+# One-click setup: Capacitor wrapper + Offline + Low-Bandwidth
+# ==========================================================
+
+set -e
+
+echo "🔧 Installing mobile + resiliency dependencies..."
+npm install @capacitor/core @capacitor/cli @capacitor/app @capacitor/browser @capacitor/geolocation
+npm install axios
+# (Optional push — enable later when keys ready)
+# npm install @capacitor/push-notifications firebase
+
+echo "🧭 Initializing Capacitor project..."
+npx cap init "Alga" com.alga.app --web-dir=dist || true
+
+echo "📝 Writing capacitor.config.ts..."
+cat > capacitor.config.ts << 'EOF'
+import { CapacitorConfig } from "@capacitor/cli";
+const config: CapacitorConfig = {
+  appId: "com.alga.app",
+  appName: "Alga",
+  webDir: "dist",
+  bundledWebRuntime: false,
+  server: { androidScheme: "https" },
+  plugins: {
+    // Prompt style is system-native; no background tracking
+    Geolocation: { enabled: true }
+    // PushNotifications: { presentationOptions: ["badge","sound","alert"] } // enable when keys ready
+  }
+};
+export default config;
+EOF
+
+echo "📁 Creating policy pages required by app stores..."
+mkdir -p public
+cat > public/privacy.html << 'EOF'
+<!doctype html><meta charset="utf-8"><title>Privacy Policy – Alga</title>
+<style>body{font-family:system-ui;margin:24px;line-height:1.5;max-width:720px}</style>
+<h1>Privacy Policy</h1>
+<p>Alga uses location only to match you with nearby stays and services while the app is in use. We do not track your background location.</p>
+<p>Payments are processed securely via Alga Pay. We store only the minimum data required to fulfill your bookings and comply with law.</p>
+<p>Contact: support@alga.app</p>
+EOF
+
+cat > public/terms.html << 'EOF'
+<!doctype html><meta charset="utf-8"><title>Terms of Service – Alga</title>
+<style>body{font-family:system-ui;margin:24px;line-height:1.5;max-width:720px}</style>
+<h1>Terms of Service</h1>
+<p>Alga connects guests and service providers. All communication and payments must be completed inside Alga.</p>
+<p>By using Alga, you agree to our policies and local laws.</p>
+EOF
+
+cat > public/account-delete.html << 'EOF'
+<!doctype html><meta charset="utf-8"><title>Account Deletion – Alga</title>
+<style>body{font-family:system-ui;margin:24px;line-height:1.5;max-width:720px}</style>
+<h1>Request Account Deletion</h1>
+<p>To delete your account and associated data, submit a request inside the app (Me → Settings → Delete Account) or email support@alga.app from your registered email.</p>
+EOF
+
+echo "📦 Adding offline support (service worker + offline fallback)..."
+cat > public/offline.html << 'EOF'
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline – Alga</title>
+<style>body{font-family:system-ui;margin:24px;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;color:#3e2e1c} .card{max-width:420px;padding:24px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)} .b{background:linear-gradient(90deg,#704d2a,#e0ad60);-webkit-background-clip:text;color:transparent;font-weight:700}</style>
+<div class="card">
+  <h2><span class="b">Alga</span> is offline</h2>
+  <p>Check your connection. We’ll auto-retry in a moment.</p>
+</div>
+EOF
+
+cat > public/sw.js << 'EOF'
+// Minimal offline cache with stale-while-revalidate, tuned for 3G/4G
+const CACHE = "alga-cache-v1";
+const ASSETS = [ "/", "/offline.html" ];
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(self.skipWaiting()));
+});
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k!==CACHE).map(k => caches.delete(k)))).then(self.clients.claim()));
+});
+self.addEventListener("fetch", e => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  e.respondWith(
+    caches.match(req).then(cached => {
+      const fetchPromise = fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy));
+        return res;
+      }).catch(() => cached || caches.match("/offline.html"));
+      return cached || fetchPromise;
+    })
+  );
+});
+EOF
+
+mkdir -p src
+if [ ! -f src/main.tsx ]; then
+  # create a minimal entry if project uses different structure; adjust later in codebase
+  cat > src/main.tsx <<'EOF'
+console.log("Alga app entry");
+EOF
+fi
+
+echo "🧰 Registering the service worker + low-bandwidth mode..."
+cat > src/register-sw.ts << 'EOF'
+export function registerSW() {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(console.warn);
+    });
+  }
+}
+EOF
+
+cat > src/lib/network.ts << 'EOF'
+// Axios instance with Ethiopia-friendly timeouts + retries
+import axios from "axios";
+const api = axios.create({
+  timeout: 12000, // 12s for 3G/4G
+});
+api.interceptors.response.use(
+  r => r,
+  async err => {
+    const cfg = err.config || {};
+    cfg.__retryCount = cfg.__retryCount || 0;
+    if (cfg.__retryCount < 2) { // retry twice on flaky links
+      cfg.__retryCount++;
+      await new Promise(res => setTimeout(res, 600 * cfg.__retryCount)); // backoff
+      return api(cfg);
+    }
+    return Promise.reject(err);
+  }
+);
+export default api;
+EOF
+
+echo "🖼️ Enabling image lazy-loading styles (saves data on 3G/4G)..."
+mkdir -p src/styles
+cat > src/styles/low-bandwidth.css << 'EOF'
+img[loading="lazy"]{filter:saturate(.98)}
+/* Prefer modern formats */
+picture img{width:100%;height:auto;display:block}
+EOF
+
+echo "🌐 Adding lightweight localization (EN/AM/TI/OM stubs)..."
+mkdir -p src/locales
+cat > src/locales/en.json << 'EOF'
+{ "app_name":"Alga", "pay":"Pay with Alga Pay", "use_location":"Use My Location", "offline":"You are offline.", "retry":"Retry" }
+EOF
+cat > src/locales/am.json << 'EOF'
+{ "app_name":"አልጋ", "pay":"በ Alga Pay ክፈል", "use_location":"ቦታዬን ተጠቀም", "offline":"ከመስመር ውጪ ነዎት።", "retry":"እንደገና ሞክር" }
+EOF
+cat > src/locales/ti.json << 'EOF'
+{ "app_name":"ኣልጋ", "pay":"ብ Alga Pay ክኽፈል", "use_location":"ቦታየ ተጠቐም", "offline":"ካብ መስመር ወጻእ ኢኻ።", "retry":"ደጊም ፈትን" }
+EOF
+cat > src/locales/om.json << 'EOF'
+{ "app_name":"Alga", "pay":"Alga Pay'n kaffal", "use_location":"Iddoo koo fayyadami", "offline":"Offlayini dha.", "retry":"Irra deebi'i" }
+EOF
+
+cat > src/lib/i18n.ts << 'EOF'
+type Dict = Record<string,string>;
+const langs: Record<string, Dict> = {
+  en: await (await fetch("/locales/en.json")).json(),
+  am: await (await fetch("/locales/am.json")).json(),
+  ti: await (await fetch("/locales/ti.json")).json(),
+  om: await (await fetch("/locales/om.json")).json()
+};
+export function t(key:string){ 
+  const code = (localStorage.getItem("alga_lang")||navigator.language||"en").slice(0,2);
+  const d = langs[code] || langs.en; 
+  return d[key] || key; 
+}
+export function setLang(code:string){ localStorage.setItem("alga_lang", code); location.reload(); }
+EOF
+
+echo "🧩 Adding a tiny connectivity banner..."
+cat > src/components/connectivity-banner.tsx << 'EOF'
+import React from "react";
+export default function ConnectivityBanner(){
+  const [online,setOnline]=React.useState<boolean>(navigator.onLine);
+  React.useEffect(()=>{
+    const up=()=>setOnline(true); const down=()=>setOnline(false);
+    window.addEventListener("online",up); window.addEventListener("offline",down);
+    return ()=>{window.removeEventListener("online",up);window.removeEventListener("offline",down);}
+  },[]);
+  if(online) return null;
+  return <div style={{position:"fixed",bottom:12,left:12,right:12,background:"#3e2e1c",color:"#fff",padding:"10px 14px",borderRadius:10,boxShadow:"0 2px 10px rgba(0,0,0,.2)",textAlign:"center"}}>
+    <span>⚠️ { "You are offline. We'll retry automatically." }</span>
+  </div>;
+}
+EOF
+
+echo "🧷 Wiring SW + i18n + styles into entry (non-destructive)..."
+grep -q 'registerSW' src/main.tsx || sed -i'' -e '1i\
+import "./styles/low-bandwidth.css";\
+import { registerSW } from "./register-sw";\
+registerSW();' src/main.tsx
+
+# (Developer can import i18n t() where needed; we avoid auto-injection into app tree.)
+
+echo "🏷️ Creating deep-link readiness docs (follow-up in IDE)..."
+mkdir -p docs
+cat > docs/MOBILE_NEXT_STEPS.md << 'EOF'
+# Mobile Next Steps (Deep Links, Icons, Store Upload)
+1) Android Studio (npx cap open android)
+   - App icons/adaptive icons (mipmap)
+   - Manifest: ACCESS_FINE_LOCATION (while-in-use)
+   - App Links: add intent-filter for https://alga.app/*
+2) Xcode (npx cap open ios)
+   - Signing & Capabilities: Location When In Use
+   - NSLocationWhenInUseUsageDescription: "Alga uses your location to find nearby homes and providers."
+   - Universal Links: associated domains for alga.app
+3) Store metadata:
+   - Privacy URL: https://YOUR_DOMAIN/privacy.html
+   - Terms URL: https://YOUR_DOMAIN/terms.html
+   - Account Delete URL: https://YOUR_DOMAIN/account-delete.html
+EOF
+
+echo "🛠️ Building web and syncing native projects..."
+npm run build
+npx cap sync
+
+echo "🤖 Adding platforms..."
+npx cap add android || true
+npx cap add ios || true
+
+echo "✅ Base mobile projects ready."
+echo "-------------------------------------------------------------"
+echo "NEXT:"
+echo "• Open Android:  npx cap open android  → set icons, sign, Build > Generate Signed Bundle (.aab)"
+echo "• Open iOS:      npx cap open ios      → set signing, Archive → Distribute to App Store"
+echo "• URLs to declare in stores: /privacy.html /terms.html /account-delete.html"
+echo "• Low-bandwidth: axios timeouts+retries, SW offline cache, image lazy-loading enabled."
+echo "• Payments: Alga Pay remains branded and internal."
+echo "• Push: Add later (keys), then npm i @capacitor/push-notifications && npx cap sync"
+echo "-------------------------------------------------------------"
