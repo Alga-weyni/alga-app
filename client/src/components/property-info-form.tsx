@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -66,11 +66,11 @@ export function PropertyInfoForm({ propertyId }: PropertyInfoFormProps) {
   });
 
   // Update form when data loads
-  useState(() => {
+  useEffect(() => {
     if (propertyInfo) {
       form.reset(propertyInfo);
     }
-  });
+  }, [propertyInfo, form]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: PropertyInfoFormData) => {
