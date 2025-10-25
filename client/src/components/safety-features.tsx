@@ -46,8 +46,8 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
           };
           setUserLocation(location);
         },
-        (error) => {
-          console.error('Error getting location:', error);
+        () => {
+          // Location access denied or error
         }
       );
     }
