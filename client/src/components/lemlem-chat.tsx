@@ -87,7 +87,7 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     utterance.lang = langCode;
     
     // Soft, loving grandmother voice settings (like speaking to a beloved grandchild)
-    utterance.rate = 0.70; // Very slow, patient, and loving pace
+    utterance.rate = 0.56; // Extremely slow, patient, and loving pace (20% slower)
     utterance.pitch = 1.2; // Soft, sweet, and gentle tone
     utterance.volume = 0.95; // Gentle presence, not overwhelming
     
