@@ -2684,7 +2684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Send message to Lemlem (uses templates first, AI only if needed)
   app.post('/api/lemlem/chat', async (req: any, res) => {
     try {
-      const { message, propertyId, bookingId } = req.body;
+      const { message, propertyId, bookingId, language } = req.body;
       const userId = req.user?.id;
 
       if (!message || message.trim().length === 0) {
@@ -2692,8 +2692,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get context for better responses
+      // Override user's language preference with selected language from UI
+      const userWithLanguage = req.user ? {
+        ...req.user,
+        preferences: {
+          ...(req.user.preferences || {}),
+          language: language || req.user.preferences?.language || 'en'
+        }
+      } : null;
+
       const context: LemlemContext = {
-        user: req.user,
+        user: userWithLanguage,
       };
 
       if (propertyId) {
