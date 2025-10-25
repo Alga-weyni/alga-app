@@ -46,7 +46,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_METHODS } from "@/lib/constants";
 import StripeCheckout from "@/components/stripe-checkout";
 import ChapaCheckout from "@/components/chapa-checkout";
-import GoogleMapView from "@/components/google-map-view";
+import PropertyMiniMap from "@/components/property-mini-map";
 import type { Property, Review, Booking } from "@shared/schema";
 
 export default function PropertyDetails() {
@@ -453,31 +453,19 @@ export default function PropertyDetails() {
 
             <Separator className="my-4 sm:my-6" />
 
-            {/* Location */}
-            {property.latitude && property.longitude && (
-              <>
-                <div className="mb-4 sm:mb-6">
-                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Location</h3>
-                  <div className="mb-3">
-                    <div className="flex items-center text-gray-700 mb-2">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span className="text-sm sm:text-base">{property.location}, {property.city}</span>
-                    </div>
-                    {property.address && (
-                      <p className="text-sm text-gray-600 ml-6">{property.address}</p>
-                    )}
-                  </div>
-                  <GoogleMapView
-                    properties={[property]}
-                    height="400px"
-                    zoom={15}
-                    showControls={true}
-                  />
-                </div>
+            {/* Location - Mini Map */}
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Location</h3>
+              <PropertyMiniMap
+                latitude={property.latitude}
+                longitude={property.longitude}
+                address={property.address}
+                city={property.city}
+                title={property.title}
+              />
+            </div>
 
-                <Separator className="my-4 sm:my-6" />
-              </>
-            )}
+            <Separator className="my-4 sm:my-6" />
 
             {/* Reviews */}
             <div>
