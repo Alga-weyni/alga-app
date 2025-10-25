@@ -30,6 +30,9 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Google Maps Integration**: Interactive map with property markers, map/list view toggle, and custom Ethiopian-themed markers.
 - **Provider Onboarding & Dashboard**: Complete application process with admin verification, automated email notifications, and status-based UX.
 - **Lemlem AI Assistant**: A 24/7 cost-optimized AI assistant utilizing a smart template system (90% free responses) with an optional AI fallback for complex queries. It handles common inquiries like lockbox codes, WiFi, and local recommendations.
+  - **Property Information Form**: 14 comprehensive fields for hosts to configure Lemlem responses (lockbox codes, WiFi, emergency contacts, house rules, local recommendations, appliance instructions).
+  - **Admin Lemlem Insights Dashboard**: Analytics tracking total chats, template vs AI usage, cost per property, monthly spending, top questions, and cost trends. Displays cost savings achieved through the template system.
+  - **Admin AI Control Panel**: Platform-wide AI management with enable/disable toggles, monthly budget caps (USD), alert thresholds, and budget tracking. Prevents AI overspending with automatic cutoffs.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
