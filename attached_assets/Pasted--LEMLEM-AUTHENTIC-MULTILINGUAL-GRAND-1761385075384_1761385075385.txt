@@ -1,0 +1,91 @@
+# ============================================================
+# LEMLEM AUTHENTIC MULTILINGUAL GRANDMOTHER VOICE INSTALLATION
+# ============================================================
+
+echo "🌸 Installing Lemlem's authentic multilingual grandmother voice..."
+
+# 1️⃣  Environment Setup
+replit secrets set LEMLEM_VOICE_ID="lemlem_voice_001"
+replit secrets set SUPPORTED_LANGUAGES='["en","am","ti","om","zh"]'
+replit secrets set DEFAULT_LANGUAGE="en"
+replit secrets set TTS_ENGINE="openai_tts-1-hd_multilingual"
+
+# 2️⃣  Dependencies
+npm install unorm
+
+# 3️⃣  Create Voice Function
+mkdir -p server/utils
+cat > server/utils/lemlem.js <<'EOF'
+import { ttsEngine, playAudio } from "./ttsCore.js";
+import unorm from "unorm";
+
+// Native context per language
+const LANG_MAP = {
+  en: { label: "English", locale: "en-US" },
+  am: { label: "Amharic", locale: "am-ET" },
+  ti: { label: "Tigrinya", locale: "ti-ER" },
+  om: { label: "Afaan Oromoo", locale: "om-ET" },
+  zh: { label: "中文", locale: "zh-CN" }
+};
+
+// Voice tone per language
+const VOICE_STYLE = {
+  en: { rate: 0.85, pitch: 1.15, tone: "soft storytelling" },
+  am: { rate: 0.78, pitch: 1.08, tone: "motherly and melodic" },
+  ti: { rate: 0.76, pitch: 1.05, tone: "gentle and heartfelt" },
+  om: { rate: 0.80, pitch: 1.10, tone: "calm and rhythmic" },
+  zh: { rate: 0.88, pitch: 1.20, tone: "graceful and balanced" }
+};
+
+export async function lemlemSpeak(text, lang) {
+  const cleanText = unorm.nfc(text)
+    .replace(/[^\p{L}\p{N}\s.,!?።፣፡]/gu, ""); // removes emojis/symbols but keeps Ethiopic marks
+
+  const voice = process.env.LEMLEM_VOICE_ID;
+  const locale = LANG_MAP[lang]?.locale || "en-US";
+  const style = VOICE_STYLE[lang] || VOICE_STYLE.en;
+
+  const ttsResponse = await ttsEngine.generate({
+    text: cleanText,
+    voice: voice,
+    language: lang,
+    locale: locale,
+    model: process.env.TTS_ENGINE,
+    input_type: "native_script", // ensures native reading
+    rate: style.rate,
+    pitch: style.pitch,
+    emotion: style.tone,
+    gender: "female"
+  });
+
+  if (ttsResponse.voiceGender !== "female") {
+    throw new Error("Voice mismatch – Lemlem must remain a warm female voice.");
+  }
+
+  return playAudio(ttsResponse);
+}
+EOF
+
+# 4️⃣  Language Switcher
+mkdir -p client/utils
+cat > client/utils/language.js <<'EOF'
+export const SUPPORTED_LANGUAGES = ["en","am","ti","om","zh"];
+export let currentLanguage = localStorage.getItem("lemlem_language") || "en";
+
+export function switchLanguage(langCode) {
+  if (!SUPPORTED_LANGUAGES.includes(langCode)) return;
+  currentLanguage = langCode;
+  localStorage.setItem("lemlem_language", langCode);
+  updateUIText(langCode);
+  lemlemSpeak("Language changed successfully.", langCode);
+}
+EOF
+
+# 5️⃣  Confirmation
+echo "✅ Lemlem grandmother voice installed!"
+echo "   - English read as English"
+echo "   - አማርኛ read naturally in Amharic"
+echo "   - ትግርኛ read as true Tigrinya"
+echo "   - Afaan Oromoo read as native Oromo"
+echo "   - 中文 read natively in Mandarin"
+echo "   - No emojis, no symbols, female-only grandmother warmth preserved."
