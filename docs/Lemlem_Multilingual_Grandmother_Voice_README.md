@@ -33,6 +33,8 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 
 | Step | Task | Status |
 |------|------|--------|
+| ✅ | Bilingual chat button with "Lemlem (ልምልም)" label | ✔ Done |
+| ✅ | Ethiopic font (Noto Sans Ethiopic) installed | ✔ Done |
 | ✅ | Verify language dropdown installed | ✔ Done |
 | ✅ | Verify multilingual templates in backend | ✔ Done |
 | ✅ | Confirm 5 languages supported (en, am, ti, om, zh) | ✔ Done |
@@ -47,13 +49,14 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 ## 🔍 Quality Assurance
 
 ### Voice Validation Procedure
-1. Open Lemlem assistant window (orange chat button).  
-2. Select each language from dropdown.  
-3. Observe:
+1. Look for the bilingual "Lemlem / ልምልም" floating button (orange gradient, bottom-right).  
+2. Click to open the assistant window.  
+3. Select each language from dropdown menu.  
+4. Observe:
    - Immediate text update on screen.  
    - Natural pronunciation in that language (no English accent).  
    - Warm grandmother tone and pacing.  
-4. Ensure no emojis or symbols are verbalized.
+5. Ensure no emojis or symbols are verbalized.
 
 ### Performance Metrics
 | Metric | Target | Result |
@@ -69,6 +72,11 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 
 ### Frontend Components
 - **Location**: `client/src/components/lemlem-chat.tsx`
+- **Bilingual Chat Button**: 
+  - Displays "Lemlem" (English) and "ልምልም" (Amharic) on floating button
+  - Uses Noto Sans Ethiopic font for authentic script rendering
+  - Orange gradient (from #F49F0A to #CD7F32) with hover effects
+  - Scales on hover with glowing shadow effect
 - **Language Switcher**: Dropdown menu with 5 language options
 - **Voice Configuration**:
   - Rate: 0.75 (slower, patient grandmother pace)
