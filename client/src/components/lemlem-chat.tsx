@@ -351,7 +351,7 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
           <div>
             <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem (ልምልም)</h3>
             <p className="text-xs opacity-90">
-              Named after my grandmother 💚
+              Your AI Assistant - named after my beautiful grandma 💚
               {isSpeaking && <span className="ml-2 animate-pulse">🔊</span>}
             </p>
           </div>
