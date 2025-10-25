@@ -1,0 +1,27 @@
+# Alga - Ethiopian Property Rental Platform
+# robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+Disallow: /host-dashboard
+Disallow: /provider-dashboard
+Disallow: /bookings/
+Disallow: /profile
+Disallow: /settings/
+
+# Sitemap
+Sitemap: https://alga.repl.co/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow specific pages for SEO
+Allow: /properties
+Allow: /services
+Allow: /discover
+Allow: /become-host
+Allow: /become-provider
+Allow: /help/
