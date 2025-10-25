@@ -55,7 +55,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
     { path: "/properties", icon: Home, emoji: "🏠", label: "Stays", ariaLabel: "Browse places to stay", testId: "stays" },
     { path: "/services", icon: Wrench, emoji: "🧰", label: "Services", ariaLabel: "Browse services and help", testId: "services" },
     { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
-    { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem", ariaLabel: "Ask Lemlem - your AI agent", testId: "help" },
+    { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem (ልምልም)", ariaLabel: "Ask Lemlem (ልምልም) - your AI agent", testId: "help" },
   ];
 
   return (
