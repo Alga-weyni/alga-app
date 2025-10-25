@@ -31,7 +31,9 @@ import {
   UserX,
   Settings,
   LogOut,
-  Briefcase
+  Briefcase,
+  Sparkles,
+  BarChart3
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -286,7 +288,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* System Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-6">
         <Card 
           className="cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => handleTabChange('users')}
@@ -370,6 +372,40 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">{stats?.totalRevenue || 0} ETB</div>
             <p className="text-xs text-muted-foreground">
               +{stats?.monthlyRevenue || 0} ETB this month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow border-[#CD7F32] bg-gradient-to-br from-[#f9e9d8] to-white"
+          onClick={() => navigate('/admin/lemlem-insights')}
+          data-testid="card-lemlem-insights"
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-[#2d1405]">Lemlem AI</CardTitle>
+            <BarChart3 className="h-4 w-4 text-[#CD7F32]" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-[#CD7F32]">Analytics</div>
+            <p className="text-xs text-gray-600">
+              View insights & costs
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow border-[#CD7F32] bg-gradient-to-br from-[#f9e9d8] to-white"
+          onClick={() => navigate('/admin/ai-control')}
+          data-testid="card-ai-control"
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-[#2d1405]">AI Controls</CardTitle>
+            <Sparkles className="h-4 w-4 text-[#CD7F32]" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-[#CD7F32]">Settings</div>
+            <p className="text-xs text-gray-600">
+              Budget & toggles
             </p>
           </CardContent>
         </Card>
