@@ -358,6 +358,19 @@ export const lemlemChatsRelations = relations(lemlemChats, ({ one }) => ({
   }),
 }));
 
+// Platform Settings for AI Controls
+export const platformSettings = pgTable("platform_settings", {
+  id: serial("id").primaryKey(),
+  aiEnabled: boolean("ai_enabled").default(true).notNull(), // Master toggle for AI fallback
+  monthlyBudgetUSD: decimal("monthly_budget_usd", { precision: 10, scale: 2 }).default("20.00"), // Monthly AI budget cap
+  currentMonthSpend: decimal("current_month_spend", { precision: 10, scale: 6 }).default("0"), // Track current month's AI spending
+  budgetResetDate: timestamp("budget_reset_date").defaultNow(), // When to reset the monthly budget
+  alertsEnabled: boolean("alerts_enabled").default(true).notNull(), // Send alerts when near budget
+  alertThreshold: integer("alert_threshold").default(80), // Alert at 80% of budget
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   property: one(properties, {
     fields: [bookings.propertyId],
@@ -609,6 +622,12 @@ export const insertLemlemChatSchema = createInsertSchema(lemlemChats).omit({
   timestamp: true,
 });
 
+export const insertPlatformSettingsSchema = createInsertSchema(platformSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -638,3 +657,5 @@ export type InsertPropertyInfo = z.infer<typeof insertPropertyInfoSchema>;
 export type PropertyInfo = typeof propertyInfo.$inferSelect;
 export type InsertLemlemChat = z.infer<typeof insertLemlemChatSchema>;
 export type LemlemChat = typeof lemlemChats.$inferSelect;
+export type InsertPlatformSettings = z.infer<typeof insertPlatformSettingsSchema>;
+export type PlatformSettings = typeof platformSettings.$inferSelect;
