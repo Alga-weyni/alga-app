@@ -1,0 +1,77 @@
+# =========================================
+#  ENHANCE LEMLEM VOICE TO SOUND WARM, TRUSTING & GRANDMOTHERLY
+# =========================================
+echo "Enhancing Lemlem’s voice warmth and trust..."
+cat > client/src/utils/lemlemVoice.ts <<'EOF'
+export function getGrandmotherVoice(text, lang) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) return console.warn("Speech synthesis not supported.");
+
+    // Preload voices (Chrome sometimes delays this)
+    const voices = synth.getVoices();
+    const femaleVoice =
+      voices.find(v => v.lang.startsWith(lang) && /female|woman|grandmother/i.test(v.name)) ||
+      voices.find(v => v.lang.startsWith(lang)) ||
+      voices.find(v => v.lang.startsWith('en')) ||
+      voices[0];
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang;
+    utter.voice = femaleVoice;
+    utter.rate = 0.75;   // Slower, patient
+    utter.pitch = 1.15;  // Warmer, softer
+    utter.volume = 1.0;  // Full presence but gentle tone
+
+    // Add a natural pause before starting to sound calm
+    setTimeout(() => synth.speak(utter), 250);
+  } catch (e) {
+    console.warn("Voice error:", e);
+  }
+}
+EOF
+
+# =========================================
+#  INTEGRATE THE GRANDMOTHER VOICE INTO LEMLEM CHAT
+# =========================================
+cat >> client/src/components/LemlemChat.tsx <<'EOF'
+
+// === Warm Grandmother Voice Integration ===
+import { getGrandmotherVoice } from '@/utils/lemlemVoice';
+
+const speak = (text, lang) => {
+  getGrandmotherVoice(text, lang);
+};
+EOF
+
+# =========================================
+#  PRELOAD VOICES WHEN LEMLEM MOUNTS
+# =========================================
+cat >> client/src/components/LemlemChat.tsx <<'EOF'
+useEffect(() => {
+  // Preload voices on mount for Chrome-based browsers
+  if (window.speechSynthesis && typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+    window.speechSynthesis.onvoiceschanged = () => {
+      console.log("Voices preloaded.");
+    };
+  }
+}, []);
+EOF
+
+# =========================================
+#  UPDATE DOCUMENTATION
+# =========================================
+cat >> replit.md <<'EOF'
+# Lemlem v4.2 — The Grandmother Voice Edition
+- Added slower, patient speaking rate (0.75)
+- Increased warmth with gentle pitch (1.15)
+- Female voice preference for all languages
+- Auto-preload voices for Chrome compatibility
+- Maintains browser-native Text-to-Speech (free)
+- Works with Chinese, Amharic, Tigrigna, Oromo, and English voices
+- Reinforces Lemlem’s grandmother identity: patient, soft, and trustworthy
+EOF
+
+git add .
+git commit -m "Lemlem v4.2 – Grandmother Voice Edition (warm, trusting, slower tone)"
+git push origin main

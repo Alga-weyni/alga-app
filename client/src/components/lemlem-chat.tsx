@@ -94,7 +94,9 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     // Try to select a female voice for grandmother feel
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(voice => 
-      voice.lang.startsWith(langCode.split('-')[0]) && voice.name.toLowerCase().includes('female')
+      voice.lang.startsWith(langCode.split('-')[0]) && 
+      (voice.name.toLowerCase().includes('female') || 
+       voice.name.toLowerCase().includes('woman'))
     ) || voices.find(voice => 
       voice.lang.startsWith(langCode.split('-')[0])
     );
@@ -107,7 +109,10 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
-    window.speechSynthesis.speak(utterance);
+    // Natural pause before speaking to sound calm and thoughtful (like a grandmother taking a breath)
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 250);
   };
 
   // Auto-speak Lemlem's responses
