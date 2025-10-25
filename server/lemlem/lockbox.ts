@@ -5,11 +5,11 @@ type LangKey = 'en-US' | 'am-ET' | 'ti-ER' | 'om-ET' | 'zh-CN';
 
 export function getLockboxReply(property: any, lang: string = 'en-US'): string {
   const opener: Record<LangKey, string> = {
-    'en-US': "Oh, my dear — I don't seem to have this property's lockbox code in my memory just yet. 🗝️",
-    'am-ET': "ልጄ ሆይ፣ የዚህን ቤት ቁልፍ ኮድ አላስታወስሁም እንደምትመስል 🗝️",
-    'ti-ER': "ወዲያ ልጄ፣ ኮድ ዘይተሓትተረኒ እዩ እየ ይመስል 🗝️",
-    'om-ET': "Mucaa koo, koodii kun akka hin yaadatamne fakkaata 🗝️",
-    'zh-CN': "亲爱的，这个房源的密码我似乎还没有记住呢 🗝️",
+    'en-US': "I don't seem to have this property's lockbox code in my memory just yet. 🗝️",
+    'am-ET': "የዚህን ቤት የመቆለፊያ ሳጥን ኮድ አሁን በማስታወሻዬ ውስጥ የለም። 🗝️",
+    'ti-ER': "ናይዚ ንብረት መቆልፊ ሳጹን ኮድ ኣብ ዝኽረይ ገና የለን። 🗝️",
+    'om-ET': "Koodii sanduqa cufsaa qabeenya kanaa yaada koo keessatti ammammoo hin qabu. 🗝️",
+    'zh-CN': "我的记忆里似乎还没有这个房源的密码箱密码。🗝️",
   };
 
   const guidance: Record<LangKey, string> = {
@@ -29,11 +29,11 @@ export function getLockboxReply(property: any, lang: string = 'en-US'): string {
 // Helper to get lockbox code WITH the code (when available)
 export function getLockboxCodeReply(code: string, location: string, lang: string = 'en-US', instructions?: string): string {
   const responses: Record<LangKey, string> = {
-    'en-US': `🔑 Here's your lockbox information, dear:\n\n**Code:** ${code}\n**Location:** ${location || "At the property entrance"}\n${instructions ? `\n**Instructions:** ${instructions}\n` : ''}\nWelcome to your stay! 💚`,
-    'am-ET': `🔑 የመቆለፊያ ሳጥን መረጃዎ እነሆ፣ ውድ ልጄ:\n\n**ኮድ:** ${code}\n**ቦታ:** ${location || "በንብረቱ መግቢያ"}\n${instructions ? `\n**መመሪያዎች:** ${instructions}\n` : ''}\nእንኳን ደህና መጡ! 💚`,
-    'ti-ER': `🔑 ናይ መቆልፊ ሳጹን ሓበሬታኹም እነሆ፣ ውድ ልጀይ:\n\n**ኮድ:** ${code}\n**ቦታ:** ${location || "ኣብ መእተዊ ናይቲ ንብረት"}\n${instructions ? `\n**መምርሒታት:** ${instructions}\n` : ''}\nእንቛዕ ደሓን መጻእኩም! 💚`,
-    'om-ET': `🔑 Odeeffannoo sanduqa cufsaa keessan kunooti, mucaa koo:\n\n**Koodii:** ${code}\n**Bakka:** ${location || "Balbala dhuunfaa irratti"}\n${instructions ? `\n**Qajeelfama:** ${instructions}\n` : ''}\nBaga nagaan dhuftan! 💚`,
-    'zh-CN': `🔑 这是您的密码箱信息，亲爱的:\n\n**密码:** ${code}\n**位置:** ${location || "在房产入口处"}\n${instructions ? `\n**说明:** ${instructions}\n` : ''}\n欢迎入住！💚`,
+    'en-US': `🔑 Here's your lockbox information:\n\n**Code:** ${code}\n**Location:** ${location || "At the property entrance"}\n${instructions ? `\n**Instructions:** ${instructions}\n` : ''}\nWelcome to your stay! 💚`,
+    'am-ET': `🔑 የመቆለፊያ ሳጥን መረጃዎ እነሆ:\n\n**ኮድ:** ${code}\n**ቦታ:** ${location || "በንብረቱ መግቢያ"}\n${instructions ? `\n**መመሪያዎች:** ${instructions}\n` : ''}\nእንኳን ደህና መጡ! 💚`,
+    'ti-ER': `🔑 ናይ መቆልፊ ሳጹን ሓበሬታኹም እነሆ:\n\n**ኮድ:** ${code}\n**ቦታ:** ${location || "ኣብ መእተዊ ናይቲ ንብረት"}\n${instructions ? `\n**መምርሒታት:** ${instructions}\n` : ''}\nእንቛዕ ደሓን መጻእኩም! 💚`,
+    'om-ET': `🔑 Odeeffannoo sanduqa cufsaa keessan kunooti:\n\n**Koodii:** ${code}\n**Bakka:** ${location || "Balbala dhuunfaa irratti"}\n${instructions ? `\n**Qajeelfama:** ${instructions}\n` : ''}\nBaga nagaan dhuftan! 💚`,
+    'zh-CN': `🔑 这是您的密码箱信息:\n\n**密码:** ${code}\n**位置:** ${location || "在房产入口处"}\n${instructions ? `\n**说明:** ${instructions}\n` : ''}\n欢迎入住！💚`,
   };
 
   return responses[lang as LangKey] || responses['en-US'];
