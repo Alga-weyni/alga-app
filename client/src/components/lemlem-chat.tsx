@@ -47,11 +47,11 @@ const LANGUAGE_OPTIONS = [
 
 // Welcome messages in all languages with heritage story
 const WELCOME_MESSAGES: Record<string, string> = {
-  'en': "Hello, dear! I'm Lemlem — your AI assistant named after my grandmother. 💚\n\nI can help you with lockbox codes, WiFi passwords, check-in/check-out times, emergency contacts, and local recommendations. What can I help you with today? ☕️",
-  'am': "ሰላም! እኔ ለምለም ነኝ — በአያቴ ስም የተሰየመ የAI ረዳትዎ። 💚\n\nየመቆለፊያ ሳጥን ኮዶች፣ የWiFi የይለፍ ቃላት፣ የመግቢያ/መውጫ ሰዓቶች፣ የአደጋ ጊዜ እውቂያዎች እና የአካባቢ ምክሮች ላገዝዎ እችላለሁ። ምን ልረዳዎ? ☕️",
-  'ti': "ሰላም! ኣነ ለምለም እየ — ብስም ሓብተይ ዝተሰየመት AI ሓጋዚ። 💚\n\nናይ መቆልፊ ሳጹን ኮድ፣ WiFi ፓስዎርድ፣ ናይ መእተዊ/ምውጻእ ሰዓት፣ ህጹጽ ርክባት፣ ከምኡ'ውን ናይ ከባቢ ምኽርታት ክሕግዘኩም እኽእል። እንታይ ክሕግዘኩም? ☕️",
-  'om': "Nagaa! Ani Lemlem jedhama — maqaa akaakayyoo kootiin moggaafame gargaaraa AI. 💚\n\nKoodii sanduqa cufsaa, jecha icciitii WiFi, sa'aatii seensaa/bahuu, quunnamtii ariifachiisaa, akkasumas gorsa naannoo isin gargaaruu nan danda'a. Maal isin gargaaruu danda'a? ☕️",
-  'zh': "您好！我是 Lemlem — 以我祖母的名字命名的人工智能助手。💚\n\n我可以帮您提供密码箱密码、WiFi密码、入住/退房时间、紧急联系方式和当地推荐。今天我能帮您什么？☕️",
+  'en': "Hello, dear! I'm Lemlem — your AI agent named after my grandmother. 💚\n\nI can help you with lockbox codes, WiFi passwords, check-in/check-out times, emergency contacts, and local recommendations. What can I help you with today? ☕️",
+  'am': "ሰላም! እኔ ለምለም ነኝ — በአያቴ ስም የተሰየመ የAI ወኪልዎ። 💚\n\nየመቆለፊያ ሳጥን ኮዶች፣ የWiFi የይለፍ ቃላት፣ የመግቢያ/መውጫ ሰዓቶች፣ የአደጋ ጊዜ እውቂያዎች እና የአካባቢ ምክሮች ላገዝዎ እችላለሁ። ምን ልረዳዎ? ☕️",
+  'ti': "ሰላም! ኣነ ለምለም እየ — ብስም ሓብተይ ዝተሰየመት AI ወኪል። 💚\n\nናይ መቆልፊ ሳጹን ኮድ፣ WiFi ፓስዎርድ፣ ናይ መእተዊ/ምውጻእ ሰዓት፣ ህጹጽ ርክባት፣ ከምኡ'ውን ናይ ከባቢ ምኽርታት ክሕግዘኩም እኽእል። እንታይ ክሕግዘኩም? ☕️",
+  'om': "Nagaa! Ani Lemlem jedhama — maqaa akaakayyoo kootiin moggaafame AI agent. 💚\n\nKoodii sanduqa cufsaa, jecha icciitii WiFi, sa'aatii seensaa/bahuu, quunnamtii ariifachiisaa, akkasumas gorsa naannoo isin gargaaruu nan danda'a. Maal isin gargaaruu danda'a? ☕️",
+  'zh': "您好！我是 Lemlem — 以我祖母的名字命名的AI智能助理。💚\n\n我可以帮您提供密码箱密码、WiFi密码、入住/退房时间、紧急联系方式和当地推荐。今天我能帮您什么？☕️",
 };
 
 export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
@@ -323,7 +323,7 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        title="Get help with Lemlem (ልምልም) — our AI assistant named after my grandmother"
+        title="Get help with Lemlem (ልምልም) — our AI agent named after my grandmother"
         className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-[#F49F0A] via-[#FF8C00] to-[#CD7F32] hover:from-[#FFB020] hover:via-[#FFA500] hover:to-[#DAA520] text-white z-50 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_30px_rgba(244,159,10,0.5)] border-2 border-white/20"
         data-testid="button-open-lemlem"
         style={{
@@ -349,9 +349,9 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
             👵🏾
           </div>
           <div>
-            <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem (ልምልም)</h3>
+            <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem (ልምልም) - AI Agent</h3>
             <p className="text-xs opacity-90">
-              Your AI Assistant - named after my beautiful grandma 💚
+              Named after my beautiful grandma 💚
               {isSpeaking && <span className="ml-2 animate-pulse">🔊</span>}
             </p>
           </div>
