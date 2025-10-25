@@ -38,12 +38,22 @@ const LANGUAGE_OPTIONS = [
   { code: 'zh', flag: '🇨🇳', label: '中文' },
 ];
 
+// Welcome messages in all languages
+const WELCOME_MESSAGES: Record<string, string> = {
+  'en': "Hello, dear! I'm Lemlem, your AI assistant. I can help you with lockbox codes, WiFi passwords, check-in/check-out times, emergency contacts, and local recommendations. What can I help you with? ☕️",
+  'am': "ሰላም! እኔ ለምለም ነኝ፣ የእርስዎ AI ረዳት። የመቆለፊያ ሳጥን ኮዶች፣ የWiFi የይለፍ ቃላት፣ የመግቢያ/መውጫ ሰዓቶች፣ የአደጋ ጊዜ እውቂያዎች እና የአካባቢ ምክሮች ላገዝዎ እችላለሁ። ምን ልረዳዎ? ☕️",
+  'ti': "ሰላም! ኣነ ለምለም እየ፣ AI ሓጋዚኽን። ናይ መቆልፊ ሳጹን ኮድ፣ WiFi ፓስዎርድ፣ ናይ መእተዊ/ምውጻእ ሰዓት፣ ህጹጽ ርክባት፣ ከምኡ'ውን ናይ ከባቢ ምኽርታት ክሕግዘኩም እኽእል። እንታይ ክሕግዘኩም? ☕️",
+  'om': "Nagaa! Ani Lemlem jedhama, gargaaraa AI keessan. Koodii sanduqa cufsaa, jecha icciitii WiFi, sa'aatii seensaa/bahuu, quunnamtii ariifachiisaa, akkasumas gorsa naannoo isin gargaaruu nan danda'a. Maal isin gargaaruu danda'a? ☕️",
+  'zh': "您好！我是 Lemlem，您的人工智能助手。我可以帮您提供密码箱密码、WiFi密码、入住/退房时间、紧急联系方式和当地推荐。我能帮您什么？☕️",
+};
+
 export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      text: "Hello, dear! I'm Lemlem, your AI assistant. I can help you with lockbox codes, WiFi passwords, check-in/check-out times, emergency contacts, and local recommendations. What can I help you with? ☕️",
+      text: WELCOME_MESSAGES['en'],
       isUser: false,
       usedTemplate: true,
       cost: 0,
@@ -54,7 +64,6 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   const [totalCost, setTotalCost] = useState(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -80,10 +89,25 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
 
   // Set initial language from profile when it loads
   useEffect(() => {
-    if (profile?.preferences?.language && !selectedLanguage) {
+    if (profile?.preferences?.language && selectedLanguage === 'en') {
       setSelectedLanguage(profile.preferences.language);
     }
-  }, [profile, selectedLanguage]);
+  }, [profile]);
+
+  // Instantly update welcome message when language changes
+  useEffect(() => {
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages];
+      const welcomeIndex = updatedMessages.findIndex((msg) => msg.id === 'welcome');
+      if (welcomeIndex !== -1) {
+        updatedMessages[welcomeIndex] = {
+          ...updatedMessages[welcomeIndex],
+          text: WELCOME_MESSAGES[selectedLanguage] || WELCOME_MESSAGES['en'],
+        };
+      }
+      return updatedMessages;
+    });
+  }, [selectedLanguage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
