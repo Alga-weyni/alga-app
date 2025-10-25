@@ -57,7 +57,7 @@ export const algaPayHandler = async (req: Request, res: Response) => {
         success: true,
         provider: "algaPay", // Never expose "Chapa"
         txRef,
-        checkoutUrl: chapaResponse.data.checkout_url,
+        checkoutUrl: chapaResponse.data?.checkout_url || "",
       });
     } 
     else if (method === "stripe" && stripe) {
