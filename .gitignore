@@ -5,6 +5,10 @@ server/public
 vite.config.ts.*
 *.tar.gz
 
+# Capacitor Native Platforms (auto-generated, large files)
+android/
+ios/
+
 # Environment & Secrets (NEVER commit these!)
 .env
 .env.*
