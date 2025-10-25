@@ -1,0 +1,155 @@
+# =========================================
+# 🔧 SYSTEM PREPARATION
+# =========================================
+git pull origin main || true
+npm install
+npx drizzle-kit push
+
+# =========================================
+# 🗄️ DATABASE: PROFILE & ACTIVITY LOGS
+# =========================================
+psql $DATABASE_URL <<'SQL'
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS first_name TEXT,
+ADD COLUMN IF NOT EXISTS last_name TEXT,
+ADD COLUMN IF NOT EXISTS phone TEXT,
+ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+ADD COLUMN IF NOT EXISTS bio TEXT,
+ADD COLUMN IF NOT EXISTS address TEXT;
+
+CREATE TABLE IF NOT EXISTS user_activity_log (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  action TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+SQL
+
+# =========================================
+# 🧠 BACKEND: PROFILE & LOGGING ROUTES
+# =========================================
+cat > server/routes/userProfile.ts <<'EOF'
+import express from 'express';
+import db from '../db';
+import {requireRole} from '../middleware/requireRole';
+const router = express.Router();
+
+// Get own profile
+router.get('/api/user/profile', requireRole(['guest','host','operator','admin','developer']), async (req,res)=>{
+ const result = await db.query('SELECT id,email,first_name,last_name,phone,avatar_url,bio,address FROM users WHERE id=$1',[req.user.id]);
+ res.json(result.rows[0]);
+});
+
+// Update own profile
+router.post('/api/user/profile', requireRole(['guest','host','operator','admin','developer']), async (req,res)=>{
+ const {first_name,last_name,phone,avatar_url,bio,address} = req.body;
+ await db.query('UPDATE users SET first_name=$1,last_name=$2,phone=$3,avatar_url=$4,bio=$5,address=$6 WHERE id=$7',
+ [first_name,last_name,phone,avatar_url,bio,address,req.user.id]);
+ await db.query('INSERT INTO user_activity_log (user_id,action,metadata) VALUES ($1,$2,$3)',
+ [req.user.id,'Profile Updated',JSON.stringify({first_name,last_name,phone})]);
+ res.json({success:true});
+});
+
+// Admin view of user activity
+router.get('/api/admin/activity', requireRole(['admin','developer']), async (req,res)=>{
+ const logs = await db.query(`
+  SELECT l.id,u.email,l.action,l.metadata,l.created_at
+  FROM user_activity_log l
+  JOIN users u ON u.id=l.user_id
+  ORDER BY l.created_at DESC
+  LIMIT 200
+ `);
+ res.json(logs.rows);
+});
+
+export default router;
+EOF
+
+# =========================================
+# 💻 FRONTEND: USER PROFILE PAGE
+# =========================================
+cat > client/src/pages/user-profile.tsx <<'EOF'
+import React,{useState,useEffect} from 'react';
+export default function UserProfile(){
+ const [form,setForm]=useState({first_name:'',last_name:'',phone:'',avatar_url:'',bio:'',address:''});
+ const [loading,setLoading]=useState(true);
+ useEffect(()=>{fetch('/api/user/profile').then(r=>r.json()).then(d=>{setForm(d||{});setLoading(false);});},[]);
+ const save=()=>fetch('/api/user/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});
+ if(loading) return <p>Loading profile...</p>;
+ return <div className="p-6 max-w-lg mx-auto">
+  <h2 className="text-2xl font-bold mb-4">My Profile</h2>
+  {['first_name','last_name','phone','avatar_url','address'].map(k=>(
+   <input key={k} placeholder={k.replace('_',' ')} value={form[k]||''}
+    onChange={e=>setForm({...form,[k]:e.target.value})}
+    className="w-full border rounded mb-2 p-2"/>))}
+  <textarea placeholder="Bio" value={form.bio||''} onChange={e=>setForm({...form,bio:e.target.value})}
+    className="w-full border rounded p-2 h-24 mb-3"></textarea>
+  <button onClick={save} className="bg-orange-500 text-white px-4 py-2 rounded">Save Changes</button>
+ </div>;
+}
+EOF
+
+# =========================================
+# 🧩 FRONTEND: ADMIN ACTIVITY LOG PAGE
+# =========================================
+cat > client/src/pages/admin-activity.tsx <<'EOF'
+import React,{useState,useEffect} from 'react';
+export default function AdminActivity(){
+ const [logs,setLogs]=useState([]);
+ useEffect(()=>{fetch('/api/admin/activity').then(r=>r.json()).then(setLogs);},[]);
+ return <div className="p-6">
+  <h2 className="text-2xl font-bold mb-4">User Activity Log</h2>
+  <table className="w-full text-sm">
+   <thead><tr><th>Email</th><th>Action</th><th>Metadata</th><th>Time</th></tr></thead>
+   <tbody>{logs.map(l=><tr key={l.id}><td>{l.email}</td><td>{l.action}</td><td><pre>{JSON.stringify(l.metadata)}</pre></td><td>{new Date(l.created_at).toLocaleString()}</td></tr>)}</tbody>
+  </table>
+ </div>;
+}
+EOF
+
+# =========================================
+# 🔁 ROUTING & NAVIGATION
+# =========================================
+cat >> client/src/App.tsx <<'EOF'
+// Add routes
+<Route path="/user-profile" element={<UserProfile />} />
+<Route path="/admin/activity" element={<AdminActivity />} />
+EOF
+
+# Add profile link for all users & activity link for admins
+sed -i "/Dashboard/a <a href='/user-profile' className='text-sm text-brown-700 hover:text-orange-600'>My Profile</a>" client/src/components/NavBar.tsx
+sed -i "/Config/a <a href='/admin/activity' className='text-sm text-brown-700 hover:text-orange-600'>Activity Log</a>" client/src/pages/admin-dashboard.tsx
+
+# =========================================
+# 📈 LEMLEM INTEGRATION (LOGGING)
+# =========================================
+cat >> server/routes/lemlem.ts <<'EOF'
+// Log each Lemlem interaction
+if(req.user){
+ await db.query('INSERT INTO user_activity_log (user_id,action,metadata) VALUES ($1,$2,$3)',
+ [req.user.id,'Lemlem Interaction',JSON.stringify({page:req.body.currentPage||'unknown',message:req.body.message})]);
+}
+EOF
+
+# =========================================
+# 🧱 BUILD & DEPLOY
+# =========================================
+npm run build
+npm run start
+
+# =========================================
+# 📘 DOCUMENTATION UPDATE
+# =========================================
+cat >> replit.md <<'EOF'
+# Phase 3.5 – User Profile & Activity Logging
+- Added editable user profiles with name, phone, bio, address, avatar
+- Added automatic user_activity_log table
+- Logs profile updates, Lemlem interactions, and admin view
+- New pages: /user-profile and /admin/activity
+- Integrated seamlessly with Roles & Permissions and Insights Dashboard
+EOF
+
+git add .
+git commit -m "Phase 3.5: User Profile Management & Activity Logging Integration"
+git push origin main
