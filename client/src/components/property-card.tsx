@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ interface PropertyCardProps {
   isFavorite?: boolean;
 }
 
-export default function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
+function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(isFavorite);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -195,3 +195,6 @@ export default function PropertyCard({ property, isFavorite = false }: PropertyC
     </Card>
   );
 }
+
+
+export default memo(PropertyCard);
