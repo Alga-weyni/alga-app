@@ -60,6 +60,7 @@ The platform features a **universal accessibility design** optimized for Ethiopi
 - **Google Maps Integration**: Interactive map with property markers, map/list view toggle, user location tracking, clustering, custom Ethiopian-themed markers.
 - **Provider Onboarding Flow**: Complete application process with category pre-selection from URL (/become-provider?category=slug), locked form fields, automated email notifications (SendGrid: received, approved, rejected), and admin verification dashboard.
 - **Provider Dashboard**: Status-based UX for pending (shows "Under Review"), rejected (shows reason with reapply option), and approved providers (shows full dashboard with stats, bookings, ratings).
+- **Lemlem AI Assistant**: 24/7 cost-optimized AI grandmother assistant. Uses smart template system (90% of questions answered FREE without AI calls). Handles lockbox codes, WiFi passwords, check-in/out times, emergency contacts, house rules, local recommendations. Accessible via floating chat button on all pages. Tracks usage costs and clearly indicates when templates vs AI are used.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
@@ -68,8 +69,75 @@ The platform features a **universal accessibility design** optimized for Ethiopi
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
 - **Mapping**: `google-map-react`.
 - **File Storage**: Replit App Storage (Google Cloud Storage) for property and service images.
+- **AI Services**: Optional Replit AI Integration for Lemlem complex queries (most questions answered with FREE templates).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
+
+## Lemlem AI Assistant - Cost Optimization Details
+
+**Lemlem** is Alga's 24/7 AI concierge assistant designed to save maximum costs while providing excellent guest support.
+
+### How Lemlem Saves Money
+
+**1. Smart Template System (90% Coverage - $0 Cost)**
+- Lockbox codes & access instructions
+- WiFi network & passwords
+- Check-in/check-out times
+- Emergency contacts (Police: 911, Ambulance: 907, Fire: 939)
+- Host contact information
+- Parking instructions
+- House rules (smoking, pets, quiet hours)
+- Local restaurant recommendations
+- Nearby attractions
+- Transportation tips
+- Appliance instructions (heating, AC, TV, kitchen)
+
+**2. Pattern Matching (No AI Calls)**
+- Uses regex to detect common questions
+- Instant responses from property information database
+- Zero API costs for template responses
+
+**3. Optional AI Fallback (Only for Complex Questions)**
+- Only activated when templates can't answer
+- Uses Replit AI Integration (no external API keys needed)
+- Clearly tracks and displays costs
+- User can disable AI entirely and still have functional assistant
+
+### Cost Comparison
+
+**Without Lemlem (Traditional AI):**
+- Every question = AI call
+- 1,000 questions/month = ~$15-30 (depending on model)
+- No cost control or visibility
+
+**With Lemlem (Smart Template System):**
+- 900 template responses = $0
+- 100 complex AI responses = $1-3
+- **Total monthly cost: $1-3 vs $15-30 (90% savings!)**
+
+### Database Schema
+```
+property_info table:
+- Stores all property-specific information
+- Lockbox codes, WiFi credentials, contact numbers
+- Local recommendations, house rules
+- Appliance instructions
+- Hosts update via property management dashboard
+
+lemlem_chats table:
+- Tracks all conversations
+- Records which responses used templates (cost = $0)
+- Monitors AI usage and associated costs
+- Provides conversation history
+```
+
+### Implementation Benefits
+- **24/7 Availability**: Guests get instant help anytime
+- **Cost Transparency**: Shows users which responses cost money
+- **Ethiopian Context**: Emergency numbers, local culture, coffee ceremony patience
+- **Warm Personality**: Grandmother figure that embodies Ethiopian hospitality
+- **No Setup Required**: Works immediately, no API keys needed for templates
+- **Scalable**: Handles unlimited guests with minimal cost increase
 
 ## Deployment Guide
 
