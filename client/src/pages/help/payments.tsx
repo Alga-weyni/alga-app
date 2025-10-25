@@ -45,7 +45,7 @@ export default function PaymentsHelp() {
           <CardContent className="space-y-4">
             <div className="border-l-4 border-green-500 pl-4 py-2">
               <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: "#2d1405" }}>
-                🇪🇹 Ethiopian Payments (via Chapa)
+                🇪🇹 Ethiopian Payments (via Alga Pay)
               </h3>
               <div className="space-y-3">
                 <div className="bg-green-50 p-3 rounded-lg">
@@ -81,7 +81,7 @@ export default function PaymentsHelp() {
               </h3>
               <div className="space-y-3">
                 <div className="bg-blue-50 p-3 rounded-lg">
-                  <p className="font-medium text-sm mb-1" style={{ color: "#2d1405" }}>💳 Visa & Mastercard (Stripe)</p>
+                  <p className="font-medium text-sm mb-1" style={{ color: "#2d1405" }}>💳 Visa & Mastercard (Alga Pay)</p>
                   <p className="text-xs" style={{ color: "#5a4a42" }}>
                     Credit and debit cards from any country. Instant confirmation with 3D Secure protection.
                   </p>
