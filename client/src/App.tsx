@@ -21,6 +21,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
 import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
 import AdminAIControl from "@/pages/admin-ai-control";
+import AdminRolesPermissions from "@/pages/admin-roles-permissions";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import ProviderDashboard from "@/pages/provider-dashboard";
 import Bookings from "@/pages/bookings";
@@ -124,6 +125,7 @@ function Router() {
         <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
         <Route path="/admin/lemlem-insights" element={<AnimatedRoute><AdminLemlemInsights /></AnimatedRoute>} />
         <Route path="/admin/ai-control" element={<AnimatedRoute><AdminAIControl /></AnimatedRoute>} />
+        <Route path="/admin/roles-permissions" element={<AnimatedRoute><AdminRolesPermissions /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
         
         {/* Protected user routes - accessible to all, each page handles auth */}
