@@ -9,6 +9,7 @@ import { useState } from "react";
 import type { ServiceProvider } from "@shared/schema";
 import ProviderBadge from "@/components/provider-badge";
 import { ETHIOPIAN_CITIES } from "@/lib/constants";
+import LocationPicker from "@/components/location-picker";
 
 const serviceTitles: Record<string, string> = {
   cleaning: "Cleaning Services",
@@ -147,18 +148,15 @@ export default function ServiceCategory() {
                 </Select>
               </div>
 
-              {/* Neighborhood Search */}
+              {/* Neighborhood Search with GPS */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: "#2d1405" }}>
                   Your area (e.g., Bole, Sarbet)
                 </label>
-                <input
-                  type="text"
+                <LocationPicker
                   value={neighborhoodSearch}
-                  onChange={(e) => setNeighborhoodSearch(e.target.value)}
+                  onChange={setNeighborhoodSearch}
                   placeholder="Enter your neighborhood"
-                  className="w-full px-3 py-2 rounded-lg border border-[#e5d9ce] focus:outline-none focus:ring-2 focus:ring-[#F49F0A]"
-                  data-testid="input-neighborhood-search"
                 />
               </div>
 
