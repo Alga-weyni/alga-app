@@ -488,7 +488,7 @@ export default function HostDashboard() {
         </div>
 
         {/* Professional Host Banner */}
-        <HostBanner hostName={user?.firstName || user?.name} />
+        <HostBanner hostName={user?.firstName} />
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
