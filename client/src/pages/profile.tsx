@@ -1,8 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,6 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ArrowLeft, 
   User, 
@@ -27,12 +29,15 @@ import {
   CreditCard,
   Globe,
   CheckCircle,
-  XCircle
+  XCircle,
+  Settings,
+  Activity,
+  Home
 } from "lucide-react";
 
 export default function Profile() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -42,13 +47,19 @@ export default function Profile() {
     phoneNumber: ""
   });
 
+  // Fetch full profile with preferences and activity
+  const { data: fullProfile } = useQuery<any>({
+    queryKey: ['/api/profile'],
+    enabled: !!user,
+  });
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#faf5f0" }}>
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>Please Sign In</h2>
           <p className="mb-4" style={{ color: "#5a4a42" }}>You need to sign in to view your profile.</p>
-          <Button onClick={() => navigate("/")}>Go Home</Button>
+          <Button onClick={() => setLocation("/")}>Go Home</Button>
         </div>
       </div>
     );
@@ -85,7 +96,7 @@ export default function Profile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof editForm) => {
-      return await apiRequest("PATCH", "/api/profile", data);
+      return await apiRequest("PUT", "/api/profile", data);
     },
     onSuccess: () => {
       toast({
@@ -94,6 +105,7 @@ export default function Profile() {
       });
       setEditDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
     },
     onError: (error: any) => {
       toast({
@@ -103,6 +115,27 @@ export default function Profile() {
       });
     }
   });
+
+  // Update preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (preferences: any) => {
+      return await apiRequest("POST", '/api/profile/preferences', preferences);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+      toast({
+        title: "✅ Preferences saved!",
+        description: "Your preferences have been updated.",
+      });
+    },
+  });
+
+  const handlePreferenceChange = (key: string, value: any) => {
+    updatePreferencesMutation.mutate({ [key]: value });
+  };
+
+  const preferences = fullProfile?.preferences || {};
+  const recentActivity = fullProfile?.recentActivity || [];
 
   return (
     <div className="min-h-screen" style={{ background: "#faf5f0" }}>
@@ -258,59 +291,246 @@ export default function Profile() {
               </CardContent>
             </Card>
 
-            {/* Settings Sections - Dropdown */}
-            <Card style={{ background: "#fff" }} data-testid="card-settings">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="settings" className="border-none">
-                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                    <div className="flex flex-col items-start">
-                      <CardTitle style={{ color: "#2d1405" }}>Settings</CardTitle>
-                      <CardDescription>Manage your account preferences</CardDescription>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-4">
-                    <div className="space-y-2">
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start hover:bg-gray-100"
-                        data-testid="button-notifications"
-                        onClick={() => navigate("/settings/notifications")}
-                      >
-                        <Bell className="w-4 h-4 mr-3" />
-                        Notifications
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start hover:bg-gray-100"
-                        data-testid="button-security"
-                        onClick={() => navigate("/settings/security")}
-                      >
-                        <Lock className="w-4 h-4 mr-3" />
-                        Security & Privacy
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start hover:bg-gray-100"
-                        data-testid="button-payments"
-                        onClick={() => navigate("/settings/payment")}
-                      >
-                        <CreditCard className="w-4 h-4 mr-3" />
-                        Payment Methods
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start hover:bg-gray-100"
-                        data-testid="button-language"
-                        onClick={() => navigate("/settings/language")}
-                      >
-                        <Globe className="w-4 h-4 mr-3" />
-                        Language & Region
-                      </Button>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card>
+            {/* Tabs for Preferences and Activity */}
+            <Tabs defaultValue="settings" className="space-y-6">
+              <TabsList className="bg-white border border-[#CD7F32]/20">
+                <TabsTrigger value="settings" data-testid="tab-settings">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </TabsTrigger>
+                <TabsTrigger value="preferences" data-testid="tab-preferences">
+                  <Bell className="w-4 h-4 mr-2" />
+                  Preferences
+                </TabsTrigger>
+                <TabsTrigger value="activity" data-testid="tab-activity">
+                  <Activity className="w-4 h-4 mr-2" />
+                  Activity
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Settings Tab */}
+              <TabsContent value="settings">
+                <Card style={{ background: "#fff" }} data-testid="card-settings">
+                  <CardHeader>
+                    <CardTitle style={{ color: "#2d1405" }}>Quick Settings</CardTitle>
+                    <CardDescription>Access your account settings</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start hover:bg-gray-100"
+                      data-testid="button-notifications"
+                      onClick={() => setLocation("/settings/notifications")}
+                    >
+                      <Bell className="w-4 h-4 mr-3" />
+                      Notifications
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start hover:bg-gray-100"
+                      data-testid="button-security"
+                      onClick={() => setLocation("/settings/security")}
+                    >
+                      <Lock className="w-4 h-4 mr-3" />
+                      Security & Privacy
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start hover:bg-gray-100"
+                      data-testid="button-payments"
+                      onClick={() => setLocation("/settings/payment")}
+                    >
+                      <CreditCard className="w-4 h-4 mr-3" />
+                      Payment Methods
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start hover:bg-gray-100"
+                      data-testid="button-language"
+                      onClick={() => setLocation("/settings/language")}
+                    >
+                      <Globe className="w-4 h-4 mr-3" />
+                      Language & Region
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Preferences Tab */}
+              <TabsContent value="preferences">
+                <div className="space-y-6">
+                  <Card style={{ background: "#fff" }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: "#2d1405" }}>Notification Preferences</CardTitle>
+                      <CardDescription>Choose how you want to be notified</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label style={{ color: "#2d1405" }}>Email Notifications</Label>
+                          <p className="text-sm" style={{ color: "#5a4a42" }}>Receive booking updates via email</p>
+                        </div>
+                        <Switch
+                          checked={preferences.emailNotifications ?? true}
+                          onCheckedChange={(checked) => handlePreferenceChange('emailNotifications', checked)}
+                          data-testid="switch-email-notifications"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label style={{ color: "#2d1405" }}>SMS Notifications</Label>
+                          <p className="text-sm" style={{ color: "#5a4a42" }}>Get booking confirmations via SMS</p>
+                        </div>
+                        <Switch
+                          checked={preferences.smsNotifications ?? true}
+                          onCheckedChange={(checked) => handlePreferenceChange('smsNotifications', checked)}
+                          data-testid="switch-sms-notifications"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label style={{ color: "#2d1405" }}>Marketing Updates</Label>
+                          <p className="text-sm" style={{ color: "#5a4a42" }}>Receive special offers and news</p>
+                        </div>
+                        <Switch
+                          checked={preferences.marketingEmails ?? false}
+                          onCheckedChange={(checked) => handlePreferenceChange('marketingEmails', checked)}
+                          data-testid="switch-marketing"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{ background: "#fff" }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: "#2d1405" }}>Display Preferences</CardTitle>
+                      <CardDescription>Customize how you see Alga</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label style={{ color: "#2d1405" }}>Preferred Language</Label>
+                        <Select
+                          value={preferences.language || 'en'}
+                          onValueChange={(value) => handlePreferenceChange('language', value)}
+                        >
+                          <SelectTrigger className="border-[#CD7F32]/20" data-testid="select-language">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="am">አማርኛ (Amharic)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label style={{ color: "#2d1405" }}>Currency</Label>
+                        <Select
+                          value={preferences.currency || 'ETB'}
+                          onValueChange={(value) => handlePreferenceChange('currency', value)}
+                        >
+                          <SelectTrigger className="border-[#CD7F32]/20" data-testid="select-currency">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ETB">ETB (Ethiopian Birr)</SelectItem>
+                            <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                            <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{ background: "#fff" }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: "#2d1405" }}>Search Preferences</CardTitle>
+                      <CardDescription>Help us personalize your search results</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label style={{ color: "#2d1405" }}>Save Search History</Label>
+                          <p className="text-sm" style={{ color: "#5a4a42" }}>Remember searches for better recommendations</p>
+                        </div>
+                        <Switch
+                          checked={preferences.saveSearchHistory ?? true}
+                          onCheckedChange={(checked) => handlePreferenceChange('saveSearchHistory', checked)}
+                          data-testid="switch-save-search"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label style={{ color: "#2d1405" }}>Show Favorites First</Label>
+                          <p className="text-sm" style={{ color: "#5a4a42" }}>Prioritize similar to your favorites</p>
+                        </div>
+                        <Switch
+                          checked={preferences.showFavoritesFirst ?? false}
+                          onCheckedChange={(checked) => handlePreferenceChange('showFavoritesFirst', checked)}
+                          data-testid="switch-favorites-first"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Activity Tab */}
+              <TabsContent value="activity">
+                <Card style={{ background: "#fff" }}>
+                  <CardHeader>
+                    <CardTitle style={{ color: "#2d1405" }}>Recent Activity</CardTitle>
+                    <CardDescription>Your interactions on Alga</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {recentActivity && recentActivity.length > 0 ? (
+                      <div className="space-y-3">
+                        {recentActivity.map((activity: any, index: number) => (
+                          <div
+                            key={activity.id}
+                            className="flex items-start gap-3 p-3 rounded-lg"
+                            style={{ background: "#faf5f0", borderColor: "#CD7F32", borderWidth: "1px" }}
+                            data-testid={`activity-${index}`}
+                          >
+                            <div className="mt-1">
+                              {activity.action === 'viewed_property' && <Home className="w-4 h-4" style={{ color: "#CD7F32" }} />}
+                              {activity.action === 'made_booking' && <CheckCircle className="w-4 h-4 text-green-600" />}
+                              {activity.action === 'searched' && <Globe className="w-4 h-4 text-blue-600" />}
+                              {activity.action === 'chatted_lemlem' && <User className="w-4 h-4 text-purple-600" />}
+                              {!['viewed_property', 'made_booking', 'searched', 'chatted_lemlem'].includes(activity.action) && (
+                                <Activity className="w-4 h-4" style={{ color: "#CD7F32" }} />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium" style={{ color: "#2d1405" }}>
+                                {activity.action.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                              </p>
+                              {activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                                <p className="text-xs mt-1" style={{ color: "#5a4a42" }}>
+                                  {JSON.stringify(activity.metadata)}
+                                </p>
+                              )}
+                              <p className="text-xs mt-1" style={{ color: "#8a7a72" }}>
+                                {new Date(activity.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Activity className="w-12 h-12 mx-auto mb-3" style={{ color: "#CD7F32", opacity: 0.3 }} />
+                        <p style={{ color: "#5a4a42" }}>No activity yet</p>
+                        <p className="text-sm mt-1" style={{ color: "#8a7a72" }}>Start exploring properties to see your activity here</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
