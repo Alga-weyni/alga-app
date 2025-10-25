@@ -48,6 +48,17 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Load voices when component mounts (some browsers need this)
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      // Chrome needs this event to load voices
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
+
   // Get user's language preference
   const { data: profile } = useQuery<any>({
     queryKey: ['/api/profile'],
@@ -64,7 +75,7 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     scrollToBottom();
   }, [messages]);
 
-  // Text-to-Speech function
+  // Text-to-Speech function - Warm Grandmother Voice
   const speak = (text: string) => {
     if (!voiceEnabled || !window.speechSynthesis) return;
 
@@ -72,9 +83,25 @@ export function LemlemChat({ propertyId, bookingId }: LemlemChatProps) {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = LANGUAGE_VOICES[userLanguage] || 'en-US';
-    utterance.rate = 0.9; // Slightly slower for grandmother feel
-    utterance.pitch = 1.1; // Slightly higher for warm, friendly tone
+    const langCode = LANGUAGE_VOICES[userLanguage] || 'en-US';
+    utterance.lang = langCode;
+    
+    // Warm, caring grandmother voice settings
+    utterance.rate = 0.75; // Slower, patient speaking pace
+    utterance.pitch = 1.15; // Warm, gentle tone
+    utterance.volume = 1.0; // Clear but not overwhelming
+    
+    // Try to select a female voice for grandmother feel
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.lang.startsWith(langCode.split('-')[0]) && voice.name.toLowerCase().includes('female')
+    ) || voices.find(voice => 
+      voice.lang.startsWith(langCode.split('-')[0])
+    );
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
     
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
