@@ -1,0 +1,50 @@
+ALGA – INSA Security Verification Checklist
+Verification Guide for INSA Compliance in Replit Environment
+This document provides a clear, step-by-step procedure to verify and maintain INSA
+security compliance for the Alga platform within the Replit development environment. It
+confirms alignment with Ethiopia’s national cybersecurity standards and the 11 required
+protection layers validated through INSA’s auditing tools (Nmap, Nessus, Burp Suite,
+OWASP ZAP, and Wireshark).
+1■■ Confirm Middleware Setup
+Ensure the insa-hardening.js file is present under /server/security/ and includes the
+following active layers of protection:
+1 Helmet – Secure HTTP headers
+2 CORS – Controlled cross-origin access
+3 XSS Clean – Blocks malicious scripts
+4 Mongo Sanitize – Prevents NoSQL injection
+5 HPP – Protects against HTTP parameter pollution
+6 Rate Limiter – DoS protection
+7 Compression – Performance and bandwidth optimization
+8 HSTS – Forces HTTPS connections
+9 Morgan – Audit logging for all access
+10 CSP – Content Security Policy
+11 Automatic HTTPS redirection
+2■■ Run the INSA Verification Checklist
+On Replit console, run the following tests:
+1 Run `npm audit` – verify all dependencies are secure.
+2 Run `npm run start` – confirm '■ INSA Security Hardening Enabled' appears in
+console.
+3 Ensure HTTP requests redirect automatically to HTTPS.
+4 Attempt duplicated parameters (e.g., /api?price=100&price;=200) – should block.
+5 Inject scripts (alert(1)) – should be sanitized instantly.
+3■■ Enable Audit Logs
+Verify that morgan logging is active. All access and error logs must appear under Replit’s
+Shell console, reflecting active monitoring.
+4■■ Optional – Vulnerability Scan
+Run OWASP ZAP or INSA testing suite to simulate vulnerabilities. Alga should resist XSS,
+SQL/NoSQL injections, and insecure header attempts.
+5■■ Maintain Weekly Compliance
+Schedule weekly security checks:
+1 Run `npm audit` every week.
+2 Use Replit Secrets Manager for all environment variables.
+3 Deploy updates with `npm install → npm run build → npm run start`.
+4 Keep NODE_ENV set to 'production' for full enforcement.
+6■■ INSA-Ready Passing Criteria
+1 HTTPS-only access enforced.
+2 All security headers validated.
+3 XSS, SQL, and NoSQL injections blocked.
+4 Audit logs visibly active.
+5 `npm audit` shows 0 vulnerabilities.
+Once all checks are completed and validated, Alga is officially INSA-ready and compliant
+with Ethiopia’s cybersecurity standards.
+Prepared b
