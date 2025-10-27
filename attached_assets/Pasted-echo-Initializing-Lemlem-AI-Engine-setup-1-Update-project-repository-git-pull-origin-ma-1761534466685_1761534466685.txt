@@ -1,0 +1,84 @@
+echo "🌿 Initializing Lemlem AI Engine setup..."
+
+# 1️⃣ Update project repository
+git pull origin main || true
+npm install
+
+# 2️⃣ Create core AI microservice structure
+mkdir -p server/ai_modules/{personalization,pricing,fraud,recommendation}
+
+# 3️⃣ Install required dependencies
+npm install openai @tensorflow/tfjs @tensorflow/tfjs-node sentiment node-fetch axios lodash uuid --save
+
+# 4️⃣ Create environment secrets for APIs
+replit secrets set OPENAI_API_KEY="sk-xxxxxx"
+replit secrets set LEMLEM_MODE="intelligence"
+replit secrets set FRAUD_THRESHOLD="0.8"
+replit secrets set RECOMMENDER_MIN_SCORE="0.7"
+
+# 5️⃣ Personalization Module – learns user behavior & preferences
+cat << 'EOF' > server/ai_modules/personalization/index.js
+import OpenAI from "openai";
+import db from "../../db.js";
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function personalizeExperience(userId) {
+  const userData = await db.userBehavior.findMany({ where: { userId }});
+  const prompt = \`Summarize preferences based on: \${JSON.stringify(userData)}\`;
+  const res = await client.responses.create({ model: "gpt-4.1-mini", input: prompt });
+  return res.output_text;
+}
+EOF
+
+# 6️⃣ Predictive Pricing Module – suggests competitive rates
+cat << 'EOF' > server/ai_modules/pricing/index.js
+import db from "../../db.js";
+export async function suggestPrice(propertyId) {
+  const property = await db.property.findUnique({ where: { id: propertyId }});
+  const comps = await db.property.findMany({ where: { city: property.city }});
+  const avgPrice = comps.reduce((a, c) => a + c.price, 0) / comps.length;
+  return (avgPrice * 1.05).toFixed(2); // suggest slightly premium
+}
+EOF
+
+# 7️⃣ Fraud Detection Module – flags anomalies
+cat << 'EOF' > server/ai_modules/fraud/index.js
+export function detectFraud(activityScore) {
+  return activityScore > process.env.FRAUD_THRESHOLD ? "⚠️ Flagged" : "✅ Clear";
+}
+EOF
+
+# 8️⃣ Experience Recommendation Module – “Guests who stayed here also liked…”
+cat << 'EOF' > server/ai_modules/recommendation/index.js
+import db from "../../db.js";
+export async function recommendSimilar(propertyId) {
+  const property = await db.property.findUnique({ where: { id: propertyId }});
+  return await db.property.findMany({
+    where: { city: property.city, type: property.type, id: { not: propertyId }},
+    take: 5
+  });
+}
+EOF
+
+# 9️⃣ Integrate modules into Lemlem core logic
+cat << 'EOF' >> server/lemlem.js
+import { personalizeExperience } from "./ai_modules/personalization/index.js";
+import { suggestPrice } from "./ai_modules/pricing/index.js";
+import { detectFraud } from "./ai_modules/fraud/index.js";
+import { recommendSimilar } from "./ai_modules/recommendation/index.js";
+
+export async function lemlemAI(userId, propertyId, activityScore) {
+  const personalization = await personalizeExperience(userId);
+  const pricing = await suggestPrice(propertyId);
+  const fraudStatus = detectFraud(activityScore);
+  const recommendations = await recommendSimilar(propertyId);
+  return { personalization, pricing, fraudStatus, recommendations };
+}
+EOF
+
+# 🔟 Restart server
+npm run build
+npm run start
+
+echo "✅ Lemlem AI Engine modules deployed successfully!"
+echo "💚 Lemlem now personalizes stays, suggests pricing, detects fraud, and recommends experiences."
