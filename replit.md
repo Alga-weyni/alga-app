@@ -1,123 +1,36 @@
 # Alga
 
 ## Overview
-Alga (አልጋ - "bed" in Amharic) is a full-stack web application for the Ethiopian property rental market, connecting property owners with travelers. It offers diverse accommodations, emphasizing local culture, safety, and multi-city support across Ethiopia. The platform provides a secure, culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga aims to be the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities.
+Alga (አልጋ - "bed" in Amharic) is a full-stack web application designed for the Ethiopian property rental market. It aims to connect property owners with travelers, offering a diverse range of accommodations with a focus on local culture, safety, and multi-city support across Ethiopia. The platform seeks to provide a secure and culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga's ambition is to become the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities. The platform also addresses the cold start problem by incentivizing informal property agents ("Delalas") through a commission system, aiming to rapidly expand property listings.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Updates (October 27, 2025)
-
-### INSA Security Hardening & Operations (Latest)
-Implemented government-grade security compliance with full operational automation:
-- **Security Score**: 98/100 - Ready for INSA audit and penetration testing
-- **Protection Layers**: HPP, XSS (multi-layer), SQL injection, NoSQL injection, CSRF, clickjacking, MIME sniffing
-- **Middleware Stack**: `server/security/insa-hardening.ts` integrates seamlessly with existing Helmet/CORS setup
-- **OWASP Top 10**: All vulnerabilities protected without breaking Drizzle ORM or Lemlem AI
-- **Security Headers**: HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- **Audit Logging**: Security events tracked for compliance reporting
-- **Zero Breaking Changes**: Applied after body parsing, before routes - existing code unaffected
-- **PCI DSS**: Payment security delegated to Chapa, Stripe, PayPal (external processors)
-- **Network Security**: Port 5000 only, TLS via Replit proxy, all other ports firewalled
-- **Weekly Automation**: `scripts/security-audit-weekly.sh` runs npm audit + compliance checks automatically
-- **Intrusion Detection**: `scripts/intrusion-detection.sh` monitors logs for XSS, SQL injection, failed logins in real-time
-- **INSA Submission Package**: Complete templates, RoE, checklists in `docs/INSA_SUBMISSION_PACKAGE.md`
-- **Verification Schedule**: Bi-annual review calendar with weekly/monthly/quarterly tasks in `docs/INSA_VERIFICATION_SCHEDULE.md`
-- **Documentation**: 4 comprehensive guides totaling 80+ pages covering all aspects of INSA compliance
-- **Testing Ready**: Hardened against Nmap, Nessus, Burp Suite, OWASP ZAP, Wireshark
-
-### Google Play Store Submission Preparation
-Comprehensive package created for Android app launch targeting Ethiopian market:
-- **Store Listing Content**: Professional app title, short description (80 chars), full description (4000 chars) emphasizing Ethiopian hospitality, Lemlem AI assistant, and authentic stays
-- **Visual Assets**: AI-generated feature graphic (1024x500 px) with brown-gold gradient and Ethiopian home silhouette, ready for Play Store
-- **Documentation**: Three detailed guides covering submission process, production build instructions, and quick day-by-day checklist
-- **Build Instructions**: Complete keystore generation, AAB/APK build commands, signing configuration, and troubleshooting guide
-- **Privacy Compliance**: Data safety disclosure template, content rating guidance, privacy policy URL reference
-- **Launch Strategy**: Android-first approach (85% Ethiopian market), followed by PWA, then iOS globally via Canadian account
-- **Marketing Copy**: Release notes, promotional text, and user-facing messaging ready for submission
-- **Files Created**: `docs/GOOGLE_PLAY_SUBMISSION.md`, `docs/BUILD_PRODUCTION_APK.md`, `docs/PLAY_STORE_QUICK_CHECKLIST.md`
-
-### Lemlem Lockbox Template System
-Built modular, multilingual response templates for natural grandmother-like interactions:
-- **Modular Architecture**: Separated lockbox responses into `server/lemlem/lockbox.ts` for maintainable code
-- **Two Functions**: `getLockboxReply()` for missing codes, `getLockboxCodeReply()` for available codes
-- **5 Languages**: English, Amharic, Tigrinya, Afaan Oromoo, Chinese with culturally appropriate translations
-- **Natural Tone**: Removed excessive "dear" usage (max 2 per conversation) to avoid robotic feel
-- **Voice-Ready**: Clean, conversational text optimized for FREE browser Text-to-Speech
-- **No AI Tags**: Responses sound like caring Ethiopian grandmother, not technical AI assistant
-- **Documentation**: Complete usage guide in `server/lemlem/README.md` with integration examples
-
-### Capacitor Native App Integration
-Extended Alga to support native Android and iOS apps for app store distribution:
-- **Native Projects**: Generated `android/` and `ios/` folders with full Capacitor configuration
-- **6 Native Plugins**: Pre-configured Geolocation (GPS search), Camera (ID verification), Push Notifications (booking alerts), Share (viral marketing), Browser (payment links), and App (lifecycle management)
-- **Ready for Stores**: Complete setup for Google Play Store and Apple App Store submission
-- **Live Reload**: Development mode allows instant testing on real devices
-- **Build Scripts**: Automated workflows for APK/AAB (Android) and IPA (iOS) generation
-- **Code Signing**: Documentation for release signing and app store deployment
-- **Multi-Platform**: Same React codebase powers web (PWA), Android, and iOS
-- **Documentation**: Step-by-step guide in `docs/MOBILE_APP_SETUP.md` with prerequisites, build instructions, and troubleshooting
-- **Deployment Strategy**: PWA-first (live now, $0 cost) → Native apps when ready for app stores ($25 Play Store + $99/year App Store)
-
-### Progressive Web App (PWA) Implementation
-Alga is now a fully installable Progressive Web App optimized for Ethiopian mobile networks:
-- **Installable**: Users can add Alga to home screen (iOS & Android) without app stores
-- **Offline Support**: Service worker caches pages, images, and API responses for offline access
-- **Network Optimization**: 12-second API timeouts for 3G/4G, aggressive image caching (30 days)
-- **Install Prompt**: Auto-prompts users to install app (dismissible)
-- **Offline Indicator**: Visual banner shows connection status
-- **App Store Compliance**: Privacy, Terms, and Account Deletion policy pages created
-- **Ethiopia-Optimized**: Cache-first for images, network-first for APIs with fallback
-- **Tech Stack**: vite-plugin-pwa, Workbox service worker, manifest.json with Alga branding
-- **Icons**: AI-generated app icon (brown/gold Ethiopian home design) at 192x192 and 512x512
-- **Documentation**: Complete PWA implementation guide in `docs/PWA_IMPLEMENTATION.md`
-
-### Property Insights Dashboard Widget
-Implemented comprehensive analytics widget for host dashboard with real-time backend data:
-- **Backend**: Created `/api/host/stats` endpoint with `getHostStats()` method in storage
-- **Frontend**: Built `PropertyInsights` component with 8 key metrics in responsive grid
-- **Metrics Displayed**:
-  - Active Listings (with total count)
-  - Upcoming Bookings (with total bookings)
-  - Total Earnings (with last payout amount)
-  - Average Rating (with total reviews)
-  - Completed Bookings (with occupancy rate %)
-  - Occupancy Rate percentage
-  - Pending Reviews (action needed)
-  - Total Bookings (all-time)
-- **Features**: Skeleton loading states, color-coded icons, hover effects, fully responsive
-- **Integration**: Displays below HostBanner on `/host/dashboard` page
-- **Tech**: Real PostgreSQL queries using Drizzle ORM, React Query for data fetching
-
 ## System Architecture
 
 ### UI/UX Design
-The platform features a universal accessibility design optimized for Ethiopian users, utilizing a warm color palette (dark brown, medium brown, cream backgrounds). Key design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks.
+The platform employs a universal accessibility design optimized for Ethiopian users, featuring a warm color palette (dark brown, medium brown, cream backgrounds). Design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks. The application is available as a Progressive Web App (PWA) and has native Android and iOS applications through Capacitor.
 
 ### Technical Implementation
-The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend uses Node.js with Express.js and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL is the database, hosted on Neon, managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control for Guest, Host, Admin, and Operator roles. Security measures include Helmet.js, CORS protection, rate limiting, and robust validation.
+The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend uses Node.js with Express.js and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL is the database, hosted on Neon, managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
 
 ### Feature Specifications
-- **Ask Lemlem Help Page**: A culturally authentic AI agent named Lemlem (after a grandmother) guides users through help topics with Ethiopian proverbs and a direct chat integration. Navigation shows "Ask Lemlem."
-- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with Ethiopian-context suggestions.
-- **User Profiles & Personalization**: Comprehensive user profiles with preferences (notifications, language, currency, search settings) and activity tracking stored in JSONB for personalized recommendations.
-- **User Settings**: Notification, security, payment, and language preferences.
+- **Delala Agent Commission System**: Incentivizes property agents with a 5% commission on bookings for 36 months, featuring agent registration, a dashboard for tracking, and admin verification.
+- **Ask Lemlem Help Page & AI Assistant**: A culturally authentic AI agent named Lemlem (grandmother-like) provides guidance with Ethiopian proverbs, offers multilingual support (English, Amharic, Tigrinya, Afaan Oromoo, Chinese), and features a host-configurable response system.
+- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with property insights (e.g., active listings, earnings, occupancy rate).
+- **User Profiles & Personalization**: Comprehensive user profiles with preferences (notifications, language, currency, search settings) and activity tracking for personalized recommendations.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters, sorting, and city filter chips.
 - **Booking System**: Full workflow with date validation and conflict prevention.
 - **Access Management**: 6-digit access code system for properties.
 - **Review System**: Advanced weighted review system (ALGA Review Engine) with time-decay algorithm.
 - **ID Verification**: Universal system with QR code scanning, OCR for foreign visitors, operator review dashboard, and integration with Fayda ID for eKYC.
-- **Alga Pay**: A white-labeled, unified payment gateway abstracting underlying processors (Chapa, Stripe, Telebirr) from users. All payment interactions show only "Alga Pay" branding.
+- **Alga Pay**: A white-labeled, unified payment gateway abstracting underlying processors.
 - **Commission & Tax System**: Automated calculation of Alga commission, VAT, and withholding tax, with ERCA-compliant PDF invoice generation.
-- **Add-On Services Marketplace**: Browsing for guests and application for providers, featuring 11 service categories, reviews, and provider badges.
+- **Add-On Services Marketplace**: Browsing for guests and application for providers across 11 service categories, including mobile beauty services and on-demand food delivery.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
-- **Google Maps Integration**: Lightweight mini-map on property details pages showing location and GPS-calculated distance from user, using the static map API.
-- **Provider Onboarding & Dashboard**: Complete application process with admin verification, automated email notifications, and status-based UX.
-- **Self-Care at Home**: Mobile beauty services category with specialty filtering, time slot booking, and GPS-powered neighborhood search for hyper-local service discovery.
-- **Meal Support**: On-demand food delivery marketplace connecting guests with local home cooks and restaurants, featuring GPS-based filtering, cuisine categories, and integrated payment.
-- **Lemlem AI Assistant**: A 24/7, cost-optimized AI assistant with a smart template system and optional AI fallback. Personalization includes greetings and responses in English, Amharic, Tigrinya, Afaan Oromoo, and Chinese. Features a bilingual chat button, in-chat language dropdown, and multilingual grandmother voice using browser-based Text-to-Speech. Hosts configure Lemlem's responses via a 14-field form. Admin features include an insights dashboard for analytics and an AI control panel for budget management.
-- **Administrative Features**: Roles & Permissions Management, and User Management with full control over user roles, status, and verification states.
+- **Google Maps Integration**: Lightweight mini-map on property details pages showing location and GPS-calculated distance.
+- **Administrative Features**: Roles & Permissions Management, User Management with full control over user roles, status, and verification states.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
@@ -127,6 +40,6 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Mapping & Location**: Google Maps Geocoding API.
 - **File Storage**: Replit App Storage (Google Cloud Storage).
 - **AI Services**: Replit AI Integration.
-- **Mobile Frameworks**: Capacitor (native iOS/Android), vite-plugin-pwa (Progressive Web App).
+- **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
