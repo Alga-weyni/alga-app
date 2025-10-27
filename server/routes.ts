@@ -3438,6 +3438,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Process agent payout
+  app.post("/api/admin/agents/:id/payout", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user!.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const agentId = parseInt(req.params.id);
+      const { commissionIds } = req.body;
+
+      if (!commissionIds || !Array.isArray(commissionIds)) {
+        return res.status(400).json({ message: "Commission IDs array is required" });
+      }
+
+      // Get agent details
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      // Import TeleBirr service
+      const { teleBirrService } = await import("./telebirr");
+
+      // Process payouts for each commission
+      const results = [];
+      for (const commissionId of commissionIds) {
+        const commissions = await storage.getAgentCommissions(agentId, { status: 'pending' });
+        const commission = commissions.find(c => c.id === commissionId);
+
+        if (!commission) {
+          results.push({
+            commissionId,
+            success: false,
+            message: 'Commission not found or already paid',
+          });
+          continue;
+        }
+
+        // Process TeleBirr payout
+        const payoutResult = await teleBirrService.sendPayout({
+          agentId,
+          commissionId,
+          amount: parseFloat(commission.commissionAmount),
+          telebirrAccount: agent.telebirrAccount,
+          description: `Alga agent commission for booking #${commission.bookingId}`,
+        });
+
+        if (payoutResult.success) {
+          // Update commission status in database
+          await db
+            .update(agentCommissions)
+            .set({
+              status: 'paid',
+              paidAt: new Date(),
+              telebirrTransactionId: payoutResult.transactionId,
+            })
+            .where(eq(agentCommissions.id, commissionId));
+        }
+
+        results.push({
+          commissionId,
+          success: payoutResult.success,
+          message: payoutResult.message,
+          transactionId: payoutResult.transactionId,
+        });
+      }
+
+      const successCount = results.filter(r => r.success).length;
+
+      res.json({
+        message: `Processed ${successCount}/${commissionIds.length} payouts`,
+        results,
+      });
+    } catch (error) {
+      console.error("Error processing payout:", error);
+      res.status(500).json({ message: "Failed to process payout" });
+    }
+  });
+
   // ==================== END AGENT ROUTES ====================
 
   const httpServer = createServer(app);
