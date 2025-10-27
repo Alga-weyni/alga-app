@@ -9,6 +9,9 @@ import {
   serviceProviders,
   serviceBookings,
   serviceReviews,
+  agents,
+  agentProperties,
+  agentCommissions,
   type User,
   type UpsertUser,
   type Property,
@@ -27,6 +30,12 @@ import {
   type InsertServiceBooking,
   type ServiceReview,
   type InsertServiceReview,
+  type Agent,
+  type InsertAgent,
+  type AgentProperty,
+  type InsertAgentProperty,
+  type AgentCommission,
+  type InsertAgentCommission,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -164,6 +173,27 @@ export interface IStorage {
   createServiceReview(review: InsertServiceReview): Promise<ServiceReview>;
   getServiceReviewsByProvider(providerId: number): Promise<ServiceReview[]>;
   getServiceReviewByBooking(bookingId: number): Promise<ServiceReview | undefined>;
+  
+  // Agent (Delala) operations
+  createAgent(agent: InsertAgent): Promise<Agent>;
+  getAgent(id: number): Promise<Agent | undefined>;
+  getAgentByUserId(userId: string): Promise<Agent | undefined>;
+  getAgentByPhone(phoneNumber: string): Promise<Agent | undefined>;
+  getAllAgents(filters?: { status?: string; city?: string }): Promise<Agent[]>;
+  verifyAgent(agentId: number, status: string, verifierId: string, rejectionReason?: string): Promise<Agent>;
+  linkPropertyToAgent(agentId: number, propertyId: number): Promise<AgentProperty>;
+  calculateAndCreateCommission(bookingId: number): Promise<AgentCommission | null>;
+  getAgentCommissions(agentId: number, filters?: { status?: string }): Promise<AgentCommission[]>;
+  getAgentDashboardStats(agentId: number): Promise<{
+    totalEarnings: number;
+    pendingEarnings: number;
+    paidEarnings: number;
+    totalProperties: number;
+    activeProperties: number;
+    expiredProperties: number;
+    totalCommissions: number;
+    recentCommissions: AgentCommission[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1244,6 +1274,273 @@ export class DatabaseStorage implements IStorage {
       .from(serviceReviews)
       .where(eq(serviceReviews.serviceBookingId, bookingId));
     return review;
+  }
+
+  // ==================== AGENT (DELALA) OPERATIONS ====================
+  
+  async createAgent(agent: InsertAgent): Promise<Agent> {
+    // Generate unique referral code
+    const referralCode = `AGENT${Date.now().toString(36).toUpperCase()}`;
+    
+    const [newAgent] = await db
+      .insert(agents)
+      .values({ ...agent, referralCode })
+      .returning();
+    
+    return newAgent;
+  }
+
+  async getAgent(id: number): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, id));
+    return agent;
+  }
+
+  async getAgentByUserId(userId: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.userId, userId));
+    return agent;
+  }
+
+  async getAgentByPhone(phoneNumber: string): Promise<Agent | undefined> {
+    const [agent] = await db.select().from(agents).where(eq(agents.phoneNumber, phoneNumber));
+    return agent;
+  }
+
+  async getAllAgents(filters?: { status?: string; city?: string }): Promise<Agent[]> {
+    let query = db.select().from(agents);
+    const conditions = [];
+    
+    if (filters?.status) {
+      conditions.push(eq(agents.status, filters.status));
+    }
+    if (filters?.city) {
+      conditions.push(eq(agents.city, filters.city));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    const results = await query.orderBy(desc(agents.createdAt));
+    return results;
+  }
+
+  async verifyAgent(
+    agentId: number,
+    status: string,
+    verifierId: string,
+    rejectionReason?: string
+  ): Promise<Agent> {
+    const [agent] = await db
+      .update(agents)
+      .set({
+        status,
+        verifiedBy: verifierId,
+        verifiedAt: new Date(),
+        rejectionReason: rejectionReason || null,
+      })
+      .where(eq(agents.id, agentId))
+      .returning();
+    
+    return agent;
+  }
+
+  async linkPropertyToAgent(agentId: number, propertyId: number): Promise<AgentProperty> {
+    // Check if property already linked
+    const [existing] = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.propertyId, propertyId));
+    
+    if (existing) {
+      throw new Error('Property already linked to an agent');
+    }
+    
+    const [agentProperty] = await db
+      .insert(agentProperties)
+      .values({
+        agentId,
+        propertyId,
+        isActive: true,
+      })
+      .returning();
+    
+    // Update agent's property count
+    await db
+      .update(agents)
+      .set({
+        totalProperties: sql`${agents.totalProperties} + 1`,
+        activeProperties: sql`${agents.activeProperties} + 1`,
+      })
+      .where(eq(agents.id, agentId));
+    
+    return agentProperty;
+  }
+
+  async calculateAndCreateCommission(bookingId: number): Promise<AgentCommission | null> {
+    // Get booking details
+    const [booking] = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.id, bookingId));
+    
+    if (!booking || booking.status !== 'completed') {
+      return null;
+    }
+    
+    // Check if property has an agent
+    const [agentProperty] = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.propertyId, booking.propertyId));
+    
+    if (!agentProperty || !agentProperty.isActive) {
+      return null;
+    }
+    
+    // If this is the first booking, set the commission start date
+    if (!agentProperty.firstBookingDate) {
+      const commissionExpiryDate = new Date();
+      commissionExpiryDate.setMonth(commissionExpiryDate.getMonth() + 36); // 36 months = 3 years
+      
+      await db
+        .update(agentProperties)
+        .set({
+          firstBookingDate: new Date(),
+          commissionExpiryDate,
+        })
+        .where(eq(agentProperties.id, agentProperty.id));
+    }
+    
+    // Check if commission period has expired (36 months from first booking)
+    const [updatedAgentProperty] = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.id, agentProperty.id));
+    
+    if (updatedAgentProperty.commissionExpiryDate && new Date() > updatedAgentProperty.commissionExpiryDate) {
+      // Commission period expired - mark as inactive
+      await db
+        .update(agentProperties)
+        .set({ isActive: false })
+        .where(eq(agentProperties.id, agentProperty.id));
+      
+      return null;
+    }
+    
+    // Check if commission already exists for this booking
+    const [existing] = await db
+      .select()
+      .from(agentCommissions)
+      .where(eq(agentCommissions.bookingId, bookingId));
+    
+    if (existing) {
+      return existing;
+    }
+    
+    // Calculate 5% commission
+    const bookingTotal = parseFloat(booking.totalPrice);
+    const commissionRate = 5.00; // 5%
+    const commissionAmount = (bookingTotal * commissionRate) / 100;
+    
+    // Create commission record
+    const [commission] = await db
+      .insert(agentCommissions)
+      .values({
+        agentId: agentProperty.agentId,
+        propertyId: booking.propertyId,
+        bookingId: booking.id,
+        bookingTotal: booking.totalPrice,
+        commissionRate: commissionRate.toString(),
+        commissionAmount: commissionAmount.toFixed(2),
+        status: 'pending',
+      })
+      .returning();
+    
+    // Update agent property totals
+    await db
+      .update(agentProperties)
+      .set({
+        totalBookings: sql`${agentProperties.totalBookings} + 1`,
+        totalCommissionEarned: sql`${agentProperties.totalCommissionEarned} + ${commissionAmount}`,
+      })
+      .where(eq(agentProperties.id, agentProperty.id));
+    
+    // Update agent total earnings
+    await db
+      .update(agents)
+      .set({
+        totalEarnings: sql`${agents.totalEarnings} + ${commissionAmount}`,
+      })
+      .where(eq(agents.id, agentProperty.agentId));
+    
+    return commission;
+  }
+
+  async getAgentCommissions(
+    agentId: number,
+    filters?: { status?: string }
+  ): Promise<AgentCommission[]> {
+    const conditions = [eq(agentCommissions.agentId, agentId)];
+    
+    if (filters?.status) {
+      conditions.push(eq(agentCommissions.status, filters.status));
+    }
+    
+    const results = await db
+      .select()
+      .from(agentCommissions)
+      .where(and(...conditions))
+      .orderBy(desc(agentCommissions.createdAt));
+    
+    return results;
+  }
+
+  async getAgentDashboardStats(agentId: number) {
+    const [agent] = await db.select().from(agents).where(eq(agents.id, agentId));
+    
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+    
+    // Get all agent properties
+    const agentProps = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.agentId, agentId));
+    
+    const activeProps = agentProps.filter(ap => ap.isActive);
+    const expiredProps = agentProps.filter(ap => !ap.isActive);
+    
+    // Get all commissions
+    const allCommissions = await db
+      .select()
+      .from(agentCommissions)
+      .where(eq(agentCommissions.agentId, agentId))
+      .orderBy(desc(agentCommissions.createdAt));
+    
+    const pendingCommissions = allCommissions.filter(c => c.status === 'pending');
+    const paidCommissions = allCommissions.filter(c => c.status === 'paid');
+    
+    const pendingEarnings = pendingCommissions.reduce(
+      (sum, c) => sum + parseFloat(c.commissionAmount),
+      0
+    );
+    
+    const paidEarnings = paidCommissions.reduce(
+      (sum, c) => sum + parseFloat(c.commissionAmount),
+      0
+    );
+    
+    return {
+      totalEarnings: parseFloat(agent.totalEarnings || '0'),
+      pendingEarnings,
+      paidEarnings,
+      totalProperties: agent.totalProperties || 0,
+      activeProperties: activeProps.length,
+      expiredProperties: expiredProps.length,
+      totalCommissions: allCommissions.length,
+      recentCommissions: allCommissions.slice(0, 10),
+    };
   }
 }
 
