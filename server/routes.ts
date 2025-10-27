@@ -3487,6 +3487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (payoutResult.success) {
           // Update commission status in database
+          const { agentCommissions } = await import("@shared/schema");
           await db
             .update(agentCommissions)
             .set({

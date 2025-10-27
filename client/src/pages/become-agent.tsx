@@ -57,11 +57,16 @@ export default function BecomeAgent() {
   const onSubmit = async (data: AgentRegistrationForm) => {
     setIsSubmitting(true);
     try {
-      await apiRequest({
+      const response = await fetch("/api/agent/register", {
         method: "POST",
-        url: "/api/agent/register",
-        data,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
 
       toast({
         title: "🎉 Application Submitted!",
