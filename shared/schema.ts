@@ -650,6 +650,87 @@ export const insertUserActivitySchema = createInsertSchema(userActivityLog).omit
   createdAt: true,
 });
 
+// ==================== DELALA AGENT COMMISSION SYSTEM ====================
+// Agents (Delalas) - Ethiopia's informal property brokers
+export const agents = pgTable("agents", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id), // Links to user account
+  fullName: varchar("full_name", { length: 255 }).notNull(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull().unique(),
+  telebirrAccount: varchar("telebirr_account", { length: 50 }).notNull(), // For direct payments
+  idNumber: varchar("id_number", { length: 50 }), // Ethiopian ID or passport
+  idDocumentUrl: varchar("id_document_url"), // URL to uploaded ID
+  businessName: varchar("business_name", { length: 255 }), // Optional business registration
+  businessLicenseUrl: varchar("business_license_url"), // Optional license
+  city: varchar("city").notNull(),
+  subCity: varchar("sub_city"),
+  status: varchar("status").notNull().default("pending"), // pending, approved, rejected, suspended
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
+  totalProperties: integer("total_properties").default(0), // Count of properties brought
+  activeProperties: integer("active_properties").default(0), // Currently active
+  referralCode: varchar("referral_code", { length: 20 }).unique(), // For marketing
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Agent-Property Relationships (which agent brought which property)
+export const agentProperties = pgTable("agent_properties", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id),
+  propertyId: integer("property_id").notNull().references(() => properties.id).unique(), // One property, one agent
+  firstBookingDate: timestamp("first_booking_date"), // When commission started (first booking)
+  commissionExpiryDate: timestamp("commission_expiry_date"), // 36 months from first booking
+  isActive: boolean("is_active").default(true), // Commission still valid?
+  totalBookings: integer("total_bookings").default(0),
+  totalCommissionEarned: decimal("total_commission_earned", { precision: 10, scale: 2 }).default("0"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Agent Commission Records (per booking)
+export const agentCommissions = pgTable("agent_commissions", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  bookingId: integer("booking_id").notNull().references(() => bookings.id).unique(), // One commission per booking
+  bookingTotal: decimal("booking_total", { precision: 10, scale: 2 }).notNull(), // Total booking amount
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("5.00"), // 5% default
+  commissionAmount: decimal("commission_amount", { precision: 10, scale: 2 }).notNull(), // 5% of booking total
+  status: varchar("status").notNull().default("pending"), // pending, paid, cancelled
+  paidAt: timestamp("paid_at"),
+  telebirrTransactionId: varchar("telebirr_transaction_id", { length: 100 }), // Payment confirmation
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertAgentSchema = createInsertSchema(agents).omit({
+  id: true,
+  totalEarnings: true,
+  totalProperties: true,
+  activeProperties: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentPropertySchema = createInsertSchema(agentProperties).omit({
+  id: true,
+  totalBookings: true,
+  totalCommissionEarned: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentCommissionSchema = createInsertSchema(agentCommissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -683,3 +764,9 @@ export type InsertPlatformSettings = z.infer<typeof insertPlatformSettingsSchema
 export type PlatformSettings = typeof platformSettings.$inferSelect;
 export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
 export type UserActivity = typeof userActivityLog.$inferSelect;
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgentProperty = z.infer<typeof insertAgentPropertySchema>;
+export type AgentProperty = typeof agentProperties.$inferSelect;
+export type InsertAgentCommission = z.infer<typeof insertAgentCommissionSchema>;
+export type AgentCommission = typeof agentCommissions.$inferSelect;
