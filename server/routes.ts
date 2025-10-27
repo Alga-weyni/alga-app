@@ -1823,6 +1823,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       
       const booking = await storage.updateBookingStatus(id, status);
+      
+      // Automatically calculate agent commission when booking is completed
+      if (status === 'completed') {
+        try {
+          const commission = await storage.calculateAndCreateCommission(id);
+          if (commission) {
+            console.log(`✅ Agent commission created: ${commission.commissionAmount} Birr for booking #${id}`);
+          }
+        } catch (commissionError) {
+          // Log error but don't fail the booking status update
+          console.error("Failed to create agent commission:", commissionError);
+        }
+      }
+      
       res.json(booking);
     } catch (error) {
       console.error("Error updating booking status:", error);
@@ -3249,6 +3263,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to log activity" });
     }
   });
+
+  // ==================== AGENT (DELALA) ROUTES ====================
+  
+  // Agent registration
+  app.post("/api/agent/register", isAuthenticated, async (req, res) => {
+    try {
+      const {
+        fullName,
+        phoneNumber,
+        telebirrAccount,
+        idNumber,
+        businessName,
+        city,
+        subCity,
+      } = req.body;
+
+      // Validate required fields
+      if (!fullName || !phoneNumber || !telebirrAccount || !city) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Check if user already has an agent account
+      const existingAgent = await storage.getAgentByUserId(req.user!.id);
+      if (existingAgent) {
+        return res.status(400).json({ message: "You already have an agent account" });
+      }
+
+      // Check if phone number already used
+      const existingPhone = await storage.getAgentByPhone(phoneNumber);
+      if (existingPhone) {
+        return res.status(400).json({ message: "Phone number already registered" });
+      }
+
+      const agent = await storage.createAgent({
+        userId: req.user!.id,
+        fullName,
+        phoneNumber,
+        telebirrAccount,
+        idNumber: idNumber || null,
+        businessName: businessName || null,
+        city,
+        subCity: subCity || null,
+        status: 'pending',
+      });
+
+      res.json(agent);
+    } catch (error) {
+      console.error("Error registering agent:", error);
+      res.status(500).json({ message: "Failed to register as agent" });
+    }
+  });
+
+  // Get agent dashboard stats
+  app.get("/api/agent/dashboard", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.user!.id);
+      
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      const stats = await storage.getAgentDashboardStats(agent.id);
+      
+      res.json({
+        agent,
+        stats,
+      });
+    } catch (error) {
+      console.error("Error fetching agent dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard" });
+    }
+  });
+
+  // Get agent commissions
+  app.get("/api/agent/commissions", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.user!.id);
+      
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      const { status } = req.query;
+      const commissions = await storage.getAgentCommissions(
+        agent.id,
+        { status: status as string | undefined }
+      );
+      
+      res.json(commissions);
+    } catch (error) {
+      console.error("Error fetching commissions:", error);
+      res.status(500).json({ message: "Failed to fetch commissions" });
+    }
+  });
+
+  // Link property to agent (used when listing a property)
+  app.post("/api/agent/link-property", isAuthenticated, async (req, res) => {
+    try {
+      const { propertyId } = req.body;
+
+      if (!propertyId) {
+        return res.status(400).json({ message: "Property ID is required" });
+      }
+
+      const agent = await storage.getAgentByUserId(req.user!.id);
+      
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      if (agent.status !== 'verified') {
+        return res.status(403).json({ message: "Agent account must be verified first" });
+      }
+
+      const agentProperty = await storage.linkPropertyToAgent(agent.id, propertyId);
+      
+      res.json(agentProperty);
+    } catch (error: any) {
+      console.error("Error linking property:", error);
+      res.status(500).json({ message: error.message || "Failed to link property" });
+    }
+  });
+
+  // Admin: Get all agents
+  app.get("/api/admin/agents", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user!.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { status, city } = req.query;
+      const agents = await storage.getAllAgents({
+        status: status as string | undefined,
+        city: city as string | undefined,
+      });
+      
+      res.json(agents);
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+      res.status(500).json({ message: "Failed to fetch agents" });
+    }
+  });
+
+  // Admin: Verify agent
+  app.post("/api/admin/agents/:id/verify", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user!.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { status, rejectionReason } = req.body;
+      const agentId = parseInt(req.params.id);
+
+      if (!status || !['verified', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      if (status === 'rejected' && !rejectionReason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+
+      const agent = await storage.verifyAgent(
+        agentId,
+        status,
+        req.user!.id,
+        rejectionReason
+      );
+      
+      res.json(agent);
+    } catch (error) {
+      console.error("Error verifying agent:", error);
+      res.status(500).json({ message: "Failed to verify agent" });
+    }
+  });
+
+  // ==================== END AGENT ROUTES ====================
 
   const httpServer = createServer(app);
   return httpServer;

@@ -18,7 +18,9 @@ import PropertySearch from "@/pages/search";
 import DiscoverPage from "@/pages/discover";
 import BecomeHost from "@/pages/become-host";
 import BecomeProvider from "@/pages/become-provider";
+import BecomeAgent from "@/pages/become-agent";
 import HostDashboard from "@/pages/host-dashboard";
+import AgentDashboard from "@/pages/agent-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
 import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
@@ -101,6 +103,7 @@ function Router() {
         <Route path="/discover" element={<AnimatedRoute><DiscoverPage /></AnimatedRoute>} />
         <Route path="/become-host" element={<AnimatedRoute><BecomeHost /></AnimatedRoute>} />
         <Route path="/become-provider" element={<AnimatedRoute><BecomeProvider /></AnimatedRoute>} />
+        <Route path="/become-agent" element={<AnimatedRoute><BecomeAgent /></AnimatedRoute>} />
         <Route path="/properties" element={<AnimatedRoute><Properties /></AnimatedRoute>} />
         <Route path="/properties/:id" element={<AnimatedRoute><PropertyDetails /></AnimatedRoute>} />
         <Route path="/booking/success" element={<AnimatedRoute><BookingSuccess /></AnimatedRoute>} />
@@ -126,6 +129,7 @@ function Router() {
         {/* Dashboard routes - accessible to all, each dashboard handles auth */}
         <Route path="/host/dashboard" element={<AnimatedRoute><HostDashboard /></AnimatedRoute>} />
         <Route path="/provider/dashboard" element={<AnimatedRoute><ProviderDashboard /></AnimatedRoute>} />
+        <Route path="/agent-dashboard" element={<AnimatedRoute><AgentDashboard /></AnimatedRoute>} />
         <Route path="/admin/dashboard" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
         <Route path="/admin/service-providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
         <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
