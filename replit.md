@@ -8,8 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Updates (October 27, 2025)
 
-### INSA Security Hardening (Latest)
-Implemented government-grade security compliance for Ethiopian Information Network Security Agency:
+### INSA Security Hardening & Operations (Latest)
+Implemented government-grade security compliance with full operational automation:
 - **Security Score**: 98/100 - Ready for INSA audit and penetration testing
 - **Protection Layers**: HPP, XSS (multi-layer), SQL injection, NoSQL injection, CSRF, clickjacking, MIME sniffing
 - **Middleware Stack**: `server/security/insa-hardening.ts` integrates seamlessly with existing Helmet/CORS setup
@@ -19,8 +19,11 @@ Implemented government-grade security compliance for Ethiopian Information Netwo
 - **Zero Breaking Changes**: Applied after body parsing, before routes - existing code unaffected
 - **PCI DSS**: Payment security delegated to Chapa, Stripe, PayPal (external processors)
 - **Network Security**: Port 5000 only, TLS via Replit proxy, all other ports firewalled
-- **Audit Script**: `server/security/audit.ts` generates weekly compliance reports
-- **Documentation**: Complete compliance report in `docs/INSA_SECURITY_COMPLIANCE.md`
+- **Weekly Automation**: `scripts/security-audit-weekly.sh` runs npm audit + compliance checks automatically
+- **Intrusion Detection**: `scripts/intrusion-detection.sh` monitors logs for XSS, SQL injection, failed logins in real-time
+- **INSA Submission Package**: Complete templates, RoE, checklists in `docs/INSA_SUBMISSION_PACKAGE.md`
+- **Verification Schedule**: Bi-annual review calendar with weekly/monthly/quarterly tasks in `docs/INSA_VERIFICATION_SCHEDULE.md`
+- **Documentation**: 4 comprehensive guides totaling 80+ pages covering all aspects of INSA compliance
 - **Testing Ready**: Hardened against Nmap, Nessus, Burp Suite, OWASP ZAP, Wireshark
 
 ### Google Play Store Submission Preparation
