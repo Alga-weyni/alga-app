@@ -83,11 +83,18 @@ export default function AdminAgents() {
 
   const verifyMutation = useMutation({
     mutationFn: async ({ agentId, status, rejectionReason }: { agentId: number; status: string; rejectionReason?: string }) => {
-      return await apiRequest({
+      const response = await fetch(`/api/admin/agents/${agentId}/verify`, {
         method: "POST",
-        url: `/api/admin/agents/${agentId}/verify`,
-        data: { status, rejectionReason },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, rejectionReason }),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Verification failed");
+      }
+
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/agents"] });
@@ -158,7 +165,7 @@ export default function AdminAgents() {
     totalProperties: filteredAgents.reduce((sum, a) => sum + (a.totalProperties || 0), 0),
   };
 
-  const cities = ["all", ...new Set(filteredAgents.map(a => a.city))];
+  const cities = ["all", ...Array.from(new Set(filteredAgents.map(a => a.city)))];
 
   if (isLoading) {
     return (
