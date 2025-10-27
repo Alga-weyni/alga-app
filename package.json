@@ -61,6 +61,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/google-map-react": "^2.1.10",
+    "@types/hpp": "^0.2.7",
     "@types/memoizee": "^0.4.12",
     "@types/multer": "^2.0.0",
     "@uppy/aws-s3": "^5.0.2",

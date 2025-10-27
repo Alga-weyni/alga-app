@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import cors from "cors";
+import { applyINSAHardening } from "./security/insa-hardening";
 
 const app = express();
 
@@ -25,6 +26,10 @@ app.use(cors(corsOptions));
 // Security: Limit request body size to prevent DoS
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// 🛡️ INSA Security Hardening (Ethiopian compliance)
+// Protects against XSS, SQL injection, NoSQL injection, HPP, clickjacking
+applyINSAHardening(app);
 
 app.use((req, res, next) => {
   const start = Date.now();
