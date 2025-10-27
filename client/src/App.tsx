@@ -26,7 +26,9 @@ import AdminServiceProviders from "@/pages/admin-service-providers";
 import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
 import AdminAIControl from "@/pages/admin-ai-control";
 import AdminRolesPermissions from "@/pages/admin-roles-permissions";
+import AdminAgents from "@/pages/admin-agents";
 import OperatorDashboard from "@/pages/operator-dashboard";
+import AgentProgram from "@/pages/agent-program";
 import ProviderDashboard from "@/pages/provider-dashboard";
 import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
@@ -104,6 +106,7 @@ function Router() {
         <Route path="/become-host" element={<AnimatedRoute><BecomeHost /></AnimatedRoute>} />
         <Route path="/become-provider" element={<AnimatedRoute><BecomeProvider /></AnimatedRoute>} />
         <Route path="/become-agent" element={<AnimatedRoute><BecomeAgent /></AnimatedRoute>} />
+        <Route path="/agent-program" element={<AnimatedRoute><AgentProgram /></AnimatedRoute>} />
         <Route path="/properties" element={<AnimatedRoute><Properties /></AnimatedRoute>} />
         <Route path="/properties/:id" element={<AnimatedRoute><PropertyDetails /></AnimatedRoute>} />
         <Route path="/booking/success" element={<AnimatedRoute><BookingSuccess /></AnimatedRoute>} />
@@ -136,6 +139,7 @@ function Router() {
         <Route path="/admin/lemlem-insights" element={<AnimatedRoute><AdminLemlemInsights /></AnimatedRoute>} />
         <Route path="/admin/ai-control" element={<AnimatedRoute><AdminAIControl /></AnimatedRoute>} />
         <Route path="/admin/roles-permissions" element={<AnimatedRoute><AdminRolesPermissions /></AnimatedRoute>} />
+        <Route path="/admin/agents" element={<AnimatedRoute><AdminAgents /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
         
         {/* Protected user routes - accessible to all, each page handles auth */}
