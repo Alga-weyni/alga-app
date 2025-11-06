@@ -260,31 +260,31 @@ export default function BecomeProvider() {
             {/* Benefits Strip - Simplified */}
             <div className="flex flex-col sm:flex-row justify-center gap-8 mb-16 max-w-3xl mx-auto">
               <div className="flex items-center gap-3 justify-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <DollarSign className="h-7 w-7 text-white" strokeWidth={2.5} />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-eth-brown">Earn More</p>
+                  <p className="font-bold text-eth-brown text-base">Earn More</p>
                   <p className="text-sm text-eth-brown/60">85% payout</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 justify-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center">
-                  <ShieldCheck className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <ShieldCheck className="h-7 w-7 text-white" strokeWidth={2.5} />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-eth-brown">Verified Badge</p>
+                  <p className="font-bold text-eth-brown text-base">Verified Badge</p>
                   <p className="text-sm text-eth-brown/60">Build trust</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 justify-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-eth-orange to-eth-brown rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <Zap className="h-7 w-7 text-white" strokeWidth={2.5} />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-eth-brown">Fast Payments</p>
+                  <p className="font-bold text-eth-brown text-base">Fast Payments</p>
                   <p className="text-sm text-eth-brown/60">Within 24 hours</p>
                 </div>
               </div>
