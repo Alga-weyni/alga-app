@@ -25,7 +25,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <div className="bg-white py-16">
+    <div className="hidden md:block bg-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 
@@ -39,8 +39,7 @@ export function HowItWorks() {
           </p>
         </div>
 
-        {/* Desktop: Show 4-step grid */}
-        <div className="hidden md:grid grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
           {steps.map((step, index) => (
             <div 
               key={index} 
@@ -58,16 +57,6 @@ export function HowItWorks() {
               <h3 className="font-bold text-lg text-eth-brown">{step.title}</h3>
             </div>
           ))}
-        </div>
-
-        {/* Mobile: Show simplified text */}
-        <div className="md:hidden text-center max-w-2xl mx-auto">
-          <h3 className="font-bold text-xl text-eth-brown mb-2">
-            Verified Properties
-          </h3>
-          <p className="text-eth-brown/70 text-base">
-            All properties are verified by our team before listing
-          </p>
         </div>
       </div>
     </div>
