@@ -39,16 +39,13 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {steps.map((step, index) => (
             <div 
               key={index} 
               className="relative text-center"
               data-testid={`how-it-works-${index}`}
             >
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-eth-brown/30 to-transparent -z-10" />
-              )}
               
               <div className="inline-flex items-center justify-center w-20 h-20 bg-eth-brown rounded-full mb-4 relative">
                 <step.icon className="h-9 w-9 text-white" />
