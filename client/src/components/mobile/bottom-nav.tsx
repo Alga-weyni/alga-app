@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Wrench, User, HelpCircle } from "lucide-react";
 
 interface NavItem {
@@ -9,7 +9,8 @@ interface NavItem {
 }
 
 export default function BottomNav() {
-  const [location, setLocation] = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navItems: NavItem[] = [
     { path: "/properties", icon: Home, label: "Stays", testId: "stays" },
@@ -19,7 +20,7 @@ export default function BottomNav() {
   ];
 
   const isActive = (path: string) => {
-    return location === path || location.startsWith(`${path}/`);
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -39,7 +40,7 @@ export default function BottomNav() {
           return (
             <button
               key={item.path}
-              onClick={() => setLocation(item.path)}
+              onClick={() => navigate(item.path)}
               className={`flex flex-col items-center justify-center w-20 h-full transition-all relative ${
                 active ? "text-[#3C2313]" : "text-[#9CA3AF]"
               }`}
