@@ -56,6 +56,9 @@ import SafetyHelp from "@/pages/help/safety";
 import { LemlemChat } from "@/components/lemlem-chat";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import OfflineIndicator from "@/components/offline-indicator";
+import MobileLayout from "@/components/mobile/mobile-layout";
+import MobileAuthGuard from "@/components/mobile/mobile-auth-guard";
+import { isMobileApp } from "@/utils/platform";
 
 const pageVariants = {
   initial: {
@@ -93,10 +96,11 @@ function AnimatedRoute({ children }: { children: React.ReactNode }) {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const isMobile = isMobileApp();
   
   useScrollToTop();
 
-  return (
+  const routes = (
     <AnimatePresence mode="sync" initial={false}>
       <Routes location={location} key={location.pathname}>
         {/* Public routes - accessible to everyone */}
@@ -164,9 +168,24 @@ function Router() {
       </Routes>
     </AnimatePresence>
   );
+
+  // Return mobile-wrapped or web version
+  if (isMobile) {
+    return (
+      <MobileAuthGuard>
+        <MobileLayout>
+          {routes}
+        </MobileLayout>
+      </MobileAuthGuard>
+    );
+  }
+
+  return routes;
 }
 
 function App() {
+  const isMobile = isMobileApp();
+  
   // Enable keyboard shortcuts globally
   useKeyboardShortcuts();
   
@@ -179,7 +198,8 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
-          <LemlemChat />
+          {/* Only show global Lemlem chat on web, mobile has it in layout */}
+          {!isMobile && <LemlemChat />}
           <PWAInstallPrompt />
           <OfflineIndicator />
         </TooltipProvider>
