@@ -144,7 +144,7 @@ export default function Home() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-80"></div>
                 ))}
@@ -158,7 +158,7 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {properties.slice(0, 6).map((property) => (
                   <PropertyCard
                     key={property.id}

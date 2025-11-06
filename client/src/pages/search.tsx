@@ -181,7 +181,7 @@ export default function PropertySearch() {
             <p className="text-gray-500 text-sm mt-2">Try adjusting your search filters</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {results.map((property: any) => (
               <Link key={property.id} to={`/property/${property.id}`}>
                 <Card 
