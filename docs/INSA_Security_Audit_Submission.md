@@ -501,13 +501,19 @@
 
 | Asset Name | URL/IP Address | Test Account Credentials | User Role |
 |------------|----------------|-------------------------|-----------|
-| Alga Web App (Development) | [Replit Dev URL] | testguest@alga.et / TestGuest123! | Guest |
-| Alga Web App (Development) | [Replit Dev URL] | testhost@alga.et / TestHost123! | Host |
-| Alga Web App (Development) | [Replit Dev URL] | testagent@alga.et / TestAgent123! | Agent |
-| Alga Web App (Development) | [Replit Dev URL] | testoperator@alga.et / TestOp123! | Operator |
-| Alga Web App (Development) | [Replit Dev URL] | testadmin@alga.et / TestAdmin123! | Admin |
-| Alga Mobile App (Android) | [APK to be provided] | Same as above | All roles |
-| Alga Mobile App (iOS) | [TestFlight link] | Same as above | All roles |
+| Alga Web Application | [Replit Development URL - To be shared securely] | testguest@alga.et / TestGuest123! | Guest |
+| Alga Web Application | [Replit Development URL - To be shared securely] | testhost@alga.et / TestHost123! | Host |
+| Alga Web Application | [Replit Development URL - To be shared securely] | testagent@alga.et / TestAgent123! | Agent |
+| Alga Web Application | [Replit Development URL - To be shared securely] | testoperator@alga.et / TestOp123! | Operator |
+| Alga Web Application | [Replit Development URL - To be shared securely] | testadmin@alga.et / TestAdmin123! | Admin |
+| Alga Mobile App (Android) | Alga.apk (to be provided on CD/DVD) | Same as above | All roles |
+| Alga Mobile App (iOS) | TestFlight invitation link (to be provided) | Same as above | All roles |
+
+**Note:** 
+- Web application is currently hosted on Replit development environment. Production URL will be provided upon deployment.
+- Android APK file will be generated and delivered on CD/DVD as per INSA requirements for sensitive files.
+- iOS application is available via TestFlight for testing. Invitation link will be shared directly with INSA audit team.
+- All test credentials are temporary and created specifically for security audit purposes.
 
 ### 4.2 API Endpoints for Testing
 
