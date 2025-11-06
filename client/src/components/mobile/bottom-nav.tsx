@@ -40,30 +40,27 @@ export default function BottomNav() {
             <Link
               key={item.path}
               href={item.path}
+              className={`flex flex-col items-center justify-center w-20 h-full transition-all ${
+                active ? "text-[#3C2313]" : "text-[#9CA3AF]"
+              }`}
+              data-testid={`mobile-nav-${item.testId}`}
             >
-              <a
-                className={`flex flex-col items-center justify-center w-20 h-full transition-all ${
-                  active ? "text-[#3C2313]" : "text-[#9CA3AF]"
+              <Icon
+                className={`w-6 h-6 transition-all ${
+                  active ? "scale-110" : "scale-100"
                 }`}
-                data-testid={`mobile-nav-${item.testId}`}
+                strokeWidth={active ? 2.5 : 2}
+              />
+              <span
+                className={`text-[10px] mt-1 font-medium ${
+                  active ? "opacity-100" : "opacity-60"
+                }`}
               >
-                <Icon
-                  className={`w-6 h-6 transition-all ${
-                    active ? "scale-110" : "scale-100"
-                  }`}
-                  strokeWidth={active ? 2.5 : 2}
-                />
-                <span
-                  className={`text-[10px] mt-1 font-medium ${
-                    active ? "opacity-100" : "opacity-60"
-                  }`}
-                >
-                  {item.label}
-                </span>
-                {active && (
-                  <div className="absolute top-0 w-12 h-1 bg-[#3C2313] rounded-b-full" />
-                )}
-              </a>
+                {item.label}
+              </span>
+              {active && (
+                <div className="absolute top-0 w-12 h-1 bg-[#3C2313] rounded-b-full" />
+              )}
             </Link>
           );
         })}
