@@ -23,6 +23,7 @@ import { Home, Menu, User, Wrench, HelpCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
+import { isMobileApp } from "@/utils/platform";
 
 interface HeaderProps {
   hideNavigation?: boolean;
@@ -35,6 +36,12 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = isMobileApp();
+  
+  // Don't render header in mobile app mode - MobileLayout has its own header
+  if (isMobile) {
+    return null;
+  }
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
