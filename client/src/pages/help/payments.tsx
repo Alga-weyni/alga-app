@@ -559,7 +559,7 @@ export default function PaymentsHelp() {
                 }}
                 data-testid="button-ask-lemlem"
               >
-                👵🏾 Ask Lemlem (ልምልም)
+                👵🏾 Ask Lemlem (ለምለም)
               </Button>
             </div>
           </div>

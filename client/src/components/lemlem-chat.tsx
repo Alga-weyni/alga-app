@@ -324,7 +324,7 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
     return (
       <button
         onClick={() => setIsOpen(true)}
-        title="Get help with Lemlem (ልምልም) — your AI assistant named after my grandmother"
+        title="Get help with Lemlem (ለምለም) — your AI assistant named after my grandmother"
         className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-[#F49F0A] via-[#FF8C00] to-[#CD7F32] hover:from-[#FFB020] hover:via-[#FFA500] hover:to-[#DAA520] text-white z-50 flex flex-col items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_30px_rgba(244,159,10,0.5)] border-2 border-white/20"
         data-testid="button-open-lemlem"
         style={{
@@ -335,7 +335,7 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
           Lemlem
         </span>
         <span className="text-base font-bold leading-tight mt-0.5" style={{ fontFamily: "'Noto Sans Ethiopic', serif" }}>
-          ልምልም
+          ለምለም
         </span>
       </button>
     );
@@ -350,7 +350,7 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
             👵🏾
           </div>
           <div>
-            <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem (ልምልም), your AI Assistant</h3>
+            <h3 className="font-semibold" data-testid="text-lemlem-title">Lemlem (ለምለም), your AI Assistant</h3>
             <p className="text-xs opacity-90">
               Named after my beautiful grandma! 💚
               {isSpeaking && <span className="ml-2 animate-pulse">🔊</span>}
