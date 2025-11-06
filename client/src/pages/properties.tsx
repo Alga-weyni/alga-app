@@ -12,7 +12,6 @@ import { PropertyGridSkeleton } from "@/components/property-skeleton";
 import { FeaturedProperties } from "@/components/featured-properties";
 import { Testimonials } from "@/components/testimonials";
 import { TrustSection } from "@/components/trust-section";
-import { HowItWorks } from "@/components/how-it-works";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -483,7 +482,6 @@ export default function Properties() {
         {!hasSearched && (
           <>
             <FeaturedProperties />
-            <HowItWorks />
             <TrustSection />
             <Testimonials />
           </>
