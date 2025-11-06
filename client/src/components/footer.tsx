@@ -27,7 +27,7 @@ export default function Footer() {
           </div>
 
           {/* For Guests */}
-          <div>
+          <div className="hidden md:block">
             <h5 className="font-bold text-white mb-4 text-sm">For Guests</h5>
             <ul className="space-y-2.5 text-sm">
               <li><Link to="/properties" className="text-white/70 hover:text-white transition-colors">Browse Stays</Link></li>
@@ -37,7 +37,7 @@ export default function Footer() {
           </div>
 
           {/* For Hosts */}
-          <div>
+          <div className="hidden md:block">
             <h5 className="font-bold text-white mb-4 text-sm">For Hosts</h5>
             <ul className="space-y-2.5 text-sm">
               <li><Link to="/become-host" className="text-white/70 hover:text-white transition-colors">List Your Property</Link></li>
@@ -47,7 +47,7 @@ export default function Footer() {
           </div>
 
           {/* Support */}
-          <div>
+          <div className="hidden md:block">
             <h5 className="font-bold text-white mb-4 text-sm">Support</h5>
             <ul className="space-y-2.5 text-sm">
               <li><a href="#" className="text-white/70 hover:text-white transition-colors">Help Center</a></li>
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
 
           {/* Legal */}
-          <div>
+          <div className="hidden md:block">
             <h5 className="font-bold text-white mb-4 text-sm">Legal</h5>
             <ul className="space-y-2.5 text-sm">
               <li><a href="#" className="text-white/70 hover:text-white transition-colors">Privacy Policy</a></li>
