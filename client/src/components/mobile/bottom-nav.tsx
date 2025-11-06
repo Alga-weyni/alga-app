@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Home, Wrench, User, HelpCircle } from "lucide-react";
 
 interface NavItem {
@@ -9,7 +9,7 @@ interface NavItem {
 }
 
 export default function BottomNav() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const navItems: NavItem[] = [
     { path: "/properties", icon: Home, label: "Stays", testId: "stays" },
@@ -37,10 +37,10 @@ export default function BottomNav() {
           const active = isActive(item.path);
           
           return (
-            <Link
+            <button
               key={item.path}
-              href={item.path}
-              className={`flex flex-col items-center justify-center w-20 h-full transition-all ${
+              onClick={() => setLocation(item.path)}
+              className={`flex flex-col items-center justify-center w-20 h-full transition-all relative ${
                 active ? "text-[#3C2313]" : "text-[#9CA3AF]"
               }`}
               data-testid={`mobile-nav-${item.testId}`}
@@ -61,7 +61,7 @@ export default function BottomNav() {
               {active && (
                 <div className="absolute top-0 w-12 h-1 bg-[#3C2313] rounded-b-full" />
               )}
-            </Link>
+            </button>
           );
         })}
       </div>
