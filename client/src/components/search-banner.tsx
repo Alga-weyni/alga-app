@@ -70,8 +70,8 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
 
         {/* Search Form */}
         <div className="flex justify-center max-w-7xl mx-auto">
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-5 w-full lg:max-w-5xl border border-[#e5ddd5]/50 hover:shadow-lg transition-all duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-5 w-full lg:max-w-6xl border border-[#e5ddd5]/50 hover:shadow-lg transition-all duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
               {/* Destination */}
               <div className="md:col-span-1">
                 <Label htmlFor="destination" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
@@ -140,31 +140,33 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
                 </div>
               </div>
 
-              {/* Guests with Search Button */}
-              <div className="flex gap-3 items-end">
-                <div className="flex-1">
-                  <Label htmlFor="guests" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
-                    Guests
-                  </Label>
-                  <div className="relative">
-                    <Select value={filters.guests} onValueChange={(value) => updateFilter("guests", value)}>
-                      <SelectTrigger className="w-full h-12 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 guest</SelectItem>
-                        <SelectItem value="2">2 guests</SelectItem>
-                        <SelectItem value="3">3 guests</SelectItem>
-                        <SelectItem value="4">4 guests</SelectItem>
-                        <SelectItem value="5">5+ guests</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              {/* Guests */}
+              <div>
+                <Label htmlFor="guests" className="block text-xs font-semibold text-[#5a4a42] mb-2 uppercase tracking-wide">
+                  Guests
+                </Label>
+                <div className="relative">
+                  <Select value={filters.guests} onValueChange={(value) => updateFilter("guests", value)}>
+                    <SelectTrigger className="w-full h-12 bg-[#faf8f6] border-[#e5ddd5] hover:border-[#d4c4b8] transition-colors">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 guest</SelectItem>
+                      <SelectItem value="2">2 guests</SelectItem>
+                      <SelectItem value="3">3 guests</SelectItem>
+                      <SelectItem value="4">4 guests</SelectItem>
+                      <SelectItem value="5">5+ guests</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+
+              {/* Search Button */}
+              <div>
                 <Button
                   type="submit"
                   className="
-                    h-12 px-8 bg-[#2d1405] hover:bg-[#3d1f0a] text-white font-semibold rounded-xl
+                    w-full h-12 bg-[#2d1405] hover:bg-[#3d1f0a] text-white font-semibold rounded-xl
                     transition-all duration-200
                     hover:shadow-lg hover:scale-105
                   "
