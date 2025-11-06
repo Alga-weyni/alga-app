@@ -163,10 +163,43 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Services Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Featured Services - Cleaning & Laundry Side by Side */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {serviceCategories.slice(0, 2).map((service) => (
+            <Link 
+              key={service.type} 
+              to={`/services/${service.type}`}
+              data-testid={`link-service-${service.type}`}
+            >
+              <Card 
+                className={`h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer border-0 bg-gradient-to-br ${service.color}`}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className={`p-3 rounded-xl bg-white/80 dark:bg-black/20 ${service.iconColor}`}>
+                      <service.icon className="w-8 h-8" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-1" style={{ color: "#2d1405" }}>
+                        {service.title}
+                      </h3>
+                      <p className="text-sm" style={{ color: "#5a4a42" }}>
+                        {service.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* All Other Services Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {serviceCategories.map((service) => (
+          {serviceCategories.slice(2).map((service) => (
             <Link 
               key={service.type} 
               to={`/services/${service.type}`}
