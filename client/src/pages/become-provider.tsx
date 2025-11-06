@@ -312,7 +312,7 @@ export default function BecomeProvider() {
               Choose Your Service Category
             </h2>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {SERVICE_CATEGORIES.map((service) => (
                 <Card 
                   key={service.id} 
@@ -320,10 +320,10 @@ export default function BecomeProvider() {
                   className="bg-white hover:shadow-lg transition-all duration-200 border-0 hover:scale-105 cursor-pointer"
                   data-testid={`card-service-${service.id}`}
                 >
-                  <CardContent className="p-8 text-center">
-                    <div className="text-5xl mb-4">{service.icon}</div>
-                    <h3 className="font-bold text-lg text-eth-brown mb-2">{service.name}</h3>
-                    <p className="text-sm text-eth-brown/60">{service.description}</p>
+                  <CardContent className="p-4 sm:p-8 text-center">
+                    <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">{service.icon}</div>
+                    <h3 className="font-bold text-sm sm:text-lg text-eth-brown mb-1 sm:mb-2">{service.name}</h3>
+                    <p className="text-xs sm:text-sm text-eth-brown/60 hidden sm:block">{service.description}</p>
                   </CardContent>
                 </Card>
               ))}
