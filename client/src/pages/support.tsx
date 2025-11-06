@@ -119,7 +119,7 @@ export default function Support() {
             }}
             data-testid="text-page-title"
           >
-            Ask Lemlem (ልምልም)
+            Ask Lemlem (ለምለም)
           </h1>
           
           <div className="inline-block px-4 py-2 rounded-full bg-[#CD7F32]/10 dark:bg-[#CD7F32]/20 mb-4">

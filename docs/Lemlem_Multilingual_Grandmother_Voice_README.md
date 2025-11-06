@@ -35,7 +35,7 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 
 | Step | Task | Status |
 |------|------|--------|
-| ✅ | Bilingual chat button with "Lemlem (ልምልም)" label | ✔ Done |
+| ✅ | Bilingual chat button with "Lemlem (ለምለም)" label | ✔ Done |
 | ✅ | Ethiopic font (Noto Sans Ethiopic) installed | ✔ Done |
 | ✅ | Verify language dropdown installed | ✔ Done |
 | ✅ | Verify multilingual templates in backend | ✔ Done |
@@ -51,7 +51,7 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 ## 🔍 Quality Assurance
 
 ### Voice Validation Procedure
-1. Look for the bilingual "Lemlem / ልምልም" floating button (orange gradient, bottom-right).  
+1. Look for the bilingual "Lemlem / ለምለም" floating button (orange gradient, bottom-right).  
 2. Click to open the assistant window.  
 3. Select each language from dropdown menu.  
 4. Observe:
@@ -75,13 +75,13 @@ It operates **fully offline and free**, powered by the browser's built-in Text-t
 ### Frontend Components
 - **Location**: `client/src/components/lemlem-chat.tsx`
 - **Bilingual Chat Button**: 
-  - Displays "Lemlem" (English) and "ልምልም" (Amharic) on floating button
+  - Displays "Lemlem" (English) and "ለምለም" (Amharic) on floating button
   - Uses Noto Sans Ethiopic font for authentic script rendering
   - Orange gradient (from #F49F0A to #CD7F32) with hover effects
   - Scales on hover with glowing shadow effect
-  - Tooltip: "Get help with Lemlem (ልምልም) — your AI assistant named after my grandmother"
+  - Tooltip: "Get help with Lemlem (ለምለም) — your AI assistant named after my grandmother"
 - **Chat Header**:
-  - Title: "Lemlem (ልምልም), your AI Assistant"
+  - Title: "Lemlem (ለምለም), your AI Assistant"
   - Subtitle: "Named after my beautiful grandma! 💚"
   - Grandmother emoji (👵🏾) for visual identity
 - **Welcome Message**: Introduces heritage story in all 5 languages
