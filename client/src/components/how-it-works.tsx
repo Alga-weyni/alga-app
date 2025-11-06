@@ -4,22 +4,22 @@ const steps = [
   {
     icon: Search,
     title: "Search & Discover",
-    description: "Browse verified Ethiopian properties from Addis to Axum"
+    description: ""
   },
   {
     icon: Home,
     title: "Book Your Stay",
-    description: "Choose dates, guests, and complete secure booking"
+    description: ""
   },
   {
     icon: CreditCard,
     title: "Pay Securely",
-    description: "Multiple payment options including Telebirr & Stripe"
+    description: ""
   },
   {
     icon: Key,
     title: "Get Access Code",
-    description: "Receive your 6-digit access code for seamless check-in"
+    description: ""
   }
 ];
 
@@ -47,15 +47,14 @@ export function HowItWorks() {
               data-testid={`how-it-works-${index}`}
             >
               
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-eth-brown rounded-full mb-4 relative">
-                <step.icon className="h-9 w-9 text-white" />
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-cream-100 rounded-full flex items-center justify-center border-2 border-eth-brown">
-                  <span className="font-bold text-eth-brown text-sm">{index + 1}</span>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-eth-brown rounded-full mb-3 relative">
+                <step.icon className="h-7 w-7 text-white" />
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-cream-100 rounded-full flex items-center justify-center border-2 border-eth-brown">
+                  <span className="font-bold text-eth-brown text-xs">{index + 1}</span>
                 </div>
               </div>
               
-              <h3 className="font-bold text-xl text-eth-brown mb-2">{step.title}</h3>
-              <p className="text-eth-brown/70">{step.description}</p>
+              <h3 className="font-bold text-lg text-eth-brown">{step.title}</h3>
             </div>
           ))}
         </div>
