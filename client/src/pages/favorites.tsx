@@ -66,13 +66,13 @@ export default function Favorites() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="h-96 bg-white/50 dark:bg-gray-800/50 rounded-lg animate-pulse" />
                 ))}
               </div>
             ) : favorites && favorites.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {favorites.map((property: any) => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
