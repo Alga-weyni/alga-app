@@ -39,7 +39,8 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {/* Desktop: Show 4-step grid */}
+        <div className="hidden md:grid grid-cols-2 gap-8 max-w-4xl mx-auto">
           {steps.map((step, index) => (
             <div 
               key={index} 
@@ -57,6 +58,16 @@ export function HowItWorks() {
               <h3 className="font-bold text-lg text-eth-brown">{step.title}</h3>
             </div>
           ))}
+        </div>
+
+        {/* Mobile: Show simplified text */}
+        <div className="md:hidden text-center max-w-2xl mx-auto">
+          <h3 className="font-bold text-xl text-eth-brown mb-2">
+            Verified Properties
+          </h3>
+          <p className="text-eth-brown/70 text-base">
+            All properties are verified by our team before listing
+          </p>
         </div>
       </div>
     </div>
