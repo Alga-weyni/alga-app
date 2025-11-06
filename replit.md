@@ -11,6 +11,14 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Design
 The platform employs a universal accessibility design optimized for Ethiopian users, featuring a warm color palette (dark brown, medium brown, cream backgrounds). Design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks. The application is available as a Progressive Web App (PWA) and has native Android and iOS applications through Capacitor.
 
+**Mobile App Implementation (November 2025):**
+- **Sign-in required**: Mobile app requires authentication before accessing features
+- **Bottom navigation**: Icon-based navigation bar with 4 main sections (Stays, Services, Me, Help)
+- **Platform detection**: Automatic detection of native vs web, different UX patterns applied
+- **Mobile layout**: Minimal header with "Alga" branding only, bottom navigation fixed at screen bottom
+- **Lemlem chat**: Adjusted positioning above bottom navigation for mobile devices
+- **Single codebase**: Web users see header navigation, mobile users see bottom navigation
+
 ### Technical Implementation
 The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend uses Node.js with Express.js and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL is the database, hosted on Neon, managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
 
