@@ -15,7 +15,7 @@ flowchart LR
     end
     
     %% Center - Application Servers
-    subgraph Replit["☁️ REPLIT CLOUD US-CENTRAL"]
+    subgraph CloudPlatform["☁️ APPLICATION CLOUD PLATFORM US-CENTRAL"]
         direction TB
         App["🖥️ APP SERVERS<br/>━━━━━━━━━━━<br/>Node.js Express<br/>Port 5000<br/>Auto-Scale 1-N"]
         Static["📦 ASSETS<br/>━━━━━━━━━<br/>Vite/React<br/>Images"]
@@ -43,7 +43,7 @@ flowchart LR
     end
     
     %% Monitoring
-    Logs["📊 LOGS & METRICS<br/>Replit/Neon/Error"]
+    Logs["📊 LOGS & METRICS<br/>Application/Neon/Error"]
     
     %% Connections - Left to Right Flow
     Users -->|HTTPS| DNS
@@ -85,12 +85,12 @@ flowchart LR
 
 ### **Infrastructure Type:** Cloud-Based (Serverless)
 
-**Primary Provider:** Replit (US-Central region)  
-**Database Provider:** Neon (AWS US-East region)  
-**Storage Provider:** Google Cloud Storage (via Replit)
+**Application Platform:** Cloud Platform (US-Central region)  
+**Database Provider:** Neon Serverless PostgreSQL (AWS US-East region)  
+**Storage Provider:** Google Cloud Storage
 
 ### **Geographic Distribution:**
-- **Application Servers:** US-Central (Replit infrastructure)
+- **Application Servers:** US-Central (Cloud platform infrastructure)
 - **Database:** AWS US-East (Neon serverless PostgreSQL)
 - **CDN:** CloudFlare (optional, global edge locations)
 - **End Users:** Ethiopia (Addis Ababa, Bahir Dar, Gondar, etc.)
@@ -101,7 +101,7 @@ flowchart LR
 - **CDN edge caching:** Reduces static asset load time by 60-80%
 
 ### **Auto-Scaling:**
-- **Application Tier:** Replit auto-scales based on load (0-N instances)
+- **Application Tier:** Cloud platform auto-scales based on load (0-N instances)
 - **Database Tier:** Neon serverless auto-scales connection pool
 - **Storage Tier:** Google Cloud Storage (unlimited capacity)
 
@@ -121,7 +121,7 @@ Internet (Ethiopia)
     ↓ (HTTPS/TLS 1.2+)
 CloudFlare CDN (Optional)
     ↓ (TLS)
-Replit Load Balancer
+Cloud Platform Load Balancer
     ↓ (Internal routing)
 Application Servers (Auto-scaling pool)
     ↓ (TLS connection)
@@ -130,14 +130,14 @@ Neon Database (Serverless PostgreSQL)
 
 ### **Port Configuration:**
 - **Public Port:** 443 (HTTPS only, HTTP redirects to HTTPS)
-- **Application Port:** 5000 (internal, behind Replit reverse proxy)
+- **Application Port:** 5000 (internal, behind cloud reverse proxy)
 - **Database Port:** 5432 (PostgreSQL, TLS encrypted)
 
 ### **Data Residency:**
 - **User Data:** Stored in Neon (AWS US-East)
 - **File Uploads:** Google Cloud Storage (multi-region)
 - **Session Data:** PostgreSQL (co-located with main database)
-- **Logs:** Replit infrastructure (US-Central)
+- **Logs:** Cloud platform infrastructure (US-Central)
 
 **Note:** All data encrypted at-rest (AES-256) and in-transit (TLS 1.2+)
 

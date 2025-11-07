@@ -151,7 +151,7 @@ Property Service
     ↓ (Validate type, size)
 Property Service
     ↓ (Upload to storage)
-Replit Object Storage (Google Cloud)
+Cloud Object Storage (Google Cloud)
     ↓ (Return public URL)
 Property Service
     ↓ (Store URL in DB)
