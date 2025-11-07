@@ -1,6 +1,10 @@
 # System Architecture Diagram
 ## Alga Platform - Technical Infrastructure
 
+**Purpose:** High-level overview of Alga's complete technical architecture showing frontend (React/PWA/Capacitor), backend (Express.js), security middleware (Helmet, CORS, rate limiting), business logic services, data layer (PostgreSQL with Drizzle ORM), and external integrations (payment processors, communication services, government APIs). This diagram illustrates the entire technology stack and how components interact.
+
+**For INSA Audit:** Demonstrates comprehensive security layers, defense-in-depth approach, and integration points requiring security validation.
+
 ```mermaid
 flowchart TB
     subgraph Internet["🌐 INTERNET"]

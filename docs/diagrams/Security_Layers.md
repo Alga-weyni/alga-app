@@ -1,6 +1,10 @@
 # System Architecture Diagram (Part 3/3)
 ## Security Layers - Defense in Depth Architecture
 
+**Purpose:** Illustrates the defense-in-depth security model with 6 layers: L0 (Internet threats), L1 (Edge security with DNS/WAF/DDoS protection), L2 (Network firewall and TLS), L3 (Application middleware, authentication, validation), L4 (Data access controls and encryption), and L5 (Monitoring and audit logs).
+
+**For INSA Audit:** Demonstrates comprehensive security controls at every layer from edge to database. Shows compliance with OWASP Top 10, implementation of security headers (CSP, HSTS), encryption at rest and in transit, RBAC, and audit logging required for INSA certification.
+
 ```mermaid
 flowchart LR
     %% Layer 0: Internet

@@ -1,6 +1,10 @@
 # Data Flow Diagram (DFD) - Context Level 0
 ## Alga Platform - External View
 
+**Purpose:** Shows Alga as a single system boundary with all external actors (Guest, Host, Agent, Operator, Admin) and external systems (payment processors, communication services, government APIs). Illustrates what data flows into and out of the platform from an external perspective.
+
+**For INSA Audit:** Identifies all entry points for potential security threats, external data sources, and third-party dependencies requiring security assessment. Essential for attack surface analysis.
+
 ```mermaid
 flowchart TB
     %% External Entities
