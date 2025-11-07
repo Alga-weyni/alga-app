@@ -1,6 +1,10 @@
 # System Architecture Diagram (Part 1/3)
 ## Deployment Architecture - Cloud Infrastructure
 
+**Purpose:** Shows the physical/cloud deployment architecture including client layer (users/DNS), edge layer (CDN/load balancer), application servers (Node.js on port 5000 with auto-scaling), data tier (PostgreSQL with replication), storage layer (Google Cloud Storage), and external services (payments, communications, government APIs).
+
+**For INSA Audit:** Demonstrates infrastructure security controls (TLS/SSL, load balancing, auto-scaling, database replication), deployment environment isolation, and compliance with cloud security best practices. Shows vendor-neutral cloud platform deployment model.
+
 ```mermaid
 flowchart LR
     %% Left Side - Users & Edge

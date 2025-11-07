@@ -1,6 +1,10 @@
 # System Architecture Diagram (Part 2/3)
 ## Component Architecture - Service & Module Breakdown
 
+**Purpose:** Detailed breakdown of software components organized by layer: Client Layer (React web, Capacitor mobile, PWA), API Layer (Express.js with security middleware), Business Logic (core services like Auth, Property, Booking, Payment), Data Access (Drizzle ORM with repositories), and External APIs (payment, communication, government, utilities).
+
+**For INSA Audit:** Shows clear separation of concerns, security middleware placement, service-oriented architecture, and how business logic is isolated from data access. Critical for understanding code organization and security boundary enforcement.
+
 ```mermaid
 flowchart LR
     %% Left Column - Client Layer

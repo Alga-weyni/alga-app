@@ -1,6 +1,10 @@
 # Entity Relationship Diagram (ERD)
 ## Alga Platform - Database Schema
 
+**Purpose:** Complete entity-relationship diagram showing all 27 database tables organized into logical groups: User & Authentication (users, sessions, verification_documents), Property Management (properties, property_info, favorites), Booking & Payment (bookings, payments, reviews), Agent Commission (agents, agent_properties, agent_commissions), Add-On Services (services, service_bookings), Safety Features (safety_check_ins), and Administrative (admin_settings, notifications).
+
+**For INSA Audit:** Identifies all sensitive data fields marked with 🚨 (passwords, financial data, personal information), shows encryption requirements, illustrates table relationships and foreign keys, and demonstrates data integrity controls. Essential for understanding data protection requirements and compliance with Ethiopian data protection regulations.
+
 ```mermaid
 flowchart TB
     %% ========================================

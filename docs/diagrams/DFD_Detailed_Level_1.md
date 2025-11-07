@@ -1,6 +1,10 @@
 # Data Flow Diagram (DFD) - Detailed Level 1
 ## Alga Platform - Internal Processes
 
+**Purpose:** Breaks down the Alga system into internal processes and data stores, showing how data flows between authentication, property management, search, booking, payment processing, and commission calculation modules. Each process is numbered (1.0-7.0) and connected to specific data stores (D1-D7).
+
+**For INSA Audit:** Reveals internal data flows, processing logic, and data storage points. Critical for identifying where sensitive data (passwords, payments, personal information) is processed, stored, and transmitted within the system.
+
 ```mermaid
 flowchart LR
     %% LEFT SIDE: External Users
