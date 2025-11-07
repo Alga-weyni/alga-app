@@ -2,130 +2,83 @@
 ## Deployment Architecture - Cloud Infrastructure
 
 ```mermaid
-flowchart TB
-    %% Internet Layer
-    subgraph Internet["🌐 INTERNET"]
-        Users["👥 Users<br/>(Web & Mobile)"]
-        DNS["🔍 DNS<br/>alga.et"]
+flowchart LR
+    %% Left Side - Users & Edge
+    subgraph Client["🌐 CLIENT LAYER"]
+        Users["👥 Users<br/>Web/Mobile"]
+        DNS["DNS<br/>alga.et"]
     end
     
-    %% Edge/CDN Layer
-    subgraph Edge["⚡ EDGE LAYER"]
-        CloudFlare["☁️ CloudFlare<br/>(Optional CDN)"]
-        LoadBalancer["⚖️ Load Balancer<br/>(Auto-Scaling)"]
+    subgraph Edge["⚡ EDGE"]
+        CDN["CDN<br/>CloudFlare"]
+        LB["Load<br/>Balancer"]
     end
     
-    %% Application Layer (Replit Infrastructure)
-    subgraph ReplitCloud["☁️ REPLIT CLOUD (US-CENTRAL)"]
+    %% Center - Application Servers
+    subgraph Replit["☁️ REPLIT CLOUD US-CENTRAL"]
         direction TB
-        
-        subgraph AppServers["🖥️ APPLICATION SERVERS (Auto-Scaling)"]
-            direction LR
-            WebServer1["Web Server 1<br/>Node.js + Express<br/>Port 5000"]
-            WebServer2["Web Server 2<br/>Node.js + Express<br/>Port 5000"]
-            WebServer3["Web Server N<br/>(Auto-Scale)<br/>Port 5000"]
-        end
-        
-        subgraph StaticAssets["📦 STATIC ASSETS"]
-            Vite["Vite Build<br/>(React Bundle)<br/>dist/public/"]
-            Images["Property Images<br/>(Compressed)"]
-        end
+        App["🖥️ APP SERVERS<br/>━━━━━━━━━━━<br/>Node.js Express<br/>Port 5000<br/>Auto-Scale 1-N"]
+        Static["📦 ASSETS<br/>━━━━━━━━━<br/>Vite/React<br/>Images"]
     end
     
-    %% Database Layer (Neon Serverless)
-    subgraph DatabaseTier["🗄️ DATABASE TIER (AWS US-EAST)"]
+    %% Right - Database & Storage
+    subgraph Data["🗄️ DATA TIER AWS US-EAST"]
         direction TB
-        
-        subgraph NeonCluster["Neon Serverless PostgreSQL"]
-            PrimaryDB["Primary DB<br/>PostgreSQL 16<br/>(Read/Write)"]
-            ReplicaDB["Replica DB<br/>(Read-Only)<br/>Auto-Failover"]
-        end
-        
-        ConnectionPool["Connection Pool<br/>(Serverless)<br/>Auto-Scaling"]
-        
-        PrimaryDB <-->|"Replication"| ReplicaDB
-        ConnectionPool -->|"Route Queries"| PrimaryDB
-        ConnectionPool -->|"Read Queries"| ReplicaDB
+        DB["PostgreSQL 16<br/>━━━━━━━━━<br/>Primary + Replica<br/>Auto-Failover"]
+        Pool["Connection Pool<br/>Serverless"]
+        Session["Sessions<br/>24hr TTL"]
     end
     
-    %% Object Storage
-    subgraph Storage["💾 OBJECT STORAGE"]
-        GCS["Google Cloud Storage<br/>(Replit App Storage)<br/>Images, Documents, PDFs"]
+    subgraph Storage["💾 STORAGE"]
+        GCS["Google Cloud<br/>━━━━━━━━<br/>Images/Docs/PDF"]
     end
     
-    %% Session Store
-    subgraph SessionStore["🔐 SESSION MANAGEMENT"]
-        PGSession["PostgreSQL Session Store<br/>(connect-pg-simple)<br/>24hr TTL"]
+    %% Bottom - External Services (Compact)
+    subgraph External["🌐 EXTERNAL SERVICES"]
+        direction LR
+        Pay["💳 PAYMENT<br/>Chapa/Stripe<br/>PayPal/TeleBirr"]
+        Comm["📧 COMMS<br/>SendGrid<br/>EthTelecom"]
+        Gov["🏛️ GOVT<br/>Fayda/ERCA"]
+        Maps["🗺️ MAPS<br/>Google"]
     end
     
-    %% External Services
-    subgraph ExternalServices["🌐 EXTERNAL SERVICES (Third-Party)"]
-        direction TB
-        
-        subgraph Payments["💳 PAYMENT PROCESSORS"]
-            Chapa["Chapa API<br/>(Ethiopian)"]
-            Stripe["Stripe API<br/>(International)"]
-            PayPal["PayPal API<br/>(International)"]
-            TeleBirr["TeleBirr API<br/>(Agent Payouts)"]
-        end
-        
-        subgraph Communications["📧 COMMUNICATIONS"]
-            SendGrid["SendGrid<br/>(Email)"]
-            EthTelecom["Ethiopian Telecom<br/>(SMS OTP)"]
-        end
-        
-        subgraph Government["🏛️ GOVERNMENT APIS"]
-            FaydaID["Fayda ID<br/>(eKYC)"]
-            ERCA["ERCA<br/>(Tax)"]
-        end
-        
-        subgraph LocationServices["🗺️ LOCATION"]
-            GoogleMaps["Google Maps<br/>Geocoding API"]
-        end
-    end
+    %% Monitoring
+    Logs["📊 LOGS & METRICS<br/>Replit/Neon/Error"]
     
-    %% Monitoring & Logging
-    subgraph Observability["📊 MONITORING & LOGGING"]
-        ReplitLogs["Replit Logs<br/>(Workflow Output)"]
-        DBMetrics["Neon Metrics<br/>(DB Performance)"]
-        ErrorTracking["Error Logs<br/>(PostgreSQL)"]
-    end
+    %% Connections - Left to Right Flow
+    Users -->|HTTPS| DNS
+    DNS --> CDN
+    CDN -->|TLS 1.2+| LB
+    LB --> App
     
-    %% Flow Connections
-    Users -->|"HTTPS"| DNS
-    DNS -->|"Resolve"| CloudFlare
-    CloudFlare -->|"TLS 1.2+"| LoadBalancer
-    LoadBalancer -->|"Distribute"| AppServers
+    App <-->|SQL| Pool
+    Pool <--> DB
+    App <--> Session
+    Session --> DB
+    App <--> Static
+    App <-->|Upload| GCS
     
-    WebServer1 & WebServer2 & WebServer3 -->|"Serve"| StaticAssets
-    WebServer1 & WebServer2 & WebServer3 <-->|"SQL Queries"| ConnectionPool
-    WebServer1 & WebServer2 & WebServer3 <-->|"Sessions"| PGSession
-    WebServer1 & WebServer2 & WebServer3 <-->|"Upload/Retrieve"| GCS
+    App -->|API| External
     
-    PGSession -->|"Store in"| PrimaryDB
+    App -.->|Monitor| Logs
+    DB -.->|Metrics| Logs
     
-    WebServer1 & WebServer2 & WebServer3 -->|"HTTPS API"| ExternalServices
+    %% Styling - Compact for A4
+    classDef clientClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef edgeClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef appClass fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
+    classDef dataClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef storageClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef externalClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef monitorClass fill:#e0f2f1,stroke:#00796b,stroke-width:2px,color:#000
     
-    AppServers -.->|"Logs"| ReplitLogs
-    NeonCluster -.->|"Metrics"| DBMetrics
-    AppServers -.->|"Errors"| ErrorTracking
-    
-    %% Styling
-    classDef internetClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef edgeClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef appClass fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
-    classDef dbClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px
-    classDef storageClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef externalClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef monitorClass fill:#e0f2f1,stroke:#00796b,stroke-width:2px
-    
-    class Users,DNS internetClass
-    class CloudFlare,LoadBalancer edgeClass
-    class WebServer1,WebServer2,WebServer3,Vite,Images appClass
-    class PrimaryDB,ReplicaDB,ConnectionPool,PGSession dbClass
+    class Users,DNS clientClass
+    class CDN,LB edgeClass
+    class App,Static appClass
+    class DB,Pool,Session dataClass
     class GCS storageClass
-    class Chapa,Stripe,PayPal,TeleBirr,SendGrid,EthTelecom,FaydaID,ERCA,GoogleMaps externalClass
-    class ReplitLogs,DBMetrics,ErrorTracking monitorClass
+    class Pay,Comm,Gov,Maps externalClass
+    class Logs monitorClass
 ```
 
 ## Deployment Details
