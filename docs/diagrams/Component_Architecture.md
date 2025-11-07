@@ -2,169 +2,77 @@
 ## Component Architecture - Service & Module Breakdown
 
 ```mermaid
-flowchart TB
-    %% Client Layer
-    subgraph ClientLayer["📱 CLIENT LAYER (Frontend)"]
+flowchart LR
+    %% Left Column - Client Layer
+    subgraph Client["📱 CLIENT LAYER"]
         direction TB
-        
-        subgraph WebApp["🌐 Web Application"]
-            React["React 18<br/>(TypeScript)<br/>Component Library"]
-            Router["Wouter Router<br/>(Client-side routing)"]
-            StateManagement["TanStack Query<br/>(Server state)<br/>+ React Hooks<br/>(Local state)"]
-            UIComponents["Shadcn/UI<br/>(Radix UI)<br/>Tailwind CSS"]
-        end
-        
-        subgraph MobileApp["📱 Mobile Application"]
-            Capacitor["Capacitor 7.4.4<br/>(Native Bridge)"]
-            NativePlugins["Native Plugins<br/>Camera, Geolocation<br/>Push Notifications"]
-        end
-        
-        subgraph PWA["⚡ Progressive Web App"]
-            ServiceWorker["Service Worker<br/>(Offline caching)"]
-            WebManifest["Web Manifest<br/>(Install prompt)"]
-        end
+        Web["🌐 WEB<br/>━━━━━━━<br/>React 18 TS<br/>Wouter Router<br/>TanStack Query<br/>Shadcn/Radix UI<br/>Tailwind CSS"]
+        Mobile["📱 MOBILE<br/>━━━━━━━<br/>Capacitor 7.4<br/>Camera/GPS<br/>Push Notify"]
+        PWA["⚡ PWA<br/>━━━━━━━<br/>Service Worker<br/>Offline Cache"]
     end
     
-    %% API Gateway Layer
-    subgraph APILayer["🔌 API LAYER (Backend Entry Point)"]
-        ExpressAPI["Express.js API<br/>(RESTful endpoints)<br/>40+ routes"]
-        SessionMiddleware["Session Middleware<br/>(express-session)<br/>PostgreSQL store"]
-        ValidationMiddleware["Validation<br/>(Zod + express-validator)<br/>Input sanitization"]
-    end
-    
-    %% Business Logic Layer
-    subgraph BusinessLayer["⚙️ BUSINESS LOGIC LAYER (Services)"]
+    %% Middle Top - API & Security
+    subgraph API["🔌 API LAYER"]
         direction TB
-        
-        subgraph CoreServices["🎯 Core Services"]
-            AuthService["Authentication Service<br/>• OTP generation (4-digit)<br/>• Bcrypt password hashing<br/>• Session management"]
-            
-            PropertyService["Property Service<br/>• CRUD operations<br/>• Image upload/compression<br/>• Availability tracking"]
-            
-            BookingService["Booking Engine<br/>• Conflict detection<br/>• Access code generation<br/>• Date validation"]
-            
-            PaymentService["Alga Pay Service<br/>• Multi-processor routing<br/>• Commission calculation<br/>• Invoice generation (PDF)"]
-        end
-        
-        subgraph ExtendedServices["🔧 Extended Services"]
-            CommissionService["Commission Service<br/>• Agent link tracking<br/>• 5% calculation<br/>• 36-month expiry"]
-            
-            ReviewService["Review Engine<br/>• ALGA scoring algorithm<br/>• Time-decay weighting<br/>• Verification checks"]
-            
-            NotificationService["Notification Service<br/>• SMS (Ethiopian Telecom)<br/>• Email (SendGrid)<br/>• Push notifications"]
-            
-            IDVerificationService["ID Verification<br/>• Fayda ID integration<br/>• OCR (Tesseract.js)<br/>• Operator queue"]
-        end
+        Express["Express.js<br/>━━━━━━━<br/>40+ Routes<br/>REST API"]
+        Security["🔒 SECURITY<br/>━━━━━━━<br/>Helmet/CORS<br/>Rate Limit<br/>INSA/XSS/HPP"]
+        Session["Session/Auth<br/>━━━━━━━<br/>PostgreSQL<br/>Zod Validate"]
     end
     
-    %% Data Access Layer
-    subgraph DataLayer["🗄️ DATA ACCESS LAYER"]
+    %% Middle Bottom - Business Logic
+    subgraph Business["⚙️ BUSINESS LOGIC"]
         direction TB
-        
-        ORM["Drizzle ORM<br/>(Query Builder)<br/>100% SQL injection safe"]
-        
-        subgraph StorageInterface["Storage Interface"]
-            UserStorage["User Repository<br/>CRUD + queries"]
-            PropertyStorage["Property Repository<br/>CRUD + queries"]
-            BookingStorage["Booking Repository<br/>CRUD + queries"]
-            PaymentStorage["Payment Repository<br/>CRUD + queries"]
-            AgentStorage["Agent Repository<br/>CRUD + queries"]
-        end
+        Core["🎯 CORE SERVICES<br/>━━━━━━━━━━<br/>• Auth (OTP/Bcrypt)<br/>• Property (CRUD)<br/>• Booking (Engine)<br/>• Payment (Alga Pay)"]
+        Extended["🔧 EXTENDED<br/>━━━━━━━━━━<br/>• Commission (5%)<br/>• Reviews (ALGA)<br/>• Notify (SMS/Email)<br/>• ID Verify (Fayda)"]
     end
     
-    %% Database Layer
-    subgraph DatabaseLayer["💾 DATABASE LAYER"]
-        PostgreSQL["PostgreSQL 16<br/>(Neon Serverless)<br/>20+ tables"]
-    end
-    
-    %% External Integration Layer
-    subgraph ExternalLayer["🌐 EXTERNAL INTEGRATIONS"]
+    %% Right Top - Data Layer
+    subgraph Data["🗄️ DATA ACCESS"]
         direction TB
-        
-        subgraph PaymentIntegrations["💳 Payment Integrations"]
-            ChapaSDK["Chapa SDK<br/>(chapa-nodejs)"]
-            StripeSDK["Stripe SDK<br/>(stripe v14)"]
-            PayPalSDK["PayPal SDK<br/>(@paypal/paypal-server-sdk)"]
-            TeleBirrAPI["TeleBirr API<br/>(Custom integration)"]
-        end
-        
-        subgraph CommunicationIntegrations["📧 Communications"]
-            SendGridSDK["SendGrid SDK<br/>(@sendgrid/mail)"]
-            SMSAPI["Ethiopian Telecom SMS<br/>(HTTP API)"]
-        end
-        
-        subgraph GovernmentIntegrations["🏛️ Government APIs"]
-            FaydaIDAPI["Fayda ID API<br/>(eKYC verification)"]
-            ERCAAPI["ERCA API<br/>(Tax compliance)"]
-        end
-        
-        subgraph UtilityIntegrations["🛠️ Utilities"]
-            GoogleMapsAPI["Google Maps API<br/>(Geocoding)"]
-            ObjectStorage["Replit Object Storage<br/>(Google Cloud)"]
-        end
+        ORM["Drizzle ORM<br/>━━━━━━━<br/>SQL Safe<br/>Zero Raw SQL"]
+        Repo["REPOSITORIES<br/>━━━━━━━<br/>User/Property<br/>Booking/Payment<br/>Agent Storage"]
+        DB["💾 DATABASE<br/>━━━━━━━<br/>PostgreSQL 16<br/>Neon Serverless<br/>20+ Tables"]
     end
     
-    %% Security Layer (Cross-cutting)
-    subgraph SecurityLayer["🔒 SECURITY LAYER (Middleware)"]
-        direction LR
-        
-        Helmet["Helmet.js<br/>(Security headers)"]
-        CORS["CORS<br/>(Origin control)"]
-        RateLimit["Rate Limiting<br/>(100 req/15min)"]
-        INSAHardening["INSA Hardening<br/>(XSS, SQL, CSRF)"]
-        XSSClean["XSS Clean<br/>(Sanitization)"]
-        HPP["HPP Protection<br/>(Parameter pollution)"]
+    %% Right Bottom - External Services
+    subgraph External["🌐 EXTERNAL APIs"]
+        direction TB
+        Payment["💳 PAYMENT<br/>━━━━━━━<br/>Chapa/Stripe<br/>PayPal/TeleBirr"]
+        Comm["📧 COMMS<br/>━━━━━━━<br/>SendGrid<br/>EthTelecom SMS"]
+        Gov["🏛️ GOVT<br/>━━━━━━━<br/>Fayda ID<br/>ERCA Tax"]
+        Utils["🛠️ UTILS<br/>━━━━━━━<br/>Google Maps<br/>Object Storage"]
     end
     
-    %% Component Communication Flows
-    React & Router & StateManagement & UIComponents -->|"HTTP/HTTPS"| ExpressAPI
-    Capacitor & NativePlugins -->|"HTTP/HTTPS"| ExpressAPI
-    ServiceWorker -->|"Cached API calls"| ExpressAPI
+    %% Flows - Left to Right
+    Client -->|HTTPS| Express
+    Express --> Security
+    Security --> Session
+    Session --> Business
     
-    ExpressAPI --> SecurityLayer
-    SecurityLayer --> SessionMiddleware
-    SessionMiddleware --> ValidationMiddleware
-    ValidationMiddleware --> BusinessLayer
+    Business --> ORM
+    ORM --> Repo
+    Repo --> DB
     
-    AuthService & PropertyService & BookingService & PaymentService --> DataLayer
-    CommissionService & ReviewService & NotificationService & IDVerificationService --> DataLayer
+    Core -->|OTP| Comm
+    Core -->|Upload| Utils
+    Core -->|Process| Payment
+    Extended -->|Payout| Payment
+    Extended -->|Notify| Comm
+    Extended -->|Verify| Gov
+    Core -->|Tax| Gov
     
-    ORM --> StorageInterface
-    StorageInterface --> PostgreSQL
+    %% Styling - Compact for A4
+    classDef clientClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef apiClass fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef businessClass fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef dataClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef externalClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
     
-    AuthService -->|"Send OTP"| SendGridSDK
-    AuthService -->|"Send OTP"| SMSAPI
-    
-    PropertyService -->|"Upload images"| ObjectStorage
-    PropertyService -->|"Geocode address"| GoogleMapsAPI
-    
-    PaymentService -->|"Process payment"| PaymentIntegrations
-    
-    CommissionService -->|"Payout"| TeleBirrAPI
-    
-    NotificationService -->|"Email"| SendGridSDK
-    NotificationService -->|"SMS"| SMSAPI
-    
-    IDVerificationService -->|"Verify ID"| FaydaIDAPI
-    
-    PaymentService -->|"Tax data"| ERCAAPI
-    
-    %% Styling
-    classDef clientClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef apiClass fill:#fff3e0,stroke:#f57c00,stroke-width:3px
-    classDef businessClass fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    classDef dataClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px
-    classDef dbClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
-    classDef externalClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef securityClass fill:#ffebee,stroke:#c62828,stroke-width:3px
-    
-    class React,Router,StateManagement,UIComponents,Capacitor,NativePlugins,ServiceWorker,WebManifest clientClass
-    class ExpressAPI,SessionMiddleware,ValidationMiddleware apiClass
-    class AuthService,PropertyService,BookingService,PaymentService,CommissionService,ReviewService,NotificationService,IDVerificationService businessClass
-    class ORM,UserStorage,PropertyStorage,BookingStorage,PaymentStorage,AgentStorage dataClass
-    class PostgreSQL dbClass
-    class ChapaSDK,StripeSDK,PayPalSDK,TeleBirrAPI,SendGridSDK,SMSAPI,FaydaIDAPI,ERCAAPI,GoogleMapsAPI,ObjectStorage externalClass
-    class Helmet,CORS,RateLimit,INSAHardening,XSSClean,HPP securityClass
+    class Web,Mobile,PWA clientClass
+    class Express,Security,Session apiClass
+    class Core,Extended businessClass
+    class ORM,Repo,DB dataClass
+    class Payment,Comm,Gov,Utils externalClass
 ```
 
 ## Service-to-Service Communication
