@@ -1,0 +1,53 @@
+# Render Deployment Configuration for Alga Platform
+# INSA Security Audit Staging Environment
+
+services:
+  # Main Web Service (Frontend + Backend)
+  - type: web
+    name: alga-staging
+    runtime: node
+    region: frankfurt # Closest to Ethiopia
+    plan: starter # $7/month
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: alga-postgres
+          property: connectionString
+      # Secrets - these must be added manually in Render Dashboard
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: VITE_GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: CHAPA_SECRET_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: TELEBIRR_APP_ID
+        sync: false
+      - key: TELEBIRR_APP_KEY
+        sync: false
+      - key: TELEBIRR_PUBLIC_KEY
+        sync: false
+      - key: TELEBIRR_SHORT_CODE
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+    
+databases:
+  # PostgreSQL Database
+  - name: alga-postgres
+    databaseName: alga_staging
+    plan: starter # Free tier (90 days), then $7/month
+    region: frankfurt
+    postgresMajorVersion: 15
+    
+# Environment Groups (optional - for easier management)
+# Create these in Render Dashboard under "Environment Groups"
+# Then reference them in services above with:
+#   - fromGroup: alga-secrets
