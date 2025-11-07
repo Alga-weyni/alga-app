@@ -2,115 +2,114 @@
 ## Alga Platform - Internal Processes
 
 ```mermaid
-flowchart TB
-    %% External Entities
-    Guest["👤 Guest"]
-    Host["🏠 Host"]
-    Agent["🤝 Agent"]
-    PaymentGW["💳 Payment Gateway<br/>(Chapa/Stripe/PayPal)"]
-    TeleBirr["📱 TeleBirr"]
-    SMS["📞 SMS Service"]
+flowchart LR
+    %% LEFT SIDE: External Users
+    subgraph Users["👥 EXTERNAL USERS"]
+        Guest["👤 Guest"]
+        Host["🏠 Host"]
+        Agent["🤝 Agent"]
+    end
     
-    %% Data Stores
-    DB1[("D1: Users<br/>Database")]
-    DB2[("D2: Properties<br/>Database")]
-    DB3[("D3: Bookings<br/>Database")]
-    DB4[("D4: Payments<br/>Database")]
-    DB5[("D5: Agents<br/>Database")]
-    DB6[("D6: Commissions<br/>Database")]
-    DB7[("D7: Sessions<br/>Database")]
+    %% CENTER: Core Processes (organized by workflow)
+    subgraph CoreProcesses["🔄 CORE PROCESSES"]
+        direction TB
+        
+        subgraph AuthFlow["Authentication Layer"]
+            P1["Process 1.0<br/>🔐 AUTH<br/>OTP Login"]
+            DB1[("D1: Users")]
+            DB7[("D7: Sessions")]
+        end
+        
+        subgraph PropertyFlow["Property Layer"]
+            P2["Process 2.0<br/>🏠 PROPERTY<br/>Manage Listings"]
+            DB2[("D2: Properties")]
+        end
+        
+        subgraph BookingFlow["Booking Layer"]
+            P3["Process 3.0<br/>🔍 SEARCH<br/>Find Properties"]
+            P4["Process 4.0<br/>📅 BOOKING<br/>Reserve Dates"]
+            DB3[("D3: Bookings")]
+        end
+        
+        subgraph PaymentFlow["Payment Layer"]
+            P5["Process 5.0<br/>💰 ALGA PAY<br/>Process Payment"]
+            DB4[("D4: Payments")]
+        end
+        
+        subgraph CommissionFlow["Commission Layer"]
+            P6["Process 6.0<br/>💵 COMMISSION<br/>Calculate 5%"]
+            P7["Process 7.0<br/>💸 PAYOUT<br/>Pay Agent"]
+            DB5[("D5: Agents")]
+            DB6[("D6: Commissions")]
+        end
+    end
     
-    %% Process 1: Authentication
-    P1["Process 1.0<br/>🔐 AUTHENTICATION<br/>Request OTP<br/>Verify OTP<br/>Create Session"]
+    %% RIGHT SIDE: External Services
+    subgraph External["🌐 EXTERNAL SERVICES"]
+        SMS["📞 SMS Service"]
+        PaymentGW["💳 Payment<br/>Gateway"]
+        TeleBirr["📱 TeleBirr"]
+    end
     
-    %% Process 2: Property Management
-    P2["Process 2.0<br/>🏠 PROPERTY MGMT<br/>Create Listing<br/>Upload Images<br/>Set Pricing"]
+    %% AUTHENTICATION FLOWS (Process 1)
+    Guest -->|"1. Login Request"| P1
+    Host -->|"1. Login Request"| P1
+    Agent -->|"1. Login Request"| P1
+    P1 -->|"2. Send OTP"| SMS
+    SMS -.->|"3. OTP Code"| Users
+    P1 <-->|"Store"| DB1
+    P1 <-->|"Create"| DB7
     
-    %% Process 3: Search & Discovery
-    P3["Process 3.0<br/>🔍 SEARCH ENGINE<br/>Filter Properties<br/>Calculate Distance<br/>Sort Results"]
+    %% PROPERTY MANAGEMENT FLOWS (Process 2)
+    Host -->|"4. List Property"| P2
+    P2 -->|"Store"| DB2
+    P2 -->|"Link"| DB1
     
-    %% Process 4: Booking System
-    P4["Process 4.0<br/>📅 BOOKING SYSTEM<br/>Check Availability<br/>Reserve Dates<br/>Generate Access Code"]
+    %% SEARCH FLOWS (Process 3)
+    Guest -->|"5. Search Query"| P3
+    P3 <-->|"Query"| DB2
+    P3 -->|"6. Results"| Guest
     
-    %% Process 5: Payment Processing
-    P5["Process 5.0<br/>💰 ALGA PAY<br/>Calculate Commission<br/>Process Payment<br/>Distribute Funds"]
+    %% BOOKING FLOWS (Process 4)
+    Guest -->|"7. Book Property"| P4
+    P4 <-->|"Check"| DB2
+    P4 <-->|"Reserve"| DB3
+    P4 -->|"8. Access Code"| Guest
+    P4 -->|"9. Notify"| Host
     
-    %% Process 6: Commission Tracking
-    P6["Process 6.0<br/>💵 COMMISSION ENGINE<br/>Calculate 5%<br/>Track 36 Months<br/>Queue Payout"]
+    %% PAYMENT FLOWS (Process 5)
+    P4 -->|"10. Total Amount"| P5
+    P5 -->|"11. Pay Request"| PaymentGW
+    PaymentGW -->|"12. Confirm"| P5
+    P5 -->|"Store"| DB4
+    P5 -->|"Update"| DB3
+    P5 -->|"13. Receipt"| Guest
+    P5 -->|"14. 100% Payment"| Host
     
-    %% Process 7: Payout Distribution
-    P7["Process 7.0<br/>💸 PAYOUT PROCESSOR<br/>Validate TeleBirr<br/>Transfer Commission<br/>Record Transaction"]
+    %% COMMISSION FLOWS (Process 6 & 7)
+    P5 -->|"15. Trigger"| P6
+    P6 <-->|"Check Link"| DB5
+    P6 -->|"Record"| DB6
+    P6 -->|"16. Queue Payout"| P7
+    P7 <-->|"Get Account"| DB5
+    P7 -->|"17. Transfer 5%"| TeleBirr
+    TeleBirr -->|"18. Confirm"| P7
+    P7 -->|"Mark Paid"| DB6
     
-    %% Authentication Flow (Process 1)
-    Guest -->|"Phone/Email"| P1
-    Host -->|"Phone/Email"| P1
-    Agent -->|"Phone/Email"| P1
-    P1 -->|"Generate OTP"| SMS
-    SMS -->|"4-Digit Code"| Guest
-    SMS -->|"4-Digit Code"| Host
-    SMS -->|"4-Digit Code"| Agent
-    P1 <-->|"Store/Verify<br/>OTP & Session"| DB1
-    P1 <-->|"Session Data"| DB7
+    %% AGENT DASHBOARD
+    Agent <-->|"View Earnings"| DB5
+    Agent <-->|"Check History"| DB6
     
-    %% Property Management Flow (Process 2)
-    Host -->|"Property Details<br/>Images, Pricing"| P2
-    P2 -->|"Store Property"| DB2
-    P2 -->|"Link to Host"| DB1
-    
-    %% Search Flow (Process 3)
-    Guest -->|"Search Criteria<br/>(City, Dates, Price)"| P3
-    P3 <-->|"Query Properties"| DB2
-    P3 -->|"Search Results"| Guest
-    
-    %% Booking Flow (Process 4)
-    Guest -->|"Booking Request<br/>(Dates, Guests)"| P4
-    P4 <-->|"Check Conflicts"| DB3
-    P4 <-->|"Verify Property"| DB2
-    P4 -->|"Create Booking"| DB3
-    P4 -->|"Generate 6-Digit<br/>Access Code"| DB3
-    
-    %% Payment Flow (Process 5)
-    P4 -->|"Booking Total"| P5
-    P5 -->|"Payment Request"| PaymentGW
-    PaymentGW -->|"Confirmation"| P5
-    P5 -->|"Record Transaction"| DB4
-    P5 -->|"Calculate:<br/>12% Service Fee<br/>15% VAT<br/>2% Withholding"| DB4
-    P5 -->|"100% to Host"| DB4
-    P5 -->|"Update Status"| DB3
-    
-    %% Commission Calculation (Process 6)
-    P5 -->|"Booking Amount"| P6
-    P6 <-->|"Check Agent Link"| DB5
-    P6 -->|"Calculate 5%"| P6
-    P6 -->|"Check Expiry<br/>(36 months)"| P6
-    P6 -->|"Store Commission"| DB6
-    P6 <-->|"Update Earnings"| DB5
-    
-    %% Payout Flow (Process 7)
-    P6 -->|"Commission Due"| P7
-    P7 <-->|"Get TeleBirr Account"| DB5
-    P7 -->|"Payout Request"| TeleBirr
-    TeleBirr -->|"Confirmation"| P7
-    P7 -->|"Mark as Paid"| DB6
-    Agent <-->|"View Dashboard"| DB5
-    Agent <-->|"Earnings History"| DB6
-    
-    %% Host Notifications
-    P4 -->|"Booking Alert"| Host
-    P5 -->|"Payment Received"| Host
-    
-    %% Guest Confirmation
-    P4 -->|"Access Code"| Guest
-    P5 -->|"Receipt"| Guest
-    
-    %% Styling
-    classDef processClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    %% STYLING
+    classDef processClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
     classDef datastoreClass fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     classDef externalClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef userClass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     
     class P1,P2,P3,P4,P5,P6,P7 processClass
     class DB1,DB2,DB3,DB4,DB5,DB6,DB7 datastoreClass
-    class Guest,Host,Agent,PaymentGW,TeleBirr,SMS externalClass
+    class SMS,PaymentGW,TeleBirr externalClass
+    class Guest,Host,Agent userClass
 ```
 
 ## Process Descriptions
