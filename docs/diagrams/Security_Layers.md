@@ -2,189 +2,92 @@
 ## Security Layers - Defense in Depth Architecture
 
 ```mermaid
-flowchart TB
-    %% Layer 0: Internet (Untrusted Zone)
-    subgraph L0["🌐 LAYER 0: INTERNET (UNTRUSTED ZONE)"]
-        Attackers["⚠️ Potential Threats<br/>• DDoS attacks<br/>• Bot traffic<br/>• Malicious users"]
-        Users["👥 Legitimate Users<br/>• Web browsers<br/>• Mobile apps"]
+flowchart LR
+    %% Layer 0: Internet
+    subgraph L0["🌐 L0: INTERNET"]
+        direction TB
+        Threats["⚠️ THREATS<br/>DDoS/Bots<br/>Malicious"]
+        Users["👥 USERS<br/>Web/Mobile"]
     end
     
     %% Layer 1: Edge Security
-    subgraph L1["🛡️ LAYER 1: EDGE SECURITY"]
+    subgraph L1["🛡️ L1: EDGE"]
         direction TB
-        
-        subgraph DNSSecurity["DNS Security"]
-            DNSSEC["DNSSEC<br/>(Domain validation)"]
-            DNSFiltering["DNS Filtering<br/>(Block malicious domains)"]
-        end
-        
-        subgraph CDNProtection["CDN Protection (Optional CloudFlare)"]
-            DDoSProtection["DDoS Protection<br/>• L3/L4 mitigation<br/>• Rate limiting<br/>• Bot detection"]
-            WAF["WAF (Web Application Firewall)<br/>• OWASP Top 10 rules<br/>• Custom rule sets<br/>• IP reputation"]
-        end
-        
-        TLSTermination["TLS Termination<br/>• TLS 1.2+ only<br/>• Strong ciphers<br/>• HSTS enabled"]
+        Edge["DNS/WAF<br/>━━━━━━━<br/>• DNSSEC<br/>• DDoS Block<br/>• OWASP Rules<br/>• TLS 1.2+<br/>• HSTS"]
     end
     
     %% Layer 2: Network Security
-    subgraph L2["🔒 LAYER 2: NETWORK SECURITY"]
+    subgraph L2["🔒 L2: NETWORK"]
         direction TB
-        
-        LoadBalancer["Load Balancer<br/>• SSL/TLS inspection<br/>• Health checks<br/>• IP whitelisting (optional)"]
-        
-        subgraph Firewall["Firewall Rules"]
-            IngressRules["Ingress Rules<br/>• Allow: HTTPS (443)<br/>• Block: All other ports<br/>• Geographic filtering (optional)"]
-            
-            EgressRules["Egress Rules<br/>• Allow: Trusted APIs<br/>• Allow: Database (5432)<br/>• Block: Suspicious IPs"]
-        end
+        Network["Firewall<br/>━━━━━━━<br/>• Load Balance<br/>• HTTPS Only<br/>• IP Filtering<br/>• TLS Inspect"]
     end
     
     %% Layer 3: Application Security
-    subgraph L3["🔐 LAYER 3: APPLICATION SECURITY"]
+    subgraph L3["🔐 L3: APP"]
         direction TB
-        
-        subgraph SecurityMiddleware["Security Middleware Stack"]
-            direction LR
-            
-            M1["1. Helmet.js<br/>• CSP headers<br/>• X-Frame-Options<br/>• X-Content-Type-Options"]
-            
-            M2["2. CORS<br/>• Allowed origins<br/>• Credentials control<br/>• Method restrictions"]
-            
-            M3["3. Rate Limiter<br/>• 100 req/15min<br/>• Per IP tracking<br/>• Sliding window"]
-            
-            M4["4. INSA Hardening<br/>• XSS detection<br/>• SQL injection blocking<br/>• Path traversal prevention"]
-            
-            M5["5. XSS Clean<br/>• Input sanitization<br/>• Output encoding"]
-            
-            M6["6. HPP Protection<br/>• Parameter pollution<br/>• Array filtering"]
-        end
-        
-        subgraph AuthSecurity["Authentication Security"]
-            SessionSec["Session Management<br/>• httpOnly cookies<br/>• Secure flag<br/>• SameSite: Lax<br/>• 24hr timeout"]
-            
-            OTPSec["OTP Security<br/>• Bcrypt hashing<br/>• 10-min expiration<br/>• Rate limiting (5/hour)"]
-            
-            PasswordSec["Password Security<br/>• Bcrypt (10 rounds)<br/>• Min 8 characters<br/>• Complexity rules"]
-        end
-        
-        subgraph InputValidation["Input Validation"]
-            ClientVal["Client-side<br/>• Zod schemas<br/>• React Hook Form<br/>• Type checking"]
-            
-            ServerVal["Server-side<br/>• Zod validation<br/>• express-validator<br/>• INSA hardening"]
-        end
+        Middleware["MIDDLEWARE<br/>━━━━━━━<br/>• Helmet CSP<br/>• CORS Control<br/>• Rate Limit<br/>• XSS/SQL Block<br/>• HPP Protect"]
+        Auth["AUTH<br/>━━━━━━━<br/>• OTP Bcrypt<br/>• Session 24hr<br/>• httpOnly<br/>• SameSite"]
+        Validate["VALIDATION<br/>━━━━━━━<br/>• Zod Schema<br/>• Type Check<br/>• Sanitize IO"]
     end
     
     %% Layer 4: Data Security
-    subgraph L4["💾 LAYER 4: DATA SECURITY"]
+    subgraph L4["💾 L4: DATA"]
         direction TB
-        
-        subgraph DataAccess["Data Access Control"]
-            RBAC["RBAC (Role-Based)<br/>• 5 user roles<br/>• Granular permissions<br/>• Server-side enforcement"]
-            
-            ORMSecurity["ORM Security<br/>• Drizzle ORM (100%)<br/>• Parameterized queries<br/>• Zero raw SQL"]
-            
-            RowLevelSec["Row-Level Security<br/>• User owns records<br/>• Query filtering<br/>• Admin override"]
-        end
-        
-        subgraph Encryption["Encryption"]
-            InTransit["In-Transit<br/>• TLS 1.2+ (All connections)<br/>• Certificate pinning (planned)<br/>• HTTPS only"]
-            
-            AtRest["At-Rest<br/>• AES-256 (Neon DB)<br/>• Encrypted backups<br/>• Secure key storage"]
-            
-            Sensitive["Sensitive Fields<br/>• Passwords: Bcrypt<br/>• Payment info: Encrypted<br/>• IDs: Hashed indexes"]
-        end
+        Access["ACCESS<br/>━━━━━━━<br/>• RBAC 5 Roles<br/>• Row-Level<br/>• Drizzle ORM<br/>• Zero Raw SQL"]
+        Encrypt["ENCRYPTION<br/>━━━━━━━<br/>• TLS 1.2+<br/>• AES-256 Rest<br/>• Bcrypt Pass<br/>• 27 Fields 🔒"]
     end
     
-    %% Layer 5: Monitoring & Logging
-    subgraph L5["📊 LAYER 5: MONITORING & AUDIT"]
+    %% Layer 5: Monitoring
+    subgraph L5["📊 L5: MONITOR"]
         direction TB
-        
-        subgraph Logging["Security Logging"]
-            ActivityLog["User Activity Log<br/>• Login attempts<br/>• Permission changes<br/>• Data access"]
-            
-            SecurityLog["Security Events<br/>• Failed auth<br/>• Rate limit hits<br/>• Suspicious patterns"]
-            
-            ErrorLog["Error Logging<br/>• Stack traces (dev only)<br/>• Generic errors (prod)<br/>• No sensitive data"]
-        end
-        
-        subgraph Monitoring["Real-time Monitoring"]
-            Alerts["Security Alerts<br/>• Brute force detection<br/>• Unusual activity<br/>• Admin actions"]
-            
-            Metrics["Security Metrics<br/>• Failed logins/hour<br/>• Rate limit violations<br/>• Error rates"]
-        end
-        
-        subgraph AuditTrail["Audit Trail"]
-            ImmutableLog["Immutable Logs<br/>• PostgreSQL storage<br/>• 90-day retention<br/>• Tamper detection"]
-            
-            ComplianceReport["Compliance Reports<br/>• INSA requirements<br/>• OWASP checklist<br/>• Admin access logs"]
-        end
+        Logs["AUDIT LOGS<br/>━━━━━━━<br/>• Activity Track<br/>• Security Event<br/>• 90-Day Keep<br/>• INSA/ERCA"]
     end
     
     %% Layer 6: Incident Response
-    subgraph L6["🚨 LAYER 6: INCIDENT RESPONSE"]
-        direction LR
-        
-        Detection["Detection<br/>• Automated alerts<br/>• Pattern analysis<br/>• Anomaly detection"]
-        
-        Response["Response<br/>• Account lockout<br/>• IP blocking<br/>• Admin notification"]
-        
-        Recovery["Recovery<br/>• Database restore<br/>• Session invalidation<br/>• User communication"]
-    end
-    
-    %% External Security Integrations
-    subgraph ExternalSec["🔗 EXTERNAL SECURITY SERVICES"]
+    subgraph L6["🚨 L6: RESPONSE"]
         direction TB
-        
-        FaydaID["Fayda ID (eKYC)<br/>• Government verification<br/>• Encrypted transmission<br/>• Secure storage"]
-        
-        PaymentSecurity["Payment Processor Security<br/>• PCI DSS compliant<br/>• Tokenization<br/>• 3D Secure"]
-        
-        ThirdPartyAPIs["Third-Party API Security<br/>• API key rotation<br/>• Request signing<br/>• Rate limiting"]
+        Incident["INCIDENT<br/>━━━━━━━<br/>• Auto Alert<br/>• IP Block<br/>• Account Lock<br/>• DB Restore"]
     end
     
-    %% Flow Connections
-    Users & Attackers -->|"Internet Traffic"| L1
+    %% External Security
+    subgraph External["🔗 EXTERNAL"]
+        direction TB
+        ExtSec["APIs<br/>━━━━━━━<br/>• Fayda eKYC<br/>• PCI DSS<br/>• Key Rotation"]
+    end
     
-    L1 --> TLSTermination
-    TLSTermination --> L2
+    %% Horizontal Flow
+    L0 -->|Traffic| L1
+    L1 -->|TLS| L2
+    L2 -->|Filter| L3
+    L3 --> Middleware
+    Middleware --> Auth
+    Auth --> Validate
+    Validate --> L4
+    L4 --> Access
+    Access --> Encrypt
     
-    L2 --> LoadBalancer
-    LoadBalancer --> Firewall
-    Firewall --> L3
+    L3 & L4 -.->|Events| L5
+    L5 -.->|Alert| L6
+    L3 & L4 -->|Secure| External
     
-    L3 --> SecurityMiddleware
-    SecurityMiddleware --> AuthSecurity
-    AuthSecurity --> InputValidation
-    InputValidation --> L4
+    %% Styling - Compact for A4
+    classDef l0Class fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
+    classDef l1Class fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,color:#000
+    classDef l2Class fill:#f3e5f5,stroke:#6a1b9a,stroke-width:3px,color:#000
+    classDef l3Class fill:#fff3e0,stroke:#e65100,stroke-width:3px,color:#000
+    classDef l4Class fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef l5Class fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#000
+    classDef l6Class fill:#fce4ec,stroke:#ad1457,stroke-width:3px,color:#000
+    classDef extClass fill:#f1f8e9,stroke:#558b2f,stroke-width:2px,color:#000
     
-    L4 --> DataAccess
-    DataAccess --> Encryption
-    
-    L3 & L4 -.->|"Log Events"| L5
-    L5 -.->|"Trigger Alerts"| L6
-    
-    L3 & L4 -->|"API Calls"| ExternalSec
-    
-    %% Styling
-    classDef threatClass fill:#ffebee,stroke:#c62828,stroke-width:3px
-    classDef userClass fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef edgeClass fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
-    classDef networkClass fill:#f3e5f5,stroke:#6a1b9a,stroke-width:3px
-    classDef appClass fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    classDef dataClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px
-    classDef monitorClass fill:#e0f2f1,stroke:#00695c,stroke-width:3px
-    classDef incidentClass fill:#fce4ec,stroke:#ad1457,stroke-width:3px
-    classDef externalClass fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
-    
-    class Attackers threatClass
-    class Users userClass
-    class DNSSEC,DNSFiltering,DDoSProtection,WAF,TLSTermination edgeClass
-    class LoadBalancer,IngressRules,EgressRules networkClass
-    class M1,M2,M3,M4,M5,M6,SessionSec,OTPSec,PasswordSec,ClientVal,ServerVal appClass
-    class RBAC,ORMSecurity,RowLevelSec,InTransit,AtRest,Sensitive dataClass
-    class ActivityLog,SecurityLog,ErrorLog,Alerts,Metrics,ImmutableLog,ComplianceReport monitorClass
-    class Detection,Response,Recovery incidentClass
-    class FaydaID,PaymentSecurity,ThirdPartyAPIs externalClass
+    class Threats,Users l0Class
+    class Edge l1Class
+    class Network l2Class
+    class Middleware,Auth,Validate l3Class
+    class Access,Encrypt l4Class
+    class Logs l5Class
+    class Incident l6Class
+    class ExtSec extClass
 ```
 
 ## Security Control Details
