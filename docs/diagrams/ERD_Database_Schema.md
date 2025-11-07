@@ -7,13 +7,13 @@ flowchart TB
     %% CORE USER & AUTHENTICATION GROUP
     %% ========================================
     
-    USERS["<b>USERS</b><br/>———————————————<br/>🔑 id (PK)<br/>📧 email (UK)<br/>🔒 password<br/>👤 first_name<br/>👤 last_name<br/>🎭 role<br/>📱 phone_number (UK)<br/>✓ phone_verified<br/>✓ id_verified<br/>🆔 fayda_id<br/>🔢 otp<br/>⏰ otp_expiry<br/>📊 status"]
+    USERS["<b>USERS</b><br/>———————————————<br/>🔑 id (PK)<br/>📧 email (UK)<br/>🔐 password 🚨BCRYPT<br/>👤 first_name<br/>👤 last_name<br/>🎭 role 🛡️RBAC<br/>🔒 phone_number (UK) 🚨<br/>✓ phone_verified<br/>✓ id_verified<br/>🔒 id_number 🚨<br/>🔒 fayda_id (UK) 🚨<br/>🔐 otp 🚨BCRYPT<br/>⏰ otp_expiry<br/>📊 status"]
     
-    SESSIONS["<b>SESSIONS</b><br/>———————————————<br/>🔑 sid (PK)<br/>📦 sess (jsonb)<br/>⏰ expire"]
+    SESSIONS["<b>SESSIONS</b><br/>———————————————<br/>🔑 sid (PK)<br/>🔐 sess (jsonb) 🚨ENCRYPTED<br/>⏰ expire"]
     
-    VERIFICATION_DOCS["<b>VERIFICATION_DOCUMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📄 document_type<br/>🔗 document_url<br/>📊 status<br/>🔗 verified_by (FK)<br/>⏰ verified_at"]
+    VERIFICATION_DOCS["<b>VERIFICATION_DOCUMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📄 document_type<br/>🔒 document_url 🚨ENCRYPTED<br/>📊 status<br/>🔗 verified_by (FK)<br/>⏰ verified_at"]
     
-    EMERGENCY["<b>EMERGENCY_CONTACTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>👤 contact_name<br/>📱 contact_phone<br/>👥 relationship"]
+    EMERGENCY["<b>EMERGENCY_CONTACTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>👤 contact_name<br/>🔒 contact_phone 🚨<br/>👥 relationship"]
     
     ACTIVITY_LOG["<b>USER_ACTIVITY_LOG</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📝 action<br/>📦 metadata (jsonb)"]
     
@@ -21,9 +21,9 @@ flowchart TB
     %% PROPERTY MANAGEMENT GROUP
     %% ========================================
     
-    PROPERTIES["<b>PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 host_id (FK)<br/>📝 title<br/>📄 description<br/>🏠 type<br/>📊 status<br/>🌍 city<br/>💰 price_per_night<br/>👥 max_guests<br/>🛏️ bedrooms<br/>📍 latitude, longitude<br/>📷 images[]<br/>⭐ rating<br/>✓ is_active"]
+    PROPERTIES["<b>PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 host_id (FK)<br/>📝 title<br/>📄 description<br/>🏠 type<br/>📊 status 🛡️WORKFLOW<br/>🌍 city<br/>💰 price_per_night<br/>👥 max_guests<br/>🛏️ bedrooms<br/>🔒 latitude 🚨GPS<br/>🔒 longitude 🚨GPS<br/>📷 images[] 🛡️STORAGE<br/>⭐ rating<br/>✓ is_active"]
     
-    PROPERTY_INFO["<b>PROPERTY_INFO</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔐 lockbox_code<br/>📡 wifi_details<br/>📋 house_rules<br/>🤖 lemlem_context"]
+    PROPERTY_INFO["<b>PROPERTY_INFO</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔐 lockbox_code 🚨<br/>🔐 wifi_details 🚨<br/>📋 house_rules<br/>🤖 lemlem_context"]
     
     FAVORITES["<b>FAVORITES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>🔗 property_id (FK)"]
     
@@ -31,21 +31,21 @@ flowchart TB
     %% BOOKING & PAYMENT GROUP
     %% ========================================
     
-    BOOKINGS["<b>BOOKINGS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>📅 check_in<br/>📅 check_out<br/>👥 total_guests<br/>💰 total_amount<br/>📊 booking_status<br/>💳 payment_status<br/>🔢 access_code"]
+    BOOKINGS["<b>BOOKINGS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>📅 check_in<br/>📅 check_out<br/>👥 total_guests<br/>🔒 total_amount 🚨FINANCIAL<br/>📊 booking_status 🛡️WORKFLOW<br/>💳 payment_status 🛡️WORKFLOW<br/>🔐 access_code 🚨6-DIGIT"]
     
-    PAYMENTS["<b>PAYMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 booking_id (FK)<br/>💰 amount<br/>💱 currency<br/>💳 payment_method<br/>🆔 transaction_id (UK)<br/>💵 alga_commission<br/>💵 vat_amount<br/>💵 host_payout<br/>📊 status"]
+    PAYMENTS["<b>PAYMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 booking_id (FK)<br/>🔒 amount 🚨FINANCIAL<br/>💱 currency<br/>💳 payment_method<br/>🔒 transaction_id (UK) 🚨<br/>🔒 alga_commission 🚨FINANCIAL<br/>🔒 vat_amount 🚨FINANCIAL<br/>🔒 withholding_tax 🚨FINANCIAL<br/>🔒 host_payout 🚨FINANCIAL<br/>📊 status 🛡️WORKFLOW"]
     
-    REVIEWS["<b>REVIEWS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>🔗 booking_id (FK)<br/>⭐ rating<br/>🧹 cleanliness_rating<br/>✓ accuracy_rating<br/>📍 location_rating<br/>💬 comment"]
+    REVIEWS["<b>REVIEWS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>🔗 booking_id (FK) 🛡️VERIFIED<br/>⭐ rating<br/>🧹 cleanliness_rating<br/>✓ accuracy_rating<br/>📍 location_rating<br/>💬 comment"]
     
     %% ========================================
     %% AGENT COMMISSION GROUP
     %% ========================================
     
-    AGENTS["<b>AGENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📱 telebirr_account<br/>📊 verification_status<br/>💰 total_earnings"]
+    AGENTS["<b>AGENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>🔒 telebirr_account 🚨PAYOUT<br/>📊 verification_status 🛡️WORKFLOW<br/>🔒 total_earnings 🚨FINANCIAL"]
     
-    AGENT_PROPS["<b>AGENT_PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 property_id (FK)<br/>⏰ linked_at<br/>⏰ expires_at"]
+    AGENT_PROPS["<b>AGENT_PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 property_id (FK)<br/>⏰ linked_at<br/>⏰ expires_at 🛡️36-MONTHS"]
     
-    AGENT_COMM["<b>AGENT_COMMISSIONS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 booking_id (FK)<br/>💰 commission_amount<br/>📊 payment_status<br/>⏰ paid_at"]
+    AGENT_COMM["<b>AGENT_COMMISSIONS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 booking_id (FK)<br/>🔒 commission_amount 🚨5%<br/>📊 payment_status 🛡️WORKFLOW<br/>⏰ paid_at"]
     
     %% ========================================
     %% SERVICE MARKETPLACE
@@ -85,17 +85,29 @@ flowchart TB
     %% STYLING
     %% ========================================
     
+    %% ========================================
+    %% LEGEND
+    %% ========================================
+    
+    LEGEND["<b>🔐 SECURITY LEGEND</b><br/>———————————————<br/>🔑 = Primary Key<br/>🔗 = Foreign Key<br/>🚨 = SENSITIVE (Encryption Required)<br/>🔐 = BCRYPT Hashing<br/>🛡️ = Access Control Required<br/>🔒 = Encrypted at Rest (AES-256)"]
+    
+    %% ========================================
+    %% STYLING
+    %% ========================================
+    
     classDef userClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
     classDef propertyClass fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
     classDef bookingClass fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
     classDef agentClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
     classDef serviceClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef legendClass fill:#ffebee,stroke:#c62828,stroke-width:4px,color:#000
     
     class USERS,SESSIONS,VERIFICATION_DOCS,EMERGENCY,ACTIVITY_LOG userClass
     class PROPERTIES,PROPERTY_INFO,FAVORITES propertyClass
     class BOOKINGS,PAYMENTS,REVIEWS bookingClass
     class AGENTS,AGENT_PROPS,AGENT_COMM agentClass
     class SERVICES serviceClass
+    class LEGEND legendClass
 ```
 
 ## Database Overview
@@ -417,19 +429,88 @@ Overall Rating = Σ(rating × weight) / Σ(weight)
 
 ---
 
-## Sensitive Field Summary 🔒
+## 🔐 INSA Security Requirements - Sensitive Field Matrix
+
+### **Complete List of Fields Requiring Encryption & Access Control**
+
+| Table | Field | Sensitivity Level | Encryption Type | Access Control | Business Justification |
+|-------|-------|------------------|-----------------|----------------|----------------------|
+| **USERS** | password | 🚨 CRITICAL | Bcrypt (cost 10) | System only (never displayed) | Authentication credential |
+| | otp | 🚨 CRITICAL | Bcrypt (cost 10) | System only (10-min expiry) | One-time password |
+| | phone_number | 🚨 CRITICAL | AES-256 at-rest | User/Admin only | PII - Contact info |
+| | email | 🔒 SENSITIVE | AES-256 at-rest | User/Admin only | PII - Contact info |
+| | id_number | 🚨 CRITICAL | AES-256 at-rest | User/Operator/Admin | Government ID number |
+| | fayda_id | 🚨 CRITICAL | AES-256 at-rest | User/Operator/Admin | Ethiopian national ID |
+| | role | 🛡️ PROTECTED | - | RBAC enforcement | Authorization control |
+| **SESSIONS** | sess | 🚨 CRITICAL | Encrypted (jsonb) | System only | User session data |
+| **VERIFICATION_DOCUMENTS** | document_url | 🚨 CRITICAL | Encrypted storage | Operator/Admin only | ID document images |
+| **EMERGENCY_CONTACTS** | contact_phone | 🔒 SENSITIVE | AES-256 at-rest | User/Admin only | Emergency contact PII |
+| **PROPERTIES** | latitude | 🔒 SENSITIVE | - | Host/Guest/Admin | Exact GPS location |
+| | longitude | 🔒 SENSITIVE | - | Host/Guest/Admin | Exact GPS location |
+| | images | 🛡️ PROTECTED | Secure storage | Public (active listings) | Property photos |
+| **PROPERTY_INFO** | lockbox_code | 🚨 CRITICAL | AES-256 at-rest | Host/Guest (during booking) | Physical access code |
+| | wifi_details | 🔒 SENSITIVE | AES-256 at-rest | Host/Guest (during booking) | Network credentials |
+| **BOOKINGS** | access_code | 🚨 CRITICAL | Hashed index | Guest/Host only | 6-digit property access |
+| | total_amount | 🔒 FINANCIAL | AES-256 at-rest | Guest/Host/Admin | Payment amount |
+| **PAYMENTS** | amount | 🚨 FINANCIAL | AES-256 at-rest | Admin/Host only | Transaction amount |
+| | transaction_id | 🚨 FINANCIAL | - | Admin only | Processor reference |
+| | alga_commission | 🚨 FINANCIAL | AES-256 at-rest | Admin only | Platform revenue |
+| | vat_amount | 🚨 FINANCIAL | AES-256 at-rest | Admin only | Tax calculation |
+| | withholding_tax | 🚨 FINANCIAL | AES-256 at-rest | Admin only | Tax withholding |
+| | host_payout | 🚨 FINANCIAL | AES-256 at-rest | Admin/Host only | Host earnings |
+| **AGENTS** | telebirr_account | 🚨 CRITICAL | AES-256 at-rest | Agent/Admin only | Payout account |
+| | total_earnings | 🔒 FINANCIAL | AES-256 at-rest | Agent/Admin only | Commission earnings |
+| **AGENT_COMMISSIONS** | commission_amount | 🔒 FINANCIAL | AES-256 at-rest | Agent/Admin only | 5% commission value |
+
+### **Sensitivity Level Definitions:**
+
+- 🚨 **CRITICAL** - Must be encrypted at-rest (AES-256) + strict access control + audit logging
+- 🔒 **SENSITIVE** - Encrypted at-rest (AES-256) + access control
+- 🛡️ **PROTECTED** - Access control enforced, no encryption required
+- 🔐 **BCRYPT** - One-way hashing (passwords, OTPs)
+
+### **Access Control Matrix (RBAC):**
+
+| Role | User Data | Property Data | Booking Data | Payment Data | Agent Data | All Data |
+|------|-----------|---------------|--------------|--------------|------------|----------|
+| **Guest** | Own only | Public + booked | Own only | Own only | ❌ | ❌ |
+| **Host** | Own only | Own only | Own properties | Own payouts | ❌ | ❌ |
+| **Agent** | Own only | Linked properties | ❌ | ❌ | Own only | ❌ |
+| **Operator** | Verification queue | Pending approvals | ❌ | ❌ | ❌ | ❌ |
+| **Admin** | ✅ All | ✅ All | ✅ All | ✅ All | ✅ All | ✅ All |
+
+### **Encryption Standards:**
+
+1. **At-Rest Encryption:**
+   - Database: AES-256 (Neon default encryption)
+   - Object Storage: AES-256 (Google Cloud Storage)
+   - Passwords: Bcrypt (cost factor 10, ~100ms per hash)
+
+2. **In-Transit Encryption:**
+   - Client ↔ Server: TLS 1.2+ (HTTPS only)
+   - Server ↔ Database: TLS 1.2+ (PostgreSQL wire protocol)
+   - Server ↔ External APIs: TLS 1.2+
+
+3. **Application-Level Protection:**
+   - Session cookies: httpOnly, secure, sameSite='Lax'
+   - API keys: Environment variables (never in code)
+   - Secrets rotation: Manual (TeleBirr, SendGrid, etc.)
+
+---
+
+## Sensitive Field Summary 🔒 (Quick Reference)
 
 | Table | Sensitive Fields | Encryption/Protection |
 |-------|------------------|----------------------|
-| USERS | password, phone_number, otp, fayda_id, id_number | Bcrypt hashing, rate limiting |
-| PROPERTIES | latitude, longitude | Access control (host/admin only) |
-| BOOKINGS | access_code, total_amount | RBAC (guest/host only) |
-| PAYMENTS | ALL fields | Encrypted storage, admin/host only |
-| AGENTS | telebirr_account, total_earnings | Agent/admin access only |
-| VERIFICATION_DOCUMENTS | document_url | Encrypted, operator/admin only |
-| SESSIONS | sess | Encrypted session store |
-| PROPERTY_INFO | lockbox_code, wifi_details | Host/guest only (during booking) |
-| EMERGENCY_CONTACTS | contact_phone | User/admin only |
+| USERS | password, phone_number, otp, fayda_id, id_number | Bcrypt hashing, AES-256, rate limiting |
+| PROPERTIES | latitude, longitude | Access control (host/guest/admin only) |
+| BOOKINGS | access_code, total_amount | Hashed index, AES-256, RBAC |
+| PAYMENTS | ALL fields | AES-256 encryption, admin/host only |
+| AGENTS | telebirr_account, total_earnings | AES-256, agent/admin access only |
+| VERIFICATION_DOCUMENTS | document_url | Encrypted storage, operator/admin only |
+| SESSIONS | sess | Encrypted session store (jsonb) |
+| PROPERTY_INFO | lockbox_code, wifi_details | AES-256, host/guest only (during booking) |
+| EMERGENCY_CONTACTS | contact_phone | AES-256, user/admin only |
 
 ---
 
