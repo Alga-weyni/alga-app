@@ -1,0 +1,54 @@
+rendering chunks...
+computing gzip size...
+../dist/public/registerSW.js                                          0.13 kB
+../dist/public/manifest.webmanifest                                   0.50 kB
+../dist/public/index.html                                             2.20 kB │ gzip:   1.04 kB
+../dist/public/assets/addis_ababa_ethiopia_ab074746-DOCCYB3k.jpg    334.06 kB
+../dist/public/assets/gondar_ethiopia_roya_bce991b8-LSfEaX92.jpg    419.97 kB
+../dist/public/assets/bahir_dar_ethiopia_l_aa3e2250-C_a-SNiq.jpg    625.81 kB
+../dist/public/assets/index-BNM8jQwE.css                            126.23 kB │ gzip:  20.43 kB
+../dist/public/assets/qr-scanner-worker.min-D85Z9gVD.js              43.95 kB │ gzip:  10.46 kB
+../dist/public/assets/index-8seqj_We.js                           1,925.41 kB │ gzip: 547.20 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 16.39s
+PWA v1.1.0
+mode      generateSW
+precache  20 entries (6368.01 KiB)
+files generated
+  ../dist/public/sw.js
+  ../dist/public/workbox-e20531c6.js
+  dist/index.js  295.4kb
+⚡ Done in 29ms
+==> Uploading build...
+==> Uploaded in 23.0s. Compression took 9.4s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+file:///opt/render/project/src/dist/index.js:1286
+  throw new Error(
+        ^
+Error: DATABASE_URL must be set. Did you forget to provision a database?
+    at file:///opt/render/project/src/dist/index.js:1286:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+file:///opt/render/project/src/dist/index.js:1286
+  throw new Error(
+        ^
+Error: DATABASE_URL must be set. Did you forget to provision a database?
+    at file:///opt/render/project/src/dist/index.js:1286:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
