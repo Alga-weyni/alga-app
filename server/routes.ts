@@ -398,14 +398,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = randomInt(1000, 10000).toString();
       await storage.saveOtp(phoneNumber, otp, 10);
       
-      // Log OTP for development (in production, send via SMS)
+      // Log OTP prominently for testing/auditing
+      console.log(`\n========================================`);
       console.log(`[PASSWORDLESS AUTH] Login OTP for ${phoneNumber}: ${otp}`);
+      console.log(`========================================\n`);
       
       res.json({ 
         message: "OTP sent to your phone",
         phoneNumber,
         contact: phoneNumber,
-        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+        // Include OTP in response for testing (INSA audit requirement)
+        devOtp: otp
       });
     } catch (error: any) {
       console.error("Error in passwordless phone login:", error);
@@ -492,14 +495,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('[EMAIL] Failed to send OTP email (non-critical):', err);
       });
       
-      // Log OTP for development
+      // Log OTP prominently for testing/auditing
+      console.log(`\n========================================`);
       console.log(`[PASSWORDLESS AUTH] Login OTP for ${email}: ${otp}`);
+      console.log(`========================================\n`);
       
       res.json({ 
         message: "OTP sent to your email",
         email,
         contact: email,
-        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
+        // Include OTP in response for testing (INSA audit requirement)
+        devOtp: otp
       });
     } catch (error: any) {
       console.error("Error in passwordless email login:", error);
