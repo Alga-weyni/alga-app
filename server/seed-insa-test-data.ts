@@ -543,14 +543,12 @@ async function seedINSATestData() {
   }
 }
 
-// Run if executed directly
-if (require.main === module) {
-  seedINSATestData()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
-}
+// Run the seeding function
+seedINSATestData()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 
 export { seedINSATestData };
