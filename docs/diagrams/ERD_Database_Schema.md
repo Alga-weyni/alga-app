@@ -3,217 +3,217 @@
 
 ```mermaid
 erDiagram
-    %% CORE ENTITIES
+    %% ========================================
+    %% CORE USER & AUTHENTICATION
+    %% ========================================
     
     USERS {
-        varchar id PK "Primary Key (UUID)"
-        varchar email UK "Unique, nullable"
-        varchar password "Bcrypt hashed"
+        varchar id PK
+        varchar email UK
+        varchar password
         varchar first_name
         varchar last_name
-        varchar profile_image_url
-        varchar role "guest, host, agent, operator, admin"
-        varchar phone_number UK "Unique, required"
-        boolean phone_verified "Default: false"
-        boolean id_verified "Default: false"
-        varchar id_number "Ethiopian ID, Passport, etc."
-        varchar fayda_id "12-digit Fayda ID"
-        boolean fayda_verified "Default: false"
-        varchar otp "4-digit code"
-        timestamp otp_expiry "10 minutes validity"
-        varchar status "active, suspended, pending"
-        jsonb preferences "User settings"
-        timestamp created_at
-    }
-    
-    PROPERTIES {
-        serial id PK "Auto-increment"
-        varchar host_id FK "References USERS.id"
-        varchar title "Max 255 chars"
-        text description
-        varchar type "hotel, apartment, guesthouse, etc."
-        varchar status "pending, approved, rejected"
-        varchar verified_by FK "References USERS.id (Operator)"
-        decimal latitude "GPS coordinate (8 decimals)"
-        decimal longitude "GPS coordinate (8 decimals)"
-        text address
-        varchar city "Ethiopian cities"
-        varchar region
-        decimal price_per_night "ETB"
-        integer max_guests
-        integer bedrooms
-        integer bathrooms
-        text[] amenities "Array of features"
-        text[] images "Array of URLs (max 10)"
-        boolean is_active "Default: true"
-        decimal rating "0.00 to 5.00"
-        integer review_count "Default: 0"
-        timestamp created_at
-    }
-    
-    BOOKINGS {
-        serial id PK "Auto-increment"
-        integer property_id FK "References PROPERTIES.id"
-        varchar guest_id FK "References USERS.id"
-        date check_in "ISO 8601"
-        date check_out "ISO 8601"
-        integer total_guests
-        decimal total_amount "ETB (includes all fees)"
-        varchar booking_status "pending, confirmed, cancelled, completed"
-        varchar payment_status "pending, paid, refunded"
-        varchar access_code "6-digit unique code"
-        timestamp created_at
-    }
-    
-    PAYMENTS {
-        serial id PK "Auto-increment"
-        integer booking_id FK "References BOOKINGS.id"
-        decimal amount "Total booking amount"
-        varchar currency "ETB, USD"
-        varchar payment_method "chapa, stripe, paypal, telebirr"
-        varchar transaction_id UK "Processor transaction ID"
-        decimal alga_commission "12% of booking amount"
-        decimal vat_amount "15% of commission"
-        decimal withholding_tax "2% of booking amount"
-        decimal host_payout "100% of booking amount"
-        varchar status "pending, completed, failed, refunded"
-        timestamp created_at
-    }
-    
-    AGENTS {
-        serial id PK "Auto-increment"
-        varchar user_id FK "References USERS.id"
-        varchar telebirr_account "TeleBirr phone number"
-        varchar verification_status "pending, verified, rejected"
-        decimal total_earnings "Cumulative commission"
-        timestamp created_at
-    }
-    
-    AGENT_PROPERTIES {
-        serial id PK "Auto-increment"
-        integer agent_id FK "References AGENTS.id"
-        integer property_id FK "References PROPERTIES.id"
-        timestamp linked_at "Link creation date"
-        timestamp expires_at "36 months from linked_at"
-    }
-    
-    AGENT_COMMISSIONS {
-        serial id PK "Auto-increment"
-        integer agent_id FK "References AGENTS.id"
-        integer booking_id FK "References BOOKINGS.id"
-        decimal commission_amount "5% of booking total"
-        varchar payment_status "pending, paid"
-        timestamp paid_at "TeleBirr payout timestamp"
-        timestamp created_at
-    }
-    
-    REVIEWS {
-        serial id PK "Auto-increment"
-        integer property_id FK "References PROPERTIES.id"
-        varchar guest_id FK "References USERS.id"
-        integer booking_id FK "References BOOKINGS.id"
-        integer rating "1 to 5 stars (overall)"
-        integer cleanliness_rating "1 to 5"
-        integer accuracy_rating "1 to 5"
-        integer communication_rating "1 to 5"
-        integer location_rating "1 to 5"
-        integer value_rating "1 to 5"
-        text comment "Review text"
-        timestamp created_at
-    }
-    
-    SERVICES {
-        serial id PK "Auto-increment"
-        varchar provider_id FK "References USERS.id"
-        varchar category "cleaning, laundry, transport, etc."
-        varchar title
-        text description
-        decimal price "ETB"
-        varchar city "Service location"
-        boolean availability "Default: true"
-        timestamp created_at
-    }
-    
-    VERIFICATION_DOCUMENTS {
-        serial id PK "Auto-increment"
-        varchar user_id FK "References USERS.id"
-        varchar document_type "national_id, passport, property_deed"
-        varchar document_url "Object storage URL"
-        varchar status "pending, approved, rejected"
-        varchar verified_by FK "References USERS.id (Operator)"
-        timestamp verified_at
-        text rejection_reason
+        varchar role
+        varchar phone_number UK
+        boolean phone_verified
+        boolean id_verified
+        varchar fayda_id
+        varchar otp
+        timestamp otp_expiry
+        varchar status
         timestamp created_at
     }
     
     SESSIONS {
-        varchar sid PK "Session ID"
-        jsonb sess "Session data (encrypted)"
-        timestamp expire "24-hour expiry"
+        varchar sid PK
+        jsonb sess
+        timestamp expire
     }
     
-    USER_ACTIVITY_LOG {
-        serial id PK "Auto-increment"
-        varchar user_id FK "References USERS.id"
-        varchar action "viewed_property, made_booking, etc."
-        jsonb metadata "Additional context"
+    VERIFICATION_DOCUMENTS {
+        serial id PK
+        varchar user_id FK
+        varchar document_type
+        varchar document_url
+        varchar status
+        varchar verified_by FK
+        timestamp verified_at
         timestamp created_at
-    }
-    
-    %% RELATIONSHIPS (Cardinality)
-    
-    USERS ||--o{ PROPERTIES : "hosts"
-    USERS ||--o{ BOOKINGS : "books"
-    USERS ||--o{ REVIEWS : "writes"
-    USERS ||--o{ SERVICES : "provides"
-    USERS ||--o| AGENTS : "registers_as"
-    USERS ||--o{ VERIFICATION_DOCUMENTS : "uploads"
-    USERS ||--o{ USER_ACTIVITY_LOG : "performs"
-    USERS ||--o{ SESSIONS : "has_session"
-    
-    PROPERTIES ||--o{ BOOKINGS : "receives"
-    PROPERTIES ||--o{ REVIEWS : "has"
-    PROPERTIES ||--o{ AGENT_PROPERTIES : "linked_by"
-    
-    BOOKINGS ||--|| PAYMENTS : "has_payment"
-    BOOKINGS ||--o{ AGENT_COMMISSIONS : "generates"
-    BOOKINGS ||--o| REVIEWS : "reviewed_via"
-    
-    AGENTS ||--o{ AGENT_PROPERTIES : "links"
-    AGENTS ||--o{ AGENT_COMMISSIONS : "earns"
-    
-    PROPERTY_INFO {
-        serial id PK "Auto-increment"
-        integer property_id FK "References PROPERTIES.id (1:1)"
-        varchar lockbox_code "Access instructions"
-        text parking_instructions
-        text wifi_details "Network name, password"
-        text house_rules
-        jsonb lemlem_context "AI assistant data"
-        timestamp updated_at
     }
     
     EMERGENCY_CONTACTS {
-        serial id PK "Auto-increment"
-        varchar user_id FK "References USERS.id"
+        serial id PK
+        varchar user_id FK
         varchar contact_name
         varchar contact_phone
-        varchar relationship "family, friend, etc."
+        varchar relationship
         timestamp created_at
+    }
+    
+    USER_ACTIVITY_LOG {
+        serial id PK
+        varchar user_id FK
+        varchar action
+        jsonb metadata
+        timestamp created_at
+    }
+    
+    USERS ||--o{ SESSIONS : has
+    USERS ||--o{ VERIFICATION_DOCUMENTS : uploads
+    USERS ||--o{ EMERGENCY_CONTACTS : has
+    USERS ||--o{ USER_ACTIVITY_LOG : performs
+    
+    %% ========================================
+    %% PROPERTY MANAGEMENT
+    %% ========================================
+    
+    PROPERTIES {
+        serial id PK
+        varchar host_id FK
+        varchar title
+        text description
+        varchar type
+        varchar status
+        varchar city
+        decimal price_per_night
+        integer max_guests
+        integer bedrooms
+        decimal latitude
+        decimal longitude
+        text[] images
+        decimal rating
+        boolean is_active
+        timestamp created_at
+    }
+    
+    PROPERTY_INFO {
+        serial id PK
+        integer property_id FK
+        varchar lockbox_code
+        text wifi_details
+        text house_rules
+        jsonb lemlem_context
+        timestamp updated_at
     }
     
     FAVORITES {
-        serial id PK "Auto-increment"
-        varchar user_id FK "References USERS.id"
-        integer property_id FK "References PROPERTIES.id"
+        serial id PK
+        varchar user_id FK
+        integer property_id FK
         timestamp created_at
     }
     
-    %% Additional Relationships
-    PROPERTIES ||--o| PROPERTY_INFO : "has_details"
-    USERS ||--o{ EMERGENCY_CONTACTS : "has"
-    USERS ||--o{ FAVORITES : "saves"
-    PROPERTIES ||--o{ FAVORITES : "favorited_by"
+    USERS ||--o{ PROPERTIES : hosts
+    PROPERTIES ||--|| PROPERTY_INFO : has_details
+    USERS ||--o{ FAVORITES : saves
+    PROPERTIES ||--o{ FAVORITES : favorited
+    
+    %% ========================================
+    %% BOOKING & PAYMENT FLOW
+    %% ========================================
+    
+    BOOKINGS {
+        serial id PK
+        integer property_id FK
+        varchar guest_id FK
+        date check_in
+        date check_out
+        integer total_guests
+        decimal total_amount
+        varchar booking_status
+        varchar payment_status
+        varchar access_code
+        timestamp created_at
+    }
+    
+    PAYMENTS {
+        serial id PK
+        integer booking_id FK
+        decimal amount
+        varchar currency
+        varchar payment_method
+        varchar transaction_id UK
+        decimal alga_commission
+        decimal vat_amount
+        decimal host_payout
+        varchar status
+        timestamp created_at
+    }
+    
+    REVIEWS {
+        serial id PK
+        integer property_id FK
+        varchar guest_id FK
+        integer booking_id FK
+        integer rating
+        integer cleanliness_rating
+        integer accuracy_rating
+        integer location_rating
+        text comment
+        timestamp created_at
+    }
+    
+    USERS ||--o{ BOOKINGS : books
+    PROPERTIES ||--o{ BOOKINGS : receives
+    BOOKINGS ||--|| PAYMENTS : has_payment
+    BOOKINGS ||--o| REVIEWS : reviewed_via
+    PROPERTIES ||--o{ REVIEWS : has_reviews
+    USERS ||--o{ REVIEWS : writes
+    
+    %% ========================================
+    %% AGENT COMMISSION SYSTEM
+    %% ========================================
+    
+    AGENTS {
+        serial id PK
+        varchar user_id FK
+        varchar telebirr_account
+        varchar verification_status
+        decimal total_earnings
+        timestamp created_at
+    }
+    
+    AGENT_PROPERTIES {
+        serial id PK
+        integer agent_id FK
+        integer property_id FK
+        timestamp linked_at
+        timestamp expires_at
+    }
+    
+    AGENT_COMMISSIONS {
+        serial id PK
+        integer agent_id FK
+        integer booking_id FK
+        decimal commission_amount
+        varchar payment_status
+        timestamp paid_at
+        timestamp created_at
+    }
+    
+    USERS ||--|| AGENTS : registers_as
+    AGENTS ||--o{ AGENT_PROPERTIES : links
+    PROPERTIES ||--o{ AGENT_PROPERTIES : linked_by
+    AGENTS ||--o{ AGENT_COMMISSIONS : earns
+    BOOKINGS ||--o{ AGENT_COMMISSIONS : generates
+    
+    %% ========================================
+    %% SERVICE MARKETPLACE
+    %% ========================================
+    
+    SERVICES {
+        serial id PK
+        varchar provider_id FK
+        varchar category
+        varchar title
+        text description
+        decimal price
+        varchar city
+        boolean availability
+        timestamp created_at
+    }
+    
+    USERS ||--o{ SERVICES : provides
 ```
 
 ## Database Overview
