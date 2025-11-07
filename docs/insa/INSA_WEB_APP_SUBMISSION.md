@@ -313,14 +313,87 @@ INSA web certification will provide:
 
 #### 4.2.2 Features of the Web Application
 
-✅ **Development Framework:** React + TypeScript (Vite)  
-✅ **Libraries:** Radix UI, Tailwind CSS, TanStack Query, Zod  
-✅ **Third-Party Services:** Chapa, Stripe, SendGrid, Google Cloud  
-✅ **User Roles:** Guest, Host, Operator, Admin  
-✅ **Security Standards:** OWASP Top 10, NIST CSF  
-✅ **Existing Security:** Helmet.js, rate limiting, RBAC, encryption
+**Development Frameworks:**
+✅ **Frontend:** React 18 + TypeScript (Vite 5.0)  
+✅ **Backend:** Node.js 20 + Express.js + TypeScript  
+✅ **Build System:** Vite with hot module replacement (HMR)
 
-**Location:** `docs/insa/THIRD_PARTY_SERVICES.md`
+**Libraries or Plugins Integrated:**
+✅ **UI Components:** Radix UI, Shadcn/ui, Tailwind CSS  
+✅ **State Management:** TanStack Query v5 (React Query)  
+✅ **Form Handling:** React Hook Form + Zod validation  
+✅ **Routing:** Wouter (lightweight React router)  
+✅ **Database ORM:** Drizzle ORM + Drizzle Kit  
+✅ **Session Store:** connect-pg-simple (PostgreSQL sessions)  
+✅ **Security Libraries:** Helmet.js, CORS, xss-clean, express-mongo-sanitize, hpp  
+✅ **Image Processing:** Sharp, browser-image-compression  
+✅ **PDF Generation:** jsPDF (invoice generation)  
+✅ **QR/OCR:** html5-qrcode, react-qr-code, tesseract.js
+
+**Custom-Developed Modules or APIs:**
+✅ **Alga Pay API:** White-labeled payment gateway (`/api/payment/*`)  
+✅ **Commission Calculation Engine:** Agent 5% commission tracking (`/api/commissions/*`)  
+✅ **ALGA Review Engine:** Weighted review algorithm with time decay  
+✅ **Lemlem AI Assistant API:** Cultural chatbot integration (`/api/lemlem/*`)  
+✅ **Access Code Generator:** 6-digit secure property access codes  
+✅ **Tax Invoice Generator:** ERCA-compliant PDF invoicing (TIN: 0101809194)  
+✅ **ID Verification Module:** QR scanning + OCR for foreign documents  
+✅ **Delala Agent Portal:** Registration, dashboard, property linking  
+✅ **Add-On Services Marketplace:** 11 service categories API  
+✅ **Real-time Availability Check:** Booking conflict prevention algorithm
+
+**Third-Party Service Integrations:**
+✅ **Payment Processors:** Chapa, Stripe, PayPal SDK, TeleBirr  
+✅ **Communication:** SendGrid (email), Ethiopian Telecom (SMS)  
+✅ **Storage:** Google Cloud Storage (object storage)  
+✅ **Mapping:** Google Maps Geocoding API  
+✅ **Identity Verification:** Fayda ID (eKYC) integration  
+✅ **Database:** Neon PostgreSQL (serverless)
+
+**Actor/User Types:**
+✅ **Guest:** Browse, search, book properties (public + authenticated)  
+✅ **Host:** List properties, manage bookings, receive payments  
+✅ **Operator:** Verify IDs, approve properties, safety check-ins  
+✅ **Admin:** User management, agent approval, platform configuration  
+✅ **Delala Agent:** Property linking, commission tracking (special role)  
+✅ **Service Provider:** Add-on services marketplace (special role)
+
+**System Dependencies:**
+✅ **Runtime:** Node.js 20.x LTS  
+✅ **Package Manager:** npm 10.x  
+✅ **Database:** PostgreSQL 16 (Neon serverless compatible)  
+✅ **Build Tools:** Vite 5.0, TypeScript 5.3, esbuild  
+✅ **Required Ports:** 5000 (HTTP/HTTPS)  
+✅ **Environment Variables:** 15+ secrets (DATABASE_URL, payment keys, API keys)
+
+**Minimum Hosting Requirements:**
+✅ **CPU:** 1 vCPU (2+ vCPU recommended for production)  
+✅ **RAM:** 512 MB minimum (1 GB recommended)  
+✅ **Storage:** 1 GB disk space (5 GB+ with user uploads)  
+✅ **Network:** 10 Mbps uplink (100 Mbps recommended)  
+✅ **SSL/TLS:** Required (Let's Encrypt or equivalent)  
+✅ **PostgreSQL:** 100 MB database (grows with data)  
+✅ **Object Storage:** 10 GB+ for property images and documents  
+✅ **Scalability:** Auto-scaling support (1-N instances)
+
+**Implemented Security Standards or Policies:**
+✅ **OWASP Top 10 (2021):** 100% coverage  
+✅ **NIST Cybersecurity Framework:** Core functions implemented  
+✅ **PCI DSS:** By proxy (Stripe/Chapa Level 1 certified)  
+✅ **ERCA Tax Compliance:** Invoice generation, transaction logging  
+✅ **Ethiopian Data Protection:** Personal data encryption and consent
+
+**Existing Security Infrastructure:**
+✅ **Helmet.js:** CSP, X-Frame-Options, HSTS, DNS prefetch control  
+✅ **Rate Limiting:** 100 req/15min global, 10 req/15min auth endpoints  
+✅ **RBAC:** Role-Based Access Control (6 roles)  
+✅ **Encryption:** TLS 1.2+ in transit, AES-256 at rest  
+✅ **Session Security:** PostgreSQL-backed, httpOnly, secure, SameSite cookies  
+✅ **Input Validation:** Zod schemas, express-validator, XSS sanitization  
+✅ **SQL Injection Prevention:** Drizzle ORM only (zero raw SQL)  
+✅ **Audit Logging:** User activity, authentication, payment transactions
+
+**Location:** `docs/insa/THIRD_PARTY_SERVICES.md`, `docs/insa/API_DOCUMENTATION.md`
 
 #### 4.2.3 Define Specific Testing Scope
 
