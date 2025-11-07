@@ -131,7 +131,7 @@ flowchart LR
 - **Process:**
   1. Validate input (Zod schema)
   2. Compress images (browser-image-compression)
-  3. Upload to Replit Object Storage
+  3. Upload to Cloud Object Storage (Google Cloud)
   4. Generate 6-digit access code
   5. Set status = 'pending' (admin approval)
 - **Output:** Property ID, pending verification

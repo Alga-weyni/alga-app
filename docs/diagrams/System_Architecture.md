@@ -7,9 +7,9 @@ flowchart TB
         Users["👥 Users<br/>(Web & Mobile)"]
     end
     
-    subgraph ReplitInfra["☁️ REPLIT CLOUD INFRASTRUCTURE"]
+    subgraph CloudInfra["☁️ CLOUD INFRASTRUCTURE"]
         subgraph SecurityLayer["🛡️ SECURITY LAYER"]
-            TLS["🔒 TLS/SSL<br/>Automatic HTTPS<br/>(*.replit.dev)"]
+            TLS["🔒 TLS/SSL<br/>Automatic HTTPS<br/>(alga.et)"]
             Firewall["🧱 Firewall<br/>Port 5000 Only<br/>All Others Blocked"]
         end
         
@@ -53,7 +53,7 @@ flowchart TB
         
         subgraph Storage["💾 STORAGE LAYER"]
             DB["🐘 PostgreSQL<br/>(Neon Serverless)<br/>20+ Tables<br/>Auto-scaling"]
-            ObjectStore["☁️ Object Storage<br/>Google Cloud<br/>(Replit Backend)<br/>Property Images"]
+            ObjectStore["☁️ Object Storage<br/>Google Cloud Storage<br/>Property Images"]
             SessionStore["🎫 Session Store<br/>PostgreSQL Table<br/>connect-pg-simple"]
         end
     end
@@ -162,8 +162,8 @@ flowchart TB
 ### 🛡️ Security Layer
 
 #### TLS/SSL Termination
-- **Provider:** Replit Proxy (automatic)
-- **Certificate:** Wildcard cert for `*.replit.dev`
+- **Provider:** Cloud Proxy (automatic)
+- **Certificate:** SSL/TLS cert for `alga.et`
 - **Protocol:** TLS 1.2, TLS 1.3
 - **Ciphers:** Strong cipher suites only
 - **HSTS:** Enabled in production (max-age: 1 year)
@@ -171,7 +171,7 @@ flowchart TB
 #### Firewall
 - **Exposed Port:** 5000 only
 - **Blocked:** All other ports (3000, 8080, etc.)
-- **DDoS Protection:** Replit infrastructure-level
+- **DDoS Protection:** Cloud infrastructure-level
 - **Rate Limiting:** Application-level (express-rate-limit)
 
 ---
@@ -250,7 +250,7 @@ flowchart TB
 - `agent_commissions` - 5% commission tracking
 - `sessions` - Active user sessions
 
-#### Object Storage (Replit App Storage)
+#### Object Storage (Cloud Object Storage)
 - **Backend:** Google Cloud Storage
 - **Usage:** Property images (up to 10 per listing)
 - **Processing:** 
@@ -322,7 +322,7 @@ flowchart TB
 ```
 Internet (Any IP)
     ↓ HTTPS (443)
-Replit Proxy (TLS Termination)
+Cloud Proxy (TLS Termination)
     ↓ HTTP
 Firewall (Port 5000 Only)
     ↓
@@ -334,7 +334,7 @@ Object Storage (Internal - GCS)
 ```
 
 **Security Zones:**
-1. **DMZ (Demilitarized Zone):** Replit Proxy + Firewall
+1. **DMZ (Demilitarized Zone):** Cloud Proxy + Firewall
 2. **Application Zone:** Express server, middleware
 3. **Data Zone:** PostgreSQL, Object Storage
 4. **External Zone:** Payment processors, APIs
@@ -345,7 +345,7 @@ Object Storage (Internal - GCS)
 
 ### Development Environment
 ```
-Local/Replit Dev
+Local/Cloud Dev
 ├── Vite Dev Server (Hot Module Reload)
 ├── Express Server (tsx watch mode)
 ├── PostgreSQL (Neon Development DB)
@@ -354,7 +354,7 @@ Local/Replit Dev
 
 ### Production Environment (Future)
 ```
-Replit Deployment
+Cloud Deployment
 ├── Static Files (Vite build output)
 ├── Express Server (Production mode)
 ├── PostgreSQL (Neon Production DB)
@@ -379,8 +379,8 @@ Replit Deployment
 ### Security Controls
 | Control | Technology | Status |
 |---------|-----------|--------|
-| TLS/SSL | Replit Proxy | ✅ Active |
-| Firewall | Replit Infrastructure | ✅ Active |
+| TLS/SSL | Cloud Proxy | ✅ Active |
+| Firewall | Cloud Infrastructure | ✅ Active |
 | Security Headers | Helmet.js | ✅ Active |
 | CORS | cors middleware | ✅ Active |
 | Rate Limiting | express-rate-limit | ✅ Active |
