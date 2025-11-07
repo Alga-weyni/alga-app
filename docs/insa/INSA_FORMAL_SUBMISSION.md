@@ -9,20 +9,20 @@
 
 **Company Name:** Alga One Member PLC  
 **Taxpayer Identification Number (TIN):** 0101809194  
-**Business Registration Number:** [Registration Number]  
+**Business Registration Number:** [Your registration number]  
 
 **Application Name:** Alga - Ethiopian Property Rental Platform  
 **Application Type:** Mobile Application (Android & iOS) + Web Application  
 
 **Company Address:**  
 Addis Ababa, Ethiopia  
-[Specific address]  
+[Your business address]  
 
 **Contact Person:**  
-Name: [Your Name]  
-Title: [Your Title]  
-Email: [your-email@alga.et]  
-Phone: [+251 9xx xxx xxx]  
+Name: Weyni Abraha  
+Title: Founder & CEO  
+Email: Winnieaman94@gmail.com  
+Phone: +251 996 034 044  
 
 **INSA Audit Contact:**  
 Dr. Tilahun Ejigu (Ph.D.)  
@@ -354,16 +354,16 @@ Thank you for your consideration of our audit request.
 ---
 
 **Submitted by:**  
-[Your Name]  
-[Your Title]  
+Weyni Abraha  
+Founder & CEO  
 Alga One Member PLC  
 TIN: 0101809194  
 
 **Date:** November 7, 2025  
 
 **Contact:**  
-Email: [your-email@alga.et]  
-Phone: [+251 9xx xxx xxx]  
+Email: Winnieaman94@gmail.com  
+Phone: +251 996 034 044  
 
 ---
 
@@ -386,8 +386,8 @@ The Alga platform has been developed in full compliance with Ethiopian laws and 
 ---
 
 **Signature:** _______________________  
-**Name:** [Your Name]  
-**Title:** [Your Title]  
+**Name:** Weyni Abraha  
+**Title:** Founder & CEO  
 **Date:** November 7, 2025  
 
 ---
