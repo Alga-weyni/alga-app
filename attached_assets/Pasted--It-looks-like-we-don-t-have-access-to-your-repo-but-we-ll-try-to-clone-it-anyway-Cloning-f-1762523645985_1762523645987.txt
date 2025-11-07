@@ -1,0 +1,42 @@
+==> It looks like we don't have access to your repo, but we'll try to clone it anyway.
+==> Cloning from https://github.com/Alga-weyni/alga-app
+==> Checking out commit 644a9f4ea556b6817bca35aa750fd1c5dc41cf96 in branch main
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install; npm run build'...
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @tailwindcss/vite@4.1.3
+npm error Found: vite@7.1.12
+npm error node_modules/vite
+npm error   vite@"^7.1.12" from the root project
+npm error   peer vite@"^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0" from @vitejs/plugin-react@4.7.0
+npm error   node_modules/@vitejs/plugin-react
+npm error     dev @vitejs/plugin-react@"^4.3.2" from the root project
+npm error   1 more (vite-plugin-pwa)
+npm error
+npm error Could not resolve dependency:
+npm error peer vite@"^5.2.0 || ^6" from @tailwindcss/vite@4.1.3
+npm error node_modules/@tailwindcss/vite
+npm error   dev @tailwindcss/vite@"^4.1.3" from the root project
+npm error
+npm error Conflicting peer dependency: vite@6.4.1
+npm error node_modules/vite
+npm error   peer vite@"^5.2.0 || ^6" from @tailwindcss/vite@4.1.3
+npm error   node_modules/@tailwindcss/vite
+npm error     dev @tailwindcss/vite@"^4.1.3" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /opt/render/.cache/_logs/2025-11-07T13_53_42_761Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /opt/render/.cache/_logs/2025-11-07T13_53_42_761Z-debug-0.log
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+sh: 1: vite: not found
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
