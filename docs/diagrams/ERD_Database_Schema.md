@@ -2,218 +2,100 @@
 ## Alga Platform - Database Schema
 
 ```mermaid
-erDiagram
+flowchart TB
     %% ========================================
-    %% CORE USER & AUTHENTICATION
-    %% ========================================
-    
-    USERS {
-        varchar id PK
-        varchar email UK
-        varchar password
-        varchar first_name
-        varchar last_name
-        varchar role
-        varchar phone_number UK
-        boolean phone_verified
-        boolean id_verified
-        varchar fayda_id
-        varchar otp
-        timestamp otp_expiry
-        varchar status
-        timestamp created_at
-    }
-    
-    SESSIONS {
-        varchar sid PK
-        jsonb sess
-        timestamp expire
-    }
-    
-    VERIFICATION_DOCUMENTS {
-        serial id PK
-        varchar user_id FK
-        varchar document_type
-        varchar document_url
-        varchar status
-        varchar verified_by FK
-        timestamp verified_at
-        timestamp created_at
-    }
-    
-    EMERGENCY_CONTACTS {
-        serial id PK
-        varchar user_id FK
-        varchar contact_name
-        varchar contact_phone
-        varchar relationship
-        timestamp created_at
-    }
-    
-    USER_ACTIVITY_LOG {
-        serial id PK
-        varchar user_id FK
-        varchar action
-        jsonb metadata
-        timestamp created_at
-    }
-    
-    USERS ||--o{ SESSIONS : has
-    USERS ||--o{ VERIFICATION_DOCUMENTS : uploads
-    USERS ||--o{ EMERGENCY_CONTACTS : has
-    USERS ||--o{ USER_ACTIVITY_LOG : performs
-    
-    %% ========================================
-    %% PROPERTY MANAGEMENT
+    %% CORE USER & AUTHENTICATION GROUP
     %% ========================================
     
-    PROPERTIES {
-        serial id PK
-        varchar host_id FK
-        varchar title
-        text description
-        varchar type
-        varchar status
-        varchar city
-        decimal price_per_night
-        integer max_guests
-        integer bedrooms
-        decimal latitude
-        decimal longitude
-        text[] images
-        decimal rating
-        boolean is_active
-        timestamp created_at
-    }
+    USERS["<b>USERS</b><br/>———————————————<br/>🔑 id (PK)<br/>📧 email (UK)<br/>🔒 password<br/>👤 first_name<br/>👤 last_name<br/>🎭 role<br/>📱 phone_number (UK)<br/>✓ phone_verified<br/>✓ id_verified<br/>🆔 fayda_id<br/>🔢 otp<br/>⏰ otp_expiry<br/>📊 status"]
     
-    PROPERTY_INFO {
-        serial id PK
-        integer property_id FK
-        varchar lockbox_code
-        text wifi_details
-        text house_rules
-        jsonb lemlem_context
-        timestamp updated_at
-    }
+    SESSIONS["<b>SESSIONS</b><br/>———————————————<br/>🔑 sid (PK)<br/>📦 sess (jsonb)<br/>⏰ expire"]
     
-    FAVORITES {
-        serial id PK
-        varchar user_id FK
-        integer property_id FK
-        timestamp created_at
-    }
+    VERIFICATION_DOCS["<b>VERIFICATION_DOCUMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📄 document_type<br/>🔗 document_url<br/>📊 status<br/>🔗 verified_by (FK)<br/>⏰ verified_at"]
     
-    USERS ||--o{ PROPERTIES : hosts
-    PROPERTIES ||--|| PROPERTY_INFO : has_details
-    USERS ||--o{ FAVORITES : saves
-    PROPERTIES ||--o{ FAVORITES : favorited
+    EMERGENCY["<b>EMERGENCY_CONTACTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>👤 contact_name<br/>📱 contact_phone<br/>👥 relationship"]
+    
+    ACTIVITY_LOG["<b>USER_ACTIVITY_LOG</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📝 action<br/>📦 metadata (jsonb)"]
     
     %% ========================================
-    %% BOOKING & PAYMENT FLOW
+    %% PROPERTY MANAGEMENT GROUP
     %% ========================================
     
-    BOOKINGS {
-        serial id PK
-        integer property_id FK
-        varchar guest_id FK
-        date check_in
-        date check_out
-        integer total_guests
-        decimal total_amount
-        varchar booking_status
-        varchar payment_status
-        varchar access_code
-        timestamp created_at
-    }
+    PROPERTIES["<b>PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 host_id (FK)<br/>📝 title<br/>📄 description<br/>🏠 type<br/>📊 status<br/>🌍 city<br/>💰 price_per_night<br/>👥 max_guests<br/>🛏️ bedrooms<br/>📍 latitude, longitude<br/>📷 images[]<br/>⭐ rating<br/>✓ is_active"]
     
-    PAYMENTS {
-        serial id PK
-        integer booking_id FK
-        decimal amount
-        varchar currency
-        varchar payment_method
-        varchar transaction_id UK
-        decimal alga_commission
-        decimal vat_amount
-        decimal host_payout
-        varchar status
-        timestamp created_at
-    }
+    PROPERTY_INFO["<b>PROPERTY_INFO</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔐 lockbox_code<br/>📡 wifi_details<br/>📋 house_rules<br/>🤖 lemlem_context"]
     
-    REVIEWS {
-        serial id PK
-        integer property_id FK
-        varchar guest_id FK
-        integer booking_id FK
-        integer rating
-        integer cleanliness_rating
-        integer accuracy_rating
-        integer location_rating
-        text comment
-        timestamp created_at
-    }
-    
-    USERS ||--o{ BOOKINGS : books
-    PROPERTIES ||--o{ BOOKINGS : receives
-    BOOKINGS ||--|| PAYMENTS : has_payment
-    BOOKINGS ||--o| REVIEWS : reviewed_via
-    PROPERTIES ||--o{ REVIEWS : has_reviews
-    USERS ||--o{ REVIEWS : writes
+    FAVORITES["<b>FAVORITES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>🔗 property_id (FK)"]
     
     %% ========================================
-    %% AGENT COMMISSION SYSTEM
+    %% BOOKING & PAYMENT GROUP
     %% ========================================
     
-    AGENTS {
-        serial id PK
-        varchar user_id FK
-        varchar telebirr_account
-        varchar verification_status
-        decimal total_earnings
-        timestamp created_at
-    }
+    BOOKINGS["<b>BOOKINGS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>📅 check_in<br/>📅 check_out<br/>👥 total_guests<br/>💰 total_amount<br/>📊 booking_status<br/>💳 payment_status<br/>🔢 access_code"]
     
-    AGENT_PROPERTIES {
-        serial id PK
-        integer agent_id FK
-        integer property_id FK
-        timestamp linked_at
-        timestamp expires_at
-    }
+    PAYMENTS["<b>PAYMENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 booking_id (FK)<br/>💰 amount<br/>💱 currency<br/>💳 payment_method<br/>🆔 transaction_id (UK)<br/>💵 alga_commission<br/>💵 vat_amount<br/>💵 host_payout<br/>📊 status"]
     
-    AGENT_COMMISSIONS {
-        serial id PK
-        integer agent_id FK
-        integer booking_id FK
-        decimal commission_amount
-        varchar payment_status
-        timestamp paid_at
-        timestamp created_at
-    }
+    REVIEWS["<b>REVIEWS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 property_id (FK)<br/>🔗 guest_id (FK)<br/>🔗 booking_id (FK)<br/>⭐ rating<br/>🧹 cleanliness_rating<br/>✓ accuracy_rating<br/>📍 location_rating<br/>💬 comment"]
     
-    USERS ||--|| AGENTS : registers_as
-    AGENTS ||--o{ AGENT_PROPERTIES : links
-    PROPERTIES ||--o{ AGENT_PROPERTIES : linked_by
-    AGENTS ||--o{ AGENT_COMMISSIONS : earns
-    BOOKINGS ||--o{ AGENT_COMMISSIONS : generates
+    %% ========================================
+    %% AGENT COMMISSION GROUP
+    %% ========================================
+    
+    AGENTS["<b>AGENTS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 user_id (FK)<br/>📱 telebirr_account<br/>📊 verification_status<br/>💰 total_earnings"]
+    
+    AGENT_PROPS["<b>AGENT_PROPERTIES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 property_id (FK)<br/>⏰ linked_at<br/>⏰ expires_at"]
+    
+    AGENT_COMM["<b>AGENT_COMMISSIONS</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 agent_id (FK)<br/>🔗 booking_id (FK)<br/>💰 commission_amount<br/>📊 payment_status<br/>⏰ paid_at"]
     
     %% ========================================
     %% SERVICE MARKETPLACE
     %% ========================================
     
-    SERVICES {
-        serial id PK
-        varchar provider_id FK
-        varchar category
-        varchar title
-        text description
-        decimal price
-        varchar city
-        boolean availability
-        timestamp created_at
-    }
+    SERVICES["<b>SERVICES</b><br/>———————————————<br/>🔑 id (PK)<br/>🔗 provider_id (FK)<br/>🏷️ category<br/>📝 title<br/>📄 description<br/>💰 price<br/>🌍 city<br/>✓ availability"]
     
-    USERS ||--o{ SERVICES : provides
+    %% ========================================
+    %% RELATIONSHIPS (1-to-Many)
+    %% ========================================
+    
+    USERS -->|"1:N"| SESSIONS
+    USERS -->|"1:N"| VERIFICATION_DOCS
+    USERS -->|"1:N"| EMERGENCY
+    USERS -->|"1:N"| ACTIVITY_LOG
+    USERS -->|"hosts<br/>1:N"| PROPERTIES
+    USERS -->|"books<br/>1:N"| BOOKINGS
+    USERS -->|"writes<br/>1:N"| REVIEWS
+    USERS -->|"saves<br/>1:N"| FAVORITES
+    USERS -->|"1:1"| AGENTS
+    USERS -->|"provides<br/>1:N"| SERVICES
+    
+    PROPERTIES -->|"1:1"| PROPERTY_INFO
+    PROPERTIES -->|"1:N"| FAVORITES
+    PROPERTIES -->|"receives<br/>1:N"| BOOKINGS
+    PROPERTIES -->|"has<br/>1:N"| REVIEWS
+    PROPERTIES -->|"1:N"| AGENT_PROPS
+    
+    BOOKINGS -->|"1:1"| PAYMENTS
+    BOOKINGS -->|"0:1"| REVIEWS
+    BOOKINGS -->|"generates<br/>0:1"| AGENT_COMM
+    
+    AGENTS -->|"links<br/>1:N"| AGENT_PROPS
+    AGENTS -->|"earns<br/>1:N"| AGENT_COMM
+    
+    %% ========================================
+    %% STYLING
+    %% ========================================
+    
+    classDef userClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    classDef propertyClass fill:#e8f5e9,stroke:#388e3c,stroke-width:3px,color:#000
+    classDef bookingClass fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    classDef agentClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef serviceClass fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    
+    class USERS,SESSIONS,VERIFICATION_DOCS,EMERGENCY,ACTIVITY_LOG userClass
+    class PROPERTIES,PROPERTY_INFO,FAVORITES propertyClass
+    class BOOKINGS,PAYMENTS,REVIEWS bookingClass
+    class AGENTS,AGENT_PROPS,AGENT_COMM agentClass
+    class SERVICES serviceClass
 ```
 
 ## Database Overview
