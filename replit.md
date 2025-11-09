@@ -1,7 +1,7 @@
 # Alga
 
 ## Overview
-Alga (አልጋ - "bed" in Amharic) is a full-stack web application designed for the Ethiopian property rental market. It aims to connect property owners with travelers, offering a diverse range of accommodations with a focus on local culture, safety, and multi-city support across Ethiopia. The platform seeks to provide a secure and culturally immersive rental experience through host/property verification, varied payment options, and role-based access for guests, hosts, operators, and administrators. Alga's ambition is to become the leading platform for Ethiopian hospitality, fostering unique cultural immersion and economic opportunities. The platform also addresses the cold start problem by incentivizing informal property agents ("Delalas") through a commission system, aiming to rapidly expand property listings.
+Alga (አልጋ - "bed" in Amharic) is a full-stack web application for the Ethiopian property rental market, featuring a **Lemlem Operations Dashboard** for administrative control. It connects property owners with travelers, offering diverse accommodations with a focus on local culture, safety, and multi-city support across Ethiopia. The platform provides a secure and culturally immersive rental experience through host/property verification, varied payment options, and role-based access. Alga aims to be the leading platform for Ethiopian hospitality, fostering cultural immersion and economic opportunities, and addresses the cold start problem by incentivizing informal property agents ("Delalas") through a commission system to rapidly expand listings.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,37 +9,29 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Design
-The platform employs a universal accessibility design optimized for Ethiopian users, featuring a warm color palette (dark brown, medium brown, cream backgrounds). Design principles include Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks. The application is available as a Progressive Web App (PWA) and has native Android and iOS applications through Capacitor.
-
-**Mobile App Implementation (November 2025):**
-- **Sign-in required**: Mobile app requires authentication before accessing features
-- **Bottom navigation**: Icon-based navigation bar with 4 main sections (Stays, Services, Me, Help)
-- **Platform detection**: Automatic detection of native vs web, different UX patterns applied
-- **Mobile layout**: Minimal header with "Alga" branding only, bottom navigation fixed at screen bottom
-- **Lemlem chat**: Adjusted positioning above bottom navigation for mobile devices
-- **Single codebase**: Web users see header navigation, mobile users see bottom navigation
+The platform features a universal accessibility design optimized for Ethiopian users, with a warm color palette (dark brown, medium brown, cream backgrounds). It incorporates Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks. It is available as a Progressive Web App (PWA) and has native Android and iOS applications via Capacitor, with distinct UI patterns for mobile (bottom navigation, minimal header).
 
 ### Technical Implementation
-The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend uses Node.js with Express.js and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL is the database, hosted on Neon, managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
+The frontend uses React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state, and React Hook Form with Zod for validation. The backend is built with Node.js, Express.js, and TypeScript, offering a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL, hosted on Neon, is managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
 
 ### Feature Specifications
-- **Delala Agent Commission System**: Incentivizes property agents with a 5% commission on bookings for 36 months, featuring agent registration, a dashboard for tracking, and admin verification.
-- **Ask Lemlem Help Page & AI Assistant**: A culturally authentic AI agent named Lemlem (grandmother-like) provides guidance with Ethiopian proverbs, offers multilingual support (English, Amharic, Tigrinya, Afaan Oromoo, Chinese), and features a host-configurable response system.
-  - **Offline/Low-Bandwidth Support (November 9, 2025)**: 100% FREE browser-native offline capabilities using IndexedDB for message caching, automatic retry queue for failed messages, pre-loaded common responses (lockbox codes, WiFi, check-out times, emergency contacts), network status detection with visual indicator, and seamless sync when internet returns. Works perfectly on Ethiopian low-bandwidth networks with no API costs.
-- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with property insights (e.g., active listings, earnings, occupancy rate).
-- **User Profiles & Personalization**: Comprehensive user profiles with preferences (notifications, language, currency, search settings) and activity tracking for personalized recommendations.
+- **Delala Agent Commission System**: Incentivizes property agents with a 5% commission on bookings for 36 months, including registration, a tracking dashboard, and admin verification.
+- **Ask Lemlem Help Page & AI Assistant**: A culturally authentic AI agent providing guidance with Ethiopian proverbs, multilingual support (English, Amharic, Tigrinya, Afaan Oromoo, Chinese), and host-configurable responses. It includes browser-native offline capabilities for message caching and automatic retry for low-bandwidth networks.
+- **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with property insights.
+- **User Profiles & Personalization**: Comprehensive profiles with preferences and activity tracking for personalized recommendations.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters, sorting, and city filter chips.
 - **Booking System**: Full workflow with date validation and conflict prevention.
 - **Access Management**: 6-digit access code system for properties.
-- **Review System**: Advanced weighted review system (ALGA Review Engine) with time-decay algorithm.
+- **Review System**: Advanced weighted review system (ALGA Review Engine) with a time-decay algorithm.
 - **ID Verification**: Universal system with QR code scanning, OCR for foreign visitors, operator review dashboard, and integration with Fayda ID for eKYC.
 - **Alga Pay**: A white-labeled, unified payment gateway abstracting underlying processors.
 - **Commission & Tax System**: Automated calculation of Alga commission, VAT, and withholding tax, with ERCA-compliant PDF invoice generation.
-- **Add-On Services Marketplace**: Browsing for guests and application for providers across 11 service categories, including mobile beauty services and on-demand food delivery.
+- **Add-On Services Marketplace**: Browsing for guests and application for providers across 11 service categories.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
 - **Google Maps Integration**: Lightweight mini-map on property details pages showing location and GPS-calculated distance.
 - **Administrative Features**: Roles & Permissions Management, User Management with full control over user roles, status, and verification states.
+- **Lemlem Operations Dashboard**: A comprehensive admin dashboard for managing 5 operational pillars (Agent Governance, Supply Curation, Hardware Deployment, Payments & Compliance, Marketing & Growth) with real-time KPIs, an AI admin assistant ("Ask Lemlem Admin Chat"), workflow automation (for alerts on commissions, warranties, payments, property verification), and CSV export functions. It runs on a zero-cost architecture optimized for 2G networks.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
@@ -52,100 +44,3 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
-## Complete Delala Agent System Summary
-
-### ✅ ALL FEATURES IMPLEMENTED (October 27, 2025)
-
-**4 Frontend Pages:**
-1. `/agent-program` - Marketing landing page with calculator, FAQ, benefits
-2. `/become-agent` - Registration form with TeleBirr verification
-3. `/agent-dashboard` - Real-time earnings dashboard
-4. `/admin/agents` - Admin verification panel
-
-**7 API Endpoints:**
-- Agent registration, dashboard, commissions, link-property
-- Admin: list agents, verify/reject, process payouts
-
-**TeleBirr Integration:**
-- Sandbox + production modes
-- Automated commission payouts
-- Transaction tracking & validation
-
-**Database:**
-- 3 tables: agents, agent_properties, agent_commissions
-- 36-month auto-expiry tracking
-- Real-time earnings aggregation
-
-**Key Numbers:**
-- 2,200+ lines of code added
-- 10 files created/modified
-- 5% commission rate for 36 months
-- Unlimited properties per agent
-
-## INSA Security Audit Preparation (November 7, 2025)
-
-### ✅ COMPLETE AUDIT PACKAGE READY
-
-**Comprehensive Security Documentation:**
-- **9 INSA Documents** (~5,164 lines, ~150 pages)
-  1. `INSA_TEST_CREDENTIALS.md` - 6 test accounts (Guest, Host, Admin, Operator, Agent, Service Provider)
-  2. `SECURITY_FUNCTIONALITY.md` - Authentication, encryption, input validation, rate limiting
-  3. `THREAT_MODEL.md` - STRIDE analysis, OWASP Top 10 coverage, risk register
-  4. `API_DOCUMENTATION.md` - 50+ endpoints with auth/authorization details
-  5. `THIRD_PARTY_SERVICES.md` - All SDKs, payment processors, compliance certificates
-  6. `AUTHENTICATION_AUTHORIZATION.md` - RBAC, session management, OTP flow
-  7. `COMPLIANCE_REQUIREMENTS.md` - ERCA tax, NIST, ISO 27001, PCI DSS
-  8. `BUILD_INSTRUCTIONS.md` - APK/IPA generation for Android/iOS
-  9. `INSA_SUBMISSION_CHECKLIST.md` - Complete audit package guide
-
-**Architecture Diagrams (Vendor-Neutral):**
-- All 7 diagrams updated to use "Cloud Platform" terminology
-- A4-optimized, professional, print-ready
-- Comprehensive coverage: DFD, ERD, deployment, security layers
-
-**Test Data Infrastructure:**
-- `server/seed-insa-test-data.ts` - Automated test data seeding
-  - 6 test users (all roles)
-  - 10 test properties across Ethiopia
-  - 50 bookings with commission tracking
-  - 1 verified Delala agent
-  - 1 approved service provider
-- Universal password: `INSA_Test_2025!`
-
-**Deployment Configuration:**
-- `render.yaml` - Production-ready deployment config
-- Render platform provides SOC 2 Type II compliance
-- Read-only team access for INSA auditors
-- CSV audit log exports
-
-**Security Compliance Achieved:**
-- ✅ OWASP Top 10 (2021) - 100% coverage
-- ✅ ERCA Tax Compliance - Invoice generation, TIN: 0101809194
-- ✅ NIST Cybersecurity Framework - Core functions implemented
-- ✅ PCI DSS by proxy (Stripe/Chapa Level 1 certified)
-- ✅ SOC 2 Type II (via infrastructure providers)
-
-**Key Security Features:**
-- OTP + password authentication (Bcrypt hashing)
-- Role-Based Access Control (4 roles: Guest, Host, Operator, Admin)
-- Rate limiting (100 req/15min global, 10 req/15min auth)
-- SQL injection prevention (Drizzle ORM only)
-- XSS protection (React auto-escape, xss-clean)
-- Session management (24-hour timeout, HttpOnly cookies)
-- Encryption at rest (AES-256) and in transit (TLS 1.2+)
-- Comprehensive audit logging
-
-**Remaining Steps for Submission:**
-1. Deploy to Render staging environment
-2. Run test data seeding script
-3. Build Android APK (debug + release)
-4. Build iOS IPA (release)
-5. Invite INSA to Render team (Viewer role)
-6. Package and submit to INSA
-
-**Estimated Time to Submission:** 2-4 hours (pending builds)
-
-**INSA Contact:**
-- Dr. Tilahun Ejigu, Cyber Security Audit Division Head
-- Email: tilahune@insa.gov.et
-- Phone: +251 937 456 374
