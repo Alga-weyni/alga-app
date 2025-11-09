@@ -43,9 +43,9 @@ export default function AskLemlemAdminChat() {
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: agents } = useQuery({ queryKey: ["/api/admin/operations/agents"] });
-  const { data: properties } = useQuery({ queryKey: ["/api/properties"] });
-  const { data: alerts } = useQuery({ queryKey: ["/api/admin/operations/alerts"] });
+  const { data: agents } = useQuery<any[]>({ queryKey: ["/api/admin/operations/agents"] });
+  const { data: properties } = useQuery<any[]>({ queryKey: ["/api/properties"] });
+  const { data: alerts } = useQuery<any[]>({ queryKey: ["/api/admin/operations/alerts"] });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
