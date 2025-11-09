@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,41 +95,8 @@ export default function LemlemOps() {
     return () => clearInterval(interval);
   }, [refetchSummary, toast]);
 
-  // Setup voice command callbacks
-  useEffect(() => {
-    voiceCommands.setLanguage(voiceLanguage);
-    
-    voiceCommands.onCommand((command) => {
-      setInputQuery(command.command);
-      setIsVoiceListening(false);
-      // Auto-submit voice query
-      handleSubmitQuery(command.command);
-    });
-
-    voiceCommands.onError((error: string) => {
-      console.error('Voice error:', error);
-      setIsVoiceListening(false);
-      toast({
-        title: "Voice Recognition Error",
-        description: error,
-        variant: "destructive",
-      });
-    });
-  }, [voiceLanguage, toast]);
-
-  // Voice command handler
-  const handleVoiceCommand = () => {
-    if (!isVoiceListening) {
-      setIsVoiceListening(true);
-      voiceCommands.startListening();
-    } else {
-      voiceCommands.stopListening();
-      setIsVoiceListening(false);
-    }
-  };
-
-  // Process operations query
-  const handleSubmitQuery = async (query?: string) => {
+  // Process operations query (memoized to prevent re-creation)
+  const handleSubmitQuery = useCallback(async (query?: string) => {
     const queryText = query || inputQuery;
     if (!queryText.trim()) return;
 
@@ -164,6 +131,39 @@ export default function LemlemOps() {
       });
     } finally {
       setIsProcessing(false);
+    }
+  }, [inputQuery, toast]);
+
+  // Setup voice command callbacks
+  useEffect(() => {
+    voiceCommands.setLanguage(voiceLanguage);
+    
+    voiceCommands.onCommand((command) => {
+      setInputQuery(command.command);
+      setIsVoiceListening(false);
+      // Auto-submit voice query
+      handleSubmitQuery(command.command);
+    });
+
+    voiceCommands.onError((error: string) => {
+      console.error('Voice error:', error);
+      setIsVoiceListening(false);
+      toast({
+        title: "Voice Recognition Error",
+        description: error,
+        variant: "destructive",
+      });
+    });
+  }, [voiceLanguage, toast, handleSubmitQuery]);
+
+  // Voice command handler
+  const handleVoiceCommand = () => {
+    if (!isVoiceListening) {
+      setIsVoiceListening(true);
+      voiceCommands.startListening();
+    } else {
+      voiceCommands.stopListening();
+      setIsVoiceListening(false);
     }
   };
 
