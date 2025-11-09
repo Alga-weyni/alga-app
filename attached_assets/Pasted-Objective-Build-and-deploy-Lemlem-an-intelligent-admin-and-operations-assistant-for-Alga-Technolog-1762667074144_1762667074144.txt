@@ -1,0 +1,70 @@
+Objective:
+Build and deploy Lemlem, an intelligent admin and operations assistant for Alga Technologies PLC — designed to manage and monitor the company’s performance pillars, even under weak or no internet conditions in Ethiopia.
+
+⸻
+
+🎯 What We’re Trying to Accomplish
+
+We are creating a centralized command-and-control system that will help our leadership team and field staff operate smoothly across five key focus areas:
+	1.	Agent Governance – Manage Dellalas (agents), contracts, and leaderboard rankings.
+	2.	Supply Curation – Track and verify high-quality property listings.
+	3.	Hardware Deployment – Monitor lockboxes, cameras, and warranty logs.
+	4.	Payments & Compliance – Handle Telebirr/CBE reconciliations and INSA readiness.
+	5.	Marketing & Growth – Monitor social media traction, campaigns, and partnerships.
+
+⸻
+
+🌍 Context & Constraints
+	•	Ethiopia’s internet is slow and inconsistent.
+	•	The system must function 100% offline, syncing data only when connection returns.
+	•	It must be free to run (no paid APIs).
+	•	It must meet INSA security standards and display compliance on every page footer.
+
+⸻
+
+💡 Expected Outcome
+
+By the end of the build:
+	•	Lemlem will operate as an offline-first Progressive Web App (PWA).
+	•	The leadership dashboard will display real-time KPIs, red-flag alerts, and weekly progress across all pillars.
+	•	The system will include an admin chat/voice interface (“Ask Lemlem”) for quick commands.
+	•	Data will be stored locally (browser or SQLite) and synced automatically when internet returns.
+	•	All sensitive operations (payments, compliance edits) will have role-based access and audit logs for INSA.
+
+⸻
+
+🧱 System Vision
+
+Lemlem is not a chatbot. She is a virtual operations officer — part assistant, part dashboard, part compliance manager.
+Her intelligence must be contextual to Alga’s business, guiding users, surfacing insights, and reporting risks proactively.
+
+The system should feel:
+	•	Reliable: works even when offline.
+	•	Cultural: localized with Amharic and English.
+	•	Practical: focused on data visibility and task automation.
+	•	Beautiful: reflects Alga’s warm, Ethiopian-inspired design (sand #F6BD89, brown #5B4032).
+
+⸻
+
+🧩 Project Deliverables
+	1.	Lemlem Admin Dashboard – five focus tabs + alert system + KPI tracker.
+	2.	Offline Support – cache, local database, and auto-sync system.
+	3.	Workflow Engine – automates red-flags, payments, and compliance reports.
+	4.	Role-Based Security – for CEO, admin, agents, and operators.
+	5.	Audit Footer & Logs – visible INSA compliance and internal recordkeeping.
+	6.	Render Integration – ready for deployment with auto-redeploy on push.
+
+⸻
+
+🧭 Success Criteria
+	•	Works seamlessly offline and online.
+	•	Fully functional without paid services.
+	•	Secure, logged, and compliant (INSA).
+	•	Visually consistent with Alga’s brand.
+	•	Ready to scale for real operations and internal reporting.
+
+⸻
+
+🔚 In Short
+
+Build Lemlem to be Alga’s digital operations brain — a self-reliant, compliant, and always-available system that keeps the company running efficiently, even when the internet does not.
