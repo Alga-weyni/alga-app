@@ -29,6 +29,7 @@ import AdminRolesPermissions from "@/pages/admin-roles-permissions";
 import AdminAgents from "@/pages/admin-agents";
 import LemlemOperationsDashboard from "@/pages/admin/LemlemOperationsDashboard";
 import LemlemOps from "@/pages/admin/LemlemOps";
+import LemlemValidationMetrics from "@/pages/admin/LemlemValidationMetrics";
 import ReportsArchive from "@/pages/admin/ReportsArchive";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import AgentProgram from "@/pages/agent-program";
@@ -150,6 +151,7 @@ function Router() {
         <Route path="/admin/roles-permissions" element={<AnimatedRoute><AdminRolesPermissions /></AnimatedRoute>} />
         <Route path="/admin/agents" element={<AnimatedRoute><AdminAgents /></AnimatedRoute>} />
         <Route path="/admin/lemlem-ops" element={<AnimatedRoute><LemlemOps /></AnimatedRoute>} />
+        <Route path="/admin/lemlem-validation" element={<AnimatedRoute><LemlemValidationMetrics /></AnimatedRoute>} />
         <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><LemlemOperationsDashboard /></AnimatedRoute>} />
         <Route path="/admin/reports" element={<AnimatedRoute><ReportsArchive /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
