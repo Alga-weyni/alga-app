@@ -26,6 +26,7 @@ import SupplyCurationTab from "@/components/operations/SupplyCurationTab";
 import HardwareDeploymentTab from "@/components/operations/HardwareDeploymentTab";
 import PaymentsComplianceTab from "@/components/operations/PaymentsComplianceTab";
 import MarketingGrowthTab from "@/components/operations/MarketingGrowthTab";
+import AskLemlemAdminChat from "@/components/operations/AskLemlemAdminChat";
 
 interface OperationsKPI {
   activeAgents: number;
@@ -219,6 +220,9 @@ export default function LemlemOperationsDashboard() {
 
       {/* INSA Compliance Footer */}
       <INSAComplianceFooter />
+      
+      {/* Ask Lemlem Admin Chat - Floating Widget */}
+      <AskLemlemAdminChat />
     </div>
   );
 }
