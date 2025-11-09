@@ -25,6 +25,7 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 ### Feature Specifications
 - **Delala Agent Commission System**: Incentivizes property agents with a 5% commission on bookings for 36 months, featuring agent registration, a dashboard for tracking, and admin verification.
 - **Ask Lemlem Help Page & AI Assistant**: A culturally authentic AI agent named Lemlem (grandmother-like) provides guidance with Ethiopian proverbs, offers multilingual support (English, Amharic, Tigrinya, Afaan Oromoo, Chinese), and features a host-configurable response system.
+  - **Offline/Low-Bandwidth Support (November 9, 2025)**: 100% FREE browser-native offline capabilities using IndexedDB for message caching, automatic retry queue for failed messages, pre-loaded common responses (lockbox codes, WiFi, check-out times, emergency contacts), network status detection with visual indicator, and seamless sync when internet returns. Works perfectly on Ethiopian low-bandwidth networks with no API costs.
 - **Property Management**: CRUD operations for listings, image uploads, and an enhanced host dashboard with property insights (e.g., active listings, earnings, occupancy rate).
 - **User Profiles & Personalization**: Comprehensive user profiles with preferences (notifications, language, currency, search settings) and activity tracking for personalized recommendations.
 - **Enhanced Search & Discovery**: Keyword search, advanced filters, sorting, and city filter chips.
