@@ -27,6 +27,7 @@ import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
 import AdminAIControl from "@/pages/admin-ai-control";
 import AdminRolesPermissions from "@/pages/admin-roles-permissions";
 import AdminAgents from "@/pages/admin-agents";
+import LemlemOperationsDashboard from "@/pages/admin/LemlemOperationsDashboard";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import AgentProgram from "@/pages/agent-program";
 import ProviderDashboard from "@/pages/provider-dashboard";
@@ -146,6 +147,7 @@ function Router() {
         <Route path="/admin/ai-control" element={<AnimatedRoute><AdminAIControl /></AnimatedRoute>} />
         <Route path="/admin/roles-permissions" element={<AnimatedRoute><AdminRolesPermissions /></AnimatedRoute>} />
         <Route path="/admin/agents" element={<AnimatedRoute><AdminAgents /></AnimatedRoute>} />
+        <Route path="/admin/lemlem-ops" element={<AnimatedRoute><LemlemOperationsDashboard /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
         
         {/* Protected user routes - accessible to all, each page handles auth */}
