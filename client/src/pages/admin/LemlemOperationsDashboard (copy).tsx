@@ -37,8 +37,7 @@ import AskLemlemAdminChat from "@/components/operations/AskLemlemAdminChat";
 import { operationsOfflineStorage } from "@/lib/operationsOfflineStorage";
 import { predictiveAnalytics, type Prediction } from "@/lib/predictiveAnalytics";
 import { voiceCommands, type VoiceLanguage } from "@/lib/voiceCommands";
-import { weeklyReportGenerator, type WeeklyReportData } from "@/lib/weeklyReportGenerator";
-import { reportStorage } from "@/lib/reportStorage";
+import { weeklyReportGenerator } from "@/lib/weeklyReportGenerator";
 import { useToast } from "@/hooks/use-toast";
 
 interface OperationsKPI {
@@ -148,28 +147,6 @@ export default function LemlemOperationsDashboard() {
     }
   }, [agents, hardware, compliance, transactions]);
 
-  // Automatic Friday Report Generation (Ethiopian Time)
-  useEffect(() => {
-    const checkAndGenerateReport = async () => {
-      const shouldGenerate = await reportStorage.shouldGenerateToday();
-      
-      if (shouldGenerate && kpiData) {
-        console.log('📅 Friday detected - Auto-generating weekly report...');
-        await generateWeeklyReport();
-        toast({
-          title: "📅 Friday Weekly Report Auto-Generated!",
-          description: "Performance Pulse PDF downloaded successfully",
-        });
-      }
-    };
-
-    // Check on mount and every hour
-    checkAndGenerateReport();
-    const interval = setInterval(checkAndGenerateReport, 60 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [kpiData]);
-
   const toggleVoiceListening = () => {
     if (isVoiceListening) {
       voiceCommands.stopListening();
@@ -219,118 +196,54 @@ export default function LemlemOperationsDashboard() {
   };
 
   const generateWeeklyReport = async () => {
-    if (!kpiData) {
-      toast({
-        title: "Error",
-        description: "KPI data not loaded yet",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!kpiData) return;
 
-    try {
-      // Collect LIVE data from all sources
-      const agentsData = agents as any[] || [];
-      const hardwareData = hardware as any[] || [];
-      const transactionsData = transactions as any[] || [];
-      const campaignsData: any[] = []; // Would come from marketing query
+    const reportData = {
+      agents: {
+        total: kpiData.activeAgents || 0,
+        active: kpiData.activeAgents || 0,
+        newThisWeek: kpiData.newAgentsThisWeek || 0,
+        totalCommissions: 0,
+        topAgent: null,
+      },
+      properties: {
+        total: kpiData.totalProperties || 0,
+        verified: kpiData.totalProperties - kpiData.pendingVerification || 0,
+        pendingVerification: kpiData.pendingVerification || 0,
+        newThisWeek: 0,
+      },
+      hardware: {
+        deployed: kpiData.hardwareDeployed || 0,
+        expiringWarranties: kpiData.warrantyExpiring || 0,
+        totalInvestment: 0,
+      },
+      payments: {
+        totalVolume: 0,
+        unreconciled: kpiData.unreconciledPayments || 0,
+        transactions: 0,
+      },
+      marketing: {
+        activeCampaigns: kpiData.activeCampaigns || 0,
+        totalBudget: 0,
+        totalSpent: 0,
+        totalImpressions: 0,
+        totalConversions: kpiData.campaignConversions || 0,
+      },
+      alerts: {
+        critical: criticalAlerts.length,
+        high: highAlerts.length,
+        medium: 0,
+        low: 0,
+        total: activeAlerts.length,
+      },
+    };
 
-      // Calculate live agent metrics
-      const totalCommissions = agentsData.reduce((sum, a) => sum + (parseFloat(a.commissionEarned) || 0), 0);
-      const topAgent = agentsData.length > 0
-        ? agentsData.sort((a, b) => parseFloat(b.commissionEarned || "0") - parseFloat(a.commissionEarned || "0"))[0]
-        : null;
-
-      // Calculate live hardware metrics
-      const totalInvestment = hardwareData.reduce((sum, h) => sum + (parseFloat(h.purchaseCost) || 0), 0);
-
-      // Calculate live payment metrics
-      const totalVolume = transactionsData.reduce((sum, t) => sum + parseFloat(t.amount || "0"), 0);
-
-      // Calculate live marketing metrics
-      const totalBudget = campaignsData.reduce((sum, c) => sum + parseFloat(c.budget || "0"), 0);
-      const totalSpent = campaignsData.reduce((sum, c) => sum + parseFloat(c.spent || "0"), 0);
-      const totalImpressions = campaignsData.reduce((sum, c) => sum + (c.impressions || 0), 0);
-
-      const reportData: WeeklyReportData = {
-        agents: {
-          total: agentsData.length,
-          active: agentsData.filter(a => a.activeProperties > 0).length,
-          newThisWeek: kpiData.newAgentsThisWeek || 0,
-          totalCommissions,
-          topAgent: topAgent ? {
-            name: topAgent.fullName || 'Unknown',
-            earnings: parseFloat(topAgent.commissionEarned || "0")
-          } : null,
-        },
-        properties: {
-          total: kpiData.totalProperties || 0,
-          verified: kpiData.totalProperties - kpiData.pendingVerification || 0,
-          pendingVerification: kpiData.pendingVerification || 0,
-          newThisWeek: 0,
-        },
-        hardware: {
-          deployed: hardwareData.length,
-          expiringWarranties: kpiData.warrantyExpiring || 0,
-          totalInvestment,
-        },
-        payments: {
-          totalVolume,
-          unreconciled: kpiData.unreconciledPayments || 0,
-          transactions: transactionsData.length,
-        },
-        marketing: {
-          activeCampaigns: kpiData.activeCampaigns || 0,
-          totalBudget,
-          totalSpent,
-          totalImpressions,
-          totalConversions: kpiData.campaignConversions || 0,
-        },
-        alerts: {
-          critical: criticalAlerts.length,
-          high: highAlerts.length,
-          medium: 0,
-          low: 0,
-          total: activeAlerts.length,
-        },
-      };
-
-      // Generate PDF
-      const pdf = weeklyReportGenerator.generatePDF(reportData, new Date());
-      const pdfBlob = pdf.output('blob');
-
-      // Store in IndexedDB
-      await reportStorage.saveReport({
-        weekEnding: new Date().toISOString().split('T')[0],
-        generatedAt: new Date().toISOString(),
-        pdfBlob,
-        metadata: {
-          totalAgents: reportData.agents.total,
-          totalProperties: reportData.properties.total,
-          criticalAlerts: reportData.alerts.critical,
-        },
-      });
-
-      // Download
-      await weeklyReportGenerator.downloadReport(reportData, new Date());
-
-      // Cleanup old reports
-      await reportStorage.cleanupOldReports();
-
-      console.log('📄 Weekly Report generated and stored successfully');
-      
-      toast({
-        title: "📄 Weekly Report Generated",
-        description: "PDF downloaded and saved to Reports library",
-      });
-    } catch (error) {
-      console.error('Failed to generate report:', error);
-      toast({
-        title: "Error Generating Report",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
+    await weeklyReportGenerator.downloadReport(reportData, new Date());
+    
+    toast({
+      title: "📄 Weekly Report Generated",
+      description: "PDF downloaded successfully",
+    });
   };
 
   return (
