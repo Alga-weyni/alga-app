@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { SystemAlert } from "@shared/schema";
+import AgentGovernanceTab from "@/components/operations/AgentGovernanceTab";
 
 interface OperationsKPI {
   activeAgents: number;
