@@ -1,30 +1,32 @@
 /**
- * COMPREHENSIVE DEMO DATA SEEDER
- * For INSA/Investor/Partner Demonstrations
+ * LEMLEM OPERATIONS DEMO DATA SEEDER
+ * For Internal Operations & Investor Demonstrations
  * 
  * Realistic Ethiopian operational data:
- * - 50+ agents across Addis Ababa zones
- * - 100+ properties (Addis, Bishoftu, Adama)
- * - 500+ transactions (TeleBirr, Chapa, Stripe)
- * - Hardware deployments with warranty tracking
- * - Marketing campaigns with metrics
- * - INSA compliance records
+ * - 55+ agents (Delalas) across Addis Ababa zones
+ * - 120+ properties (Addis, Bishoftu, Adama)
+ * - 550+ transactions (TeleBirr, Chapa, Stripe)
+ * - 45 hardware deployments (lockboxes, cameras)
+ * - 8 marketing campaigns (Facebook, Instagram, TikTok, Telegram)
  */
 
 import { db } from './db';
-import { users, properties, agents, bookings } from '../shared/schema';
 import { 
-  hardwareDeployments, 
-  paymentTransactions, 
-  marketingCampaigns, 
-  systemAlerts, 
-  insaCompliance 
+  users, 
+  properties, 
+  agents, 
+  bookings,
+  hardwareDeployments,
+  paymentTransactions,
+  marketingCampaigns,
+  systemAlerts
 } from '../shared/schema';
 import bcrypt from 'bcrypt';
 
 const ADDIS_ZONES = ['Bole', 'CMC', 'Gerji', 'Megenagna', 'Piassa', 'Merkato', 'Lebu', 'Gurd Shola'];
-const CITIES = ['Addis Ababa', 'Bishoftu', 'Adama', 'Hawassa', 'Bahir Dar'];
-const PROPERTY_TYPES = ['apartment', 'condo', 'villa', 'studio', 'guesthouse'];
+const CITIES = ['Addis Ababa', 'Bishoftu', 'Adama'];
+const REGIONS = ['Addis Ababa', 'Oromia', 'Oromia'];
+const PROPERTY_TYPES = ['hotel', 'guesthouse', 'traditional_home', 'eco_lodge'];
 
 // Ethiopian names for realism
 const FIRST_NAMES = [
@@ -62,54 +64,58 @@ function randomDate(daysBack: number): Date {
   return new Date(past.getTime() + Math.random() * (now.getTime() - past.getTime()));
 }
 
-async function seedDemoData() {
-  console.log('🌱 Starting comprehensive demo data seeding...\n');
+function generateTelebirrAccount(): string {
+  return `+251${Math.floor(Math.random() * 900000000 + 100000000)}`;
+}
 
-  // 1. AGENTS (50+ across Addis zones)
-  console.log('👥 Seeding 50 agents across Addis Ababa zones...');
-  const agentData = [];
+async function seedDemoData() {
+  console.log('🌱 Starting Lemlem Operations demo data seeding...\n');
+
+  // 1. USERS (for agents, hosts, guests)
+  console.log('👤 Seeding 135 users (55 agents, 30 hosts, 50 guests)...');
+  const userData = [];
   
+  // Create users for agents
   for (let i = 0; i < 55; i++) {
     const name = randomName();
-    const zone = randomItem(ADDIS_ZONES);
-    const daysAgo = Math.floor(Math.random() * 180); // 0-6 months ago
-    const activeProps = Math.floor(Math.random() * 8);
-    const totalProps = activeProps + Math.floor(Math.random() * 5);
-    
-    agentData.push({
+    userData.push({
+      id: `agent-${i + 1}`,
       fullName: name.full,
       phoneNumber: randomPhone(),
       email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@agent.alga.et`,
-      zone,
-      idVerified: Math.random() > 0.1, // 90% verified
-      activeProperties: activeProps,
-      totalProperties: totalProps,
-      commissionEarned: (Math.random() * 50000 + 5000).toFixed(2),
-      contractStartDate: randomDate(daysAgo).toISOString().split('T')[0],
-      contractEndDate: new Date(Date.now() + (36 - daysAgo / 30) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: Math.random() > 0.15 ? 'active' : 'inactive',
-      createdAt: randomDate(daysAgo),
+      password: await bcrypt.hash('Agent2025!', 10),
+      role: 'host', // Agents are also hosts
+      verified: Math.random() > 0.1,
+      createdAt: randomDate(180),
     });
   }
 
-  await db.insert(agents).values(agentData);
-  console.log(`✅ Seeded ${agentData.length} agents\n`);
-
-  // 2. USERS (for property owners/guests)
-  console.log('👤 Seeding 80 users (hosts and guests)...');
-  const userData = [];
-  
-  for (let i = 0; i < 80; i++) {
+  // Create users for hosts
+  for (let i = 0; i < 30; i++) {
     const name = randomName();
-    const role = i < 30 ? 'host' : 'guest';
-    
     userData.push({
+      id: `host-${i + 1}`,
+      fullName: name.full,
+      phoneNumber: randomPhone(),
+      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@host.alga.et`,
+      password: await bcrypt.hash('Host2025!', 10),
+      role: 'host',
+      verified: Math.random() > 0.2,
+      createdAt: randomDate(365),
+    });
+  }
+
+  // Create users for guests
+  for (let i = 0; i < 50; i++) {
+    const name = randomName();
+    userData.push({
+      id: `guest-${i + 1}`,
       fullName: name.full,
       phoneNumber: randomPhone(),
       email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@alga.et`,
-      passwordHash: await bcrypt.hash('Demo2025!', 10),
-      role,
-      isVerified: Math.random() > 0.2, // 80% verified
+      password: await bcrypt.hash('Guest2025!', 10),
+      role: 'guest',
+      verified: Math.random() > 0.2,
       createdAt: randomDate(365),
     });
   }
@@ -117,35 +123,71 @@ async function seedDemoData() {
   const insertedUsers = await db.insert(users).values(userData).returning();
   console.log(`✅ Seeded ${insertedUsers.length} users\n`);
 
-  // 3. PROPERTIES (100+ across cities)
+  const agentUsers = insertedUsers.filter(u => u.id.startsWith('agent-'));
+  const hostUsers = insertedUsers.filter(u => u.id.startsWith('host-'));
+  const guestUsers = insertedUsers.filter(u => u.id.startsWith('guest-'));
+
+  // 2. AGENTS (55 Delalas across Addis zones)
+  console.log('👥 Seeding 55 agents (Delalas) across Addis Ababa zones...');
+  const agentData = [];
+  
+  for (let i = 0; i < 55; i++) {
+    const agentUser = agentUsers[i];
+    const city = randomItem(ADDIS_ZONES);
+    const daysAgo = Math.floor(Math.random() * 180);
+    const activeProps = Math.floor(Math.random() * 8);
+    const totalProps = activeProps + Math.floor(Math.random() * 5);
+    
+    agentData.push({
+      userId: agentUser.id,
+      fullName: agentUser.fullName,
+      phoneNumber: agentUser.phoneNumber,
+      telebirrAccount: generateTelebirrAccount(),
+      city,
+      subCity: Math.random() > 0.5 ? `${city} ${Math.floor(Math.random() * 10) + 1}` : null,
+      status: Math.random() > 0.15 ? 'approved' : 'pending',
+      totalEarnings: (Math.random() * 50000 + 5000).toFixed(2),
+      totalProperties: totalProps,
+      activeProperties: activeProps,
+      createdAt: randomDate(daysAgo),
+    });
+  }
+
+  await db.insert(agents).values(agentData);
+  console.log(`✅ Seeded ${agentData.length} agents\n`);
+
+  // 3. PROPERTIES (120 across cities)
   console.log('🏠 Seeding 120 properties across Addis, Bishoftu, Adama...');
   const propertyData = [];
-  const hostUsers = insertedUsers.filter(u => u.role === 'host');
 
   for (let i = 0; i < 120; i++) {
-    const city = i < 70 ? 'Addis Ababa' : randomItem(['Bishoftu', 'Adama', 'Hawassa']);
-    const zone = city === 'Addis Ababa' ? randomItem(ADDIS_ZONES) : null;
+    const cityIndex = i < 70 ? 0 : i < 95 ? 1 : 2;
+    const city = CITIES[cityIndex];
+    const region = REGIONS[cityIndex];
+    const zone = city === 'Addis Ababa' ? randomItem(ADDIS_ZONES) : city;
     const propertyType = randomItem(PROPERTY_TYPES);
-    const hostUser = randomItem(hostUsers);
+    const hostUser = randomItem([...agentUsers, ...hostUsers]);
     
     propertyData.push({
       hostId: hostUser.id,
-      title: `${propertyType === 'apartment' ? 'Modern' : propertyType === 'villa' ? 'Luxury' : 'Cozy'} ${propertyType} in ${zone || city}`,
-      description: `Beautiful ${propertyType} perfect for travelers. Located in ${zone || city}, close to amenities and attractions.`,
-      propertyType,
-      address: `${zone || city}, ${city}, Ethiopia`,
+      title: `${propertyType === 'hotel' ? 'Modern' : propertyType === 'guesthouse' ? 'Cozy' : propertyType === 'eco_lodge' ? 'Luxury' : 'Traditional'} ${propertyType.replace('_', ' ')} in ${zone}`,
+      description: `Beautiful ${propertyType.replace('_', ' ')} perfect for travelers. Located in ${zone}, ${city}, close to amenities and attractions. Experience authentic Ethiopian hospitality.`,
+      type: propertyType,
+      location: zone,
       city,
-      neighborhood: zone,
-      latitude: city === 'Addis Ababa' ? '9.03' : city === 'Bishoftu' ? '8.75' : '8.54',
-      longitude: city === 'Addis Ababa' ? '38.74' : city === 'Bishoftu' ? '38.98' : '39.27',
+      region,
+      address: `${zone}, ${city}, Ethiopia`,
+      latitude: city === 'Addis Ababa' ? (9.0 + Math.random() * 0.1).toFixed(8) : city === 'Bishoftu' ? (8.75 + Math.random() * 0.05).toFixed(8) : (8.54 + Math.random() * 0.05).toFixed(8),
+      longitude: city === 'Addis Ababa' ? (38.74 + Math.random() * 0.1).toFixed(8) : city === 'Bishoftu' ? (38.98 + Math.random() * 0.05).toFixed(8) : (39.27 + Math.random() * 0.05).toFixed(8),
       pricePerNight: (Math.random() * 3000 + 500).toFixed(2),
+      currency: 'ETB',
       bedrooms: Math.floor(Math.random() * 4) + 1,
       bathrooms: Math.floor(Math.random() * 3) + 1,
       maxGuests: Math.floor(Math.random() * 6) + 2,
-      amenities: ['wifi', 'kitchen', 'parking', 'ac', 'tv'],
+      amenities: ['wifi', 'kitchen', 'parking', 'ac', 'tv', 'hot_water'],
       images: [`https://picsum.photos/seed/${i}/800/600`],
-      isAvailable: Math.random() > 0.15, // 85% available
-      verificationStatus: Math.random() > 0.2 ? 'verified' : 'pending',
+      isActive: Math.random() > 0.15,
+      status: Math.random() > 0.2 ? 'approved' : 'pending',
       createdAt: randomDate(180),
     });
   }
@@ -153,10 +195,9 @@ async function seedDemoData() {
   const insertedProperties = await db.insert(properties).values(propertyData).returning();
   console.log(`✅ Seeded ${insertedProperties.length} properties\n`);
 
-  // 4. BOOKINGS (generating transaction history)
+  // 4. BOOKINGS (300 transactions)
   console.log('📅 Seeding 300 bookings...');
   const bookingData = [];
-  const guestUsers = insertedUsers.filter(u => u.role === 'guest');
 
   for (let i = 0; i < 300; i++) {
     const property = randomItem(insertedProperties);
@@ -165,25 +206,61 @@ async function seedDemoData() {
     const checkIn = randomDate(daysAgo);
     const nights = Math.floor(Math.random() * 7) + 1;
     const checkOut = new Date(checkIn.getTime() + nights * 24 * 60 * 60 * 1000);
-    const totalPrice = (parseFloat(property.pricePerNight) * nights).toFixed(2);
+    const totalPrice = parseFloat((parseFloat(property.pricePerNight) * nights).toFixed(2));
+    const commission = (totalPrice * 0.10).toFixed(2);
+    const vat = (totalPrice * 0.15).toFixed(2);
+    const withholding = (totalPrice * 0.02).toFixed(2);
+    const hostPayout = (totalPrice - parseFloat(commission) - parseFloat(vat) - parseFloat(withholding)).toFixed(2);
     
     bookingData.push({
       propertyId: property.id,
       guestId: guest.id,
-      checkInDate: checkIn.toISOString().split('T')[0],
-      checkOutDate: checkOut.toISOString().split('T')[0],
-      numberOfGuests: Math.floor(Math.random() * property.maxGuests) + 1,
-      totalPrice,
+      checkIn,
+      checkOut,
+      guests: Math.floor(Math.random() * property.maxGuests) + 1,
+      totalPrice: totalPrice.toString(),
+      currency: 'ETB',
       status: Math.random() > 0.2 ? 'confirmed' : Math.random() > 0.5 ? 'completed' : 'cancelled',
+      paymentMethod: randomItem(['telebirr', 'chapa', 'stripe', 'cbe']),
       paymentStatus: Math.random() > 0.1 ? 'paid' : 'pending',
+      algaCommission: commission,
+      vat,
+      withholding,
+      hostPayout,
       createdAt: randomDate(daysAgo + 7),
     });
   }
 
-  await db.insert(bookings).values(bookingData);
-  console.log(`✅ Seeded ${bookingData.length} bookings\n`);
+  const insertedBookings = await db.insert(bookings).values(bookingData).returning();
+  console.log(`✅ Seeded ${insertedBookings.length} bookings\n`);
 
-  // 5. HARDWARE DEPLOYMENTS
+  // 5. PAYMENT TRANSACTIONS (550)
+  console.log('💰 Seeding 550 payment transactions...');
+  const paymentData = [];
+
+  for (let i = 0; i < 550; i++) {
+    const gateway = randomItem(['telebirr', 'chapa', 'stripe']);
+    const amount = (Math.random() * 50000 + 1000).toFixed(2);
+    const transactionDate = randomDate(90);
+    
+    paymentData.push({
+      transactionId: `${gateway.toUpperCase()}_${Date.now()}_${i}_${Math.random().toString(36).substring(7)}`,
+      paymentGateway: gateway,
+      transactionType: randomItem(['booking', 'commission', 'payout']),
+      amount,
+      currency: 'ETB',
+      status: Math.random() > 0.05 ? 'completed' : 'pending',
+      relatedBookingId: i < 300 ? insertedBookings[i].id : null,
+      reconciled: Math.random() > 0.15,
+      reconciledAt: Math.random() > 0.15 ? new Date(transactionDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000) : null,
+      createdAt: transactionDate,
+    });
+  }
+
+  await db.insert(paymentTransactions).values(paymentData);
+  console.log(`✅ Seeded ${paymentData.length} payment transactions\n`);
+
+  // 6. HARDWARE DEPLOYMENTS (45)
   console.log('🔧 Seeding 45 hardware deployments...');
   const hardwareTypes = ['lockbox', 'camera', 'smart_lock', 'thermostat'];
   const manufacturers = ['Yale', 'Kwikset', 'August', 'Ring', 'Nest', 'Ecobee'];
@@ -202,51 +279,28 @@ async function seedDemoData() {
       manufacturer,
       model: `${manufacturer} ${type.toUpperCase()}-${Math.floor(Math.random() * 900) + 100}`,
       serialNumber: `SN${Date.now()}${Math.floor(Math.random() * 10000)}`,
-      installationDate: installDate.toISOString().split('T')[0],
-      warrantyExpiry: warrantyExpiry.toISOString().split('T')[0],
-      purchaseCost: (Math.random() * 15000 + 3000).toFixed(2),
+      purchaseDate: new Date(installDate.getTime() - 7 * 24 * 60 * 60 * 1000),
+      installationDate: installDate,
+      warrantyExpiry,
       status: Math.random() > 0.1 ? 'active' : 'maintenance',
+      cost: (Math.random() * 15000 + 3000).toFixed(2),
+      createdAt: installDate,
     });
   }
 
   await db.insert(hardwareDeployments).values(hardwareData);
   console.log(`✅ Seeded ${hardwareData.length} hardware deployments\n`);
 
-  // 6. PAYMENT TRANSACTIONS (500+)
-  console.log('💰 Seeding 550 payment transactions...');
-  const paymentGateways = ['telebirr', 'chapa', 'stripe'];
-  const paymentData = [];
-
-  for (let i = 0; i < 550; i++) {
-    const gateway = randomItem(paymentGateways);
-    const amount = (Math.random() * 50000 + 1000).toFixed(2);
-    const transactionDate = randomDate(90);
-    
-    paymentData.push({
-      bookingId: Math.floor(Math.random() * 300) + 1,
-      gateway,
-      transactionId: `${gateway.toUpperCase()}_${Date.now()}_${i}`,
-      amount,
-      currency: 'ETB',
-      status: Math.random() > 0.05 ? 'completed' : 'pending',
-      reconciled: Math.random() > 0.15, // 85% reconciled
-      transactionDate: transactionDate.toISOString().split('T')[0],
-      reconciledAt: Math.random() > 0.15 ? new Date(transactionDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null,
-    });
-  }
-
-  await db.insert(paymentTransactions).values(paymentData);
-  console.log(`✅ Seeded ${paymentData.length} payment transactions\n`);
-
-  // 7. MARKETING CAMPAIGNS
+  // 7. MARKETING CAMPAIGNS (8)
   console.log('📢 Seeding 8 marketing campaigns...');
   const platforms = ['facebook', 'instagram', 'tiktok', 'telegram'];
   const campaignData = platforms.flatMap(platform => [
     {
       campaignName: `${platform.charAt(0).toUpperCase() + platform.slice(1)} - Property Listings Launch`,
+      campaignType: 'paid_ads',
       platform,
-      startDate: randomDate(60).toISOString().split('T')[0],
-      endDate: randomDate(30).toISOString().split('T')[0],
+      startDate: randomDate(60),
+      endDate: randomDate(30),
       budget: (Math.random() * 50000 + 10000).toFixed(2),
       spent: (Math.random() * 40000 + 5000).toFixed(2),
       impressions: Math.floor(Math.random() * 500000 + 100000),
@@ -257,9 +311,10 @@ async function seedDemoData() {
     },
     {
       campaignName: `${platform.charAt(0).toUpperCase() + platform.slice(1)} - Agent Recruitment Q1`,
+      campaignType: 'social_media',
       platform,
-      startDate: randomDate(45).toISOString().split('T')[0],
-      endDate: randomDate(15).toISOString().split('T')[0],
+      startDate: randomDate(45),
+      endDate: randomDate(15),
       budget: (Math.random() * 30000 + 5000).toFixed(2),
       spent: (Math.random() * 25000 + 3000).toFixed(2),
       impressions: Math.floor(Math.random() * 300000 + 50000),
@@ -273,15 +328,15 @@ async function seedDemoData() {
   await db.insert(marketingCampaigns).values(campaignData);
   console.log(`✅ Seeded ${campaignData.length} marketing campaigns\n`);
 
-  // 8. SYSTEM ALERTS
-  console.log('⚠️  Seeding 12 system alerts...');
+  // 8. SYSTEM ALERTS (for Operations Dashboard)
+  console.log('⚠️  Seeding 6 system alerts...');
   const alertData = [
     {
       pillar: 'agent_governance',
       alertType: 'commission_expiring',
       severity: 'high',
-      title: 'Commission Contract Expiring Soon',
-      description: '3 agents have contracts expiring within 30 days',
+      title: 'Agent Commission Contracts Expiring',
+      description: '3 agent contracts will expire within 30 days - renewal required',
       entityType: 'agent',
       entityId: 5,
       status: 'active',
@@ -290,7 +345,7 @@ async function seedDemoData() {
       pillar: 'hardware_deployment',
       alertType: 'warranty_expiring',
       severity: 'critical',
-      title: 'Warranty Expiring: Lockbox Hardware',
+      title: 'Hardware Warranty Expiring Soon',
       description: '5 lockbox units have warranties expiring within 15 days',
       entityType: 'hardware',
       entityId: 8,
@@ -311,7 +366,7 @@ async function seedDemoData() {
       alertType: 'verification_lapse',
       severity: 'medium',
       title: 'Property Verification Pending',
-      description: '8 active properties awaiting operator verification for 3+ days',
+      description: '8 active properties awaiting operator verification',
       entityType: 'property',
       entityId: 23,
       status: 'active',
@@ -321,71 +376,17 @@ async function seedDemoData() {
   await db.insert(systemAlerts).values(alertData);
   console.log(`✅ Seeded ${alertData.length} system alerts\n`);
 
-  // 9. INSA COMPLIANCE RECORDS
-  console.log('🛡️  Seeding 10 INSA compliance records...');
-  const complianceData = [
-    {
-      complianceCategory: 'Data Protection',
-      requirement: 'Personal Data Encryption at Rest',
-      status: 'completed',
-      dueDate: randomDate(30).toISOString().split('T')[0],
-      completedDate: randomDate(60).toISOString().split('T')[0],
-      evidenceUrl: 'https://docs.alga.et/compliance/encryption-cert.pdf',
-      assignedTo: 'Security Team',
-    },
-    {
-      complianceCategory: 'Access Control',
-      requirement: 'Role-Based Access Control Implementation',
-      status: 'completed',
-      dueDate: randomDate(20).toISOString().split('T')[0],
-      completedDate: randomDate(45).toISOString().split('T')[0],
-      evidenceUrl: 'https://docs.alga.et/compliance/rbac-implementation.pdf',
-      assignedTo: 'Engineering Team',
-    },
-    {
-      complianceCategory: 'Audit Trail',
-      requirement: 'Comprehensive Activity Logging',
-      status: 'completed',
-      dueDate: randomDate(15).toISOString().split('T')[0],
-      completedDate: randomDate(30).toISOString().split('T')[0],
-      evidenceUrl: 'https://docs.alga.et/compliance/audit-logs.pdf',
-      assignedTo: 'Operations Team',
-    },
-    {
-      complianceCategory: 'Network Security',
-      requirement: 'HTTPS/TLS Encryption for All Traffic',
-      status: 'completed',
-      dueDate: randomDate(10).toISOString().split('T')[0],
-      completedDate: randomDate(25).toISOString().split('T')[0],
-      evidenceUrl: 'https://docs.alga.et/compliance/tls-cert.pdf',
-      assignedTo: 'Infrastructure Team',
-    },
-    {
-      complianceCategory: 'Data Protection',
-      requirement: 'Automated Data Backup System',
-      status: 'in_progress',
-      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      completedDate: null,
-      evidenceUrl: null,
-      assignedTo: 'Infrastructure Team',
-    },
-  ];
-
-  await db.insert(insaCompliance).values(complianceData);
-  console.log(`✅ Seeded ${complianceData.length} INSA compliance records\n`);
-
-  console.log('🎉 COMPREHENSIVE DEMO DATA SEEDING COMPLETE!\n');
+  console.log('🎉 LEMLEM OPERATIONS DEMO DATA SEEDING COMPLETE!\n');
   console.log('📊 Summary:');
-  console.log(`   • ${agentData.length} agents`);
+  console.log(`   • ${agentData.length} agents (Delalas)`);
   console.log(`   • ${insertedUsers.length} users`);
   console.log(`   • ${insertedProperties.length} properties`);
-  console.log(`   • ${bookingData.length} bookings`);
+  console.log(`   • ${insertedBookings.length} bookings`);
   console.log(`   • ${hardwareData.length} hardware deployments`);
   console.log(`   • ${paymentData.length} payment transactions`);
   console.log(`   • ${campaignData.length} marketing campaigns`);
   console.log(`   • ${alertData.length} system alerts`);
-  console.log(`   • ${complianceData.length} INSA compliance records`);
-  console.log('\n✅ System ready for INSA/investor demonstration!');
+  console.log('\n✅ Lemlem Operations Dashboard ready for demonstration!');
 }
 
 seedDemoData()
