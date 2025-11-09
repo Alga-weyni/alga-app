@@ -40,6 +40,7 @@ import { voiceCommands, type VoiceLanguage } from "@/lib/voiceCommands";
 import { weeklyReportGenerator, type WeeklyReportData } from "@/lib/weeklyReportGenerator";
 import { reportStorage } from "@/lib/reportStorage";
 import { useToast } from "@/hooks/use-toast";
+import lemlemOfflineStorage, { type PropertyKnowledge } from "@/lib/lemlemOfflineStorage";
 
 interface OperationsKPI {
   activeAgents: number;
@@ -713,7 +714,144 @@ function OverviewTab({ alerts, predictions }: { alerts: SystemAlert[], predictio
           </div>
         </CardContent>
       </Card>
+
+      {/* Auto-Learning Mode Card */}
+      <AutoLearningCard />
     </div>
+  );
+}
+
+function AutoLearningCard() {
+  const [cachedProperties, setCachedProperties] = useState<PropertyKnowledge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadCachedProperties();
+  }, []);
+
+  const loadCachedProperties = async () => {
+    try {
+      const cached = await lemlemOfflineStorage.getAllPropertyKnowledge();
+      setCachedProperties(cached);
+    } catch (error) {
+      console.error('Failed to load cached properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshCache = async () => {
+    setLoading(true);
+    await loadCachedProperties();
+    toast({
+      title: "✅ Cache refreshed",
+      description: `${cachedProperties.length} properties with cached knowledge`,
+      variant: "default",
+    });
+  };
+
+  return (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-[#CD7F32]" />
+              Lemlem Auto-Learning Mode
+            </CardTitle>
+            <CardDescription>
+              Property-specific knowledge cached for instant offline responses
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshCache}
+            data-testid="button-refresh-cache"
+          >
+            Refresh Cache
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <Brain className="h-4 w-4 text-blue-600" />
+          <AlertTitle>How Auto-Learning Works</AlertTitle>
+          <AlertDescription className="text-sm">
+            When guests ask Lemlem about a property, the system automatically caches host-provided 
+            recommendations (restaurants, attractions, transportation). This enables instant offline 
+            responses without API costs. Property knowledge syncs automatically when property pages load.
+          </AlertDescription>
+        </Alert>
+
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading cached properties...
+          </div>
+        ) : cachedProperties.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Brain className="h-12 w-12 mx-auto mb-2 opacity-30" />
+            <p>No properties cached yet</p>
+            <p className="text-xs mt-1">Knowledge will be cached when properties are viewed</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-muted-foreground mb-2">
+              {cachedProperties.length} {cachedProperties.length === 1 ? 'property' : 'properties'} with cached knowledge
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {cachedProperties.slice(0, 6).map((prop) => (
+                <div 
+                  key={prop.propertyId}
+                  className="p-3 rounded-lg border bg-white"
+                  data-testid={`cached-property-${prop.propertyId}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Property #{prop.propertyId}</div>
+                      <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                        {prop.restaurants && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            <span>Restaurants cached</span>
+                          </div>
+                        )}
+                        {prop.attractions && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            <span>Attractions cached</span>
+                          </div>
+                        )}
+                        {prop.transportation && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            <span>Transportation cached</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        Last synced: {new Date(prop.lastUpdated).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {prop.synced ? 'Synced' : 'Pending'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {cachedProperties.length > 6 && (
+              <div className="text-center text-sm text-muted-foreground mt-2">
+                +{cachedProperties.length - 6} more properties cached
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
