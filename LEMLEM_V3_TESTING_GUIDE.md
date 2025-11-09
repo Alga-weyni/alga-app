@@ -12,8 +12,11 @@ Validate Lemlem v3 with real-world operations queries to determine if v4 (recomm
 
 ### 2. Familiarize Yourself with the Interface
 - **Query Input**: Type your questions in plain English or Amharic
-- **Voice Commands**: Click the microphone icon for hands-free queries
-- **Language Toggle**: Switch between English and Amharic voice recognition
+- **Voice Commands**: **MANUAL ACTIVATION** - Click the 🎤 microphone button to start listening (not auto-ready)
+  - Hover over mic button to see "Click to start voice input" tooltip
+  - Red alert appears when actively listening: "Listening... Speak now"
+  - Click mic again to stop listening
+- **Language Toggle**: Switch between English (🇬🇧) and Amharic (🇪🇹) voice recognition
 - **Weekly Summary**: Automatically refreshes every Sunday at 6:00 AM
 - **PDF Export**: Download your query history for stakeholders
 
@@ -174,26 +177,32 @@ Validate Lemlem v3 with real-world operations queries to determine if v4 (recomm
 ---
 
 ### **Category 7: Voice Command Tests** 🎤
+**NOTE**: Voice commands require **MANUAL ACTIVATION** - Lemlem does NOT listen automatically.
 
-#### Test 7.1: English Voice Query
+#### Test 7.1: English Voice Query (Manual Activation)
 **Steps**:
-1. Click microphone icon
-2. Speak clearly: "Show today's top agents"
-3. Wait for transcription and response
+1. **Click the 🎤 microphone icon** to start listening (manual trigger required)
+2. Wait for red "Listening... Speak now" alert to appear
+3. Speak clearly: "Show today's top agents"
+4. Query executes automatically after voice recognition
 
 **What to Check**:
+- Did the tooltip "Click to start voice input" appear on hover?
+- Did the red alert confirm listening is active?
 - Was your voice accurately recognized?
-- Did the query execute automatically?
+- Did you need to manually click the mic (not auto-ready)?
 
-#### Test 7.2: Amharic Voice Query
+#### Test 7.2: Amharic Voice Query (Manual Activation)
 **Steps**:
-1. Switch language to Amharic (አማርኛ)
-2. Click microphone icon
-3. Speak: "የዛሬ ምርጥ ወኪሎች ያሳዩ" (Show today's top agents)
+1. Switch language to Amharic (🇪🇹 አማርኛ) using language toggle
+2. **Click the 🎤 microphone icon** to manually activate listening
+3. Wait for red "Listening... Speak now" alert
+4. Speak: "የዛሬ ምርጥ ወኪሎች ያሳዩ" (Show today's top agents)
 
 **What to Check**:
-- Was Amharic recognized?
-- Was query translated correctly?
+- Was manual activation required (not auto-listening)?
+- Was Amharic recognized correctly?
+- Did the query execute after voice input?
 
 ---
 

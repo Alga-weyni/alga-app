@@ -19,8 +19,10 @@ This checklist ensures smooth onboarding for admins testing Lemlem Operations In
 
 ### Step 3: Features Walkthrough
 - [ ] Locate the query input field
-- [ ] Find the voice command button (microphone icon)
-- [ ] Check the language toggle (English ↔ Amharic)
+- [ ] Find the voice command button (🎤 microphone icon - **MANUAL ACTIVATION ONLY**)
+  - Hover over the mic to see "Click to start voice input" tooltip
+  - Voice does NOT auto-listen - you must click to activate
+- [ ] Check the language toggle (🇬🇧 English ↔ 🇪🇹 Amharic)
 - [ ] Identify the "Metrics" button (top right)
 - [ ] Note the "Export PDF" button (appears after queries)
 
@@ -40,11 +42,12 @@ This checklist ensures smooth onboarding for admins testing Lemlem Operations In
 - [ ] Evaluate: Was the data helpful?
 - [ ] Note: What decision would you make based on this?
 
-### Step 6: Voice Command Test
-- [ ] Click the microphone icon
+### Step 6: Voice Command Test (Manual Activation)
+- [ ] **Click the 🎤 microphone icon** to manually start listening (not auto-ready)
+- [ ] Wait for the red "Listening... Speak now" alert to appear
 - [ ] Speak clearly: "Show new agents this week"
 - [ ] Check if voice was accurately recognized
-- [ ] Verify the query executed automatically
+- [ ] Note: Voice requires manual click each time (not voice-first)
 
 ---
 
@@ -68,7 +71,7 @@ This checklist ensures smooth onboarding for admins testing Lemlem Operations In
 - [ ] Review the auto-generated weekly summary
 - [ ] Run complex queries for management meetings
 - [ ] Export a PDF report to share with your team
-- [ ] Test voice commands for hands-free querying
+- [ ] Test voice commands (remember: manual activation required - click mic each time)
 
 **Track Business Impact:**
 - [ ] How many decisions were made using Lemlem data?
