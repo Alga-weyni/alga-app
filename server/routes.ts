@@ -3526,6 +3526,234 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== END AGENT ROUTES ====================
 
+  // ==================== LEMLEM OPERATIONS DASHBOARD ROUTES ====================
+
+  // Get KPI Overview Data
+  router.get("/api/admin/operations/kpis", requireAuth, async (req, res) => {
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+      const {
+        agents,
+        properties,
+        hardwareDeployments,
+        paymentTransactions,
+        marketingCampaigns,
+      } = await import("@shared/schema");
+
+      // Count active agents
+      const activeAgentsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(agents)
+        .where(eq(agents.verificationStatus, "verified"));
+      const activeAgents = Number(activeAgentsResult[0]?.count || 0);
+
+      // Count agents from last week
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const newAgentsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(agents)
+        .where(
+          and(
+            eq(agents.verificationStatus, "verified"),
+            sql`${agents.createdAt} >= ${oneWeekAgo.toISOString()}`
+          )
+        );
+      const newAgentsThisWeek = Number(newAgentsResult[0]?.count || 0);
+
+      // Count total properties
+      const totalPropertiesResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(properties);
+      const totalProperties = Number(totalPropertiesResult[0]?.count || 0);
+
+      // Count pending properties
+      const pendingPropertiesResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(properties)
+        .where(eq(properties.status, "pending"));
+      const pendingVerification = Number(pendingPropertiesResult[0]?.count || 0);
+
+      // Count hardware deployments
+      const hardwareResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(hardwareDeployments)
+        .where(eq(hardwareDeployments.status, "active"));
+      const hardwareDeployed = Number(hardwareResult[0]?.count || 0);
+
+      // Count warranty expiring soon (next 30 days)
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      const warrantyResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(hardwareDeployments)
+        .where(
+          and(
+            eq(hardwareDeployments.status, "active"),
+            sql`${hardwareDeployments.warrantyExpiry} <= ${thirtyDaysFromNow.toISOString()}`
+          )
+        );
+      const warrantyExpiring = Number(warrantyResult[0]?.count || 0);
+
+      // Count unreconciled payments
+      const unreconciledResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.reconciled, false));
+      const unreconciledPayments = Number(unreconciledResult[0]?.count || 0);
+
+      // Count active campaigns
+      const campaignsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(marketingCampaigns)
+        .where(eq(marketingCampaigns.status, "active"));
+      const activeCampaigns = Number(campaignsResult[0]?.count || 0);
+
+      // Sum campaign conversions
+      const conversionsResult = await db
+        .select({ sum: sql<number>`COALESCE(SUM(${marketingCampaigns.conversions}), 0)` })
+        .from(marketingCampaigns)
+        .where(eq(marketingCampaigns.status, "active"));
+      const campaignConversions = Number(conversionsResult[0]?.sum || 0);
+
+      res.json({
+        activeAgents,
+        newAgentsThisWeek,
+        totalProperties,
+        pendingVerification,
+        hardwareDeployed,
+        warrantyExpiring,
+        unreconciledPayments,
+        activeCampaigns,
+        campaignConversions,
+      });
+    } catch (error) {
+      console.error("Error fetching operations KPIs:", error);
+      res.status(500).json({ message: "Failed to fetch operations KPIs" });
+    }
+  });
+
+  // Get Active System Alerts
+  router.get("/api/admin/operations/alerts", requireAuth, async (req, res) => {
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+      const { systemAlerts } = await import("@shared/schema");
+
+      const alerts = await db
+        .select()
+        .from(systemAlerts)
+        .where(eq(systemAlerts.status, "active"))
+        .orderBy(
+          sql`CASE 
+            WHEN ${systemAlerts.severity} = 'critical' THEN 1 
+            WHEN ${systemAlerts.severity} = 'high' THEN 2 
+            WHEN ${systemAlerts.severity} = 'medium' THEN 3 
+            ELSE 4 
+          END`,
+          systemAlerts.createdAt
+        );
+
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      res.status(500).json({ message: "Failed to fetch alerts" });
+    }
+  });
+
+  // Acknowledge Alert
+  router.post("/api/admin/operations/alerts/:id/acknowledge", requireAuth, async (req, res) => {
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+      const { systemAlerts } = await import("@shared/schema");
+      const alertId = parseInt(req.params.id);
+
+      await db
+        .update(systemAlerts)
+        .set({
+          status: "acknowledged",
+          acknowledgedBy: req.user.id,
+          acknowledgedAt: new Date(),
+        })
+        .where(eq(systemAlerts.id, alertId));
+
+      res.json({ message: "Alert acknowledged successfully" });
+    } catch (error) {
+      console.error("Error acknowledging alert:", error);
+      res.status(500).json({ message: "Failed to acknowledge alert" });
+    }
+  });
+
+  // Resolve Alert
+  router.post("/api/admin/operations/alerts/:id/resolve", requireAuth, async (req, res) => {
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+      const { systemAlerts } = await import("@shared/schema");
+      const alertId = parseInt(req.params.id);
+      const { resolutionNotes } = req.body;
+
+      await db
+        .update(systemAlerts)
+        .set({
+          status: "resolved",
+          resolvedBy: req.user.id,
+          resolvedAt: new Date(),
+          resolutionNotes: resolutionNotes || null,
+        })
+        .where(eq(systemAlerts.id, alertId));
+
+      res.json({ message: "Alert resolved successfully" });
+    } catch (error) {
+      console.error("Error resolving alert:", error);
+      res.status(500).json({ message: "Failed to resolve alert" });
+    }
+  });
+
+  // Get Agent Governance Data
+  router.get("/api/admin/operations/agents", requireAuth, async (req, res) => {
+    if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    try {
+      const { agents, agentCommissions } = await import("@shared/schema");
+
+      const agentsList = await db
+        .select({
+          id: agents.id,
+          firstName: agents.firstName,
+          lastName: agents.lastName,
+          phoneNumber: agents.phoneNumber,
+          city: agents.city,
+          verificationStatus: agents.verificationStatus,
+          totalEarnings: agents.totalEarnings,
+          totalProperties: agents.totalProperties,
+          activeProperties: agents.activeProperties,
+          createdAt: agents.createdAt,
+        })
+        .from(agents)
+        .orderBy(agents.totalEarnings);
+
+      res.json(agentsList);
+    } catch (error) {
+      console.error("Error fetching agents data:", error);
+      res.status(500).json({ message: "Failed to fetch agents data" });
+    }
+  });
+
+  // ==================== END LEMLEM OPERATIONS DASHBOARD ROUTES ====================
+
   const httpServer = createServer(app);
   return httpServer;
 }
