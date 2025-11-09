@@ -23,7 +23,7 @@ import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
 import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog } from "@shared/schema";
-import { sql, desc } from "drizzle-orm";
+import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -3529,7 +3529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== LEMLEM OPERATIONS DASHBOARD ROUTES ====================
 
   // Get KPI Overview Data
-  router.get("/api/admin/operations/kpis", requireAuth, async (req, res) => {
+  app.get("/api/admin/operations/kpis", isAuthenticated, async (req: any, res) => {
     if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -3547,7 +3547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const activeAgentsResult = await db
         .select({ count: sql<number>`count(*)` })
         .from(agents)
-        .where(eq(agents.verificationStatus, "verified"));
+        .where(eq(agents.status, "approved"));
       const activeAgents = Number(activeAgentsResult[0]?.count || 0);
 
       // Count agents from last week
@@ -3558,7 +3558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(agents)
         .where(
           and(
-            eq(agents.verificationStatus, "verified"),
+            eq(agents.status, "approved"),
             sql`${agents.createdAt} >= ${oneWeekAgo.toISOString()}`
           )
         );
@@ -3637,7 +3637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get Active System Alerts
-  router.get("/api/admin/operations/alerts", requireAuth, async (req, res) => {
+  app.get("/api/admin/operations/alerts", isAuthenticated, async (req: any, res) => {
     if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -3667,7 +3667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Acknowledge Alert
-  router.post("/api/admin/operations/alerts/:id/acknowledge", requireAuth, async (req, res) => {
+  app.post("/api/admin/operations/alerts/:id/acknowledge", isAuthenticated, async (req: any, res) => {
     if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -3693,7 +3693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Resolve Alert
-  router.post("/api/admin/operations/alerts/:id/resolve", requireAuth, async (req, res) => {
+  app.post("/api/admin/operations/alerts/:id/resolve", isAuthenticated, async (req: any, res) => {
     if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -3721,7 +3721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get Agent Governance Data
-  router.get("/api/admin/operations/agents", requireAuth, async (req, res) => {
+  app.get("/api/admin/operations/agents", isAuthenticated, async (req: any, res) => {
     if (!req.user || (req.user.role !== "admin" && req.user.role !== "operator")) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -3732,18 +3732,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agentsList = await db
         .select({
           id: agents.id,
-          firstName: agents.firstName,
-          lastName: agents.lastName,
+          fullName: agents.fullName,
           phoneNumber: agents.phoneNumber,
           city: agents.city,
-          verificationStatus: agents.verificationStatus,
+          status: agents.status,
           totalEarnings: agents.totalEarnings,
           totalProperties: agents.totalProperties,
           activeProperties: agents.activeProperties,
           createdAt: agents.createdAt,
         })
         .from(agents)
-        .orderBy(agents.totalEarnings);
+        .orderBy(desc(agents.totalEarnings));
 
       res.json(agentsList);
     } catch (error) {
