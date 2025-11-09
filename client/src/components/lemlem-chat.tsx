@@ -9,11 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Send, Volume2, VolumeX } from "lucide-react";
+import { X, Send, Volume2, VolumeX, WifiOff, Wifi } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { isMobileApp } from "@/utils/platform";
+import lemlemOfflineStorage, { isOnline, onNetworkStatusChange } from "@/lib/lemlemOfflineStorage";
 
 interface Message {
   id: string;
@@ -73,9 +74,41 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
   const [totalCost, setTotalCost] = useState(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [networkOnline, setNetworkOnline] = useState(isOnline());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = isMobileApp();
+
+  // Initialize offline storage and preload responses
+  useEffect(() => {
+    lemlemOfflineStorage.init().then(() => {
+      lemlemOfflineStorage.preloadOfflineResponses(selectedLanguage);
+    });
+  }, [selectedLanguage]);
+
+  // Monitor network status
+  useEffect(() => {
+    const handleNetworkChange = (online: boolean) => {
+      setNetworkOnline(online);
+      if (online) {
+        toast({
+          title: "✅ Back Online!",
+          description: "Lemlem can now fetch fresh information for you.",
+          variant: "default",
+        });
+        // Try to send pending messages
+        retryPendingMessages();
+      } else {
+        toast({
+          title: "📡 Low/No Internet",
+          description: "Lemlem will use offline answers. She'll sync when you're back online!",
+          variant: "default",
+        });
+      }
+    };
+
+    onNetworkStatusChange(handleNetworkChange);
+  }, []);
 
   // Load voices when component mounts (some browsers need this)
   useEffect(() => {
@@ -251,6 +284,35 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
     "Where can I eat nearby?",
   ];
 
+  // Retry pending messages when back online
+  const retryPendingMessages = async () => {
+    try {
+      const pending = await lemlemOfflineStorage.getPendingMessages();
+      for (const msg of pending) {
+        try {
+          await apiRequest("POST", "/api/lemlem/chat", {
+            message: msg.message,
+            propertyId: msg.propertyId,
+            bookingId: msg.bookingId,
+            language: msg.language,
+          });
+          // Success! Remove from pending queue
+          await lemlemOfflineStorage.deletePendingMessage(msg.id);
+        } catch (err) {
+          // Still failing, increment retry count
+          if (msg.retryCount < 3) {
+            await lemlemOfflineStorage.addPendingMessage({
+              ...msg,
+              retryCount: msg.retryCount + 1,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to retry pending messages:", err);
+    }
+  };
+
   const handleSend = async (text?: string) => {
     const messageText = text || input;
     if (!messageText.trim()) return;
@@ -265,12 +327,55 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
     setInput("");
     setIsLoading(true);
 
+    // Check if offline
+    if (!networkOnline) {
+      // Try to get cached response first
+      const cached = await lemlemOfflineStorage.getCachedResponse(messageText);
+      
+      if (cached) {
+        const lemlemMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: cached.answer,
+          isUser: false,
+          usedTemplate: true,
+          cost: 0,
+        };
+        setMessages((prev) => [...prev, lemlemMessage]);
+        speakLastMessage(cached.answer);
+      } else {
+        // No cached response, show offline message
+        const offlineMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "I need an internet connection to answer that, dear. I'll remember your question and respond when you're back online! 🙏",
+          isUser: false,
+          usedTemplate: true,
+          cost: 0,
+        };
+        setMessages((prev) => [...prev, offlineMessage]);
+        
+        // Add to pending queue
+        await lemlemOfflineStorage.addPendingMessage({
+          id: `pending-${Date.now()}`,
+          message: messageText,
+          propertyId,
+          bookingId,
+          language: selectedLanguage,
+          timestamp: Date.now(),
+          retryCount: 0,
+        });
+      }
+      
+      setIsLoading(false);
+      return;
+    }
+
+    // Online - try to send
     try {
       const response = await apiRequest("POST", "/api/lemlem/chat", {
         message: messageText,
         propertyId,
         bookingId,
-        language: selectedLanguage, // Pass selected language to backend
+        language: selectedLanguage,
       });
 
       const lemlemMessage: Message = {
@@ -282,6 +387,13 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
       };
 
       setMessages((prev) => [...prev, lemlemMessage]);
+
+      // Cache the response for offline use
+      await lemlemOfflineStorage.cacheResponse({
+        question: messageText.toLowerCase().trim(),
+        answer: response.message,
+        language: selectedLanguage,
+      });
 
       // Auto-speak Lemlem's response
       speakLastMessage(response.message);
@@ -357,10 +469,17 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
             <p className="text-xs opacity-90">
               Named after my beautiful grandma! 💚
               {isSpeaking && <span className="ml-2 animate-pulse">🔊</span>}
+              {!networkOnline && <span className="ml-2" title="Offline Mode - Using cached responses">📡</span>}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!networkOnline && (
+            <div className="text-xs bg-yellow-500/20 border border-yellow-500/50 rounded px-2 py-1 flex items-center gap-1" title="Offline - Using cached answers">
+              <WifiOff className="h-3 w-3" />
+              <span>Offline</span>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"
