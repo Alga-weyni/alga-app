@@ -22,7 +22,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, paymentTransactions, hardwareDeployments } from "@shared/schema";
 import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
@@ -3164,19 +3164,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse query and fetch relevant data
       if (queryLower.includes('top') && queryLower.includes('agent')) {
-        // Top agents by bookings
+        // Top agents by bookings (via commissions)
         const topAgents = await db.select({
           agentId: agents.id,
           agentName: sql`COALESCE(${agents.fullName}, ${agents.id})`,
-          bookings: sql<number>`COUNT(DISTINCT ${bookings.id})`,
-          commission: sql<number>`SUM(${agentCommissions.amountEarned})`,
+          bookings: sql<number>`COUNT(DISTINCT ${agentCommissions.bookingId})`,
+          commission: sql<number>`SUM(${agentCommissions.commissionAmount})`,
         })
           .from(agents)
-          .leftJoin(bookings, eq(agents.id, bookings.bookedByAgent))
           .leftJoin(agentCommissions, eq(agents.id, agentCommissions.agentId))
           .where(eq(agents.status, 'active'))
           .groupBy(agents.id, agents.fullName)
-          .orderBy(desc(sql`COUNT(DISTINCT ${bookings.id})`))
+          .orderBy(desc(sql`COUNT(DISTINCT ${agentCommissions.bookingId})`))
           .limit(5);
 
         if (topAgents.length === 0) {
@@ -3213,7 +3212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const unreconciledPayments = await db.select()
           .from(paymentTransactions)
           .where(and(
-            eq(paymentTransactions.provider, 'telebirr'),
+            eq(paymentTransactions.paymentGateway, 'telebirr'),
             eq(paymentTransactions.status, 'pending')
           ));
 
@@ -3226,18 +3225,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           response = "All TeleBirr payments are reconciled.";
         }
-      } else if (queryLower.includes('cmc') || queryLower.includes('agent status')) {
-        // Agent status by zone
-        const zone = queryLower.includes('cmc') ? 'CMC' : 'All';
+      } else if (queryLower.includes('agent status')) {
+        // Agent status
         const agentStats = await db.select({
           status: agents.status,
           count: sql<number>`COUNT(*)`,
         })
           .from(agents)
-          .where(zone === 'CMC' ? eq(agents.zone, 'CMC') : undefined)
           .groupBy(agents.status);
 
-        response = `Agent Status ${zone !== 'All' ? `in ${zone}` : ''}:\n\n`;
+        response = `Agent Status:\n\n`;
         agentStats.forEach((stat) => {
           response += `• ${stat.status}: ${stat.count} agents\n`;
         });
@@ -3250,7 +3247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response = `Payment Mismatches: ${mismatches.length}\n\n`;
         if (mismatches.length > 0) {
           mismatches.slice(0, 10).forEach((payment) => {
-            response += `• ${payment.amount} ETB - ${payment.provider} - Transaction #${payment.id}\n`;
+            response += `• ${payment.amount} ETB - ${payment.paymentGateway} - Transaction #${payment.id}\n`;
           });
         } else {
           response = "No payment mismatches found.";
@@ -3261,18 +3258,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
 
         const expiringWarranties = await db.select()
-          .from(hardware)
+          .from(hardwareDeployments)
           .where(
             and(
-              sql`${hardware.warrantyExpiry} <= ${oneMonthFromNow}`,
-              sql`${hardware.warrantyExpiry} >= NOW()`
+              sql`${hardwareDeployments.warrantyExpiry} <= ${oneMonthFromNow}`,
+              sql`${hardwareDeployments.warrantyExpiry} >= NOW()`
             )
           );
 
         response = `Warranties Expiring in 30 Days: ${expiringWarranties.length}\n\n`;
         if (expiringWarranties.length > 0) {
           expiringWarranties.forEach((hw) => {
-            response += `• ${hw.type} #${hw.serialNumber} - Expires ${new Date(hw.warrantyExpiry!).toLocaleDateString()}\n`;
+            response += `• ${hw.hardwareType} #${hw.serialNumber} - Expires ${new Date(hw.warrantyExpiry!).toLocaleDateString()}\n`;
           });
           insights.push(`${expiringWarranties.length} hardware warranties need renewal`);
         }
@@ -3346,15 +3343,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const topPerformers = await db.select({
         agentId: agents.id,
-        bookings: sql<number>`COUNT(DISTINCT ${bookings.id})`,
-        commission: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)`,
+        bookings: sql<number>`COUNT(DISTINCT ${agentCommissions.bookingId})`,
+        commission: sql<number>`COALESCE(SUM(${agentCommissions.commissionAmount}), 0)`,
       })
         .from(agents)
-        .leftJoin(bookings, eq(agents.id, bookings.bookedByAgent))
         .leftJoin(agentCommissions, eq(agents.id, agentCommissions.agentId))
-        .where(sql`${bookings.createdAt} >= ${oneWeekAgo}`)
+        .where(sql`${agentCommissions.createdAt} >= ${oneWeekAgo}`)
         .groupBy(agents.id)
-        .orderBy(desc(sql`COUNT(DISTINCT ${bookings.id})`))
+        .orderBy(desc(sql`COUNT(DISTINCT ${agentCommissions.bookingId})`))
         .limit(5);
 
       // Booking growth
@@ -3375,18 +3371,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Commission revenue
       const totalCommission = await db.select({ 
-        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.commissionAmount}), 0)` 
       })
         .from(agentCommissions);
 
       const pendingCommission = await db.select({ 
-        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.commissionAmount}), 0)` 
       })
         .from(agentCommissions)
         .where(eq(agentCommissions.status, 'pending'));
 
       const paidCommission = await db.select({ 
-        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.commissionAmount}), 0)` 
       })
         .from(agentCommissions)
         .where(eq(agentCommissions.status, 'paid'));
