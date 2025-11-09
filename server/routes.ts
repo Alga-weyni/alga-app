@@ -3145,6 +3145,320 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ====================================================================
+  // LEMLEM OPERATIONS ASSISTANT ROUTES
+  // ====================================================================
+
+  // Process operations query with AI-powered natural language understanding
+  app.post('/api/admin/lemlem-ops/query', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!['admin', 'operator'].includes(req.user.role)) {
+        return res.status(403).json({ message: "Admin/Operator access required" });
+      }
+
+      const { query } = req.body;
+      const queryLower = query.toLowerCase();
+
+      let response = "";
+      let insights: string[] = [];
+
+      // Parse query and fetch relevant data
+      if (queryLower.includes('top') && queryLower.includes('agent')) {
+        // Top agents by bookings
+        const topAgents = await db.select({
+          agentId: agents.id,
+          agentName: sql`COALESCE(${agents.fullName}, ${agents.id})`,
+          bookings: sql<number>`COUNT(DISTINCT ${bookings.id})`,
+          commission: sql<number>`SUM(${agentCommissions.amountEarned})`,
+        })
+          .from(agents)
+          .leftJoin(bookings, eq(agents.id, bookings.bookedByAgent))
+          .leftJoin(agentCommissions, eq(agents.id, agentCommissions.agentId))
+          .where(eq(agents.status, 'active'))
+          .groupBy(agents.id, agents.fullName)
+          .orderBy(desc(sql`COUNT(DISTINCT ${bookings.id})`))
+          .limit(5);
+
+        if (topAgents.length === 0) {
+          response = "No active agents with bookings found.";
+        } else {
+          response = `Top ${topAgents.length} Agents:\n\n`;
+          topAgents.forEach((agent, idx) => {
+            response += `${idx + 1}. ${agent.agentName}\n   • ${agent.bookings} bookings\n   • ${agent.commission || 0} ETB commission\n\n`;
+          });
+          insights.push(`${topAgents[0].agentName} is the top performer with ${topAgents[0].bookings} bookings`);
+        }
+      } else if (queryLower.includes('overdue') && queryLower.includes('verification')) {
+        // Overdue property verifications
+        const overdueProps = await db.select({
+          id: properties.id,
+          title: properties.title,
+          hostId: properties.hostId,
+          status: properties.status,
+        })
+          .from(properties)
+          .where(eq(properties.status, 'pending'));
+
+        response = `Pending Verifications: ${overdueProps.length}\n\n`;
+        if (overdueProps.length > 0) {
+          overdueProps.slice(0, 10).forEach((prop) => {
+            response += `• Property #${prop.id}: ${prop.title}\n`;
+          });
+          insights.push(`${overdueProps.length} properties require verification approval`);
+        } else {
+          response = "All properties are verified. No pending verifications.";
+        }
+      } else if (queryLower.includes('telebirr') || queryLower.includes('reconciliation')) {
+        // Missing TeleBirr reconciliations
+        const unreconciledPayments = await db.select()
+          .from(paymentTransactions)
+          .where(and(
+            eq(paymentTransactions.provider, 'telebirr'),
+            eq(paymentTransactions.status, 'pending')
+          ));
+
+        response = `Unreconciled TeleBirr Payments: ${unreconciledPayments.length}\n\n`;
+        if (unreconciledPayments.length > 0) {
+          unreconciledPayments.slice(0, 10).forEach((payment) => {
+            response += `• ${payment.amount} ETB - Transaction #${payment.id}\n`;
+          });
+          insights.push(`${unreconciledPayments.length} TeleBirr transactions need reconciliation`);
+        } else {
+          response = "All TeleBirr payments are reconciled.";
+        }
+      } else if (queryLower.includes('cmc') || queryLower.includes('agent status')) {
+        // Agent status by zone
+        const zone = queryLower.includes('cmc') ? 'CMC' : 'All';
+        const agentStats = await db.select({
+          status: agents.status,
+          count: sql<number>`COUNT(*)`,
+        })
+          .from(agents)
+          .where(zone === 'CMC' ? eq(agents.zone, 'CMC') : undefined)
+          .groupBy(agents.status);
+
+        response = `Agent Status ${zone !== 'All' ? `in ${zone}` : ''}:\n\n`;
+        agentStats.forEach((stat) => {
+          response += `• ${stat.status}: ${stat.count} agents\n`;
+        });
+      } else if (queryLower.includes('payment') && queryLower.includes('mismatch')) {
+        // Payment mismatches
+        const mismatches = await db.select()
+          .from(paymentTransactions)
+          .where(eq(paymentTransactions.status, 'failed'));
+
+        response = `Payment Mismatches: ${mismatches.length}\n\n`;
+        if (mismatches.length > 0) {
+          mismatches.slice(0, 10).forEach((payment) => {
+            response += `• ${payment.amount} ETB - ${payment.provider} - Transaction #${payment.id}\n`;
+          });
+        } else {
+          response = "No payment mismatches found.";
+        }
+      } else if (queryLower.includes('warranty') && queryLower.includes('expir')) {
+        // Warranty expiring
+        const oneMonthFromNow = new Date();
+        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+        const expiringWarranties = await db.select()
+          .from(hardware)
+          .where(
+            and(
+              sql`${hardware.warrantyExpiry} <= ${oneMonthFromNow}`,
+              sql`${hardware.warrantyExpiry} >= NOW()`
+            )
+          );
+
+        response = `Warranties Expiring in 30 Days: ${expiringWarranties.length}\n\n`;
+        if (expiringWarranties.length > 0) {
+          expiringWarranties.forEach((hw) => {
+            response += `• ${hw.type} #${hw.serialNumber} - Expires ${new Date(hw.warrantyExpiry!).toLocaleDateString()}\n`;
+          });
+          insights.push(`${expiringWarranties.length} hardware warranties need renewal`);
+        }
+      } else if (queryLower.includes('new bookings') || queryLower.includes('this week')) {
+        // New bookings this week
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const newBookings = await db.select()
+          .from(bookings)
+          .where(sql`${bookings.createdAt} >= ${oneWeekAgo}`);
+
+        response = `New Bookings This Week: ${newBookings.length}\n\n`;
+        const totalRevenue = newBookings.reduce((sum, b) => sum + parseFloat(b.totalPrice), 0);
+        response += `Total Revenue: ${totalRevenue.toFixed(2)} ETB\n`;
+        insights.push(`${newBookings.length} bookings this week - ${((newBookings.length / 7) * 30).toFixed(0)} projected monthly`);
+      } else {
+        // General operations summary
+        const activeAgentsCount = await db.select({ count: sql<number>`COUNT(*)` })
+          .from(agents)
+          .where(eq(agents.status, 'active'));
+
+        const pendingPropsCount = await db.select({ count: sql<number>`COUNT(*)` })
+          .from(properties)
+          .where(eq(properties.status, 'pending'));
+
+        const pendingPaymentsCount = await db.select({ count: sql<number>`COUNT(*)` })
+          .from(paymentTransactions)
+          .where(eq(paymentTransactions.status, 'pending'));
+
+        response = `Operations Summary:\n\n`;
+        response += `• Active Agents: ${activeAgentsCount[0]?.count || 0}\n`;
+        response += `• Pending Property Verifications: ${pendingPropsCount[0]?.count || 0}\n`;
+        response += `• Pending Payments: ${pendingPaymentsCount[0]?.count || 0}\n\n`;
+        response += `Try asking specific questions like:\n`;
+        response += `- "Show today's top agents"\n`;
+        response += `- "List overdue verifications"\n`;
+        response += `- "Missing TeleBirr reconciliations"\n`;
+      }
+
+      res.json({ response, insights });
+    } catch (error) {
+      console.error("Error processing operations query:", error);
+      res.status(500).json({ 
+        response: "Sorry, I couldn't process that query. Please try again.",
+        insights: [],
+      });
+    }
+  });
+
+  // Get weekly summary for operations dashboard
+  app.get('/api/admin/lemlem-ops/weekly-summary', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!['admin', 'operator'].includes(req.user.role)) {
+        return res.status(403).json({ message: "Admin/Operator access required" });
+      }
+
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+      // Agent performance
+      const totalActiveAgents = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(agents)
+        .where(eq(agents.status, 'active'));
+
+      const newAgentsThisWeek = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(agents)
+        .where(sql`${agents.createdAt} >= ${oneWeekAgo}`);
+
+      const topPerformers = await db.select({
+        agentId: agents.id,
+        bookings: sql<number>`COUNT(DISTINCT ${bookings.id})`,
+        commission: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)`,
+      })
+        .from(agents)
+        .leftJoin(bookings, eq(agents.id, bookings.bookedByAgent))
+        .leftJoin(agentCommissions, eq(agents.id, agentCommissions.agentId))
+        .where(sql`${bookings.createdAt} >= ${oneWeekAgo}`)
+        .groupBy(agents.id)
+        .orderBy(desc(sql`COUNT(DISTINCT ${bookings.id})`))
+        .limit(5);
+
+      // Booking growth
+      const thisWeekBookings = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(bookings)
+        .where(sql`${bookings.createdAt} >= ${oneWeekAgo}`);
+
+      const lastWeekBookings = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(bookings)
+        .where(and(
+          sql`${bookings.createdAt} >= ${twoWeeksAgo}`,
+          sql`${bookings.createdAt} < ${oneWeekAgo}`
+        ));
+
+      const thisWeek = thisWeekBookings[0]?.count || 0;
+      const lastWeek = lastWeekBookings[0]?.count || 1;
+      const percentChange = ((thisWeek - lastWeek) / lastWeek * 100);
+
+      // Commission revenue
+      const totalCommission = await db.select({ 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+      })
+        .from(agentCommissions);
+
+      const pendingCommission = await db.select({ 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+      })
+        .from(agentCommissions)
+        .where(eq(agentCommissions.status, 'pending'));
+
+      const paidCommission = await db.select({ 
+        total: sql<number>`COALESCE(SUM(${agentCommissions.amountEarned}), 0)` 
+      })
+        .from(agentCommissions)
+        .where(eq(agentCommissions.status, 'paid'));
+
+      // Compliance alerts
+      const pendingVerifications = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(properties)
+        .where(eq(properties.status, 'pending'));
+
+      const pendingPayments = await db.select({ count: sql<number>`COUNT(*)` })
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.status, 'pending'));
+
+      const complianceAlerts = [];
+      if (pendingVerifications[0]?.count > 0) {
+        complianceAlerts.push({
+          type: 'Property Verifications',
+          count: pendingVerifications[0].count,
+          severity: 'medium',
+        });
+      }
+      if (pendingPayments[0]?.count > 0) {
+        complianceAlerts.push({
+          type: 'Payment Reconciliations',
+          count: pendingPayments[0].count,
+          severity: 'high',
+        });
+      }
+
+      // Properties by zone
+      const propertiesByZone = await db.select({
+        zone: properties.city,
+        count: sql<number>`COUNT(*)`,
+        verified: sql<number>`COUNT(CASE WHEN ${properties.status} = 'active' THEN 1 END)`,
+      })
+        .from(properties)
+        .groupBy(properties.city);
+
+      res.json({
+        agentPerformance: {
+          totalActive: totalActiveAgents[0]?.count || 0,
+          newThisWeek: newAgentsThisWeek[0]?.count || 0,
+          topPerformers: topPerformers.map(p => ({
+            agentId: p.agentId,
+            bookings: p.bookings || 0,
+            commission: p.commission || 0,
+          })),
+        },
+        bookingGrowth: {
+          thisWeek,
+          lastWeek,
+          percentChange: parseFloat(percentChange.toFixed(1)),
+        },
+        commissionRevenue: {
+          total: totalCommission[0]?.total || 0,
+          pending: pendingCommission[0]?.total || 0,
+          paid: paidCommission[0]?.total || 0,
+        },
+        complianceAlerts,
+        propertiesByZone: propertiesByZone.map(z => ({
+          zone: z.zone || 'Unknown',
+          count: z.count || 0,
+          verified: z.verified || 0,
+        })),
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error generating weekly summary:", error);
+      res.status(500).json({ message: "Failed to generate summary" });
+    }
+  });
+
   // User Profile Routes
   
   // Get current user profile with preferences
