@@ -310,7 +310,7 @@ export default function LemlemOps() {
                   Operations Query
                 </CardTitle>
                 <CardDescription>
-                  Ask Lemlem about agents, bookings, compliance, or performance metrics
+                  Type your question or click the 🎤 mic button to use voice input (manual activation)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -355,36 +355,60 @@ export default function LemlemOps() {
                   )}
                 </ScrollArea>
 
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ask about operations, agents, bookings, compliance..."
-                    value={inputQuery}
-                    onChange={(e) => setInputQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSubmitQuery()}
-                    disabled={isProcessing || isVoiceListening}
-                    data-testid="input-query"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleVoiceCommand}
-                    className={isVoiceListening ? 'bg-red-100 border-red-300' : ''}
-                    data-testid="button-voice"
-                  >
-                    {isVoiceListening ? (
-                      <MicOff className="h-4 w-4 text-red-600" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    onClick={() => handleSubmitQuery()}
-                    disabled={isProcessing || !inputQuery.trim()}
-                    data-testid="button-submit-query"
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    Ask
-                  </Button>
+                <div className="space-y-3">
+                  {/* Voice Status Indicator */}
+                  {isVoiceListening && (
+                    <Alert className="bg-red-50 border-red-200">
+                      <AlertTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
+                        <Mic className="h-4 w-4 animate-pulse" />
+                        Listening... Speak now
+                      </AlertTitle>
+                      <AlertDescription className="text-xs text-red-600">
+                        Voice recognition active. Click mic to stop.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Ask about operations, agents, bookings, compliance..."
+                      value={inputQuery}
+                      onChange={(e) => setInputQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmitQuery()}
+                      disabled={isProcessing || isVoiceListening}
+                      data-testid="input-query"
+                    />
+                    <div className="relative group">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleVoiceCommand}
+                        className={isVoiceListening ? 'bg-red-100 border-red-300' : 'hover:bg-gray-100'}
+                        data-testid="button-voice"
+                      >
+                        {isVoiceListening ? (
+                          <MicOff className="h-4 w-4 text-red-600" />
+                        ) : (
+                          <Mic className="h-4 w-4 text-gray-600" />
+                        )}
+                      </Button>
+                      {/* Tooltip */}
+                      {!isVoiceListening && (
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                          Click to start voice input
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => handleSubmitQuery()}
+                      disabled={isProcessing || !inputQuery.trim()}
+                      data-testid="button-submit-query"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Ask
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
