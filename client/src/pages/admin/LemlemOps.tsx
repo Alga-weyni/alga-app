@@ -264,15 +264,6 @@ export default function LemlemOps() {
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Metrics
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setVoiceLanguage(voiceLanguage === 'en-US' ? 'am-ET' : 'en-US')}
-                className="bg-white/10 text-white border-white/30 hover:bg-white/20"
-                data-testid="button-language"
-              >
-                {voiceLanguage === 'en-US' ? '🇬🇧 English' : '🇪🇹 አማርኛ'}
-              </Button>
               {messages.length > 0 && (
                 <Button
                   variant="outline"
@@ -310,7 +301,7 @@ export default function LemlemOps() {
                   Operations Query
                 </CardTitle>
                 <CardDescription>
-                  Type your question or click the 🎤 mic button to use voice input (manual activation)
+                  Type your question in plain English or Amharic
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -355,20 +346,8 @@ export default function LemlemOps() {
                   )}
                 </ScrollArea>
 
-                <div className="space-y-3">
-                  {/* Voice Status Indicator */}
-                  {isVoiceListening && (
-                    <Alert className="bg-red-50 border-red-200">
-                      <AlertTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
-                        <Mic className="h-4 w-4 animate-pulse" />
-                        Listening... Speak now
-                      </AlertTitle>
-                      <AlertDescription className="text-xs text-red-600">
-                        Voice recognition active. Click mic to stop.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
+                <div className="space-y-4">
+                  {/* Primary Input Method: Text */}
                   <div className="flex gap-2">
                     <Input
                       placeholder="Ask about operations, agents, bookings, compliance..."
@@ -377,37 +356,77 @@ export default function LemlemOps() {
                       onKeyDown={(e) => e.key === 'Enter' && handleSubmitQuery()}
                       disabled={isProcessing || isVoiceListening}
                       data-testid="input-query"
+                      className="flex-1"
                     />
-                    <div className="relative group">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={handleVoiceCommand}
-                        className={isVoiceListening ? 'bg-red-100 border-red-300' : 'hover:bg-gray-100'}
-                        data-testid="button-voice"
-                      >
-                        {isVoiceListening ? (
-                          <MicOff className="h-4 w-4 text-red-600" />
-                        ) : (
-                          <Mic className="h-4 w-4 text-gray-600" />
-                        )}
-                      </Button>
-                      {/* Tooltip */}
-                      {!isVoiceListening && (
-                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                          Click to start voice input
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                        </div>
-                      )}
-                    </div>
                     <Button
                       onClick={() => handleSubmitQuery()}
                       disabled={isProcessing || !inputQuery.trim()}
                       data-testid="button-submit-query"
+                      className="bg-[#CD7F32] hover:bg-[#B87025] text-white"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Ask
                     </Button>
+                  </div>
+
+                  {/* Optional: Voice Input */}
+                  <div className="pt-2 border-t">
+                    <div className="text-xs text-muted-foreground mb-2">
+                      Optional: Voice input (manual activation)
+                    </div>
+                    
+                    {/* Voice Status Indicator */}
+                    {isVoiceListening && (
+                      <Alert className="bg-red-50 border-red-200 mb-3">
+                        <AlertTitle className="text-sm font-medium text-red-700 flex items-center gap-2">
+                          <Mic className="h-4 w-4 animate-pulse" />
+                          Listening... Speak now
+                        </AlertTitle>
+                        <AlertDescription className="text-xs text-red-600">
+                          Voice recognition active. Click mic to stop.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="flex gap-2 items-center">
+                      <div className="relative group">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleVoiceCommand}
+                          className={isVoiceListening ? 'bg-red-100 border-red-300' : 'hover:bg-gray-100'}
+                          data-testid="button-voice"
+                        >
+                          {isVoiceListening ? (
+                            <>
+                              <MicOff className="h-4 w-4 mr-2 text-red-600" />
+                              Stop Listening
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="h-4 w-4 mr-2 text-gray-600" />
+                              Start Voice Input
+                            </>
+                          )}
+                        </Button>
+                        {/* Tooltip */}
+                        {!isVoiceListening && (
+                          <div className="absolute bottom-full mb-2 left-0 px-3 py-1.5 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                            Click to start voice input
+                            <div className="absolute top-full left-4 border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                        )}
+                      </div>
+                      <select 
+                        value={voiceLanguage}
+                        onChange={(e) => setVoiceLanguage(e.target.value as VoiceLanguage)}
+                        className="text-xs border rounded px-2 py-1.5 bg-white"
+                        data-testid="select-voice-language"
+                      >
+                        <option value="en-US">🇬🇧 English</option>
+                        <option value="am-ET">🇪🇹 አማርኛ</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </CardContent>
