@@ -731,6 +731,153 @@ export const insertAgentCommissionSchema = createInsertSchema(agentCommissions).
   updatedAt: true,
 });
 
+// ========================================
+// LEMLEM OPERATIONS DASHBOARD TABLES
+// ========================================
+
+// Hardware Deployment Tracking (Lockboxes, Cameras, etc.)
+export const hardwareDeployments = pgTable("hardware_deployments", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id),
+  hardwareType: varchar("hardware_type").notNull(), // lockbox, camera, smart_lock, thermostat
+  serialNumber: varchar("serial_number", { length: 100 }),
+  manufacturer: varchar("manufacturer"),
+  model: varchar("model"),
+  purchaseDate: timestamp("purchase_date"),
+  warrantyExpiry: timestamp("warranty_expiry"),
+  installationDate: timestamp("installation_date"),
+  installedBy: varchar("installed_by").references(() => users.id),
+  status: varchar("status").notNull().default("active"), // active, maintenance, broken, retired
+  location: text("location"), // Physical location at property
+  lastMaintenanceDate: timestamp("last_maintenance_date"),
+  nextMaintenanceDate: timestamp("next_maintenance_date"),
+  notes: text("notes"),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment Transaction Tracking (for reconciliation with TeleBirr, CBE, etc.)
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  transactionId: varchar("transaction_id", { length: 100 }).unique().notNull(),
+  paymentGateway: varchar("payment_gateway").notNull(), // telebirr, chapa, stripe, cbe, paypal
+  transactionType: varchar("transaction_type").notNull(), // booking, commission, refund, payout
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency").default("ETB").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, completed, failed, refunded
+  relatedBookingId: integer("related_booking_id").references(() => bookings.id),
+  relatedAgentId: integer("related_agent_id").references(() => agents.id),
+  payerUserId: varchar("payer_user_id").references(() => users.id),
+  recipientUserId: varchar("recipient_user_id").references(() => users.id),
+  gatewayResponse: jsonb("gateway_response"), // Full API response for reconciliation
+  reconciled: boolean("reconciled").default(false),
+  reconciledAt: timestamp("reconciled_at"),
+  reconciledBy: varchar("reconciled_by").references(() => users.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Marketing Campaigns & Social Media Tracking
+export const marketingCampaigns = pgTable("marketing_campaigns", {
+  id: serial("id").primaryKey(),
+  campaignName: varchar("campaign_name", { length: 255 }).notNull(),
+  campaignType: varchar("campaign_type").notNull(), // social_media, email, partnership, influencer, paid_ads
+  platform: varchar("platform"), // facebook, instagram, tiktok, telegram, twitter, linkedin
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  status: varchar("status").notNull().default("active"), // active, paused, completed, cancelled
+  budget: decimal("budget", { precision: 10, scale: 2 }),
+  spent: decimal("spent", { precision: 10, scale: 2 }).default("0"),
+  targetAudience: text("target_audience"),
+  goals: text("goals"),
+  
+  // Metrics
+  impressions: integer("impressions").default(0),
+  reach: integer("reach").default(0),
+  clicks: integer("clicks").default(0),
+  conversions: integer("conversions").default(0), // Bookings or sign-ups from this campaign
+  leads: integer("leads").default(0),
+  
+  // Social Media Specific
+  followers: integer("followers").default(0),
+  likes: integer("likes").default(0),
+  shares: integer("shares").default(0),
+  comments: integer("comments").default(0),
+  
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// System Alerts & Red Flags for Operations Dashboard
+export const systemAlerts = pgTable("system_alerts", {
+  id: serial("id").primaryKey(),
+  alertType: varchar("alert_type").notNull(), // agent_commission_due, warranty_expiring, payment_mismatch, property_unverified, low_campaign_performance
+  severity: varchar("severity").notNull().default("medium"), // low, medium, high, critical
+  pillar: varchar("pillar").notNull(), // agent_governance, supply_curation, hardware_deployment, payments_compliance, marketing_growth
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  relatedEntityType: varchar("related_entity_type"), // agent, property, hardware, payment, campaign
+  relatedEntityId: integer("related_entity_id"),
+  status: varchar("status").notNull().default("active"), // active, acknowledged, resolved, dismissed
+  acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// INSA Compliance Tracking
+export const insaCompliance = pgTable("insa_compliance", {
+  id: serial("id").primaryKey(),
+  complianceCategory: varchar("compliance_category").notNull(), // security_audit, data_protection, encryption, access_control
+  requirement: text("requirement").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, in_progress, completed, failed
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  evidenceUrl: varchar("evidence_url"),
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for new tables
+export const insertHardwareDeploymentSchema = createInsertSchema(hardwareDeployments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMarketingCampaignSchema = createInsertSchema(marketingCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSystemAlertSchema = createInsertSchema(systemAlerts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInsaComplianceSchema = createInsertSchema(insaCompliance).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -770,3 +917,13 @@ export type InsertAgentProperty = z.infer<typeof insertAgentPropertySchema>;
 export type AgentProperty = typeof agentProperties.$inferSelect;
 export type InsertAgentCommission = z.infer<typeof insertAgentCommissionSchema>;
 export type AgentCommission = typeof agentCommissions.$inferSelect;
+export type InsertHardwareDeployment = z.infer<typeof insertHardwareDeploymentSchema>;
+export type HardwareDeployment = typeof hardwareDeployments.$inferSelect;
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertMarketingCampaign = z.infer<typeof insertMarketingCampaignSchema>;
+export type MarketingCampaign = typeof marketingCampaigns.$inferSelect;
+export type InsertSystemAlert = z.infer<typeof insertSystemAlertSchema>;
+export type SystemAlert = typeof systemAlerts.$inferSelect;
+export type InsertInsaCompliance = z.infer<typeof insertInsaComplianceSchema>;
+export type InsaCompliance = typeof insaCompliance.$inferSelect;
