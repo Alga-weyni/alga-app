@@ -71,6 +71,38 @@ function generateTelebirrAccount(): string {
 async function seedDemoData() {
   console.log('🌱 Starting Lemlem Operations demo data seeding...\n');
 
+  // Clear existing demo data (TRUNCATE with CASCADE to handle foreign keys)
+  console.log('🗑️  Clearing existing demo data...');
+  
+  try {
+    // Use TRUNCATE CASCADE to delete all data while respecting foreign keys
+    await db.execute(`
+      TRUNCATE TABLE 
+        system_alerts,
+        marketing_campaigns,
+        payment_transactions,
+        hardware_deployments,
+        access_codes,
+        reviews,
+        agent_commissions,
+        lemlem_chats,
+        bookings,
+        favorites,
+        property_info,
+        agent_properties,
+        agents,
+        properties
+      RESTART IDENTITY CASCADE
+    `);
+    
+    // Delete non-admin users
+    await db.execute(`DELETE FROM users WHERE role != 'admin'`);
+    
+    console.log('✅ Cleared existing data\n');
+  } catch (error) {
+    console.log('⚠️  Skipping data clear (tables may not exist yet)\n');
+  }
+
   // 1. USERS (for agents, hosts, guests)
   console.log('👤 Seeding 135 users (55 agents, 30 hosts, 50 guests)...');
   const userData = [];
@@ -78,14 +110,16 @@ async function seedDemoData() {
   // Create users for agents
   for (let i = 0; i < 55; i++) {
     const name = randomName();
+    const timestamp = Date.now() + i;
     userData.push({
-      id: `agent-${i + 1}`,
-      fullName: name.full,
+      id: `agent-${timestamp}`,
+      firstName: name.first,
+      lastName: name.last,
       phoneNumber: randomPhone(),
-      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@agent.alga.et`,
+      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}.${timestamp}@agent.alga.et`,
       password: await bcrypt.hash('Agent2025!', 10),
       role: 'host', // Agents are also hosts
-      verified: Math.random() > 0.1,
+      phoneVerified: Math.random() > 0.1,
       createdAt: randomDate(180),
     });
   }
@@ -93,14 +127,16 @@ async function seedDemoData() {
   // Create users for hosts
   for (let i = 0; i < 30; i++) {
     const name = randomName();
+    const timestamp = Date.now() + i + 1000;
     userData.push({
-      id: `host-${i + 1}`,
-      fullName: name.full,
+      id: `host-${timestamp}`,
+      firstName: name.first,
+      lastName: name.last,
       phoneNumber: randomPhone(),
-      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@host.alga.et`,
+      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}.${timestamp}@host.alga.et`,
       password: await bcrypt.hash('Host2025!', 10),
       role: 'host',
-      verified: Math.random() > 0.2,
+      phoneVerified: Math.random() > 0.2,
       createdAt: randomDate(365),
     });
   }
@@ -108,14 +144,16 @@ async function seedDemoData() {
   // Create users for guests
   for (let i = 0; i < 50; i++) {
     const name = randomName();
+    const timestamp = Date.now() + i + 2000;
     userData.push({
-      id: `guest-${i + 1}`,
-      fullName: name.full,
+      id: `guest-${timestamp}`,
+      firstName: name.first,
+      lastName: name.last,
       phoneNumber: randomPhone(),
-      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}@alga.et`,
+      email: `${name.first.toLowerCase()}.${name.last.toLowerCase()}.${timestamp}@alga.et`,
       password: await bcrypt.hash('Guest2025!', 10),
       role: 'guest',
-      verified: Math.random() > 0.2,
+      phoneVerified: Math.random() > 0.2,
       createdAt: randomDate(365),
     });
   }
@@ -137,11 +175,12 @@ async function seedDemoData() {
     const daysAgo = Math.floor(Math.random() * 180);
     const activeProps = Math.floor(Math.random() * 8);
     const totalProps = activeProps + Math.floor(Math.random() * 5);
+    const fullName = `${agentUser.firstName || ''} ${agentUser.lastName || ''}`.trim();
     
     agentData.push({
       userId: agentUser.id,
-      fullName: agentUser.fullName,
-      phoneNumber: agentUser.phoneNumber,
+      fullName: fullName,
+      phoneNumber: agentUser.phoneNumber || randomPhone(),
       telebirrAccount: generateTelebirrAccount(),
       city,
       subCity: Math.random() > 0.5 ? `${city} ${Math.floor(Math.random() * 10) + 1}` : null,
