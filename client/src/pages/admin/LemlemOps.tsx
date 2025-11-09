@@ -22,7 +22,8 @@ import {
   Calendar,
   Sparkles,
   ArrowLeft,
-  Clock
+  Clock,
+  BarChart3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { voiceCommands, type VoiceLanguage } from "@/lib/voiceCommands";
@@ -253,6 +254,16 @@ export default function LemlemOps() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/admin/lemlem-validation'}
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+                data-testid="button-validation-metrics"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Metrics
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
