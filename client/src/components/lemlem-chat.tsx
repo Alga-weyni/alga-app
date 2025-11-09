@@ -86,6 +86,30 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
     });
   }, [selectedLanguage]);
 
+  // AUTO-LEARNING MODE: Sync property knowledge when chat opens
+  useEffect(() => {
+    if (isOpen && propertyId) {
+      // Fetch property info and auto-cache for offline use
+      fetch(`/api/property-info/${propertyId}`)
+        .then(res => res.json())
+        .then(async (propertyInfo) => {
+          const learned = await lemlemOfflineStorage.syncPropertyKnowledge(propertyId, propertyInfo);
+          if (learned) {
+            // Show subtle confirmation that Lemlem learned new tips
+            toast({
+              title: "✅ Lemlem learned your tips!",
+              description: "New local recommendations cached for offline use.",
+              variant: "default",
+              duration: 3000,
+            });
+          }
+        })
+        .catch(err => {
+          console.log('Property info sync skipped (offline or not available)');
+        });
+    }
+  }, [isOpen, propertyId, toast]);
+
   // Monitor network status
   useEffect(() => {
     const handleNetworkChange = (online: boolean) => {

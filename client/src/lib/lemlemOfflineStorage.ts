@@ -30,14 +30,25 @@ interface OfflineResponse {
   language: string;
 }
 
+export interface PropertyKnowledge {
+  propertyId: number;
+  restaurants?: string;
+  attractions?: string;
+  transportation?: string;
+  hostTips?: string;
+  lastUpdated: number;
+  synced: boolean;
+}
+
 const DB_NAME = 'LemlemOfflineDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Incremented for property knowledge store
 
 // Stores for different data types
 const STORES = {
   MESSAGES: 'messages',
   PENDING: 'pending_messages',
   RESPONSES: 'cached_responses',
+  PROPERTY_KNOWLEDGE: 'property_knowledge', // NEW: Auto-learning property data
 };
 
 class LemlemOfflineStorage {
@@ -76,6 +87,13 @@ class LemlemOfflineStorage {
         if (!db.objectStoreNames.contains(STORES.RESPONSES)) {
           const responsesStore = db.createObjectStore(STORES.RESPONSES, { keyPath: 'question' });
           responsesStore.createIndex('language', 'language', { unique: false });
+        }
+
+        // NEW: Store for property-specific knowledge (auto-learning mode)
+        if (!db.objectStoreNames.contains(STORES.PROPERTY_KNOWLEDGE)) {
+          const knowledgeStore = db.createObjectStore(STORES.PROPERTY_KNOWLEDGE, { keyPath: 'propertyId' });
+          knowledgeStore.createIndex('lastUpdated', 'lastUpdated', { unique: false });
+          knowledgeStore.createIndex('synced', 'synced', { unique: false });
         }
       };
     });
@@ -252,6 +270,138 @@ class LemlemOfflineStorage {
     for (const response of commonResponses) {
       await this.cacheResponse(response);
     }
+  }
+
+  /**
+   * ========================================
+   * AUTO-LEARNING MODE: Property Knowledge
+   * ========================================
+   */
+
+  /**
+   * Cache property-specific knowledge (restaurants, attractions, transportation)
+   * Called automatically when host updates property info
+   */
+  async cachePropertyKnowledge(knowledge: PropertyKnowledge): Promise<void> {
+    if (!this.db) await this.init();
+    
+    const knowledgeData = {
+      ...knowledge,
+      lastUpdated: Date.now(),
+      synced: true, // Assume synced when we first cache from server
+    };
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORES.PROPERTY_KNOWLEDGE], 'readwrite');
+      const store = transaction.objectStore(STORES.PROPERTY_KNOWLEDGE);
+      const request = store.put(knowledgeData);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        console.log(`✅ Lemlem learned new tips for property #${knowledge.propertyId}`);
+        resolve();
+      };
+    });
+  }
+
+  /**
+   * Get cached property knowledge (used when offline or for instant responses)
+   */
+  async getPropertyKnowledge(propertyId: number): Promise<PropertyKnowledge | null> {
+    if (!this.db) await this.init();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORES.PROPERTY_KNOWLEDGE], 'readonly');
+      const store = transaction.objectStore(STORES.PROPERTY_KNOWLEDGE);
+      const request = store.get(propertyId);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        resolve(request.result || null);
+      };
+    });
+  }
+
+  /**
+   * Sync property knowledge from server when online
+   * Returns true if sync successful, false if already cached or error
+   */
+  async syncPropertyKnowledge(propertyId: number, propertyInfo: any): Promise<boolean> {
+    try {
+      // Check if we already have this cached
+      const existing = await this.getPropertyKnowledge(propertyId);
+      
+      // If data hasn't changed, don't re-cache
+      const hasRestaurants = propertyInfo?.nearestRestaurants;
+      const hasAttractions = propertyInfo?.nearestAttractions;
+      const hasTransportation = propertyInfo?.transportationTips;
+      
+      if (existing && 
+          existing.restaurants === propertyInfo?.nearestRestaurants &&
+          existing.attractions === propertyInfo?.nearestAttractions &&
+          existing.transportation === propertyInfo?.transportationTips) {
+        return false; // No changes, skip sync
+      }
+
+      // Cache new/updated knowledge
+      if (hasRestaurants || hasAttractions || hasTransportation) {
+        await this.cachePropertyKnowledge({
+          propertyId,
+          restaurants: propertyInfo.nearestRestaurants,
+          attractions: propertyInfo.nearestAttractions,
+          transportation: propertyInfo.transportationTips,
+          hostTips: propertyInfo.otherInstructions,
+          lastUpdated: Date.now(),
+          synced: true,
+        });
+        return true; // New knowledge learned!
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Failed to sync property knowledge:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get all cached properties (for debugging/admin view)
+   */
+  async getAllPropertyKnowledge(): Promise<PropertyKnowledge[]> {
+    if (!this.db) await this.init();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORES.PROPERTY_KNOWLEDGE], 'readonly');
+      const store = transaction.objectStore(STORES.PROPERTY_KNOWLEDGE);
+      const request = store.getAll();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result || []);
+    });
+  }
+
+  /**
+   * Clear property knowledge cache (for testing or refresh)
+   */
+  async clearPropertyKnowledge(propertyId?: number): Promise<void> {
+    if (!this.db) await this.init();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORES.PROPERTY_KNOWLEDGE], 'readwrite');
+      const store = transaction.objectStore(STORES.PROPERTY_KNOWLEDGE);
+
+      if (propertyId) {
+        // Clear specific property
+        const request = store.delete(propertyId);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+      } else {
+        // Clear all
+        const request = store.clear();
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+      }
+    });
   }
 }
 
