@@ -22,6 +22,10 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { SystemAlert } from "@shared/schema";
 import AgentGovernanceTab from "@/components/operations/AgentGovernanceTab";
+import SupplyCurationTab from "@/components/operations/SupplyCurationTab";
+import HardwareDeploymentTab from "@/components/operations/HardwareDeploymentTab";
+import PaymentsComplianceTab from "@/components/operations/PaymentsComplianceTab";
+import MarketingGrowthTab from "@/components/operations/MarketingGrowthTab";
 
 interface OperationsKPI {
   activeAgents: number;
