@@ -27,6 +27,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { voiceCommands, type VoiceLanguage } from "@/lib/voiceCommands";
 import { weeklyReportGenerator } from "@/lib/weeklyReportGenerator";
+import { lemlemAnalytics } from "@/lib/lemlemUsageAnalytics";
+import { useAuth } from "@/hooks/useAuth";
 import jsPDF from 'jspdf';
 
 interface OpsMessage {
@@ -66,6 +68,12 @@ export default function LemlemOps() {
   const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>('en-US');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Initialize analytics on mount
+  useEffect(() => {
+    lemlemAnalytics.init().catch(console.error);
+  }, []);
 
   // Fetch weekly summary
   const { data: weeklySummary, refetch: refetchSummary } = useQuery<WeeklySummary>({
@@ -101,6 +109,7 @@ export default function LemlemOps() {
     if (!queryText.trim()) return;
 
     setIsProcessing(true);
+    const startTime = Date.now();
     
     try {
       const response = await fetch('/api/admin/lemlem-ops/query', {
@@ -110,6 +119,7 @@ export default function LemlemOps() {
       });
 
       const data = await response.json();
+      const responseTime = Date.now() - startTime;
 
       const newMessage: OpsMessage = {
         id: `msg-${Date.now()}`,
@@ -122,6 +132,15 @@ export default function LemlemOps() {
 
       setMessages(prev => [...prev, newMessage]);
       setInputQuery("");
+
+      // Track analytics
+      if (query) {
+        // Voice command
+        await lemlemAnalytics.trackVoiceCommand(queryText, user?.id);
+      } else {
+        // Text query
+        await lemlemAnalytics.trackQuery(queryText, user?.id, responseTime);
+      }
     } catch (error) {
       console.error('Query failed:', error);
       toast({
@@ -132,7 +151,7 @@ export default function LemlemOps() {
     } finally {
       setIsProcessing(false);
     }
-  }, [inputQuery, toast]);
+  }, [inputQuery, toast, user?.id]);
 
   // Setup voice command callbacks
   useEffect(() => {
@@ -168,7 +187,7 @@ export default function LemlemOps() {
   };
 
   // Export to PDF
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF();
     
     doc.setFontSize(18);
@@ -195,6 +214,9 @@ export default function LemlemOps() {
     });
 
     doc.save(`lemlem-ops-${Date.now()}.pdf`);
+    
+    // Track PDF export
+    await lemlemAnalytics.trackPdfExport(user?.id);
     
     toast({
       title: "✅ PDF Exported",
