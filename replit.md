@@ -6,6 +6,8 @@ Alga (አልጋ - "bed" in Amharic) is a full-stack web application for the Ethi
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+**Company Identity**: Alga is a women-run, women-owned, and women-operated company. All guidance, materials, and communications should reflect and honor this foundation.
+
 ## System Architecture
 
 ### UI/UX Design
