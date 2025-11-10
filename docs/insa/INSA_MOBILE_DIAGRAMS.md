@@ -1,6 +1,337 @@
 # INSA Mobile Application Security Audit - Technical Diagrams
 
-## 1. Mobile Application Architecture Diagram
+## 1. Business Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Business Stakeholders"
+        S1[Ethiopian Travelers<br/>Diaspora Returning Home]
+        S2[International Tourists<br/>UNESCO Heritage Sites]
+        S3[Domestic Travelers<br/>Exploring Ethiopia]
+        S4[Property Owners<br/>Hotels, Guesthouses, Homes]
+        S5[Delala Agents<br/>Property Brokers]
+        S6[Service Providers<br/>11 Categories]
+    end
+    
+    subgraph "Core Platform - Alga Mobile App"
+        P1[Property Marketplace<br/>10 Major Cities]
+        P2[Booking Engine<br/>Date Management]
+        P3[Payment Gateway<br/>Alga Pay]
+        P4[Verification System<br/>ID + Property]
+        P5[Commission Engine<br/>Agent + Platform]
+        P6[AI Assistant<br/>Ask Lemlem]
+    end
+    
+    subgraph "Revenue Streams"
+        R1[Platform Commission<br/>10% per Booking]
+        R2[Service Marketplace<br/>10% Commission]
+        R3[Premium Host Features<br/>Future]
+    end
+    
+    subgraph "Key Partners & Infrastructure"
+        K1[Payment Processors<br/>TeleBirr, Chapa, Stripe]
+        K2[Ethiopian Telecom<br/>SMS OTP]
+        K3[National Bank of Ethiopia<br/>Payment Approval]
+        K4[INSA<br/>Security Certification]
+        K5[Google Cloud Storage<br/>Replit Object Storage]
+        K6[Neon Database<br/>PostgreSQL Hosting]
+    end
+    
+    subgraph "Value Propositions"
+        V1[For Guests:<br/>Verified Properties<br/>Offline Access<br/>Cultural AI Guide]
+        V2[For Hosts:<br/>Mobile Management<br/>Fast Payouts<br/>Commission-Free First Year]
+        V3[For Delala Agents:<br/>5% Commission 36 Months<br/>Mobile Dashboard<br/>No Upfront Costs]
+    end
+    
+    subgraph "Regulatory Compliance"
+        C1[ERCA Tax Compliance<br/>TIN: 0101809194]
+        C2[INSA Security<br/>Mobile App Audit]
+        C3[National Bank of Ethiopia<br/>Payment License]
+        C4[Ethiopian Data Protection<br/>Privacy Laws]
+    end
+    
+    subgraph "Operational Roles"
+        O1[Admin<br/>Platform Management]
+        O2[Operators<br/>Verification Team]
+        O3[Lemlem Operations<br/>5 Pillars Dashboard]
+    end
+    
+    %% Guest Flow
+    S1 --> P1
+    S2 --> P1
+    S3 --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> R1
+    P1 --> P6
+    
+    %% Host Flow
+    S4 --> P1
+    S4 --> P4
+    P2 --> S4
+    P3 --> S4
+    
+    %% Delala Agent Flow
+    S5 --> P1
+    S5 --> P5
+    P5 --> R1
+    
+    %% Service Provider Flow
+    S6 --> P1
+    P1 --> R2
+    
+    %% Platform Dependencies
+    P3 --> K1
+    P4 --> K2
+    P1 --> K5
+    P2 --> K6
+    
+    %% Value Delivery
+    P1 --> V1
+    P1 --> V2
+    P5 --> V3
+    
+    %% Compliance
+    P3 --> C1
+    P4 --> C2
+    P3 --> C3
+    P6 --> C4
+    
+    %% Operations
+    O1 --> P1
+    O2 --> P4
+    O3 --> P5
+    
+    K4 --> C2
+    K3 --> C3
+    
+    style P1 fill:#FFD700
+    style P3 fill:#90EE90
+    style R1 fill:#98FB98
+    style C2 fill:#FFB6C1
+    style V3 fill:#87CEEB
+```
+
+## 2. Business Process Flow - End-to-End
+
+```mermaid
+flowchart LR
+    subgraph "Guest Journey"
+        G1[Download App<br/>Google Play/App Store]
+        G2[Browse Properties<br/>10 Cities Filter]
+        G3[Select Property<br/>View Details + Reviews]
+        G4[Upload ID<br/>Camera Scan]
+        G5[Book + Pay<br/>TeleBirr/Chapa/Stripe]
+        G6[Receive Access Code<br/>6-Digit PIN]
+        G7[Check-In<br/>Ask Lemlem for Help]
+        G8[Check-Out<br/>Leave Review]
+    end
+    
+    subgraph "Host Journey"
+        H1[Register as Host<br/>Phone Verification]
+        H2[Create Listing<br/>Photos + Details]
+        H3[Upload Property Deed<br/>Verification]
+        H4[Operator Approval<br/>Property Goes Live]
+        H5[Receive Bookings<br/>Push Notifications]
+        H6[Accept Booking<br/>Confirm Guest]
+        H7[Receive Payout<br/>TeleBirr T+7 Days]
+    end
+    
+    subgraph "Delala Agent Journey"
+        D1[Register as Agent<br/>Business Name + TIN]
+        D2[Admin Verification<br/>Approve Agent]
+        D3[Add Properties<br/>On Behalf of Owners]
+        D4[Earn 5% Commission<br/>Per Booking]
+        D5[Track Earnings<br/>Mobile Dashboard]
+        D6[Request Payout<br/>Monthly Withdrawals]
+    end
+    
+    subgraph "Revenue Flow"
+        RF1[Booking: 4000 ETB]
+        RF2[Platform Commission:<br/>400 ETB 10%]
+        RF3[Delala Commission:<br/>200 ETB 5%]
+        RF4[VAT 15%:<br/>90 ETB]
+        RF5[Withholding 5%:<br/>30 ETB]
+        RF6[Host Payout:<br/>3280 ETB]
+        RF7[Alga Revenue:<br/>280 ETB Net]
+    end
+    
+    G1 --> G2 --> G3 --> G4 --> G5 --> G6 --> G7 --> G8
+    H1 --> H2 --> H3 --> H4 --> H5 --> H6 --> H7
+    D1 --> D2 --> D3 --> D4 --> D5 --> D6
+    
+    G5 --> RF1
+    RF1 --> RF2
+    RF1 --> RF3
+    RF2 --> RF4
+    RF2 --> RF5
+    RF1 --> RF6
+    RF2 --> RF7
+    
+    H6 --> H7
+    D4 --> D6
+    
+    style RF1 fill:#FFD700
+    style RF7 fill:#98FB98
+    style G5 fill:#90EE90
+    style H7 fill:#90EE90
+```
+
+## 3. Alga Business Model Canvas
+
+```mermaid
+graph TB
+    subgraph "Key Partners"
+        KP1[Payment: TeleBirr, Chapa, Stripe]
+        KP2[Gov: INSA, NBE, ERCA]
+        KP3[Infrastructure: Replit, Neon, Google Cloud]
+    end
+    
+    subgraph "Key Activities"
+        KA1[Property Verification]
+        KA2[ID Verification]
+        KA3[Payment Processing]
+        KA4[Commission Calculation]
+        KA5[Platform Maintenance]
+    end
+    
+    subgraph "Key Resources"
+        KR1[Mobile App Android/iOS/PWA]
+        KR2[PostgreSQL Database]
+        KR3[Lemlem AI Assistant]
+        KR4[Delala Agent Network]
+        KR5[Operator Team]
+    end
+    
+    subgraph "Value Propositions"
+        VP1[Guests: Verified Properties<br/>Offline Access<br/>Cultural Immersion]
+        VP2[Hosts: Mobile First<br/>Fast Payouts<br/>Low Commission]
+        VP3[Agents: 5% for 36 Months<br/>No Upfront Cost]
+    end
+    
+    subgraph "Customer Relationships"
+        CR1[24/7 AI Assistant Lemlem]
+        CR2[In-App Messaging]
+        CR3[Push Notifications]
+        CR4[Email/SMS Updates]
+    end
+    
+    subgraph "Channels"
+        CH1[Google Play Store]
+        CH2[Apple App Store]
+        CH3[PWA Web Browser]
+        CH4[Social Media Ethiopian Diaspora]
+    end
+    
+    subgraph "Customer Segments"
+        CS1[Ethiopian Diaspora]
+        CS2[International Tourists]
+        CS3[Domestic Travelers]
+        CS4[Property Owners]
+        CS5[Delala Agents]
+    end
+    
+    subgraph "Cost Structure"
+        CO1[Zero-Cost Architecture:<br/>✓ Browser-Native AI No API<br/>✓ Free Tier Hosting<br/>✓ No External APIs]
+        CO2[Variable Costs:<br/>• Payment Processor Fees 2-3%<br/>• SMS OTP ~0.10 ETB/message<br/>• Object Storage Pay-per-use]
+    end
+    
+    subgraph "Revenue Streams"
+        RS1[Platform Commission: 10% per Booking]
+        RS2[Service Marketplace: 10% Commission]
+        RS3[Future: Premium Host Subscriptions]
+    end
+    
+    KP1 --> KA3
+    KP2 --> KA1
+    KP3 --> KR1
+    
+    KA1 --> VP1
+    KA2 --> VP1
+    KA3 --> VP2
+    KA4 --> VP3
+    
+    KR1 --> CH1
+    KR1 --> CH2
+    KR1 --> CH3
+    KR3 --> CR1
+    KR4 --> VP3
+    
+    VP1 --> CS1
+    VP1 --> CS2
+    VP1 --> CS3
+    VP2 --> CS4
+    VP3 --> CS5
+    
+    CR1 --> CS1
+    CR2 --> CS4
+    
+    CH1 --> CS1
+    CH2 --> CS2
+    CH3 --> CS3
+    
+    KA3 --> RS1
+    KA5 --> CO2
+    KR1 --> CO1
+    
+    RS1 --> CO2
+    
+    style VP1 fill:#FFD700
+    style VP3 fill:#87CEEB
+    style RS1 fill:#98FB98
+    style CO1 fill:#90EE90
+```
+
+## 4. Commission & Tax Calculation Flow
+
+```mermaid
+flowchart TD
+    Start[Booking Confirmed<br/>Total: 4000 ETB]
+    
+    Start --> Calc1{Is Property<br/>Registered by<br/>Delala Agent?}
+    
+    Calc1 -->|Yes| AgentPath[Calculate Agent Commission<br/>5% of Total = 200 ETB]
+    Calc1 -->|No| NoAgent[No Agent Commission<br/>0 ETB]
+    
+    AgentPath --> PlatformCalc[Calculate Platform Commission<br/>10% of Total = 400 ETB]
+    NoAgent --> PlatformCalc
+    
+    PlatformCalc --> VATCalc[Calculate VAT<br/>15% of Commissions]
+    
+    VATCalc --> VATAmount{Agent Involved?}
+    VATAmount -->|Yes| VATWith[VAT = 15% × 600 ETB<br/>= 90 ETB]
+    VATAmount -->|No| VATWithout[VAT = 15% × 400 ETB<br/>= 60 ETB]
+    
+    VATWith --> WithholdingCalc[Calculate Withholding Tax<br/>5% of Commissions]
+    VATWithout --> WithholdingCalc
+    
+    WithholdingCalc --> WithAmount{Agent Involved?}
+    WithAmount -->|Yes| WithWith[Withholding = 5% × 600 ETB<br/>= 30 ETB]
+    WithAmount -->|No| WithWithout[Withholding = 5% × 400 ETB<br/>= 20 ETB]
+    
+    WithWith --> HostPayout1[Host Payout Calculation<br/>4000 - 400 - 200 = 3400 ETB<br/>Net to Host: 3400 ETB]
+    WithWithout --> HostPayout2[Host Payout Calculation<br/>4000 - 400 = 3600 ETB<br/>Net to Host: 3600 ETB]
+    
+    HostPayout1 --> AlgaRevenue1[Alga Net Revenue<br/>400 - 90 - 30 = 280 ETB]
+    HostPayout2 --> AlgaRevenue2[Alga Net Revenue<br/>400 - 60 - 20 = 320 ETB]
+    
+    AgentPath --> AgentPayout[Agent Payout<br/>200 ETB × 36 months]
+    
+    AlgaRevenue1 --> ERCA[Submit to ERCA<br/>VAT + Withholding<br/>Generate Invoice PDF]
+    AlgaRevenue2 --> ERCA
+    
+    ERCA --> Complete[Payment Complete<br/>All Parties Paid]
+    
+    style Start fill:#87CEEB
+    style AlgaRevenue1 fill:#98FB98
+    style AlgaRevenue2 fill:#98FB98
+    style HostPayout1 fill:#FFD700
+    style HostPayout2 fill:#FFD700
+    style AgentPayout fill:#FFB6C1
+    style ERCA fill:#FFA500
+```
+
+## 5. Mobile Application Architecture Diagram
 
 ```mermaid
 graph TB
