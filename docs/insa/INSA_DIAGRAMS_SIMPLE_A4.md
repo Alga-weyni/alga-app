@@ -110,7 +110,7 @@ flowchart LR
 
 ---
 
-## Diagram 3: System Architecture (Simplified)
+## Diagram 3: System Architecture with Database Relationships
 
 ```mermaid
 graph TB
@@ -122,69 +122,102 @@ graph TB
     
     subgraph "Application Layer"
         REACT[React 18 + TypeScript<br/>Vite 5.0 Build Tool]
-        ROUTER[Wouter Routing]
         STATE[React Query<br/>Server State Management]
         UI[Shadcn/UI Components<br/>Tailwind CSS Styling]
     end
     
     subgraph "Backend Layer"
         EXPRESS[Express.js Server<br/>Node.js + TypeScript]
-        AUTH[Session Management<br/>24hr Timeout]
-        RBAC[Role-Based Access<br/>5 User Roles]
-        VALID[Zod Validation]
+        AUTH[Session Auth<br/>24hr Timeout]
+        RBAC[5 User Roles<br/>Guest/Host/Agent/Operator/Admin]
     end
     
-    subgraph "Data Layer"
-        POSTGRES[(PostgreSQL<br/>Neon Serverless)]
+    subgraph "Database Layer - PostgreSQL (Neon, AES-256 Encrypted)"
         ORM[Drizzle ORM<br/>Type-Safe Queries]
+        
+        subgraph "Core Tables"
+            USERS[(users<br/>PK: id<br/>role, email, phone)]
+            PROPS[(properties<br/>PK: id<br/>FK: host_id → users)]
+            BOOKS[(bookings<br/>PK: id<br/>FK: guest_id → users<br/>FK: property_id → properties)]
+        end
+        
+        subgraph "Financial Tables"
+            PAYS[(payments<br/>PK: id<br/>FK: booking_id → bookings)]
+            COMM[(commissions<br/>PK: id<br/>FK: agent_id → users<br/>FK: booking_id → bookings)]
+        end
+        
+        subgraph "Verification Tables"
+            IDS[(id_verifications<br/>PK: id<br/>FK: user_id → users)]
+            REVS[(reviews<br/>PK: id<br/>FK: user_id → users<br/>FK: property_id → properties)]
+        end
     end
     
     subgraph "Security Layer"
-        HELMET[Helmet.js<br/>HTTP Headers]
-        CORS[CORS Protection]
-        RATE[Rate Limiting<br/>express-rate-limit]
-        XSS[XSS Protection<br/>xss-clean]
+        SEC[Helmet + CORS + Rate Limit + XSS Protection]
     end
     
     subgraph "External Services"
-        PAYMENT[Chapa + Stripe + PayPal<br/>Payment Processing]
-        TELECOM[Ethiopian Telecom<br/>SMS OTP Delivery]
-        STORAGE[Google Cloud Storage<br/>ID Documents + Images]
-        MAPS[Google Maps API<br/>Geocoding]
+        PAYMENT[Chapa/Stripe/PayPal]
+        TELECOM[Ethiopian Telecom SMS]
+        STORAGE[Google Cloud Storage]
     end
     
     AND --> REACT
     IOS --> REACT
     PWA --> REACT
     
-    REACT --> ROUTER
     REACT --> STATE
     REACT --> UI
-    
     STATE --> EXPRESS
     
     EXPRESS --> AUTH
     EXPRESS --> RBAC
-    EXPRESS --> VALID
-    
-    EXPRESS --> HELMET
-    EXPRESS --> CORS
-    EXPRESS --> RATE
-    EXPRESS --> XSS
+    EXPRESS --> SEC
     
     EXPRESS --> ORM
-    ORM --> POSTGRES
+    ORM --> USERS
+    ORM --> PROPS
+    ORM --> BOOKS
+    ORM --> PAYS
+    ORM --> COMM
+    ORM --> IDS
+    ORM --> REVS
+    
+    USERS -.->|1:N| PROPS
+    USERS -.->|1:N| BOOKS
+    PROPS -.->|1:N| BOOKS
+    BOOKS -.->|1:1| PAYS
+    BOOKS -.->|1:1| COMM
+    USERS -.->|1:N| COMM
+    USERS -.->|1:1| IDS
+    USERS -.->|1:N| REVS
+    PROPS -.->|1:N| REVS
     
     EXPRESS --> PAYMENT
     EXPRESS --> TELECOM
     EXPRESS --> STORAGE
-    EXPRESS --> MAPS
     
     style REACT fill:#61DAFB
     style EXPRESS fill:#90EE90
-    style POSTGRES fill:#336791
-    style HELMET fill:#FFB6C1
+    style USERS fill:#336791
+    style PROPS fill:#336791
+    style BOOKS fill:#336791
+    style SEC fill:#FFB6C1
 ```
+
+**Database Relationships:**
+
+| Relationship | Type | Description |
+|--------------|------|-------------|
+| users → properties | 1:N | One host owns many properties |
+| users → bookings | 1:N | One guest makes many bookings |
+| properties → bookings | 1:N | One property has many bookings |
+| bookings → payments | 1:1 | One booking has one payment |
+| bookings → commissions | 1:1 | One booking generates one commission |
+| users → commissions | 1:N | One agent earns many commissions |
+| users → id_verifications | 1:1 | One user has one ID verification |
+| users → reviews | 1:N | One user writes many reviews |
+| properties → reviews | 1:N | One property receives many reviews |
 
 **Technology Stack Summary:**
 
