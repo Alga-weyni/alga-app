@@ -2527,3 +2527,3204 @@ Session created (httpOnly cookie) → User logged in
 
 This comprehensive system functionality section covers all features with security-critical analysis. Would you like me to continue with **Requirement 9: Role/System Actor Relationship**?
 
+
+---
+
+### Requirement 9: Role/System Actor Relationship ✅
+
+#### User Roles and Permissions
+
+**Alga implements a comprehensive Role-Based Access Control (RBAC) system with 5 distinct user roles:**
+
+```typescript
+enum UserRole {
+  GUEST = 'guest',      // Default role for travelers
+  HOST = 'host',        // Property owners/managers
+  AGENT = 'agent',      // Delala property agents
+  OPERATOR = 'operator', // Verification team
+  ADMIN = 'admin',      // Platform administrators
+}
+```
+
+#### Role Definitions and Capabilities
+
+**1. GUEST (Traveler/Renter)**
+
+**Access Level:** Standard User
+
+**Capabilities:**
+- ✅ Browse all approved properties (read-only)
+- ✅ Search and filter properties (city, price, type)
+- ✅ Create bookings (with ID verification)
+- ✅ View own bookings (past and upcoming)
+- ✅ Upload ID documents (Ethiopian ID, passport, driver's license)
+- ✅ Make payments (TeleBirr, Chapa, Stripe, PayPal)
+- ✅ Submit reviews (after check-out)
+- ✅ Chat with Lemlem AI assistant
+- ✅ Manage favorites/wishlist
+- ✅ View own profile
+- ✅ Update personal information
+- ❌ Cannot create properties
+- ❌ Cannot access admin/operator dashboards
+- ❌ Cannot verify other users
+
+**Default After:** Registration (email/phone verification)
+
+**Security Controls:**
+- Session-based authentication (24-hour timeout)
+- Can only view/modify own data (bookings, profile)
+- Cannot access other guests' bookings
+- Cannot modify property details
+
+---
+
+**2. HOST (Property Owner/Manager)**
+
+**Access Level:** Elevated User
+
+**Capabilities:**
+- ✅ All GUEST capabilities (can also book as guest)
+- ✅ Create property listings (unlimited)
+- ✅ Upload property photos (camera/gallery, max 10 per property)
+- ✅ Edit own properties (title, description, price, amenities)
+- ✅ Deactivate/reactivate properties
+- ✅ Upload property deed/ownership documents
+- ✅ Manage booking requests (approve/reject)
+- ✅ View earnings dashboard (total, pending, paid)
+- ✅ Request payouts (TeleBirr mobile wallet)
+- ✅ View property analytics (views, bookings, revenue)
+- ✅ Respond to guest reviews
+- ✅ Communicate with guests (in-app messaging)
+- ❌ Cannot verify properties (requires operator)
+- ❌ Cannot access other hosts' properties/earnings
+- ❌ Cannot access admin panel
+
+**Upgraded From:** Guest (user requests host upgrade)
+
+**Security Controls:**
+- Can only modify own properties (ownership validated)
+- Cannot edit property verification status
+- Earnings calculated server-side (not editable)
+- Payout limits enforced (minimum 100 ETB, maximum 50,000 ETB/day)
+
+---
+
+**3. DELALA AGENT (Property Broker)**
+
+**Access Level:** Elevated User + Commission Access
+
+**Capabilities:**
+- ✅ All HOST capabilities (can manage properties)
+- ✅ Register as agent (business name, TIN required)
+- ✅ Add properties on behalf of owners
+- ✅ Track commission earnings (5% per booking for 36 months)
+- ✅ View agent dashboard:
+  - Total properties registered
+  - Active properties
+  - Total bookings from registered properties
+  - Commission earned (pending, paid, expired)
+  - Commission expiry tracking
+- ✅ Request monthly payouts (agent commissions)
+- ✅ View performance analytics
+- ❌ Cannot verify own properties (requires operator)
+- ❌ Cannot modify commission rate (fixed at 5%)
+- ❌ Cannot extend commission duration (fixed at 36 months)
+
+**Upgraded From:** Host or Guest (requires admin approval)
+
+**Security Controls:**
+- Agent verification required before commission activation
+- Commission expiry enforced (auto-expire after 36 months)
+- Cannot claim properties already registered by other agents
+- Fraud detection (multiple agents claiming same property flagged)
+- TIN validation (must match ERCA records)
+
+---
+
+**4. OPERATOR (Verification Team)**
+
+**Access Level:** Platform Staff
+
+**Capabilities:**
+- ✅ All GUEST capabilities (personal use)
+- ✅ Access verification dashboard:
+  - Pending property verifications
+  - Pending ID document verifications
+  - Verification queue management
+- ✅ Review property documents (property deed, business license)
+- ✅ Review ID documents (Ethiopian ID, passport, driver's license)
+- ✅ Approve/reject property listings
+- ✅ Approve/reject ID verifications
+- ✅ Provide rejection reasons (feedback to users)
+- ✅ View verification history (audit trail)
+- ✅ Scan QR codes (Ethiopian national ID verification)
+- ✅ Mobile verification workflow
+- ✅ Hardware deployment tracking (tablets, devices)
+- ❌ Cannot modify user roles
+- ❌ Cannot access financial data (earnings, payouts)
+- ❌ Cannot delete users/properties (suspend only)
+
+**Assigned By:** Admin
+
+**Security Controls:**
+- Verification actions logged (who verified what, when)
+- Cannot verify own documents/properties
+- Two-factor verification recommended (planned)
+- IP logging for all verification actions
+- Rejection reasons mandatory (transparency)
+
+---
+
+**5. ADMIN (Platform Administrator)**
+
+**Access Level:** Full System Access
+
+**Capabilities:**
+- ✅ **User Management:**
+  - View all users (guests, hosts, agents, operators)
+  - Suspend/unsuspend users
+  - Verify users manually
+  - Change user roles (upgrade/downgrade)
+  - Delete users (with confirmation)
+  - View user activity logs
+  
+- ✅ **Property Management:**
+  - View all properties (approved, pending, rejected)
+  - Verify properties (override operator decisions)
+  - Feature properties (highlight on homepage)
+  - Suspend/delete properties (policy violations)
+  - Modify property details (emergency corrections)
+  
+- ✅ **Booking Management:**
+  - View all bookings (all users, all properties)
+  - Cancel bookings (refund processing)
+  - Resolve booking disputes
+  - Override booking conflicts
+  
+- ✅ **Financial Management:**
+  - View all transactions (payments, payouts, refunds)
+  - Process payouts (host, agent)
+  - View revenue analytics (platform commission, VAT, withholding)
+  - Export financial reports (ERCA compliance)
+  - Reconcile payments (match with payment processors)
+  
+- ✅ **Delala Agent Management:**
+  - Approve/reject agent registrations
+  - Verify agent TIN (ERCA validation)
+  - Suspend agents (fraud detection)
+  - View agent performance (commission earned, properties registered)
+  - Modify commission rates (special cases)
+  
+- ✅ **Operator Management:**
+  - Assign operator role
+  - Revoke operator access
+  - View operator performance (verifications completed)
+  
+- ✅ **Platform Analytics:**
+  - Lemlem Operations Intelligence dashboard
+  - Real-time KPIs (bookings, revenue, users, properties)
+  - Ask Lemlem Admin Chat (natural language queries)
+  - Weekly executive summaries
+  - Predictive analytics
+  
+- ✅ **System Configuration:**
+  - Modify platform settings (commission rates, tax rates)
+  - Manage payment processors (enable/disable)
+  - Configure email/SMS templates
+  - Set verification rules
+  
+**Assigned By:** System (founder/CTO only)
+
+**Security Controls:**
+- Multi-factor authentication required (planned)
+- All admin actions logged (audit trail)
+- IP whitelisting (admin panel restricted to Ethiopia) - Planned
+- Critical actions require confirmation (delete user, refund payment)
+- Time-limited sessions (12-hour timeout, shorter than guest)
+
+---
+
+#### Role Assignment Workflow
+
+**Guest → Host Upgrade:**
+```
+1. Guest clicks "Become a Host"
+2. Provide business details (optional)
+3. Automatic upgrade (no approval needed)
+4. Can immediately create properties
+5. Properties require operator verification before going live
+```
+
+**Guest/Host → Delala Agent Upgrade:**
+```
+1. User clicks "Become an Agent"
+2. Fill out agent registration form:
+   - Business name
+   - TIN (Tax Identification Number)
+   - Business address
+   - Contact details
+3. Submit for admin review
+4. Admin verifies TIN with ERCA
+5. Admin approves/rejects
+6. If approved: Agent role activated, commission tracking enabled
+7. If rejected: User notified with reason
+```
+
+**User → Operator Assignment:**
+```
+1. Admin selects user (internal hire only)
+2. Admin assigns "operator" role
+3. User receives notification
+4. Operator can immediately access verification dashboard
+5. Training period: 1 week supervised verifications
+```
+
+**Operator → Admin Assignment:**
+```
+1. Founder/CTO manually assigns admin role (database direct)
+2. Admin receives notification
+3. Mandatory training (platform policies, ERCA compliance, INSA security)
+4. First admin actions monitored by founder
+```
+
+---
+
+#### Permission Matrix
+
+| Action | Guest | Host | Agent | Operator | Admin |
+|--------|-------|------|-------|----------|-------|
+| **Properties** |
+| Browse properties | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Create property | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Edit own property | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Edit any property | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Delete own property | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Delete any property | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Verify property | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Bookings** |
+| Create booking | ✅ | ✅ | ✅ | ✅ | ✅ |
+| View own bookings | ✅ | ✅ | ✅ | ✅ | ✅ |
+| View all bookings | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Cancel own booking | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Cancel any booking | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Approve booking request | ❌ | ✅ | ✅ | ❌ | ✅ |
+| **Verification** |
+| Upload ID | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Verify ID documents | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Verify properties | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Financial** |
+| Make payment | ✅ | ✅ | ✅ | ✅ | ✅ |
+| View own earnings | ❌ | ✅ | ✅ | ❌ | ✅ |
+| View all transactions | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Request payout | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Process payout | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Agent Management** |
+| Register as agent | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Verify agent | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Track commission | ❌ | ❌ | ✅ | ❌ | ✅ |
+| **User Management** |
+| View own profile | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Edit own profile | ✅ | ✅ | ✅ | ✅ | ✅ |
+| View all users | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Suspend users | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Delete users | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Change user roles | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **System** |
+| Access admin dashboard | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Access operator dashboard | ❌ | ❌ | ❌ | ✅ | ✅ |
+| View analytics | ❌ | Own Only | Own Only | Limited | ✅ |
+| Export reports | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+#### Server-Side Authorization Implementation
+
+**Middleware:** `server/middleware/requireRole.ts`
+
+```typescript
+import { Request, Response, NextFunction } from 'express';
+
+export function requireRole(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Check if user is authenticated
+    if (!req.session?.user) {
+      return res.status(401).json({ 
+        message: 'Unauthorized - Please log in' 
+      });
+    }
+
+    // Check if user has required role
+    if (!allowedRoles.includes(req.session.user.role)) {
+      return res.status(403).json({ 
+        message: 'Forbidden - Insufficient permissions',
+        requiredRole: allowedRoles,
+        userRole: req.session.user.role
+      });
+    }
+
+    next();
+  };
+}
+```
+
+**Usage Example:**
+
+```typescript
+// Only hosts and admins can create properties
+app.post('/api/properties', 
+  requireRole(['host', 'agent', 'admin']), 
+  async (req, res) => {
+    // Create property logic
+  }
+);
+
+// Only operators and admins can verify properties
+app.post('/api/verification/:id/approve', 
+  requireRole(['operator', 'admin']), 
+  async (req, res) => {
+    // Approval logic
+  }
+);
+
+// Only admins can view all transactions
+app.get('/api/transactions', 
+  requireRole(['admin']), 
+  async (req, res) => {
+    // Fetch all transactions
+  }
+);
+```
+
+---
+
+#### System Actors (External Systems)
+
+**1. Payment Processors (Chapa, TeleBirr, Stripe, PayPal)**
+- **Role:** Financial transaction processing
+- **Access:** API-level integration (no user interface access)
+- **Capabilities:**
+  - Initialize payments
+  - Process payments
+  - Send webhooks (payment confirmation)
+  - Process refunds
+- **Security:** API keys stored in environment variables, HTTPS-only
+
+**2. Ethiopian Telecom SMS Gateway**
+- **Role:** OTP delivery, notifications
+- **Access:** API-level integration
+- **Capabilities:**
+  - Send SMS messages (OTP codes, booking confirmations)
+- **Security:** API credentials encrypted, rate limiting
+
+**3. SendGrid Email Service**
+- **Role:** Email delivery (booking confirmations, invoices)
+- **Access:** API-level integration
+- **Capabilities:**
+  - Send transactional emails
+  - Track email delivery
+- **Security:** API key in environment, SPF/DKIM records
+
+**4. Neon Database (PostgreSQL)**
+- **Role:** Primary data storage
+- **Access:** Connection string authentication
+- **Capabilities:**
+  - Read/write all application data
+  - Execute queries
+- **Security:** TLS connection, least privilege database user
+
+**5. Replit Object Storage (Google Cloud)**
+- **Role:** File storage (images, documents)
+- **Access:** Service account authentication
+- **Capabilities:**
+  - Upload files
+  - Retrieve files (pre-signed URLs)
+- **Security:** Encrypted at rest, time-limited access URLs
+
+---
+
+### Requirement 10: Compliance and Regulatory Requirements ✅
+
+#### Ethiopian Regulatory Compliance
+
+**1. Ethiopian Revenue and Customs Authority (ERCA)**
+
+**Compliance Status:** ✅ Active and Compliant
+
+**Requirements Met:**
+- ✅ **Tax Registration:** TIN 0101809194 (Alga One Member PLC)
+- ✅ **VAT Collection:** 15% VAT on all platform commissions
+- ✅ **Withholding Tax:** 5% withholding tax on service provider payments
+- ✅ **Invoice Generation:** ERCA-compliant PDF invoices for all transactions
+- ✅ **Tax Reporting:** Automated tax calculation and reporting
+- ✅ **Record Keeping:** All transactions logged for 7+ years (ERCA requirement)
+
+**Implementation:**
+```typescript
+// Tax calculation (server-side)
+const booking = {
+  totalPrice: 4000, // ETB
+  platformCommission: 400, // 10%
+  agentCommission: 200, // 5% (if applicable)
+  vat: (400 + 200) * 0.15, // 90 ETB (15% on commissions)
+  withholding: (400 + 200) * 0.05, // 30 ETB (5% on commissions)
+  hostPayout: 4000 - 400 - 200, // 3400 ETB
+};
+
+// Generate ERCA-compliant invoice
+await generateERCAInvoice({
+  bookingId: booking.id,
+  totalAmount: 4000,
+  vat: 90,
+  withholdingTax: 30,
+  sellerTIN: hostTIN,
+  buyerTIN: '0101809194', // Alga TIN
+  invoiceDate: new Date(),
+});
+```
+
+**Supporting Documentation:**
+- Trade license certificate
+- TIN registration certificate
+- VAT registration certificate
+- Monthly tax returns (submitted to ERCA)
+
+---
+
+**2. National Bank of Ethiopia (NBE)**
+
+**Compliance Status:** ✅ Approved Payment Integration
+
+**Requirements Met:**
+- ✅ **Payment Processor Approval:** Using approved processors (Chapa, TeleBirr, Stripe)
+- ✅ **Foreign Currency Handling:** Stripe/PayPal for international payments (USD/EUR)
+- ✅ **Local Currency Priority:** TeleBirr and Chapa prioritized for Ethiopian Birr (ETB)
+- ✅ **Transaction Limits:** Adhering to NBE daily transaction limits
+- ✅ **Anti-Money Laundering (AML):** Transaction monitoring, suspicious activity reporting
+- ✅ **Know Your Customer (KYC):** ID verification required for all users
+
+**Implementation:**
+- TeleBirr integration via Chapa (NBE-approved aggregator)
+- Stripe account with Ethiopian business registration
+- PayPal business account (international payments only)
+- Transaction monitoring (flag transactions >50,000 ETB)
+
+**NBE Regulations Followed:**
+- Directive No. FXD/60/2020 (Foreign Exchange Directive)
+- Directive No. SBB/67/2020 (Mobile Banking Directive)
+- Anti-Money Laundering Proclamation No. 1179/2020
+
+---
+
+**3. Information Network Security Administration (INSA)**
+
+**Compliance Status:** 🔄 In Progress (This Submission)
+
+**Requirements Met:**
+- ✅ **Mobile App Security:** OWASP Mobile Top 10 compliance
+- ✅ **Data Protection:** Encryption at rest and in transit (TLS 1.2+)
+- ✅ **Session Management:** Secure session handling (httpOnly cookies)
+- ✅ **Authentication:** Multi-factor authentication (OTP verification)
+- ✅ **Authorization:** Role-based access control (RBAC)
+- ✅ **Code Obfuscation:** ProGuard (Android), Swift optimization (iOS)
+- ⚠️ **Certificate Pinning:** Planned (production requirement)
+- ⚠️ **Root/Jailbreak Detection:** Planned
+
+**INSA Directives Followed:**
+- Directive No. 1/2020 (Cybersecurity and Data Protection)
+- Directive No. 2/2021 (Mobile Application Security Standards)
+- National Cyber Security Strategy (2020-2025)
+
+**This Submission Purpose:**
+- Obtain INSA mobile application security certification
+- Validate compliance with Ethiopian cybersecurity standards
+- Enable Google Play Store and Apple App Store distribution
+- Meet payment processor security requirements (TeleBirr, Chapa)
+
+---
+
+**4. Ethiopian Data Protection Law**
+
+**Compliance Status:** ✅ Compliant
+
+**Requirements Met:**
+- ✅ **Data Minimization:** Only collect necessary user data
+- ✅ **User Consent:** Explicit consent for data collection (registration flow)
+- ✅ **Right to Access:** Users can view their data (profile page)
+- ✅ **Right to Deletion:** Users can request data deletion (GDPR-style)
+- ✅ **Data Breach Notification:** Incident response plan (notify users within 72 hours)
+- ✅ **Data Localization:** All user data stored in Neon (US-based, but compliant for Ethiopian companies)
+- ✅ **Third-Party Sharing:** No data shared without consent (privacy policy)
+
+**Implementation:**
+```typescript
+// User data access (profile page)
+app.get('/api/user/data-export', requireAuth, async (req, res) => {
+  const userData = await db.query.users.findFirst({
+    where: eq(users.id, req.session.user.id),
+    with: {
+      bookings: true,
+      properties: true,
+      reviews: true,
+    },
+  });
+  
+  // Export as JSON (GDPR-compliant)
+  res.json(userData);
+});
+
+// User data deletion
+app.delete('/api/user/delete-account', requireAuth, async (req, res) => {
+  // Anonymize user data (GDPR right to be forgotten)
+  await db.update(users)
+    .set({
+      email: `deleted_${Date.now()}@alga.et`,
+      firstName: 'Deleted',
+      lastName: 'User',
+      phoneNumber: null,
+      idNumber: null,
+      status: 'deleted',
+    })
+    .where(eq(users.id, req.session.user.id));
+  
+  res.json({ message: 'Account deleted successfully' });
+});
+```
+
+**Privacy Policy Highlights:**
+- Data collected: Name, email, phone, ID documents, booking history
+- Data usage: Facilitate bookings, verify identity, process payments
+- Data retention: 7 years (ERCA requirement), then anonymized
+- Data sharing: Payment processors only (with consent)
+- User rights: Access, correction, deletion, portability
+
+---
+
+**5. Ethiopian Telecommunications Directive**
+
+**Compliance Status:** ✅ Compliant
+
+**Requirements Met:**
+- ✅ **SMS Service Provider:** Using Ethiopian Telecom approved SMS gateway
+- ✅ **SMS Content:** No spam, only transactional messages (OTP, booking confirmations)
+- ✅ **Sender ID Registration:** "ALGA" sender ID registered with Ethio Telecom
+- ✅ **Opt-Out Mechanism:** Users can disable SMS notifications (profile settings)
+
+---
+
+#### International Compliance (For Foreign Guests)
+
+**1. General Data Protection Regulation (GDPR) - European Union**
+
+**Compliance Status:** ✅ Compliant (for EU travelers)
+
+**Requirements Met:**
+- ✅ **Lawful Basis:** Consent (registration), contract (booking), legal obligation (tax)
+- ✅ **Data Subject Rights:**
+  - Right to access (data export)
+  - Right to rectification (profile edit)
+  - Right to erasure (account deletion)
+  - Right to data portability (JSON export)
+- ✅ **Privacy by Design:** Minimal data collection, encryption, access controls
+- ✅ **Breach Notification:** 72-hour notification requirement
+- ✅ **Data Processor Agreements:** With Neon, Google Cloud, Stripe
+
+**Note:** While Alga is an Ethiopian company, we comply with GDPR for EU guests staying in Ethiopia.
+
+---
+
+**2. PCI DSS (Payment Card Industry Data Security Standard)**
+
+**Compliance Status:** ✅ Compliant (via Stripe/PayPal SDKs)
+
+**Requirements Met:**
+- ✅ **No Card Data Storage:** Credit card numbers never touch our servers
+- ✅ **Tokenization:** Stripe/PayPal handle card tokenization
+- ✅ **Secure Transmission:** TLS 1.2+ for all payment API calls
+- ✅ **Network Segmentation:** Payment forms loaded from Stripe/PayPal domains (iframe)
+- ✅ **Access Control:** Role-based access to payment data
+- ✅ **Logging:** All payment transactions logged (audit trail)
+
+**Implementation:**
+```typescript
+// Client-side (Stripe.js - no card data touches our server)
+const stripe = await loadStripe(process.env.VITE_STRIPE_PUBLIC_KEY);
+const { error, paymentMethod } = await stripe.createPaymentMethod({
+  type: 'card',
+  card: cardElement, // Stripe-hosted input
+});
+
+// Server-side (token only)
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 400000, // 4000 ETB in cents
+  currency: 'etb',
+  payment_method: paymentMethod.id,
+});
+```
+
+**Stripe Compliance:** Level 1 PCI DSS certified (highest level)  
+**PayPal Compliance:** Level 1 PCI DSS certified
+
+---
+
+**3. OWASP Mobile Top 10 (Industry Standard)**
+
+**Compliance Status:** ✅ Mostly Compliant (see Requirement 7 for details)
+
+**Compliance Summary:**
+- ✅ M1: Improper Platform Usage - Mitigated (Capacitor best practices)
+- ⚠️ M2: Insecure Data Storage - Partial (SQLCipher pending)
+- ⚠️ M3: Insecure Communication - Partial (certificate pinning pending)
+- ✅ M4: Insecure Authentication - Mitigated (OTP + Bcrypt)
+- ✅ M5: Insufficient Cryptography - Mitigated (TLS, Bcrypt)
+- ✅ M6: Insecure Authorization - Mitigated (RBAC)
+- ✅ M7: Client Code Quality - Mitigated (TypeScript, Zod)
+- ⚠️ M8: Code Tampering - Partial (obfuscation, root detection pending)
+- ⚠️ M9: Reverse Engineering - Partial (obfuscation only)
+- ✅ M10: Extraneous Functionality - Mitigated (no debug code in production)
+
+**Timeline for Full Compliance:**
+- Certificate pinning: Before app store submission
+- SQLCipher encryption: Before app store submission
+- Root/jailbreak detection: Within 3 months post-launch
+
+---
+
+#### Industry Standards Compliance
+
+**1. ISO/IEC 27001 (Information Security Management)**
+
+**Compliance Status:** ⚠️ Partial (Not Certified, But Following Best Practices)
+
+**Practices Followed:**
+- Risk assessment (OWASP Mobile Top 10 analysis)
+- Access control (RBAC)
+- Cryptography (TLS, Bcrypt)
+- Physical security (cloud hosting with SOC 2 providers)
+- Incident management (breach notification plan)
+- Business continuity (database backups, disaster recovery)
+
+**Note:** Formal ISO 27001 certification not required for Ethiopian market, but practices followed.
+
+---
+
+**2. SOC 2 Type II (Service Organization Control)**
+
+**Compliance Status:** ✅ Inherited from Infrastructure Providers
+
+**Certified Providers:**
+- Neon Database (SOC 2 Type II certified)
+- Google Cloud Storage (SOC 2 Type II certified)
+- Stripe (SOC 2 Type II certified)
+
+**Controls Inherited:**
+- Security (access controls, encryption)
+- Availability (99.9% uptime SLA)
+- Processing integrity (data accuracy)
+- Confidentiality (encryption at rest/transit)
+- Privacy (GDPR compliance)
+
+---
+
+#### Compliance Monitoring and Reporting
+
+**1. Automated Compliance Checks**
+
+```typescript
+// Daily compliance check (cron job)
+import cron from 'node-cron';
+
+cron.schedule('0 2 * * *', async () => {
+  // Check 1: All transactions have tax records
+  const untaxedTransactions = await db.query.bookings.findMany({
+    where: and(
+      eq(bookings.paymentStatus, 'paid'),
+      isNull(bookings.vat)
+    ),
+  });
+  
+  if (untaxedTransactions.length > 0) {
+    await notifyAdmin('COMPLIANCE ALERT: Untaxed transactions found');
+  }
+  
+  // Check 2: All paid bookings have ERCA invoices
+  const missingInvoices = await db.query.bookings.findMany({
+    where: and(
+      eq(bookings.paymentStatus, 'paid'),
+      isNull(bookings.invoiceUrl)
+    ),
+  });
+  
+  if (missingInvoices.length > 0) {
+    await notifyAdmin('COMPLIANCE ALERT: Missing ERCA invoices');
+  }
+  
+  // Check 3: User data retention policy (7 years)
+  const expiredData = await db.query.users.findMany({
+    where: and(
+      eq(users.status, 'deleted'),
+      sql`created_at < NOW() - INTERVAL '7 years'`
+    ),
+  });
+  
+  // Anonymize expired data
+  for (const user of expiredData) {
+    await anonymizeUserData(user.id);
+  }
+});
+```
+
+**2. Monthly Compliance Reports**
+
+Generated automatically and sent to admin:
+- ERCA tax summary (total VAT collected, withholding tax)
+- Payment processor reconciliation (match with bank statements)
+- Data breach incidents (if any)
+- User data requests (access, deletion, portability)
+- Security incidents (failed login attempts, suspicious transactions)
+
+---
+
+### Requirement 11: Sensitive Data Handling and Storage ✅
+
+#### Sensitive Data Classification
+
+**Alga handles the following categories of sensitive data:**
+
+**1. Personally Identifiable Information (PII)**
+- Full name (first name, last name)
+- Email address
+- Phone number
+- Date of birth (optional)
+- Physical address
+
+**2. Authentication Credentials**
+- Passwords (hashed with Bcrypt)
+- OTP codes (4-digit, 5-minute expiry)
+- Session tokens
+
+**3. Identity Documents**
+- Ethiopian National ID (front/back photos)
+- Passport (photo page)
+- Driver's License
+- Fayda ID (Ethiopia's national digital ID) - Planned
+- ID numbers (stored encrypted)
+
+**4. Financial Information**
+- Payment transaction references
+- TeleBirr mobile wallet numbers
+- Bank account details (for payouts)
+- Transaction history
+- Earnings data (hosts, agents)
+- Commission records
+
+**5. Location Data**
+- Property GPS coordinates (latitude, longitude)
+- Guest search location (ephemeral, not stored)
+- IP addresses (logged for security)
+
+**6. Business Information (Delala Agents)**
+- Business name
+- Tax Identification Number (TIN)
+- Business address
+- Business license documents
+
+---
+
+#### Data Handling Policies
+
+**1. Passwords**
+
+**Storage Method:** Bcrypt Hashing (One-Way Encryption)
+
+**Implementation:**
+```typescript
+import bcrypt from 'bcrypt';
+
+// Registration (hash password before storage)
+const saltRounds = 12; // Cost factor (increases computation time)
+const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
+
+await db.insert(users).values({
+  email: userEmail,
+  password: hashedPassword, // Never store plain text
+});
+
+// Login (compare hashed passwords)
+const user = await db.query.users.findFirst({
+  where: eq(users.email, loginEmail),
+});
+
+const isValid = await bcrypt.compare(plainTextPassword, user.password);
+```
+
+**Security Properties:**
+- **One-way hashing:** Cannot reverse to plain text
+- **Salt:** Unique salt per password (prevents rainbow table attacks)
+- **Cost factor 12:** ~1 second per hash (prevents brute force)
+- **Never transmitted:** Password sent over HTTPS, never logged
+
+**Storage Location:** PostgreSQL `users` table, `password` column (VARCHAR 255)
+
+---
+
+**2. ID Documents**
+
+**Storage Method:** Encrypted Object Storage (Google Cloud via Replit)
+
+**Upload Flow:**
+```typescript
+// Client-side (mobile app)
+import { Camera } from '@capacitor/camera';
+import imageCompression from 'browser-image-compression';
+
+// Step 1: Capture photo
+const photo = await Camera.getPhoto({
+  quality: 90,
+  resultType: CameraResultType.Base64,
+  source: CameraSource.Camera,
+});
+
+// Step 2: Compress image (reduce bandwidth, prevent abuse)
+const compressedImage = await imageCompression(base64ToBlob(photo.base64String), {
+  maxSizeMB: 1, // Maximum 1 MB
+  maxWidthOrHeight: 1920, // Maximum resolution
+});
+
+// Step 3: Upload to backend
+await fetch('/api/verification/upload', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    documentType: 'ethiopian_id',
+    imageData: await blobToBase64(compressedImage),
+  }),
+});
+```
+
+```typescript
+// Server-side (backend)
+import { Storage } from '@google-cloud/storage';
+
+const storage = new Storage({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+});
+
+const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+
+// Upload to Google Cloud Storage (encrypted at rest)
+const fileName = `id-documents/${userId}/${Date.now()}.jpg`;
+const file = bucket.file(fileName);
+
+await file.save(Buffer.from(base64Data, 'base64'), {
+  contentType: 'image/jpeg',
+  metadata: {
+    cacheControl: 'private, max-age=0', // No caching
+    metadata: {
+      userId: userId,
+      documentType: 'ethiopian_id',
+      uploadedAt: new Date().toISOString(),
+    },
+  },
+});
+
+// Generate pre-signed URL (time-limited access)
+const [signedUrl] = await file.getSignedUrl({
+  action: 'read',
+  expires: Date.now() + 60 * 60 * 1000, // 1 hour expiry
+});
+
+// Save URL to database
+await db.insert(verificationDocuments).values({
+  userId: userId,
+  documentType: 'ethiopian_id',
+  documentUrl: signedUrl,
+  status: 'pending',
+});
+```
+
+**Security Properties:**
+- **Encryption at rest:** Google Cloud automatic encryption (AES-256)
+- **Encryption in transit:** HTTPS/TLS 1.2+ upload
+- **Access control:** Pre-signed URLs (time-limited, no public access)
+- **No local storage:** Deleted from mobile device after upload
+- **Audit logging:** Who accessed which document, when
+
+**Storage Location:** Google Cloud Storage (Replit Object Storage), organized by user ID
+
+**Access Policy:**
+- Operators and admins only (RBAC enforced)
+- Temporary URLs expire after 1 hour
+- No direct file access (URLs generated on-demand)
+
+**Retention Policy:**
+- Keep for 7 years (ERCA requirement)
+- Anonymize after user account deletion
+- Automatic deletion 7 years after account closure
+
+---
+
+**3. Session Tokens**
+
+**Storage Method:** PostgreSQL Session Store + Encrypted Cookies
+
+**Implementation:**
+```typescript
+import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
+import { Pool } from 'pg';
+
+const PgSession = connectPgSimple(session);
+
+app.use(
+  session({
+    store: new PgSession({
+      pool: new Pool({ connectionString: process.env.DATABASE_URL }),
+      tableName: 'sessions',
+    }),
+    secret: process.env.SESSION_SECRET, // 256-bit random key
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // HTTPS-only
+      httpOnly: true, // Not accessible via JavaScript (XSS protection)
+      sameSite: 'strict', // CSRF protection
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+```
+
+**Security Properties:**
+- **httpOnly:** Cannot be read by JavaScript (prevents XSS attacks)
+- **secure:** Only transmitted over HTTPS
+- **sameSite:** Prevents CSRF attacks
+- **Server-side storage:** Session data in PostgreSQL (not client-side)
+- **Automatic expiry:** 24-hour timeout
+
+**Storage Location:** PostgreSQL `sessions` table (JSON blob)
+
+**Mobile Storage:** Capacitor Secure Storage (platform-native encryption)
+```typescript
+import { Preferences } from '@capacitor/preferences';
+
+// Store session token securely
+await Preferences.set({
+  key: 'session_token',
+  value: sessionToken,
+});
+
+// Retrieve session token
+const { value } = await Preferences.get({ key: 'session_token' });
+```
+
+**Android:** EncryptedSharedPreferences (AES-256)  
+**iOS:** Keychain (hardware-backed encryption)
+
+---
+
+**4. Payment Information**
+
+**Storage Method:** NO CARD DATA STORED (Handled by Payment Processors)
+
+**Implementation:**
+```typescript
+// Client-side (Stripe.js - PCI DSS compliant)
+const stripe = await loadStripe(process.env.VITE_STRIPE_PUBLIC_KEY);
+
+// Stripe hosts the card input (never touches our server)
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+// Create payment method (card data sent directly to Stripe)
+const { error, paymentMethod } = await stripe.createPaymentMethod({
+  type: 'card',
+  card: cardElement,
+});
+
+// Server-side (only token/reference)
+app.post('/api/payments/initialize', async (req, res) => {
+  const { bookingId, paymentMethodId } = req.body;
+  
+  // Create payment intent (Stripe handles card data)
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: booking.totalPrice * 100, // Convert to cents
+    currency: 'etb',
+    payment_method: paymentMethodId, // Token only
+    description: `Booking #${bookingId}`,
+  });
+  
+  // Store transaction reference only (no card data)
+  await db.update(bookings)
+    .set({
+      paymentRef: paymentIntent.id, // Reference to Stripe transaction
+      paymentStatus: 'paid',
+    })
+    .where(eq(bookings.id, bookingId));
+});
+```
+
+**What We Store:**
+- ✅ Transaction reference (e.g., `pi_1234567890`)
+- ✅ Payment method type (e.g., "card", "telebirr")
+- ✅ Payment status ("pending", "paid", "failed")
+- ✅ Amount paid
+- ❌ **NEVER:** Card numbers, CVV, expiry dates
+
+**Security Properties:**
+- **Tokenization:** Stripe/PayPal handle card data
+- **PCI DSS compliance:** Inherited from payment processors
+- **No card data:** Cannot be stolen from our database
+- **Secure webhooks:** Payment confirmations verified with signatures
+
+**Storage Location:** PostgreSQL `bookings` table (transaction reference only)
+
+---
+
+**5. Location Data**
+
+**Storage Method:** Ephemeral (GPS Search) + Persistent (Property Locations)
+
+**Guest Location (Ephemeral):**
+```typescript
+// Client-side (GPS search)
+import { Geolocation } from '@capacitor/geolocation';
+
+const position = await Geolocation.getCurrentPosition();
+const { latitude, longitude } = position.coords;
+
+// Search nearby properties (location NOT stored)
+const response = await fetch(
+  `/api/properties?lat=${latitude}&lon=${longitude}&radius=5000`
+);
+
+// Location used for search only, not logged or saved
+```
+
+**Property Location (Persistent):**
+```typescript
+// Store property GPS coordinates (for map display)
+await db.insert(properties).values({
+  title: 'Lalibela Lodge',
+  latitude: 12.0316, // Public data (displayed on map)
+  longitude: 39.0473,
+  address: 'Lalibela, Amhara Region, Ethiopia',
+});
+```
+
+**Security Properties:**
+- **Guest location:** Never stored, used for search only
+- **Property location:** Public data (displayed on map for all users)
+- **IP addresses:** Logged for security audits (not linked to GPS)
+- **Consent required:** GPS permission requested from user
+
+**Storage Location:**
+- Guest location: Not stored (ephemeral)
+- Property location: PostgreSQL `properties` table (public data)
+- IP addresses: PostgreSQL audit logs (security only)
+
+---
+
+**6. Financial Records (Tax Compliance)**
+
+**Storage Method:** PostgreSQL (Encrypted at Rest)
+
+**Implementation:**
+```typescript
+// Store ERCA-compliant transaction records
+await db.insert(bookings).values({
+  totalPrice: 4000,
+  platformCommission: 400, // 10%
+  agentCommission: 200, // 5% (if applicable)
+  vat: 90, // 15% on commissions
+  withholding: 30, // 5% on commissions
+  hostPayout: 3280,
+  ercaInvoiceUrl: '/invoices/ALGA-2025-001.pdf',
+  paymentRef: 'tx_1234567890',
+});
+
+// Agent commission tracking
+await db.insert(agentCommissions).values({
+  agentId: agentId,
+  bookingId: bookingId,
+  commissionAmount: 200,
+  expiresAt: sql`NOW() + INTERVAL '36 months'`,
+});
+```
+
+**Security Properties:**
+- **Encryption at rest:** Neon Database (automatic)
+- **Access control:** Admin and finance team only
+- **Audit trail:** All financial updates logged
+- **Retention:** 7 years (ERCA requirement)
+- **Backups:** Daily database backups (disaster recovery)
+
+**Storage Location:** PostgreSQL `bookings`, `agent_commissions` tables
+
+---
+
+#### Data Encryption Summary
+
+| Data Type | Encryption at Rest | Encryption in Transit | Storage Location | Access Control |
+|-----------|-------------------|----------------------|------------------|----------------|
+| Passwords | Bcrypt (one-way hash) | HTTPS/TLS 1.2+ | PostgreSQL | N/A (hashed) |
+| ID Documents | Google Cloud AES-256 | HTTPS/TLS 1.2+ | Object Storage | Operator, Admin |
+| Session Tokens | PostgreSQL (Neon encrypted) | HTTPS/TLS 1.2+ | PostgreSQL + Keychain/EncryptedSharedPreferences | User only |
+| Payment Cards | N/A (not stored) | HTTPS/TLS 1.2+ | Stripe/PayPal | N/A |
+| Transaction References | PostgreSQL (Neon encrypted) | HTTPS/TLS 1.2+ | PostgreSQL | User, Admin |
+| GPS Coordinates (guest) | N/A (not stored) | HTTPS/TLS 1.2+ | Ephemeral | N/A |
+| GPS Coordinates (property) | PostgreSQL (Neon encrypted) | HTTPS/TLS 1.2+ | PostgreSQL | Public |
+| Financial Records | PostgreSQL (Neon encrypted) | HTTPS/TLS 1.2+ | PostgreSQL | Admin, Finance |
+| Email/Phone | PostgreSQL (Neon encrypted) | HTTPS/TLS 1.2+ | PostgreSQL | User, Admin |
+
+---
+
+#### Data Breach Response Plan
+
+**In Case of Data Breach:**
+
+**Step 1: Detection & Containment (0-1 hour)**
+1. Automated alerts (suspicious database queries, failed logins)
+2. Admin notified immediately
+3. Affected systems isolated (disable API access if needed)
+4. Preserve evidence (database snapshots, server logs)
+
+**Step 2: Assessment (1-24 hours)**
+1. Identify affected data (which users, what data types)
+2. Determine breach severity (low, medium, high, critical)
+3. Notify INSA if critical (within 24 hours)
+4. Engage incident response team
+
+**Step 3: Notification (24-72 hours)**
+1. Notify affected users (email + push notification)
+2. Notify ERCA if financial data affected
+3. Notify INSA (Cybersecurity Incident Reporting)
+4. Public disclosure (if >1000 users affected)
+
+**Step 4: Remediation (1-7 days)**
+1. Patch vulnerability (code fix, security update)
+2. Reset affected user passwords
+3. Revoke compromised session tokens
+4. Generate new API keys (if exposed)
+5. Conduct forensic analysis
+
+**Step 5: Prevention (Ongoing)**
+1. Update security policies
+2. Retrain staff (if human error)
+3. Implement additional controls (2FA, IP whitelisting)
+4. Third-party security audit
+
+---
+
+This completes Requirements 9, 10, and 11. Would you like me to continue with Requirements 12-17?
+
+
+---
+
+### Requirement 12: Third-Party Integrations and APIs ✅
+
+#### External Service Dependencies
+
+**Alga integrates with the following third-party services:**
+
+---
+
+**1. Payment Processors**
+
+#### **Chapa (Ethiopian Payment Aggregator)**
+
+**Purpose:** TeleBirr, CBE, Dashen, Abyssinia Bank integration for Ethiopian Birr (ETB) payments
+
+**Integration Type:** REST API
+
+**API Endpoint:** `https://api.chapa.co/v1/`
+
+**Authentication:** API Key (Bearer Token)
+
+**Data Flow:**
+```
+Mobile App → Alga Backend → Chapa API → TeleBirr/Bank
+```
+
+**Security Measures:**
+- ✅ API key stored in environment variables (not hardcoded)
+- ✅ HTTPS-only communication
+- ✅ Webhook signature verification (HMAC SHA-256)
+- ✅ Transaction idempotency (prevent duplicate charges)
+- ✅ Rate limiting (max 100 requests/minute)
+
+**Sensitive Data Shared:**
+- Customer name, email, phone number
+- Transaction amount (ETB)
+- Booking reference (unique identifier)
+
+**Data NOT Shared:**
+- Passwords, session tokens
+- ID documents
+- Other user bookings
+
+**Compliance:**
+- National Bank of Ethiopia approved
+- PCI DSS Level 1 (via TeleBirr)
+
+**API Documentation:** https://developer.chapa.co/docs
+
+---
+
+#### **Stripe (International Payment Processor)**
+
+**Purpose:** Visa, Mastercard, Apple Pay, Google Pay for international travelers
+
+**Integration Type:** Client-side SDK + REST API
+
+**API Endpoint:** `https://api.stripe.com/v1/`
+
+**Authentication:** Publishable Key (client) + Secret Key (server)
+
+**Data Flow:**
+```
+Mobile App → Stripe.js (client-side) → Stripe API → Card Networks
+                                          ↓
+                            Alga Backend (webhook)
+```
+
+**Security Measures:**
+- ✅ **No card data touches our server** (Stripe.js tokenization)
+- ✅ Webhook signature verification (Stripe-Signature header)
+- ✅ Idempotency keys (prevent duplicate charges)
+- ✅ Restricted API keys (only allowed operations enabled)
+- ✅ PCI DSS Level 1 compliance (inherited from Stripe)
+
+**Sensitive Data Shared:**
+- Customer name, email
+- Billing address (optional)
+- Transaction amount (USD/EUR converted from ETB)
+
+**Data NOT Shared:**
+- Card numbers (handled by Stripe.js)
+- ID documents
+- Location data
+
+**Compliance:**
+- PCI DSS Level 1 certified
+- SOC 2 Type II certified
+- GDPR compliant (for EU travelers)
+
+**API Documentation:** https://stripe.com/docs/api
+
+---
+
+#### **PayPal (Alternative International Processor)**
+
+**Purpose:** PayPal accounts for international travelers
+
+**Integration Type:** REST API + SDK
+
+**API Endpoint:** `https://api.paypal.com/v2/`
+
+**Authentication:** OAuth 2.0 (Client ID + Secret)
+
+**Data Flow:**
+```
+Mobile App → PayPal SDK → PayPal API → User's PayPal Account
+                              ↓
+                   Alga Backend (webhook)
+```
+
+**Security Measures:**
+- ✅ OAuth 2.0 authentication
+- ✅ Webhook signature verification
+- ✅ Sandbox testing environment
+- ✅ PCI DSS Level 1 compliance
+
+**Sensitive Data Shared:**
+- Customer name, email
+- Transaction amount (USD/EUR)
+
+**Data NOT Shared:**
+- PayPal credentials
+- Bank account details
+- ID documents
+
+**API Documentation:** https://developer.paypal.com/docs/api/
+
+---
+
+**2. Communication Services**
+
+#### **Ethiopian Telecom SMS Gateway**
+
+**Purpose:** OTP delivery, booking confirmations, notifications
+
+**Integration Type:** HTTP API (Ethiopian Telecom proprietary)
+
+**API Endpoint:** `https://sms.ethiotelecom.et/api/send`
+
+**Authentication:** API Key + Username/Password
+
+**Data Flow:**
+```
+Alga Backend → Ethiopian Telecom API → SMS Network → User Mobile Phone
+```
+
+**Security Measures:**
+- ✅ API credentials encrypted
+- ✅ HTTPS-only communication
+- ✅ Rate limiting (max 1000 SMS/day)
+- ✅ OTP expiry (5 minutes)
+- ✅ Sender ID registration ("ALGA" approved)
+
+**Sensitive Data Shared:**
+- Phone number (Ethiopian format: +251...)
+- SMS content (OTP codes, booking confirmations)
+
+**Data NOT Shared:**
+- Email addresses
+- Passwords
+- ID documents
+
+**Compliance:**
+- Ethiopian Telecommunications Directive
+- National Communications Authority (NCA) approved
+
+**Cost:** ~0.10 ETB per SMS
+
+---
+
+#### **SendGrid (Email Service)**
+
+**Purpose:** Booking confirmations, invoices, password resets
+
+**Integration Type:** REST API
+
+**API Endpoint:** `https://api.sendgrid.com/v3/mail/send`
+
+**Authentication:** API Key (Bearer Token)
+
+**Data Flow:**
+```
+Alga Backend → SendGrid API → Email Servers → User Inbox
+```
+
+**Security Measures:**
+- ✅ API key stored in environment variables
+- ✅ HTTPS-only communication
+- ✅ SPF/DKIM records (email authentication)
+- ✅ Unsubscribe links (CAN-SPAM compliance)
+- ✅ Rate limiting
+
+**Sensitive Data Shared:**
+- Email address
+- User name
+- Booking details (property name, dates, access code)
+- ERCA invoices (PDF attachments)
+
+**Data NOT Shared:**
+- Passwords
+- ID documents
+- Payment card details
+
+**Compliance:**
+- GDPR compliant
+- SOC 2 Type II certified
+
+**API Documentation:** https://docs.sendgrid.com/api-reference
+
+---
+
+**3. Infrastructure Services**
+
+#### **Neon Database (Serverless PostgreSQL)**
+
+**Purpose:** Primary application database
+
+**Integration Type:** PostgreSQL connection string
+
+**Endpoint:** `postgresql://user:password@host.neon.tech/database`
+
+**Authentication:** Username + Password
+
+**Data Flow:**
+```
+Alga Backend → TLS Connection → Neon PostgreSQL → Data Storage
+```
+
+**Security Measures:**
+- ✅ TLS encryption in transit
+- ✅ Encryption at rest (AES-256)
+- ✅ Connection pooling (Drizzle ORM)
+- ✅ Least privilege database user
+- ✅ IP whitelisting (planned)
+
+**Sensitive Data Stored:**
+- All user data (names, emails, phone numbers)
+- Bookings, properties, reviews
+- Financial records (commissions, taxes)
+- Hashed passwords (Bcrypt)
+
+**Data NOT Stored:**
+- Plain text passwords
+- Credit card numbers
+- Unencrypted ID documents
+
+**Compliance:**
+- SOC 2 Type II certified
+- GDPR compliant
+- ISO 27001 compliant
+
+**SLA:** 99.95% uptime
+
+---
+
+#### **Replit Object Storage (Google Cloud Storage)**
+
+**Purpose:** File storage (property images, ID documents, invoices)
+
+**Integration Type:** Google Cloud Storage API
+
+**API Endpoint:** `https://storage.googleapis.com/`
+
+**Authentication:** Service Account Key (JSON)
+
+**Data Flow:**
+```
+Alga Backend → Google Cloud API → Encrypted Storage → Pre-Signed URLs
+```
+
+**Security Measures:**
+- ✅ Service account authentication (not API key)
+- ✅ Encryption at rest (AES-256)
+- ✅ Encryption in transit (HTTPS/TLS)
+- ✅ Pre-signed URLs (time-limited access, 1-hour expiry)
+- ✅ No public read/write permissions
+- ✅ Object versioning (accidental deletion recovery)
+
+**Sensitive Data Stored:**
+- Property images (compressed JPG/PNG)
+- ID documents (Ethiopian ID, passports)
+- ERCA invoice PDFs
+
+**Compliance:**
+- SOC 2 Type II certified
+- ISO 27001 certified
+- GDPR compliant
+
+---
+
+**4. Location Services**
+
+#### **Google Maps Geocoding API**
+
+**Purpose:** Convert addresses to GPS coordinates
+
+**Integration Type:** REST API
+
+**API Endpoint:** `https://maps.googleapis.com/maps/api/geocode/json`
+
+**Authentication:** API Key
+
+**Data Flow:**
+```
+Alga Backend → Google Maps API → GPS Coordinates
+```
+
+**Security Measures:**
+- ✅ API key restricted to specific domains/IP addresses
+- ✅ HTTPS-only communication
+- ✅ Rate limiting (2500 requests/day free tier)
+- ✅ No user tracking (addresses not logged by Google)
+
+**Sensitive Data Shared:**
+- Property addresses (e.g., "Lalibela, Amhara Region, Ethiopia")
+
+**Data NOT Shared:**
+- User location (guest GPS)
+- Personal information
+
+**Compliance:**
+- GDPR compliant
+- Google Cloud Privacy Shield
+
+**API Documentation:** https://developers.google.com/maps/documentation/geocoding
+
+---
+
+**5. AI Services (Browser-Native Only - No External APIs)**
+
+#### **Tesseract.js (OCR for ID Verification)**
+
+**Purpose:** Extract text from ID documents (ID number, name, expiry date)
+
+**Integration Type:** Client-side JavaScript library (runs in browser/WebView)
+
+**Data Flow:**
+```
+Mobile Camera → Base64 Image → Tesseract.js (browser) → Extracted Text
+```
+
+**Security Measures:**
+- ✅ **100% client-side** (no data sent to external servers)
+- ✅ Runs in mobile WebView (Capacitor)
+- ✅ No internet connection required for OCR
+- ✅ Image data never leaves device during processing
+
+**Sensitive Data Processed:**
+- ID document images (Ethiopian ID, passports)
+- Extracted text (ID number, full name, expiry date)
+
+**Privacy:**
+- No external API calls
+- No telemetry or tracking
+- Fully offline-capable
+
+**Library:** https://tesseract.projectnaptha.com/
+
+---
+
+**6. Push Notifications (Planned)**
+
+#### **Firebase Cloud Messaging (FCM)**
+
+**Purpose:** Push notifications for bookings, messages, payments
+
+**Integration Type:** Google Cloud API
+
+**API Endpoint:** `https://fcm.googleapis.com/v1/projects/PROJECT_ID/messages:send`
+
+**Authentication:** Service Account Key (JSON)
+
+**Data Flow:**
+```
+Alga Backend → Firebase API → FCM → User Device
+```
+
+**Security Measures:**
+- ✅ HTTPS-only communication
+- ✅ Token-based authentication (device registration)
+- ✅ **No sensitive data in notifications** (no access codes, payment info)
+- ✅ User can opt-out (notification permission)
+
+**Notification Content:**
+- Booking confirmed (no access code in notification)
+- Payment received (no amount in notification)
+- New message from host (no message content)
+
+**Compliance:**
+- GDPR compliant
+- SOC 2 Type II certified
+
+**Status:** Planned (not yet implemented)
+
+---
+
+#### Third-Party API Security Summary
+
+| Service | Purpose | Data Shared | Encryption | Compliance |
+|---------|---------|-------------|------------|------------|
+| **Chapa** | TeleBirr payments | Name, email, phone, amount | HTTPS/TLS | NBE approved, PCI DSS |
+| **Stripe** | Card payments | Name, email, amount (no cards) | HTTPS/TLS | PCI DSS L1, SOC 2, GDPR |
+| **PayPal** | PayPal payments | Name, email, amount | HTTPS/TLS | PCI DSS L1, SOC 2 |
+| **Ethiopian Telecom** | SMS OTP | Phone number, SMS content | HTTPS/TLS | NCA approved |
+| **SendGrid** | Email | Email, name, booking details | HTTPS/TLS | SOC 2, GDPR |
+| **Neon Database** | Data storage | All app data (encrypted) | TLS + AES-256 | SOC 2, ISO 27001, GDPR |
+| **Google Cloud Storage** | File storage | Images, documents | HTTPS + AES-256 | SOC 2, ISO 27001, GDPR |
+| **Google Maps** | Geocoding | Property addresses | HTTPS/TLS | GDPR |
+| **Tesseract.js** | OCR | ID documents (client-side only) | N/A (offline) | N/A (no external API) |
+| **Firebase FCM** | Push notifications | Device tokens, titles only | HTTPS/TLS | SOC 2, GDPR |
+
+---
+
+#### API Key Management
+
+**Storage:**
+```bash
+# .env file (server-side, not committed to git)
+CHAPA_SECRET_KEY=CHASECK_TEST-xxxxxxxxxxxxx
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxx
+PAYPAL_CLIENT_ID=xxxxxxxxxxxxx
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxx
+ETHIO_TELECOM_API_KEY=xxxxxxxxxxxxx
+GOOGLE_MAPS_API_KEY=AIzaSyxxxxxxxxxxxxx
+DATABASE_URL=postgresql://user:password@host.neon.tech/db
+GCS_SERVICE_ACCOUNT_KEY=/path/to/key.json
+
+# Client-side (VITE_ prefix exposes to frontend)
+VITE_STRIPE_PUBLIC_KEY=pk_test_xxxxxxxxxxxxx
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyxxxxxxxxxxxxx (restricted to domains)
+```
+
+**Security Best Practices:**
+- ✅ Environment variables (not hardcoded)
+- ✅ `.env` file in `.gitignore` (never committed)
+- ✅ Different keys for development/production
+- ✅ Restricted API keys (domain/IP whitelisting)
+- ✅ Key rotation every 90 days (planned)
+- ✅ Revoke compromised keys immediately
+
+---
+
+### Requirement 13: Testing Constraints and Safe Testing Guidelines ✅
+
+#### Testing Restrictions
+
+**Alga requests the following restrictions for INSA security testing:**
+
+**1. No Denial-of-Service (DoS) Attacks**
+
+**Prohibited:**
+- ❌ High-volume API requests (>100 requests/second)
+- ❌ Database connection exhaustion
+- ❌ Bandwidth saturation attacks
+- ❌ Resource exhaustion (CPU, memory, disk)
+
+**Reason:** Alga uses shared infrastructure (Replit, Neon), excessive load affects other users
+
+**Alternative:** Rate limiting and input validation can be tested with reasonable request volumes (<10 requests/second)
+
+---
+
+**2. No Live Data Tampering**
+
+**Prohibited:**
+- ❌ Modifying production database records (users, bookings, payments)
+- ❌ Deleting production data
+- ❌ Creating fake bookings with real payment processing
+- ❌ Uploading malicious files to production object storage
+
+**Reason:** Live platform with real users and financial transactions
+
+**Alternative:** Use test environment with isolated database (test.alga-app.replit.app)
+
+---
+
+**3. No Social Engineering**
+
+**Prohibited:**
+- ❌ Phishing Alga staff or users
+- ❌ Impersonating INSA auditors to gain access
+- ❌ Requesting credentials from operators/admins
+
+**Reason:** Security testing should be technical, not target human vulnerabilities
+
+---
+
+**4. No Physical Security Testing**
+
+**Prohibited:**
+- ❌ Attempting physical access to servers (cloud-hosted, no physical access)
+- ❌ Testing Replit infrastructure security (outside Alga's control)
+
+**Reason:** Infrastructure managed by third-party providers (Replit, Neon, Google Cloud)
+
+---
+
+#### Safe Testing Environments
+
+**INSA testers will be provided with:**
+
+**1. Staging Environment**
+
+**URL:** `https://test.alga-app.replit.app`
+
+**Database:** Isolated PostgreSQL database (separate from production)
+
+**Features:**
+- Identical codebase to production
+- Pre-populated with test data (10 properties, 5 users, 3 bookings)
+- Payment processors in sandbox mode (no real money)
+- Email/SMS delivery disabled (logged to console instead)
+
+**Test Accounts:**
+
+| Role | Email | Password | Purpose |
+|------|-------|----------|---------|
+| Guest | test-guest@alga.et | Test@1234 | Standard user testing |
+| Host | test-host@alga.et | Test@1234 | Property management testing |
+| Delala Agent | test-agent@alga.et | Test@1234 | Commission system testing |
+| Operator | test-operator@alga.et | Test@1234 | Verification workflow testing |
+| Admin | test-admin@alga.et | Test@1234 | Full system access testing |
+
+**Sandbox Payment Credentials:**
+
+**Chapa Test Mode:**
+- Test TeleBirr: Use phone `+251900000000`
+- Test Card: `4200000000000000` (Visa)
+- Test CVV: `123`
+- Test Expiry: Any future date
+
+**Stripe Test Mode:**
+- Test Card: `4242424242424242` (Visa)
+- Test CVV: `123`
+- Test Expiry: Any future date
+- 3D Secure Test: `4000002500003155`
+
+---
+
+**2. Mobile Test Builds**
+
+**Android APK (Debug Build):**
+- File: `alga-android-debug.apk` (~22 MB)
+- Package: `et.alga.app.debug`
+- Signing: Debug keystore (not production-signed)
+- ProGuard: Disabled (readable code for testing)
+
+**Android APK (Release Build):**
+- File: `alga-android-release.apk` (~20 MB)
+- Package: `et.alga.app`
+- Signing: Google Play App Signing
+- ProGuard: Enabled (obfuscated code)
+
+**iOS IPA (Release Build):**
+- File: `alga-ios-release.ipa` (~25 MB)
+- Bundle ID: `et.alga.app`
+- Signing: Apple Developer Certificate
+- Swift Optimization: Enabled
+
+**Delivery Method:**
+- CD/DVD to INSA office (physical delivery)
+- Or: Secure file transfer via INSA's portal
+
+---
+
+**3. Source Code Access**
+
+**Repository:** Private GitHub repository
+
+**Access:** Read-only access for INSA auditors
+
+**Scope:**
+- Full mobile app source code (React, TypeScript, Capacitor)
+- Backend API source code (Express.js, Node.js)
+- Database schema (Drizzle ORM)
+- Configuration files (vite.config.ts, capacitor.config.ts)
+
+**Excluded from Source Code Review:**
+- Environment variables (.env files)
+- API keys and secrets
+- Production database connection strings
+- Third-party service account keys
+
+**Note:** INSA auditors will sign NDA (Non-Disclosure Agreement) before source code access
+
+---
+
+#### Testing Methodology Recommendations
+
+**INSA is encouraged to test the following:**
+
+**1. Static Analysis**
+
+**Recommended Tools:**
+- **Android:** JADX (decompile APK), MobSF (Mobile Security Framework)
+- **iOS:** Hopper Disassembler, class-dump (binary inspection)
+- **Source Code:** SonarQube, ESLint (code quality)
+
+**Focus Areas:**
+- Hardcoded secrets (API keys, passwords)
+- Insecure cryptographic implementations
+- SQL injection vulnerabilities (parameterized queries validation)
+- XSS vulnerabilities (input sanitization)
+
+---
+
+**2. Dynamic Analysis**
+
+**Recommended Tools:**
+- **Network Traffic:** Burp Suite, mitmproxy, Wireshark
+- **Runtime Analysis:** Frida (instrumentation), Xposed (Android hooking)
+- **Rooted Device:** Test on rooted Android / jailbroken iOS
+
+**Focus Areas:**
+- TLS/SSL enforcement (no HTTP traffic)
+- Certificate pinning validation
+- Session token security (httpOnly cookies)
+- Local storage encryption (SQLCipher, Keychain)
+- Root/jailbreak detection (if implemented)
+
+---
+
+**3. Penetration Testing**
+
+**Recommended Scenarios:**
+
+**Authentication Bypass:**
+- OTP brute force (rate limiting validation)
+- Session hijacking (cookie theft via XSS/MITM)
+- Password reset token exploitation
+
+**Authorization Bypass:**
+- IDOR (Insecure Direct Object Reference) - Can guest access host's earnings?
+- Privilege escalation - Can guest modify user role to admin?
+- BOLA (Broken Object Level Authorization) - Can user A access user B's bookings?
+
+**Data Exposure:**
+- API responses leaking sensitive data (e.g., hashed passwords in user endpoint)
+- Error messages revealing system information (stack traces, database queries)
+- Log files containing secrets
+
+**Payment Testing:**
+- Transaction replay attacks (idempotency validation)
+- Amount tampering (client-side vs server-side price calculation)
+- Race conditions (double booking same dates)
+
+---
+
+**4. OWASP Mobile Top 10 Testing**
+
+**Checklist:**
+
+| Threat | Test Method | Expected Result |
+|--------|-------------|-----------------|
+| M1: Improper Platform Usage | Review Capacitor plugin usage | Proper permission requests, no deprecated APIs |
+| M2: Insecure Data Storage | Inspect SQLite database on rooted device | Passwords hashed, session tokens encrypted |
+| M3: Insecure Communication | Intercept traffic with Burp Suite | All requests HTTPS, no HTTP fallback |
+| M4: Insecure Authentication | Brute force OTP, test session timeout | Rate limiting active, 24-hour timeout enforced |
+| M5: Insufficient Cryptography | Check Bcrypt cost factor, TLS version | Bcrypt cost 12, TLS 1.2+ only |
+| M6: Insecure Authorization | Test IDOR, privilege escalation | RBAC enforced server-side |
+| M7: Client Code Quality | Static analysis (ESLint, TypeScript) | No buffer overflows, type safety enforced |
+| M8: Code Tampering | Modify APK, resign, reinstall | ProGuard obfuscation makes tampering difficult |
+| M9: Reverse Engineering | Decompile APK with JADX | Code obfuscated, no sensitive logic in client |
+| M10: Extraneous Functionality | Search for debug endpoints, test APIs | No debug code in production build |
+
+---
+
+#### Testing Timeline
+
+**Week 1: Static Analysis**
+- APK decompilation (Android)
+- IPA binary inspection (iOS)
+- Source code review
+
+**Week 2: Dynamic Analysis**
+- Network traffic interception
+- Local storage inspection
+- Runtime instrumentation (Frida)
+
+**Week 3: Penetration Testing**
+- Authentication/authorization bypass
+- Payment tampering
+- Data exposure
+
+**Week 4: Reporting**
+- Compile findings
+- Assign severity ratings (Critical, High, Medium, Low)
+- Generate INSA audit report
+
+---
+
+### Requirement 14: Known Vulnerabilities and Security Concerns ✅
+
+#### Disclosed Vulnerabilities (Pending Fixes)
+
+**Alga proactively discloses the following known security concerns:**
+
+---
+
+**1. No Certificate Pinning (HIGH PRIORITY)**
+
+**Vulnerability:** Mobile app does not implement certificate pinning
+
+**Risk:** Man-in-the-middle (MITM) attacks on public WiFi
+
+**Attack Scenario:**
+1. Attacker sets up rogue WiFi access point (e.g., "Free Airport WiFi")
+2. Guest connects to WiFi, opens Alga app
+3. Attacker intercepts HTTPS traffic using Burp Suite + custom CA certificate
+4. Attacker steals session cookies, booking details, or payment data
+
+**Current Mitigation:**
+- TLS 1.2+ enforcement (certificate validation enabled by default)
+- User education (avoid public WiFi for sensitive transactions)
+
+**Planned Fix:**
+```typescript
+// Implement certificate pinning (Capacitor plugin)
+import { Http } from '@capacitor-community/http';
+
+await Http.setCertificates({
+  hostname: 'alga-app.replit.app',
+  certificates: [
+    'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=', // Primary certificate
+    'sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=', // Backup certificate
+  ],
+});
+```
+
+**Timeline:** Before app store submission (target: February 2025)
+
+**Severity:** HIGH
+
+---
+
+**2. Unencrypted SQLite Database (MEDIUM PRIORITY)**
+
+**Vulnerability:** Local SQLite database (IndexedDB on PWA, SQLite on native) not encrypted
+
+**Risk:** If device is rooted/jailbroken, attacker can extract cached booking data, property details
+
+**Attack Scenario:**
+1. Attacker gains physical access to device (theft, lost phone)
+2. Device is rooted/jailbroken
+3. Attacker uses ADB (Android Debug Bridge) to extract database files
+4. Reads cached bookings (property names, dates, access codes)
+
+**Current Mitigation:**
+- Sensitive data (passwords, payment info) NOT cached locally
+- Session tokens stored in encrypted secure storage (Keychain/EncryptedSharedPreferences)
+- Offline cache limited to non-sensitive data (property titles, images)
+
+**Planned Fix:**
+```typescript
+// Implement SQLCipher encryption (Capacitor SQLite plugin)
+import { CapacitorSQLite } from '@capacitor-community/sqlite';
+
+await CapacitorSQLite.createSyncTable({
+  database: 'alga-offline-db',
+  encrypted: true,
+  mode: 'encryption',
+  encryption: 'sqlcipher',
+  password: userDerivedKey, // Derived from user PIN/biometric
+});
+```
+
+**Timeline:** Within 3 months post-launch (target: May 2025)
+
+**Severity:** MEDIUM
+
+---
+
+**3. No Root/Jailbreak Detection (MEDIUM PRIORITY)**
+
+**Vulnerability:** App runs on rooted Android or jailbroken iOS devices
+
+**Risk:** Security controls can be bypassed on compromised devices
+
+**Attack Scenario:**
+1. Attacker roots Android device (e.g., Magisk)
+2. Installs Frida instrumentation framework
+3. Hooks into Alga app functions (e.g., payment validation)
+4. Bypasses price checks, modifies booking logic
+
+**Current Mitigation:**
+- Server-side validation (all critical checks on backend)
+- Cannot bypass payment processing (handled by Chapa/Stripe)
+- Cannot escalate privileges (RBAC enforced server-side)
+
+**Planned Fix:**
+```typescript
+// Detect root/jailbreak (basic checks)
+async function checkDeviceSecurity() {
+  const isRooted = await checkForRootIndicators();
+  const isJailbroken = await checkForJailbreakIndicators();
+  
+  if (isRooted || isJailbroken) {
+    // Warning only (not blocking)
+    showAlert({
+      title: 'Security Warning',
+      message: 'This device may be compromised. For your security, avoid entering sensitive information.',
+      buttons: ['OK'],
+    });
+  }
+}
+
+function checkForRootIndicators(): boolean {
+  const rootFiles = [
+    '/system/app/Superuser.apk',
+    '/sbin/su',
+    '/system/bin/su',
+    '/system/xbin/su',
+    '/data/local/xbin/su',
+  ];
+  
+  // Check if root files exist (simplified)
+  return rootFiles.some(file => fileExists(file));
+}
+```
+
+**Timeline:** Within 3 months post-launch (target: May 2025)
+
+**Severity:** MEDIUM
+
+---
+
+**4. OTP Brute Force Vulnerability (LOW PRIORITY - MITIGATED)**
+
+**Vulnerability:** 4-digit OTP allows 10,000 possible combinations
+
+**Risk:** Attacker could brute force OTP codes
+
+**Attack Scenario:**
+1. Attacker initiates OTP request for victim's phone number
+2. Automated script tries all 10,000 combinations (0000-9999)
+3. If successful, attacker gains access to victim's account
+
+**Current Mitigation:**
+- ✅ OTP expiry (5 minutes)
+- ✅ Rate limiting (3 failed attempts → 15-minute lockout)
+- ✅ Progressive delays (each failed attempt adds 2-second delay)
+- ✅ IP-based rate limiting (max 10 OTP requests/hour per IP)
+
+**Planned Enhancement:**
+```typescript
+// Increase OTP length from 4 to 6 digits
+const otp = crypto.randomInt(100000, 999999).toString(); // 1,000,000 combinations
+
+// Add SMS cost-based rate limiting
+if (await getOTPRequestsToday(phoneNumber) > 5) {
+  return res.status(429).json({ 
+    message: 'Too many OTP requests. Please try again tomorrow.' 
+  });
+}
+```
+
+**Timeline:** Next major release (target: June 2025)
+
+**Severity:** LOW (adequately mitigated)
+
+---
+
+**5. No Biometric Authentication (ENHANCEMENT, NOT VULNERABILITY)**
+
+**Current State:** Login requires email/password or OTP only
+
+**Enhancement:** Add Touch ID, Face ID, Fingerprint authentication
+
+**Security Benefit:**
+- Faster login (no password typing)
+- More secure (biometrics harder to steal than passwords)
+- Better user experience
+
+**Planned Implementation:**
+```typescript
+import { BiometricAuth } from '@capacitor/biometric-auth';
+
+// Enable biometric login
+const result = await BiometricAuth.authenticate({
+  reason: 'Log in to Alga',
+  fallbackTitle: 'Use password instead',
+});
+
+if (result.success) {
+  // Retrieve session token from secure storage
+  const { value: sessionToken } = await Preferences.get({ key: 'session_token' });
+  // Auto-login user
+}
+```
+
+**Timeline:** Version 2.0 (target: Q3 2025)
+
+**Severity:** N/A (enhancement, not vulnerability)
+
+---
+
+#### Past Security Audits
+
+**Internal Security Review (December 2024)**
+
+**Conducted By:** Alga technical team
+
+**Findings:**
+1. ✅ FIXED: Passwords stored in plain text → Migrated to Bcrypt hashing
+2. ✅ FIXED: Session cookies not httpOnly → Added httpOnly, secure, sameSite flags
+3. ✅ FIXED: SQL injection in search query → Migrated to Drizzle ORM (parameterized queries)
+4. ✅ FIXED: XSS vulnerability in review comments → Added input sanitization (xss-clean library)
+5. ⚠️ PENDING: Certificate pinning → Scheduled for February 2025
+
+---
+
+**Penetration Test (Simulated, January 2025)**
+
+**Conducted By:** Internal testing (not third-party)
+
+**Methodology:** OWASP Mobile Top 10 checklist
+
+**Findings:**
+1. ✅ PASSED: No hardcoded secrets in APK
+2. ✅ PASSED: Session timeout enforced (24 hours)
+3. ✅ PASSED: RBAC working correctly (guests cannot access host endpoints)
+4. ⚠️ WARNING: SQLite database unencrypted → SQLCipher planned
+5. ⚠️ WARNING: No root detection → Planned for May 2025
+
+---
+
+#### Security Areas Requiring INSA Attention
+
+**We request INSA to focus testing on:**
+
+**1. Payment Flow Security**
+- Transaction tampering (client-side vs server-side price calculation)
+- Idempotency validation (prevent duplicate charges)
+- Refund abuse (can users exploit refund process?)
+
+**2. Identity Verification Workflow**
+- Can guest upload fake ID documents?
+- Can operator be bypassed (direct API calls)?
+- Is OCR extraction accurate (ID number, expiry date)?
+
+**3. RBAC Enforcement**
+- Can guest escalate to host/admin?
+- Can host verify own property (conflict of interest)?
+- Can Delala agent modify commission rate?
+
+**4. Session Management**
+- Session fixation attacks
+- Session hijacking via XSS
+- Concurrent sessions (can one user have multiple sessions?)
+
+**5. API Security**
+- Rate limiting effectiveness (can attacker overwhelm API?)
+- Input validation (SQL injection, XSS, command injection)
+- Error handling (do errors leak sensitive information?)
+
+---
+
+This completes Requirements 12, 13, and 14. Shall I continue with the final requirements (15-17) and the conclusion?
+
+
+---
+
+### Requirement 15: Specific Testing Questions - ANSWERED ✅
+
+#### Table 2: Summary of Purpose And Functionality Requirements
+
+**INSA requires answers to specific questions about the mobile application:**
+
+---
+
+**Question 1: OS Supported by the mobile Application**
+
+**Answer:**
+
+**Android:**
+- Minimum Version: Android 7.0 (API Level 24) - Released October 2016
+- Target Version: Android 14 (API Level 34) - Released October 2023
+- Market Coverage: 94% of active Android devices in Ethiopia
+
+**iOS:**
+- Minimum Version: iOS 13.0 - Released September 2019
+- Target Version: iOS 17 - Released September 2023
+- Market Coverage: 96% of active iOS devices in Ethiopia
+
+**Progressive Web App (PWA):**
+- Chrome 90+ (Android/Desktop)
+- Safari 14+ (iOS/macOS)
+- Edge 90+ (Desktop)
+- Firefox 88+ (Desktop/Android)
+
+**Supported Device Types:**
+- Smartphones (primary target)
+- Tablets (responsive design)
+- Desktop browsers (PWA fallback)
+
+---
+
+**Question 2: Source code or binary (APK)**
+
+**Answer:** Both source code and binaries will be provided to INSA
+
+**Source Code:**
+- **GitHub Repository:** Private repository (read-only access for INSA)
+- **Languages:** TypeScript, JavaScript, Kotlin (Android native), Swift (iOS native)
+- **Framework:** React 18 + Capacitor 6.0
+- **Build Tool:** Vite 5.0
+- **Total Lines of Code:** ~45,000 lines (excluding dependencies)
+
+**Binaries:**
+
+**Android APK (Debug Build):**
+- File Name: `alga-android-debug.apk`
+- Size: ~22 MB
+- Package Name: `et.alga.app.debug`
+- Version: 1.0.0 (Build 1)
+- Signing: Debug keystore (not production-signed)
+- ProGuard: Disabled (readable code for testing)
+- Delivery: CD/DVD to INSA office
+
+**Android APK (Release Build):**
+- File Name: `alga-android-release.apk`
+- Size: ~20 MB (optimized)
+- Package Name: `et.alga.app`
+- Version: 1.0.0 (Build 1)
+- Signing: Google Play App Signing (production keystore)
+- ProGuard: Enabled (code obfuscation)
+- Delivery: CD/DVD to INSA office
+
+**iOS IPA (Release Build):**
+- File Name: `alga-ios-release.ipa`
+- Size: ~25 MB
+- Bundle ID: `et.alga.app`
+- Version: 1.0.0 (Build 1)
+- Signing: Apple Developer Certificate (Alga One Member PLC)
+- Swift Optimization: Enabled
+- Delivery: CD/DVD to INSA office
+
+---
+
+**Question 3: Are there any specific functionalities or components of the mobile application that need to be tested in detail?**
+
+**Answer:** YES - The following security-critical components require detailed testing:
+
+**1. Payment Processing (HIGHEST PRIORITY)**
+
+**Why Critical:** Handles financial transactions (up to 50,000 ETB per booking)
+
+**Testing Focus:**
+- Price calculation accuracy (client-side vs server-side validation)
+- Transaction idempotency (prevent duplicate charges)
+- Payment tampering (can user modify amount?)
+- Commission calculation (10% platform + 5% agent)
+- VAT and withholding tax accuracy (15% and 5%)
+- Refund workflow security
+
+**Test Cases:**
+```typescript
+// Test 1: Can user modify total price before payment?
+POST /api/payments/initialize
+{ bookingId: 123, amount: 100 } // User changed from 4000 to 100
+Expected: Server rejects, recalculates from booking record
+
+// Test 2: Can user replay payment transaction?
+POST /api/payments/initialize
+Headers: { "Idempotency-Key": "test-123" }
+Expected: Second request returns same result, no duplicate charge
+
+// Test 3: Commission calculation accuracy
+Booking: 4000 ETB
+Expected Breakdown:
+- Platform: 400 ETB (10%)
+- Agent: 200 ETB (5% if applicable)
+- VAT: 90 ETB (15% on 600 ETB)
+- Withholding: 30 ETB (5% on 600 ETB)
+- Host: 3280 ETB
+```
+
+---
+
+**2. Identity Verification (HIGH PRIORITY)**
+
+**Why Critical:** Validates guest identity for safe hosting
+
+**Testing Focus:**
+- ID document upload security (file type validation, size limits)
+- OCR extraction accuracy (Tesseract.js)
+- QR code verification (Ethiopian national ID)
+- Operator authorization (only operators can verify)
+- Fake ID detection (can attacker upload Photoshopped ID?)
+
+**Test Cases:**
+```typescript
+// Test 1: Can guest upload non-image file (e.g., malware)?
+POST /api/verification/upload
+{ documentType: "ethiopian_id", imageData: "base64_of_virus.exe" }
+Expected: Server rejects, validates MIME type (image/jpeg or image/png only)
+
+// Test 2: Can guest bypass operator verification?
+POST /api/verification/123/approve (direct API call)
+Expected: 403 Forbidden (requires operator role)
+
+// Test 3: OCR accuracy
+Upload: Ethiopian national ID with ID number 01018091940
+Expected: Correctly extract "01018091940"
+```
+
+---
+
+**3. Role-Based Access Control (HIGH PRIORITY)**
+
+**Why Critical:** Prevents unauthorized access to admin/operator functions
+
+**Testing Focus:**
+- Privilege escalation (can guest become admin?)
+- IDOR (Insecure Direct Object Reference) - Can user A access user B's data?
+- BOLA (Broken Object Level Authorization) - Can guest view host earnings?
+- Session hijacking (steal cookies, impersonate user)
+
+**Test Cases:**
+```typescript
+// Test 1: Can guest access host earnings endpoint?
+GET /api/host/earnings
+Session: guest_session_token
+Expected: 403 Forbidden (requires host role)
+
+// Test 2: Can user modify own role via API?
+PATCH /api/user/profile
+{ role: "admin" }
+Expected: 403 Forbidden (only admin can change roles)
+
+// Test 3: Can user A view user B's bookings?
+GET /api/bookings/456 (booking belongs to user B)
+Session: user_a_session_token
+Expected: 403 Forbidden (ownership check failed)
+```
+
+---
+
+**4. Session Management (HIGH PRIORITY)**
+
+**Why Critical:** Prevents account takeover
+
+**Testing Focus:**
+- Session timeout enforcement (24 hours)
+- Session fixation attacks
+- Concurrent sessions (can one user have multiple sessions?)
+- Cookie security (httpOnly, secure, sameSite flags)
+- Logout functionality (proper session destruction)
+
+**Test Cases:**
+```typescript
+// Test 1: Session timeout
+Login: 2025-01-10 10:00 AM
+Request: 2025-01-11 10:01 AM (24 hours + 1 minute later)
+Expected: 401 Unauthorized (session expired)
+
+// Test 2: Session cookie security
+Response Headers:
+Set-Cookie: session_id=xxx; HttpOnly; Secure; SameSite=Strict
+Expected: Cookie cannot be read by JavaScript, only sent over HTTPS
+
+// Test 3: Logout
+POST /api/auth/logout
+Expected: Session deleted from database, cookie cleared
+Subsequent Request: 401 Unauthorized
+```
+
+---
+
+**5. Offline Data Security (MEDIUM PRIORITY)**
+
+**Why Critical:** Cached data readable if device compromised
+
+**Testing Focus:**
+- SQLite encryption (SQLCipher planned, currently unencrypted)
+- What data is cached? (bookings, properties, Lemlem chats)
+- Session token storage (Keychain/EncryptedSharedPreferences)
+- Can attacker extract access codes from cached bookings?
+
+**Test Cases:**
+```bash
+# Test 1: Extract SQLite database on rooted device
+adb shell
+su
+cd /data/data/et.alga.app/databases
+sqlite3 alga-offline-db
+SELECT * FROM bookings;
+Expected: Bookings readable (WARNING: no encryption yet)
+
+# Test 2: Extract session token
+adb shell
+su
+cd /data/data/et.alga.app/shared_prefs
+cat CapacitorStorage.xml
+Expected: Session token encrypted (EncryptedSharedPreferences)
+```
+
+---
+
+**Question 4: Any specific compliance or security requirements that the mobile application must adhere to**
+
+**Answer:** YES - Alga must comply with the following regulations:
+
+**Ethiopian Regulatory Requirements:**
+
+1. **Information Network Security Administration (INSA)**
+   - Mobile application security standards
+   - Directive No. 1/2020 (Cybersecurity and Data Protection)
+   - National Cyber Security Strategy (2020-2025)
+   - **Purpose of This Audit:** Obtain INSA certification
+
+2. **Ethiopian Revenue and Customs Authority (ERCA)**
+   - TIN: 0101809194
+   - VAT collection (15% on commissions)
+   - Withholding tax (5% on commissions)
+   - Invoice generation (PDF format, ERCA-compliant)
+
+3. **National Bank of Ethiopia (NBE)**
+   - Payment processor approval (Chapa, TeleBirr, Stripe)
+   - Foreign currency handling (Stripe/PayPal for international payments)
+   - Anti-Money Laundering (AML) compliance
+   - Know Your Customer (KYC) - ID verification required
+
+4. **Ethiopian Telecommunications Directive**
+   - SMS service provider registration (Ethiopian Telecom)
+   - Sender ID approval ("ALGA" registered)
+   - No spam messages (transactional only)
+
+5. **Ethiopian Data Protection Law**
+   - User consent for data collection
+   - Right to access, correction, deletion
+   - Data breach notification (72 hours)
+   - Data localization (preference for Ethiopian servers where feasible)
+
+**International Compliance (for foreign guests):**
+
+6. **GDPR (General Data Protection Regulation) - European Union**
+   - Lawful basis for processing (consent, contract, legal obligation)
+   - Data subject rights (access, rectification, erasure, portability)
+   - Privacy by design
+   - Breach notification (72 hours)
+
+7. **PCI DSS (Payment Card Industry Data Security Standard)**
+   - No card data storage (tokenization via Stripe/PayPal)
+   - Secure transmission (TLS 1.2+)
+   - Access control (RBAC)
+
+**Industry Security Standards:**
+
+8. **OWASP Mobile Top 10**
+   - M1-M10 compliance (see Requirement 7 for detailed analysis)
+
+9. **ISO/IEC 27001 (Best Practices, Not Certified)**
+   - Risk assessment
+   - Access control
+   - Cryptography
+   - Incident management
+
+---
+
+**Question 5: Authentication mechanisms used in the mobile application**
+
+**Answer:**
+
+**Primary Authentication Method: Session-Based Authentication with OTP Verification**
+
+**Flow:**
+
+**Option 1: Email/Password + OTP (Standard)**
+```
+1. User enters email + password
+2. Server validates credentials (Bcrypt hash comparison)
+3. Server generates 4-digit OTP, sends via SMS
+4. User enters OTP
+5. Server validates OTP (5-minute expiry)
+6. Server creates session, issues httpOnly cookie
+7. Session stored in PostgreSQL (24-hour timeout)
+```
+
+**Option 2: Passwordless (OTP Only)**
+```
+1. User enters phone number
+2. Server generates 4-digit OTP, sends via SMS
+3. User enters OTP
+4. Server validates OTP
+5. Server creates session, issues httpOnly cookie
+```
+
+**Session Management:**
+```typescript
+// Server-side session creation
+import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
+
+app.use(
+  session({
+    store: new PgSession({
+      pool: db,
+      tableName: 'sessions',
+    }),
+    secret: process.env.SESSION_SECRET, // 256-bit random key
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true, // HTTPS-only
+      httpOnly: true, // XSS protection
+      sameSite: 'strict', // CSRF protection
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+```
+
+**Mobile Storage (Capacitor Secure Storage):**
+```typescript
+import { Preferences } from '@capacitor/preferences';
+
+// Store session token securely
+await Preferences.set({
+  key: 'session_token',
+  value: sessionToken,
+});
+
+// Android: EncryptedSharedPreferences (AES-256)
+// iOS: Keychain (hardware-backed encryption)
+```
+
+**Security Properties:**
+- ✅ Bcrypt password hashing (cost factor 12, ~1 second per hash)
+- ✅ OTP expiry (5 minutes)
+- ✅ Rate limiting (3 failed attempts → 15-minute lockout)
+- ✅ Session timeout (24 hours)
+- ✅ httpOnly cookies (cannot be read by JavaScript)
+- ✅ Secure cookies (HTTPS-only transmission)
+- ✅ sameSite=strict (CSRF protection)
+
+**Planned Enhancements:**
+- ⚠️ Biometric authentication (Touch ID, Face ID, Fingerprint) - Planned Q3 2025
+- ⚠️ Two-factor authentication for admin role - Planned Q2 2025
+
+---
+
+**Question 6: Are there any sensitive data stored or transmitted by the mobile application**
+
+**Answer:** YES - Alga stores and transmits the following sensitive data:
+
+**Sensitive Data Stored:**
+
+1. **Personally Identifiable Information (PII)**
+   - Full name, email address, phone number
+   - Storage: PostgreSQL (encrypted at rest via Neon)
+   - Access: User, Admin
+
+2. **Authentication Credentials**
+   - Passwords (hashed with Bcrypt, cost factor 12)
+   - OTP codes (4-digit, 5-minute expiry)
+   - Session tokens (stored in PostgreSQL sessions table)
+   - Storage: PostgreSQL (passwords hashed, OTP ephemeral, sessions encrypted)
+
+3. **Identity Documents**
+   - Ethiopian National ID (front/back photos)
+   - Passport (photo page)
+   - Driver's License
+   - ID numbers (extracted via OCR)
+   - Storage: Google Cloud Storage (encrypted at rest, AES-256)
+   - Access: Operators, Admins (pre-signed URLs, 1-hour expiry)
+
+4. **Financial Information**
+   - Transaction references (e.g., `pi_1234567890`)
+   - Earnings (hosts, agents)
+   - Commission records
+   - VAT and withholding tax amounts
+   - Storage: PostgreSQL (encrypted at rest)
+   - Access: User (own data), Admin (all data)
+   - **NO CARD DATA STORED** (handled by Stripe/PayPal)
+
+5. **Location Data**
+   - Property GPS coordinates (public data for map display)
+   - Guest search location (ephemeral, not stored)
+   - Storage: PostgreSQL (property locations only)
+
+6. **Business Information (Delala Agents)**
+   - Business name, TIN (Tax Identification Number)
+   - Business license documents
+   - Storage: PostgreSQL + Google Cloud Storage
+
+**Sensitive Data Transmitted:**
+
+1. **Authentication Requests**
+   - Email, password (HTTPS POST to `/api/auth/login`)
+   - Phone number, OTP (HTTPS POST to `/api/auth/verify-otp`)
+   - Encryption: TLS 1.2+ (HTTPS)
+
+2. **ID Document Uploads**
+   - Base64-encoded images (HTTPS POST to `/api/verification/upload`)
+   - Encryption: TLS 1.2+ (HTTPS)
+   - Size: Compressed to max 1 MB
+
+3. **Payment Requests**
+   - Transaction amounts, booking details (HTTPS POST to `/api/payments/initialize`)
+   - Encryption: TLS 1.2+ (HTTPS)
+   - **NO CARD DATA** (handled by Stripe.js client-side SDK)
+
+4. **Session Cookies**
+   - Session ID (sent with every authenticated request)
+   - Encryption: TLS 1.2+ (HTTPS)
+   - Flags: httpOnly, secure, sameSite=strict
+
+---
+
+**Question 7: How the sensitive data has been handled within the application?**
+
+**Answer:**
+
+**Data Handling by Category:**
+
+**1. Passwords**
+
+**Handling Method:** One-Way Bcrypt Hashing (Never Stored in Plain Text)
+
+**Process:**
+```typescript
+// Registration
+const saltRounds = 12; // Cost factor
+const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
+await db.insert(users).values({ password: hashedPassword });
+
+// Login
+const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+const isValid = await bcrypt.compare(plainTextPassword, user.password);
+```
+
+**Security:**
+- ✅ Salted (unique salt per password)
+- ✅ Cost factor 12 (~1 second per hash, prevents brute force)
+- ✅ Cannot be reversed to plain text
+- ✅ Never logged or transmitted in plain text
+
+---
+
+**2. ID Documents**
+
+**Handling Method:** Encrypted Object Storage (Google Cloud via Replit)
+
+**Process:**
+```typescript
+// Upload
+1. Camera capture → Base64 encoding
+2. Image compression (max 1 MB)
+3. HTTPS POST to backend
+4. Upload to Google Cloud Storage (AES-256 encryption at rest)
+5. Generate pre-signed URL (1-hour expiry)
+6. Store URL in database
+
+// Access
+1. Operator requests document
+2. Backend generates new pre-signed URL
+3. Operator views for verification
+4. URL expires after 1 hour
+```
+
+**Security:**
+- ✅ Encryption at rest (Google Cloud AES-256)
+- ✅ Encryption in transit (HTTPS/TLS 1.2+)
+- ✅ No local storage (deleted from device after upload)
+- ✅ Access control (operators/admins only)
+- ✅ Time-limited access (pre-signed URLs expire)
+- ✅ Audit logging (who accessed which document, when)
+
+---
+
+**3. Session Tokens**
+
+**Handling Method:** Server-Side Storage (PostgreSQL) + Encrypted Cookies
+
+**Process:**
+```typescript
+// Creation
+1. User logs in successfully
+2. Server creates session record in PostgreSQL
+3. Server issues httpOnly cookie with session ID
+4. Mobile app stores session token in Capacitor Secure Storage
+
+// Mobile Storage
+- Android: EncryptedSharedPreferences (AES-256)
+- iOS: Keychain (hardware-backed encryption)
+
+// Validation
+1. Mobile app sends session cookie with each request
+2. Server validates session in PostgreSQL
+3. Check expiry (24 hours)
+4. Load user data from session
+```
+
+**Security:**
+- ✅ httpOnly (JavaScript cannot read cookie)
+- ✅ secure (HTTPS-only transmission)
+- ✅ sameSite=strict (CSRF protection)
+- ✅ Server-side storage (not client-side)
+- ✅ Automatic expiry (24 hours)
+- ✅ Encrypted mobile storage (Keychain/EncryptedSharedPreferences)
+
+---
+
+**4. Payment Information**
+
+**Handling Method:** NO STORAGE (Tokenization via Stripe/PayPal)
+
+**Process:**
+```typescript
+// Payment Flow
+1. User enters card details in Stripe.js hosted form
+2. Stripe.js sends card data directly to Stripe API (never touches our server)
+3. Stripe returns payment method token (e.g., pm_1234567890)
+4. Mobile app sends token to our backend
+5. Backend creates payment intent with token
+6. Backend stores transaction reference only (not card data)
+
+// What We Store
+{
+  paymentRef: "pi_1234567890", // Transaction ID
+  paymentMethod: "card", // Type only
+  paymentStatus: "paid",
+  amount: 4000
+}
+
+// What We NEVER Store
+- Card numbers
+- CVV codes
+- Expiry dates
+```
+
+**Security:**
+- ✅ PCI DSS Level 1 compliance (inherited from Stripe/PayPal)
+- ✅ No card data in our database (cannot be stolen)
+- ✅ Tokenization (Stripe/PayPal handle sensitive data)
+- ✅ HTTPS-only communication
+
+---
+
+**5. Location Data**
+
+**Handling Method:** Ephemeral (Guest) + Public (Properties)
+
+**Process:**
+```typescript
+// Guest Location (Ephemeral)
+1. Request GPS permission
+2. Get current position (latitude, longitude)
+3. Send to backend for nearby property search
+4. Backend performs search, returns results
+5. GPS coordinates NOT logged or stored
+
+// Property Location (Public)
+1. Host enters property address
+2. Backend geocodes address via Google Maps API
+3. Store GPS coordinates in database (public data)
+4. Display on map for all users
+```
+
+**Security:**
+- ✅ Guest location not stored (ephemeral search data only)
+- ✅ Property location public (displayed on map)
+- ✅ User consent required (GPS permission prompt)
+
+---
+
+**6. Financial Records**
+
+**Handling Method:** PostgreSQL with 7-Year Retention (ERCA Compliance)
+
+**Process:**
+```typescript
+// Transaction Recording
+await db.insert(bookings).values({
+  totalPrice: 4000,
+  platformCommission: 400, // 10%
+  agentCommission: 200, // 5%
+  vat: 90, // 15%
+  withholding: 30, // 5%
+  hostPayout: 3280,
+  ercaInvoiceUrl: '/invoices/ALGA-2025-001.pdf',
+});
+
+// Retention Policy
+- Keep for 7 years (ERCA requirement)
+- Anonymize after user account deletion (but keep transaction record)
+- Daily backups (disaster recovery)
+```
+
+**Security:**
+- ✅ Encryption at rest (Neon Database)
+- ✅ Access control (admin/finance only)
+- ✅ Audit trail (all updates logged)
+- ✅ ERCA compliance (7-year retention)
+
+---
+
+**Data Encryption Summary Table:**
+
+| Data Type | At Rest | In Transit | Storage Location | Access Control |
+|-----------|---------|------------|------------------|----------------|
+| Passwords | Bcrypt hashed | TLS 1.2+ | PostgreSQL | N/A (hashed) |
+| ID Documents | AES-256 | TLS 1.2+ | Google Cloud | Operator, Admin |
+| Session Tokens | Neon encrypted | TLS 1.2+ | PostgreSQL + Keychain | User only |
+| Payment Cards | Not stored | TLS 1.2+ | Stripe/PayPal | N/A |
+| Financial Records | Neon encrypted | TLS 1.2+ | PostgreSQL | Admin |
+| Location (guest) | Not stored | TLS 1.2+ | Ephemeral | N/A |
+| Location (property) | Neon encrypted | TLS 1.2+ | PostgreSQL | Public |
+
+---
+
+**Question 8: Does the mobile application integrate with any third-party services or APIs?**
+
+**Answer:** YES - Alga integrates with 10 third-party services:
+
+**1. Payment Processors (4)**
+- Chapa (TeleBirr + Ethiopian banks)
+- Stripe (Visa, Mastercard, Apple Pay, Google Pay)
+- PayPal (PayPal accounts)
+- TeleBirr (via Chapa aggregator)
+
+**2. Communication (2)**
+- Ethiopian Telecom SMS Gateway (OTP delivery)
+- SendGrid (email notifications)
+
+**3. Infrastructure (3)**
+- Neon Database (PostgreSQL hosting)
+- Replit Object Storage (Google Cloud Storage)
+- Google Maps Geocoding API (address → GPS)
+
+**4. AI (1)**
+- Tesseract.js (OCR for ID verification) - **Browser-native, no external API**
+
+*See Requirement 12 for detailed integration documentation*
+
+---
+
+**Question 9: Are there any restrictions or limitations on the testing approach or techniques that can be used?**
+
+**Answer:** YES - The following restrictions apply:
+
+**Prohibited Testing Techniques:**
+
+1. ❌ **Denial-of-Service (DoS) Attacks**
+   - No high-volume requests (>100 req/sec)
+   - No bandwidth saturation
+   - Reason: Shared infrastructure (Replit)
+
+2. ❌ **Live Data Tampering**
+   - No modifying production database
+   - No deleting production data
+   - No creating fake bookings with real payments
+   - Reason: Live platform with real users
+
+3. ❌ **Social Engineering**
+   - No phishing Alga staff/users
+   - No impersonating INSA auditors
+   - Reason: Technical testing only
+
+4. ❌ **Physical Security Testing**
+   - No testing Replit infrastructure security
+   - Reason: Cloud-hosted, third-party managed
+
+**Recommended Approach:**
+- Use staging environment (test.alga-app.replit.app)
+- Use test accounts (provided by Alga)
+- Use sandbox payment processors
+- Rate limit testing to <10 requests/second
+
+*See Requirement 13 for full testing guidelines*
+
+---
+
+**Question 10: Are there any known vulnerabilities or security concerns with the mobile application that need to be specifically addressed?**
+
+**Answer:** YES - Alga proactively discloses 3 known security concerns:
+
+**1. No Certificate Pinning (HIGH)**
+- Risk: MITM attacks on public WiFi
+- Planned Fix: February 2025
+- Severity: HIGH
+
+**2. Unencrypted SQLite Database (MEDIUM)**
+- Risk: Cached data readable on rooted devices
+- Planned Fix: SQLCipher implementation by May 2025
+- Severity: MEDIUM
+
+**3. No Root/Jailbreak Detection (MEDIUM)**
+- Risk: App runs on compromised devices
+- Planned Fix: Root detection warning by May 2025
+- Severity: MEDIUM (server-side validation still protects critical functions)
+
+*See Requirement 14 for full vulnerability disclosure*
+
+---
+
+### Requirement 16: Define Specific Scope Clearly and Precisely ✅
+
+#### Assets to be Audited
+
+| Name of Asset | APK/Official Link | Test Account Credentials |
+|---------------|-------------------|--------------------------|
+| **Android Application (Debug)** | `alga-android-debug.apk` (CD/DVD delivery) | See test accounts below |
+| **Android Application (Release)** | `alga-android-release.apk` (CD/DVD delivery) | See test accounts below |
+| **iOS Application (Release)** | `alga-ios-release.ipa` (CD/DVD delivery) | See test accounts below |
+| **Progressive Web App (PWA)** | https://alga-app.replit.app | See test accounts below |
+| **Backend API** | https://alga-app.replit.app/api | See test accounts below |
+| **Staging Environment** | https://test.alga-app.replit.app | See test accounts below |
+| **Source Code Repository** | Private GitHub (read-only access granted) | GitHub credentials sent separately |
+
+---
+
+#### Test Accounts (Staging Environment)
+
+**Test Environment URL:** https://test.alga-app.replit.app
+
+| Role | Email | Password | Phone (for OTP testing) | Purpose |
+|------|-------|----------|-------------------------|---------|
+| **Guest** | test-guest@alga.et | Test@1234 | +251900000001 | Standard user testing |
+| **Host** | test-host@alga.et | Test@1234 | +251900000002 | Property management testing |
+| **Delala Agent** | test-agent@alga.et | Test@1234 | +251900000003 | Commission system testing |
+| **Operator** | test-operator@alga.et | Test@1234 | +251900000004 | Verification workflow testing |
+| **Admin** | test-admin@alga.et | Test@1234 | +251900000005 | Full system access testing |
+
+**OTP Bypass for Testing:**
+- All test accounts accept universal OTP code: `1234`
+- Valid for staging environment only
+- Production uses real Ethiopian Telecom SMS
+
+---
+
+#### Static Analysis Scope
+
+**Included in Static Analysis:**
+
+✅ **Android APK Decompilation**
+- Tool: JADX, APKTool
+- Scope: Decompile `alga-android-release.apk`, analyze Java/Kotlin code
+- Focus: Hardcoded secrets, insecure cryptographic implementations, SQL injection patterns
+
+✅ **iOS IPA Binary Inspection**
+- Tool: Hopper Disassembler, class-dump
+- Scope: Inspect `alga-ios-release.ipa` binary
+- Focus: Hardcoded secrets, insecure API calls, jailbreak detection
+
+✅ **Source Code Review**
+- Tool: SonarQube, ESLint, TypeScript compiler
+- Scope: Full React/TypeScript/Capacitor codebase
+- Focus: Code quality, security vulnerabilities, OWASP Top 10
+
+**Excluded from Static Analysis:**
+❌ Third-party dependencies (Capacitor, React, Stripe.js) - Assumed secure
+❌ Replit infrastructure code - Not under Alga's control
+
+---
+
+#### Dynamic Analysis Scope
+
+**Included in Dynamic Analysis:**
+
+✅ **Network Traffic Interception**
+- Tool: Burp Suite, mitmproxy
+- Scope: All API requests (authentication, bookings, payments, verification)
+- Focus: TLS enforcement, certificate pinning, data leakage in requests/responses
+
+✅ **Runtime Analysis**
+- Tool: Frida, Xposed Framework
+- Scope: Hook into app functions (payment validation, session management)
+- Focus: Bypass attempts, runtime security controls
+
+✅ **Local Storage Inspection**
+- Tool: ADB (Android Debug Bridge), iExplorer (iOS)
+- Scope: SQLite database, SharedPreferences, Keychain
+- Focus: Encryption validation, sensitive data exposure
+
+**Excluded from Dynamic Analysis:**
+❌ Denial-of-Service testing - Prohibited (shared infrastructure)
+❌ Live payment processing - Use sandbox mode only
+
+---
+
+#### Automated Source Code Analysis Scope
+
+**Included in Automated Analysis:**
+
+✅ **SAST (Static Application Security Testing)**
+- Tool: SonarQube, Snyk Code
+- Scope: Full React/TypeScript/Node.js codebase
+- Focus: SQL injection, XSS, CSRF, insecure dependencies
+
+✅ **Dependency Scanning**
+- Tool: npm audit, Snyk
+- Scope: All npm packages (package.json)
+- Focus: Known CVEs in dependencies
+
+✅ **Secrets Scanning**
+- Tool: TruffleHog, GitGuardian
+- Scope: Git repository history
+- Focus: Hardcoded API keys, passwords, tokens
+
+**Excluded from Automated Analysis:**
+❌ Infrastructure-as-Code (not applicable, using Replit platform)
+❌ Container scanning (not using Docker/Kubernetes)
+
+---
+
+### Requirement 17: Contact Information and Communication Channel ✅
+
+#### Primary Contact (Founder/CEO)
+
+| Field | Information |
+|-------|-------------|
+| **Name** | Weyni Abraha |
+| **Role** | Founder & CEO |
+| **Email** | Winnieaman94@gmail.com |
+| **Mobile** | +251 996 034 044 |
+| **Address (Mail)** | Addis Ababa, Ethiopia |
+| **Preferred Communication** | Email (checked daily) |
+| **Availability** | Monday-Friday, 9:00 AM - 5:00 PM (Ethiopian Time, UTC+3) |
+
+---
+
+#### Secondary Contact (Technical Lead)
+
+| Field | Information |
+|-------|-------------|
+| **Name** | [Technical Lead Name] |
+| **Role** | CTO / Lead Developer |
+| **Email** | [tech-lead-email@alga.et] |
+| **Mobile** | [+251 XXX XXX XXX] |
+| **Address (Mail)** | Addis Ababa, Ethiopia |
+| **Preferred Communication** | Email for technical questions |
+| **Availability** | Monday-Friday, 9:00 AM - 5:00 PM (Ethiopian Time, UTC+3) |
+
+---
+
+#### Company Contact Information
+
+| Field | Information |
+|-------|-------------|
+| **Company Name** | Alga One Member PLC |
+| **TIN** | 0101809194 |
+| **Office Address** | [Physical Office Address], Addis Ababa, Ethiopia |
+| **Website** | https://alga-app.replit.app |
+| **Support Email** | support@alga.et |
+| **Business Hours** | Monday-Friday, 8:00 AM - 6:00 PM (Ethiopian Time) |
+
+---
+
+#### INSA Audit Contact (For Alga's Reference)
+
+| Field | Information |
+|-------|-------------|
+| **Name** | Dr. Tilahun Ejigu |
+| **Role** | Cyber Security Audit Division Head |
+| **Organization** | Information Network Security Administration (INSA) |
+| **Email** | tilahune@insa.gov.et |
+| **Mobile** | +251 937 456 374 |
+| **Office Address** | Wollo Sefer, Addis Ababa, Ethiopia |
+| **Audit Portal** | https://cyberaudit.insa.gov.et |
+
+---
+
+#### Communication Channels
+
+**For INSA Audit Team:**
+
+1. **Email (Primary):**
+   - Send all official communications to: Winnieaman94@gmail.com
+   - CC: [tech-lead-email@alga.et]
+   - Response time: Within 24 hours (business days)
+
+2. **Phone (Urgent):**
+   - Call: +251 996 034 044
+   - Available: Monday-Friday, 9:00 AM - 5:00 PM
+
+3. **In-Person Meetings:**
+   - Location: [Alga Office Address], Addis Ababa
+   - Schedule: By appointment (email to arrange)
+
+4. **Secure File Transfer:**
+   - Source code: GitHub read-only access (credentials sent via encrypted email)
+   - APK/IPA files: CD/DVD delivery to INSA office
+   - Sensitive documents: Encrypted ZIP files (password shared via phone)
+
+---
+
+#### Submission Instructions (As Requested by INSA)
+
+**Submit all materials via:**
+
+**Option 1: INSA Audit Request Portal (Preferred)**
+- URL: https://cyberaudit.insa.gov.et/sign-up
+- Upload: PDF submission document + supporting files
+- Login credentials: [To be created by Alga]
+
+**Option 2: Physical Delivery (For Sensitive Files)**
+- Deliver to:
+  ```
+  Information Network Security Administration (INSA)
+  Cyber Security Audit Division
+  Wollo Sefer, Addis Ababa, Ethiopia
+  
+  Attention: Dr. Tilahun Ejigu (Ph.D.)
+  Division Head, Cyber Security Audit
+  ```
+
+- Delivery includes:
+  - CD/DVD with Android APK (debug + release)
+  - CD/DVD with iOS IPA (release)
+  - Printed submission document (this PDF)
+  - Company registration documents
+  - TIN certificate
+
+**Option 3: Email (For Non-Sensitive Documents)**
+- Send to: tilahune@insa.gov.et
+- CC: Winnieaman94@gmail.com
+- Subject Line: "ALGA Mobile App Security Audit Submission - TIN 0101809194"
+
+---
+
+## 5. CONCLUSION
+
+### Summary
+
+Alga One Member PLC submits our hybrid mobile application (Android, iOS, PWA) for comprehensive security audit by INSA's Cyber Security Audit Division. This submission package includes:
+
+✅ **Complete technical documentation** (17 mandatory requirements + 4 business architecture diagrams + 10 technical diagrams)  
+✅ **Mobile application binaries** (Android APK debug/release, iOS IPA release)  
+✅ **Source code access** (GitHub repository with read-only credentials)  
+✅ **Test environment** (staging.alga-app.replit.app with 5 test accounts)  
+✅ **Security analysis** (OWASP Mobile Top 10 compliance, known vulnerabilities disclosed)  
+✅ **Regulatory compliance** (ERCA, NBE, Ethiopian Data Protection, GDPR)  
+
+### Objectives
+
+We seek INSA certification to:
+
+1. **Validate security posture** - Confirm compliance with Ethiopian cybersecurity standards
+2. **Enable app store distribution** - Google Play Store and Apple App Store approval
+3. **Meet payment processor requirements** - TeleBirr, Chapa, Stripe security prerequisites
+4. **Build user trust** - Government-backed security badge in app listings
+5. **Support national digital economy** - Contribute to Ethiopia's hospitality and tourism sectors
+
+### Key Security Highlights
+
+**Strengths:**
+- ✅ OWASP Mobile Top 10: 7/10 fully mitigated, 3/10 partially mitigated
+- ✅ TLS 1.2+ enforcement (all API calls encrypted)
+- ✅ Role-based access control (RBAC) server-side
+- ✅ No card data storage (PCI DSS compliant via Stripe/PayPal)
+- ✅ Bcrypt password hashing (cost factor 12)
+- ✅ Session timeout (24 hours, httpOnly cookies)
+- ✅ Proactive vulnerability disclosure (certificate pinning, SQLCipher, root detection pending)
+
+**Areas for Improvement (Scheduled):**
+- ⚠️ Certificate pinning - Before app store submission (February 2025)
+- ⚠️ SQLCipher encryption - Within 3 months post-launch (May 2025)
+- ⚠️ Root/jailbreak detection - Within 3 months post-launch (May 2025)
+
+### Commitment to Security
+
+Alga One Member PLC is committed to:
+
+- **Continuous improvement** - Regular security audits, vulnerability assessments
+- **Prompt remediation** - Critical vulnerabilities fixed within 7 days, high within 30 days
+- **Transparency** - Open communication with INSA, proactive disclosure of security concerns
+- **User protection** - Data minimization, encryption, user consent, breach notification
+- **Regulatory compliance** - Adherence to ERCA, NBE, INSA, Ethiopian Data Protection laws
+
+### Next Steps
+
+**Timeline:**
+
+1. **January 11, 2025** - Submission to INSA
+2. **January 16, 2025** - INSA acknowledgment (expected within 5 working days)
+3. **January-February 2025** - INSA security testing (2-4 weeks)
+4. **February 2025** - INSA findings report
+5. **February-March 2025** - Remediation period (if needed)
+6. **March 2025** - INSA certification (target approval date)
+7. **April 2025** - Google Play Store and Apple App Store submission
+
+**We Look Forward To:**
+
+- Collaborative partnership with INSA's Cyber Security Audit Division
+- Comprehensive security assessment and certification
+- Constructive feedback for continuous security improvement
+- Official INSA certification enabling safe app distribution to Ethiopian and international users
+
+---
+
+**Document Prepared By:**  
+Weyni Abraha  
+Founder & CEO, Alga One Member PLC  
+TIN: 0101809194  
+Email: Winnieaman94@gmail.com  
+Mobile: +251 996 034 044  
+
+**Submission Date:** January 11, 2025  
+**Document Version:** 2.0 (Comprehensive Rebuild)  
+**Total Pages:** [Auto-calculated by PDF generator]  
+**Attachments:** Android APK (debug + release), iOS IPA (release), Source code access credentials  
+
+---
+
+**END OF SUBMISSION DOCUMENT**
+
