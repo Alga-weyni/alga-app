@@ -224,17 +224,23 @@ cd ios && xcodebuild -workspace App.xcworkspace -scheme App
    - Verified guest reviews only
    - Host response capability
 
-8. **Lemlem AI Assistant**
+8. **Mandatory Hardware Security**
+   - Smart lockbox (TTLock integration for keyless entry with temporary eKeys via app)
+   - Security cameras (property surveillance for guest safety)
+   - Properties cannot be approved without photographic proof of both devices installed
+
+9. **Lemlem AI Assistant**
    - Browser-native (no external AI API costs)
    - Multilingual (Amharic, English, Tigrinya, Afaan Oromoo, Chinese)
    - Offline-capable (IndexedDB caching)
    - Contextual property knowledge
 
-9. **Admin Dashboard (Lemlem Operations)**
+10. **Admin Dashboard (Lemlem Operations)**
    - Real-time KPIs (bookings, revenue, users)
    - Natural language queries
    - Weekly executive summaries
    - CSV export
+   - Hardware Deployment tracking (lockbox & camera installation status per property)
 
 ---
 

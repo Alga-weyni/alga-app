@@ -31,6 +31,7 @@ The frontend uses React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix
 - **Add-On Services Marketplace**: Browsing for guests and application for providers across 11 service categories.
 - **International Support**: Multi-language (Amharic, English) and localization.
 - **Safety Features**: Location sharing, emergency contacts, safety check-ins.
+- **Mandatory Hardware Requirements**: All properties must have (1) Smart lockbox (TTLock integration for keyless entry and temporary eKeys), (2) Security cameras (surveillance for guest safety and property protection). Properties cannot be approved without verified installation of both devices.
 - **Google Maps Integration**: Lightweight mini-map on property details pages showing location and GPS-calculated distance.
 - **Administrative Features**: Roles & Permissions Management, User Management with full control over user roles, status, and verification states.
 - **Lemlem Operations Dashboard**: A comprehensive admin dashboard for managing 5 operational pillars (Agent Governance, Supply Curation, Hardware Deployment, Payments & Compliance, Marketing & Growth) with real-time KPIs, an AI admin assistant ("Ask Lemlem Admin Chat"), workflow automation (for alerts on commissions, warranties, payments, property verification), and CSV export functions. It runs on a zero-cost architecture optimized for 2G networks.
@@ -42,6 +43,7 @@ The frontend uses React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix
 - **Database & Hosting**: Neon Database (serverless PostgreSQL).
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
 - **Mapping & Location**: Google Maps Geocoding API.
+- **Smart Lock Integration**: TTLock Open Platform API and SDK (keyless entry system for all properties).
 - **File Storage**: Replit App Storage (Google Cloud Storage).
 - **AI Services**: Replit AI Integration.
 - **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
