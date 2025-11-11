@@ -198,8 +198,8 @@ cd ios && xcodebuild -workspace App.xcworkspace -scheme App
    - Date selection with conflict prevention
    - Real-time availability check
    - Payment processing (TeleBirr, Chapa, Stripe, PayPal)
-   - 6-digit access code generation
-   - Booking confirmation (email + SMS)
+   - TTLock 4-digit PIN generation (time-limited, offline-capable)
+   - Booking confirmation (email + SMS with access code)
 
 4. **Payment Processing**
    - Multi-currency (ETB, USD, EUR)
@@ -224,10 +224,15 @@ cd ios && xcodebuild -workspace App.xcworkspace -scheme App
    - Verified guest reviews only
    - Host response capability
 
-8. **Mandatory Hardware Security**
-   - Smart lockbox (TTLock integration for keyless entry with temporary eKeys via app)
-   - Security cameras (property surveillance for guest safety)
-   - Properties cannot be approved without photographic proof of both devices installed
+8. **Mandatory Hardware Security & TTLock Access System**
+   - **TTLock Smart Lockbox**: Keypad-based lockbox holding physical property keys
+     - **4-digit PIN codes** generated via TTLock Keyboard Password API
+     - **Time-limited validity**: Codes active only during booking period (check-in to checkout)
+     - **Offline operation**: Works without internet/Bluetooth at unlock time
+     - **Auto-expiration**: Codes invalidate automatically after checkout
+     - **Guest flow**: Alga app/SMS delivers code → Guest enters on keypad → Retrieves key from lockbox
+   - **Security Cameras**: Property surveillance for guest safety and incident documentation
+   - **Operator Verification**: Properties cannot be approved without photographic proof of both devices installed and functional
 
 9. **Lemlem AI Assistant**
    - Browser-native (no external AI API costs)
