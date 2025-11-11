@@ -6,6 +6,8 @@ import {
   favorites,
   verificationDocuments,
   accessCodes,
+  lockboxes,
+  securityCameras,
   serviceProviders,
   serviceBookings,
   serviceReviews,
@@ -24,6 +26,10 @@ import {
   type InsertFavorite,
   type AccessCode,
   type InsertAccessCode,
+  type Lockbox,
+  type InsertLockbox,
+  type SecurityCamera,
+  type InsertSecurityCamera,
   type ServiceProvider,
   type InsertServiceProvider,
   type ServiceBooking,
@@ -145,6 +151,24 @@ export interface IStorage {
   getAccessCodeByBookingId(bookingId: number): Promise<AccessCode | undefined>;
   getAccessCodesByGuestId(guestId: string): Promise<AccessCode[]>;
   expireOldAccessCodes(): Promise<void>;
+  
+  // Alga Secure Access - Lockbox operations
+  createLockbox(lockbox: InsertLockbox): Promise<Lockbox>;
+  getLockboxByPropertyId(propertyId: number): Promise<Lockbox | undefined>;
+  updateLockbox(id: number, updates: Partial<InsertLockbox>): Promise<Lockbox>;
+  verifyLockbox(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<Lockbox>;
+  getAllPendingLockboxes(): Promise<Lockbox[]>;
+  
+  // Alga Secure Access - Security camera operations
+  createSecurityCamera(camera: InsertSecurityCamera): Promise<SecurityCamera>;
+  getSecurityCamerasByPropertyId(propertyId: number): Promise<SecurityCamera[]>;
+  updateSecurityCamera(id: number, updates: Partial<InsertSecurityCamera>): Promise<SecurityCamera>;
+  verifySecurityCamera(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<SecurityCamera>;
+  getAllPendingSecurityCameras(): Promise<SecurityCamera[]>;
+  
+  // Alga Secure Access - Property hardware verification
+  updatePropertyHardwareStatus(propertyId: number, lockboxVerified: boolean, cameraVerified: boolean): Promise<Property>;
+  getPropertiesWithoutHardware(): Promise<Property[]>;
   
   // Service provider operations
   createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
@@ -1056,6 +1080,134 @@ export class DatabaseStorage implements IStorage {
           eq(accessCodes.status, "active")
         )
       );
+  }
+
+  // ==================== ALGA SECURE ACCESS OPERATIONS ====================
+  
+  // Lockbox operations
+  async createLockbox(lockbox: InsertLockbox): Promise<Lockbox> {
+    const [newLockbox] = await db
+      .insert(lockboxes)
+      .values(lockbox)
+      .returning();
+    return newLockbox;
+  }
+
+  async getLockboxByPropertyId(propertyId: number): Promise<Lockbox | undefined> {
+    const [lockbox] = await db
+      .select()
+      .from(lockboxes)
+      .where(eq(lockboxes.propertyId, propertyId));
+    return lockbox;
+  }
+
+  async updateLockbox(id: number, updates: Partial<InsertLockbox>): Promise<Lockbox> {
+    const [updated] = await db
+      .update(lockboxes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(lockboxes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async verifyLockbox(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<Lockbox> {
+    const [verified] = await db
+      .update(lockboxes)
+      .set({
+        verificationStatus: status,
+        verifiedBy,
+        verifiedAt: new Date(),
+        rejectionReason: rejectionReason || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(lockboxes.id, id))
+      .returning();
+    return verified;
+  }
+
+  async getAllPendingLockboxes(): Promise<Lockbox[]> {
+    return await db
+      .select()
+      .from(lockboxes)
+      .where(eq(lockboxes.verificationStatus, "pending"))
+      .orderBy(desc(lockboxes.createdAt));
+  }
+
+  // Security camera operations
+  async createSecurityCamera(camera: InsertSecurityCamera): Promise<SecurityCamera> {
+    const [newCamera] = await db
+      .insert(securityCameras)
+      .values(camera)
+      .returning();
+    return newCamera;
+  }
+
+  async getSecurityCamerasByPropertyId(propertyId: number): Promise<SecurityCamera[]> {
+    return await db
+      .select()
+      .from(securityCameras)
+      .where(eq(securityCameras.propertyId, propertyId))
+      .orderBy(desc(securityCameras.createdAt));
+  }
+
+  async updateSecurityCamera(id: number, updates: Partial<InsertSecurityCamera>): Promise<SecurityCamera> {
+    const [updated] = await db
+      .update(securityCameras)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(securityCameras.id, id))
+      .returning();
+    return updated;
+  }
+
+  async verifySecurityCamera(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<SecurityCamera> {
+    const [verified] = await db
+      .update(securityCameras)
+      .set({
+        verificationStatus: status,
+        verifiedBy,
+        verifiedAt: new Date(),
+        rejectionReason: rejectionReason || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(securityCameras.id, id))
+      .returning();
+    return verified;
+  }
+
+  async getAllPendingSecurityCameras(): Promise<SecurityCamera[]> {
+    return await db
+      .select()
+      .from(securityCameras)
+      .where(eq(securityCameras.verificationStatus, "pending"))
+      .orderBy(desc(securityCameras.createdAt));
+  }
+
+  // Property hardware verification
+  async updatePropertyHardwareStatus(propertyId: number, lockboxVerified: boolean, cameraVerified: boolean): Promise<Property> {
+    const [updated] = await db
+      .update(properties)
+      .set({
+        lockboxVerified,
+        cameraVerified,
+        hardwareVerifiedAt: lockboxVerified && cameraVerified ? new Date() : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(properties.id, propertyId))
+      .returning();
+    return updated;
+  }
+
+  async getPropertiesWithoutHardware(): Promise<Property[]> {
+    return await db
+      .select()
+      .from(properties)
+      .where(
+        and(
+          eq(properties.status, "approved"),
+          sql`(${properties.lockboxVerified} = false OR ${properties.cameraVerified} = false)`
+        )
+      )
+      .orderBy(desc(properties.createdAt));
   }
 
   // Service provider operations
