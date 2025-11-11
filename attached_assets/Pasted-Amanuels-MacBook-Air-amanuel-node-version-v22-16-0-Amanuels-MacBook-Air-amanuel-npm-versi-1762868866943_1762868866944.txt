@@ -1,0 +1,47 @@
+Amanuels-MacBook-Air:~ amanuel$ node --version 
+v22.16.0
+Amanuels-MacBook-Air:~ amanuel$ npm --version 
+10.9.2
+Amanuels-MacBook-Air:~ amanuel$ git --version
+git version 2.15.0
+Amanuels-MacBook-Air:~ amanuel$ 
+  [Restored 11 Nov 2025 at 11:34:55 AM]
+Last login: Tue Nov 11 11:34:45 on console
+amanuel@Amanuels-Air ~ % # Open Terminal app
+# Delete the old folder
+rm -rf ~/Projects/alga-app
+zsh: command not found: #
+zsh: command not found: #
+amanuel@Amanuels-Air ~ % rm -rf ~/Projects/alga-app
+amanuel@Amanuels-Air ~ % cd ~/Projects/alga-app
+npm install
+cd: no such file or directory: /Users/amanuel/Projects/alga-app
+npm error code ENOENT
+npm error syscall open
+npm error path /Users/amanuel/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/Users/amanuel/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /Users/amanuel/.npm/_logs/2025-11-11T13_39_42_810Z-debug-0.log
+amanuel@Amanuels-Air ~ % cd ~/Projects/alga-app    
+npm install
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated xss-clean@0.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm error code ETIMEDOUT
+npm error syscall read
+npm error errno -60
+npm error network read ETIMEDOUT
+npm error network This is a problem related to network connectivity.
+npm error network In most cases you are behind a proxy or have bad network settings.
+npm error network
+npm error network If you are behind a proxy, please make sure that the
+npm error network 'proxy' config is set properly.  See: 'npm help config'
+npm error A complete log of this run can be found in: /Users/amanuel/.npm/_logs/2025-11-11T13_42_13_365Z-debug-0.log
+amanuel@Amanuels-Air alga-app % 
