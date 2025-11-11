@@ -1,0 +1,79 @@
+Objective: Establish Alga’s official access-control flow.
+In Replit, ensure your backend and database are structured to handle:
+	•	Lockbox registration — one lockbox per property (added by host).
+	•	Code generation — 4-digit access code created automatically at check-in.
+	•	Code expiry — automatic invalidation at checkout time.
+	•	Logging — store all generated codes with timestamps and guest info.
+
+💡 Purpose: This shows INSA and investors that Alga controls physical access safely, even offline.
+
+⸻
+
+🔒 2. Keep the System Hardware-Agnostic for Now
+
+Do:
+	•	Describe it as “offline smart lockbox with time-limited 4-digit PINs”.
+	•	Ensure your Replit backend allows easy plug-in of any vendor API (TTLock, Igloohome, Populife).
+
+Don’t:
+	•	Hard-code one specific supplier yet.
+	•	Build around proprietary SDKs before INSA approval — flexibility is key.
+
+⸻
+
+📱 3. Integrate the Access Flow into Booking Logic
+
+Do:
+	•	Make every confirmed booking trigger a “Generate Access Code” event.
+	•	Store the code and display it automatically in the guest’s booking dashboard.
+	•	Let hosts and operators see the same information in their admin panel.
+
+Don’t:
+	•	Let hosts manually send codes. Automation is part of your platform’s security story.
+
+⸻
+
+🧩 4. Prepare a “Lockbox Management” Section in Operator Dashboard
+
+Do:
+	•	Include: property name, lockbox ID, verification status, code active/expired, photo proof.
+	•	Add a “Hardware Verified” toggle — properties without it can’t go live.
+
+Don’t:
+	•	Approve any listing without a verified lockbox and security camera photo uploaded.
+
+⸻
+
+🧱 5. Document It Clearly
+
+Do:
+	•	In Replit’s replit.md or internal wiki, include:
+	•	“Lockbox Access Flow Overview” (step-by-step guest journey).
+	•	“Security Features Summary” (offline PIN, expiry, operator verification).
+	•	“Hardware Standards” (minimum specs, installation, weatherproof rating).
+
+Don’t:
+	•	Overload documentation with code; focus on clarity for auditors and partners.
+
+⸻
+
+💼 6. Plan the Partnership Phase
+
+Do:
+	•	Reach out to Igloohome and Populife for distribution or white-label options.
+	•	Negotiate early for Ethiopian import rights or bulk discounts.
+	•	Add a “Buy Alga-Certified Lockbox” option in the Host app later.
+
+Don’t:
+	•	Order large quantities before your pilot program validates compatibility and price point.
+
+⸻
+
+🧠 7. Position Alga as Security-First
+
+Do:
+	•	Brand this system as “Alga Secure Access” — simple, offline, trusted.
+	•	Include it prominently in investor decks and compliance materials.
+
+Don’t:
+	•	Treat it as an add-on. It’s your differentiator and trust anchor

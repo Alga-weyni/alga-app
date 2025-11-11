@@ -108,6 +108,11 @@ export const properties = pgTable("properties", {
   isActive: boolean("is_active").default(true),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
+  // Alga Secure Access - Hardware verification status
+  lockboxVerified: boolean("lockbox_verified").default(false),
+  cameraVerified: boolean("camera_verified").default(false),
+  hardwareVerifiedAt: timestamp("hardware_verified_at"),
+  hardwareVerificationNotes: text("hardware_verification_notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -223,15 +228,66 @@ export const favorites = pgTable("favorites", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ==================== ALGA SECURE ACCESS SYSTEM ====================
+// Lockboxes - Hardware-agnostic smart lockbox registry
+export const lockboxes = pgTable("lockboxes", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull().references(() => properties.id).unique(), // One lockbox per property
+  vendor: varchar("vendor", { length: 50 }).notNull(), // ttlock, igloohome, populife, master_lock, other
+  vendorLockId: varchar("vendor_lock_id", { length: 255 }), // Vendor's unique lock ID
+  model: varchar("model", { length: 100 }), // Model name/number
+  serialNumber: varchar("serial_number", { length: 100 }),
+  installationDate: timestamp("installation_date"),
+  installationPhotoUrl: varchar("installation_photo_url"), // Photo proof for operator verification
+  location: text("location"), // Where lockbox is mounted (e.g., "Main entrance left side")
+  verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"), // Admin/operator notes
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Access Codes - Time-limited 4-digit PIN codes for guest check-in
 export const accessCodes = pgTable("access_codes", {
   id: serial("id").primaryKey(),
   bookingId: integer("booking_id").notNull().references(() => bookings.id),
   propertyId: integer("property_id").notNull().references(() => properties.id),
+  lockboxId: integer("lockbox_id").references(() => lockboxes.id),
   guestId: varchar("guest_id").notNull().references(() => users.id),
-  code: varchar("code", { length: 6 }).notNull(),
+  code: varchar("code", { length: 4 }).notNull(), // 4-digit PIN
   validFrom: timestamp("valid_from").notNull(),
   validTo: timestamp("valid_to").notNull(),
-  status: varchar("status").default("active").notNull(), // active, expired, revoked
+  status: varchar("status").default("active").notNull(), // active, expired, revoked, used
+  usedAt: timestamp("used_at"), // Track when guest first used code
+  generatedBy: varchar("generated_by").default("system").notNull(), // system, manual
+  vendorCodeId: varchar("vendor_code_id", { length: 255 }), // Vendor's code ID (if applicable)
+  deliveryMethod: varchar("delivery_method"), // sms, whatsapp, app, email
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Security Cameras - Mandatory safety hardware for all properties
+export const securityCameras = pgTable("security_cameras", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  location: text("location").notNull(), // Where camera is mounted (e.g., "Front entrance", "Parking area")
+  brand: varchar("brand", { length: 100 }),
+  model: varchar("model", { length: 100 }),
+  installationDate: timestamp("installation_date"),
+  installationPhotoUrl: varchar("installation_photo_url"), // Photo proof for operator verification
+  viewingArea: text("viewing_area"), // What the camera covers (e.g., "Entrance and driveway")
+  recordingEnabled: boolean("recording_enabled").default(true),
+  storageType: varchar("storage_type"), // cloud, local, none
+  verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  rejectionReason: text("rejection_reason"),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"), // Admin/operator notes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -351,6 +407,12 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
     fields: [properties.id],
     references: [propertyInfo.propertyId],
   }),
+  lockbox: one(lockboxes, {
+    fields: [properties.id],
+    references: [lockboxes.propertyId],
+  }),
+  securityCameras: many(securityCameras),
+  accessCodes: many(accessCodes),
 }));
 
 export const propertyInfoRelations = relations(propertyInfo, ({ one }) => ({
@@ -436,9 +498,38 @@ export const accessCodesRelations = relations(accessCodes, ({ one }) => ({
     fields: [accessCodes.propertyId],
     references: [properties.id],
   }),
+  lockbox: one(lockboxes, {
+    fields: [accessCodes.lockboxId],
+    references: [lockboxes.id],
+  }),
   guest: one(users, {
     fields: [accessCodes.guestId],
     references: [users.id],
+  }),
+}));
+
+export const lockboxesRelations = relations(lockboxes, ({ one, many }) => ({
+  property: one(properties, {
+    fields: [lockboxes.propertyId],
+    references: [properties.id],
+  }),
+  verifier: one(users, {
+    fields: [lockboxes.verifiedBy],
+    references: [users.id],
+    relationName: "verifiedLockboxBy"
+  }),
+  accessCodes: many(accessCodes),
+}));
+
+export const securityCamerasRelations = relations(securityCameras, ({ one }) => ({
+  property: one(properties, {
+    fields: [securityCameras.propertyId],
+    references: [properties.id],
+  }),
+  verifier: one(users, {
+    fields: [securityCameras.verifiedBy],
+    references: [users.id],
+    relationName: "verifiedCameraBy"
   }),
 }));
 
@@ -574,6 +665,18 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
 });
 
 export const insertAccessCodeSchema = createInsertSchema(accessCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLockboxSchema = createInsertSchema(lockboxes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSecurityCameraSchema = createInsertSchema(securityCameras).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -896,6 +999,10 @@ export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertAccessCode = z.infer<typeof insertAccessCodeSchema>;
 export type AccessCode = typeof accessCodes.$inferSelect;
+export type InsertLockbox = z.infer<typeof insertLockboxSchema>;
+export type Lockbox = typeof lockboxes.$inferSelect;
+export type InsertSecurityCamera = z.infer<typeof insertSecurityCameraSchema>;
+export type SecurityCamera = typeof securityCameras.$inferSelect;
 export type ServiceType = z.infer<typeof serviceTypeEnum>;
 export type InsertServiceProvider = z.infer<typeof insertServiceProviderSchema>;
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
