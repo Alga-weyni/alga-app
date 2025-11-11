@@ -23,7 +23,8 @@ import {
   Sparkles,
   ArrowLeft,
   Clock,
-  BarChart3
+  BarChart3,
+  Lock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { voiceCommands, type VoiceLanguage } from "@/lib/voiceCommands";
@@ -31,6 +32,7 @@ import { weeklyReportGenerator } from "@/lib/weeklyReportGenerator";
 import { lemlemAnalytics } from "@/lib/lemlemUsageAnalytics";
 import { useAuth } from "@/hooks/useAuth";
 import jsPDF from 'jspdf';
+import HardwareVerificationPanel from "@/components/admin/HardwareVerificationPanel";
 
 interface OpsMessage {
   id: string;
@@ -480,6 +482,20 @@ export default function LemlemOps() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Hardware Deployment Verification Section */}
+        <div className="mt-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Lock className="h-6 w-6 text-[#CD7F32]" />
+              Hardware Deployment
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              Verify lockbox and security camera installations for property approval
+            </p>
+          </div>
+          <HardwareVerificationPanel />
         </div>
       </div>
     </div>
