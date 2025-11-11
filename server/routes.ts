@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from "@shared/schema";
+import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, insertLockboxSchema, insertSecurityCameraSchema, insertAccessCodeSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from "@shared/schema";
 import { smsService } from "./smsService";
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
@@ -1781,6 +1781,264 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== ALGA SECURE ACCESS ROUTES ====================
+  
+  // Helper function to generate 4-digit access code
+  function generate4DigitCode(): string {
+    return randomInt(1000, 9999).toString();
+  }
+  
+  // Lockbox Management Routes
+  app.post('/api/lockboxes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const lockboxData = insertLockboxSchema.parse(req.body);
+      
+      // Verify user owns the property
+      const property = await storage.getProperty(lockboxData.propertyId);
+      if (!property || property.hostId !== userId) {
+        return res.status(403).json({ message: "Unauthorized: You don't own this property" });
+      }
+      
+      // Check if property already has a lockbox
+      const existing = await storage.getLockboxByPropertyId(lockboxData.propertyId);
+      if (existing) {
+        return res.status(400).json({ message: "Property already has a lockbox registered" });
+      }
+      
+      const lockbox = await storage.createLockbox(lockboxData);
+      res.status(201).json(lockbox);
+    } catch (error) {
+      console.error("Error creating lockbox:", error);
+      res.status(500).json({ message: "Failed to register lockbox" });
+    }
+  });
+  
+  app.get('/api/lockboxes/property/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      const lockbox = await storage.getLockboxByPropertyId(propertyId);
+      
+      if (!lockbox) {
+        return res.status(404).json({ message: "No lockbox found for this property" });
+      }
+      
+      res.json(lockbox);
+    } catch (error) {
+      console.error("Error fetching lockbox:", error);
+      res.status(500).json({ message: "Failed to fetch lockbox" });
+    }
+  });
+  
+  app.patch('/api/lockboxes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      const updates = req.body;
+      
+      // Get lockbox and verify ownership
+      const lockbox = await storage.getLockboxByPropertyId(updates.propertyId);
+      if (!lockbox || lockbox.id !== id) {
+        return res.status(404).json({ message: "Lockbox not found" });
+      }
+      
+      const property = await storage.getProperty(lockbox.propertyId);
+      if (!property || property.hostId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const updated = await storage.updateLockbox(id, updates);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating lockbox:", error);
+      res.status(500).json({ message: "Failed to update lockbox" });
+    }
+  });
+  
+  // Operator-only: Verify lockbox
+  app.post('/api/lockboxes/:id/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { status, rejectionReason } = req.body;
+      
+      // Check if user is operator or admin
+      if (req.user.role !== 'operator' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized: Only operators can verify hardware" });
+      }
+      
+      const verified = await storage.verifyLockbox(id, userId, status, rejectionReason);
+      
+      // Update property hardware status
+      if (status === 'verified') {
+        const cameras = await storage.getSecurityCamerasByPropertyId(verified.propertyId);
+        const cameraVerified = cameras.some(c => c.verificationStatus === 'verified');
+        await storage.updatePropertyHardwareStatus(verified.propertyId, true, cameraVerified);
+      }
+      
+      res.json(verified);
+    } catch (error) {
+      console.error("Error verifying lockbox:", error);
+      res.status(500).json({ message: "Failed to verify lockbox" });
+    }
+  });
+  
+  // Operator-only: Get all pending lockboxes
+  app.get('/api/lockboxes/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'operator' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized: Only operators can view pending hardware" });
+      }
+      
+      const lockboxes = await storage.getAllPendingLockboxes();
+      res.json(lockboxes);
+    } catch (error) {
+      console.error("Error fetching pending lockboxes:", error);
+      res.status(500).json({ message: "Failed to fetch pending lockboxes" });
+    }
+  });
+  
+  // Security Camera Management Routes
+  app.post('/api/security-cameras', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const cameraData = insertSecurityCameraSchema.parse(req.body);
+      
+      // Verify user owns the property
+      const property = await storage.getProperty(cameraData.propertyId);
+      if (!property || property.hostId !== userId) {
+        return res.status(403).json({ message: "Unauthorized: You don't own this property" });
+      }
+      
+      const camera = await storage.createSecurityCamera(cameraData);
+      res.status(201).json(camera);
+    } catch (error) {
+      console.error("Error creating security camera:", error);
+      res.status(500).json({ message: "Failed to register security camera" });
+    }
+  });
+  
+  app.get('/api/security-cameras/property/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      const cameras = await storage.getSecurityCamerasByPropertyId(propertyId);
+      res.json(cameras);
+    } catch (error) {
+      console.error("Error fetching security cameras:", error);
+      res.status(500).json({ message: "Failed to fetch security cameras" });
+    }
+  });
+  
+  app.patch('/api/security-cameras/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      const updates = req.body;
+      
+      // Verify ownership through property
+      const cameras = await storage.getSecurityCamerasByPropertyId(updates.propertyId);
+      const camera = cameras.find(c => c.id === id);
+      if (!camera) {
+        return res.status(404).json({ message: "Camera not found" });
+      }
+      
+      const property = await storage.getProperty(camera.propertyId);
+      if (!property || property.hostId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const updated = await storage.updateSecurityCamera(id, updates);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating security camera:", error);
+      res.status(500).json({ message: "Failed to update security camera" });
+    }
+  });
+  
+  // Operator-only: Verify security camera
+  app.post('/api/security-cameras/:id/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { status, rejectionReason } = req.body;
+      
+      // Check if user is operator or admin
+      if (req.user.role !== 'operator' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized: Only operators can verify hardware" });
+      }
+      
+      const verified = await storage.verifySecurityCamera(id, userId, status, rejectionReason);
+      
+      // Update property hardware status
+      if (status === 'verified') {
+        const lockbox = await storage.getLockboxByPropertyId(verified.propertyId);
+        const lockboxVerified = lockbox?.verificationStatus === 'verified';
+        const cameras = await storage.getSecurityCamerasByPropertyId(verified.propertyId);
+        const allCamerasVerified = cameras.every(c => c.verificationStatus === 'verified');
+        await storage.updatePropertyHardwareStatus(verified.propertyId, lockboxVerified || false, allCamerasVerified);
+      }
+      
+      res.json(verified);
+    } catch (error) {
+      console.error("Error verifying security camera:", error);
+      res.status(500).json({ message: "Failed to verify security camera" });
+    }
+  });
+  
+  // Operator-only: Get all pending security cameras
+  app.get('/api/security-cameras/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'operator' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized: Only operators can view pending hardware" });
+      }
+      
+      const cameras = await storage.getAllPendingSecurityCameras();
+      res.json(cameras);
+    } catch (error) {
+      console.error("Error fetching pending security cameras:", error);
+      res.status(500).json({ message: "Failed to fetch pending security cameras" });
+    }
+  });
+  
+  // Operator-only: Get properties without hardware
+  app.get('/api/properties/without-hardware', isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'operator' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized: Only operators can view this data" });
+      }
+      
+      const properties = await storage.getPropertiesWithoutHardware();
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching properties without hardware:", error);
+      res.status(500).json({ message: "Failed to fetch properties without hardware" });
+    }
+  });
+  
+  // Access Code Routes - Get code for a booking
+  app.get('/api/access-codes/booking/:bookingId', isAuthenticated, async (req: any, res) => {
+    try {
+      const bookingId = parseInt(req.params.bookingId);
+      const userId = req.user.id;
+      
+      // Get booking and verify ownership
+      const booking = await storage.getBooking(bookingId);
+      if (!booking || booking.guestId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      const accessCode = await storage.getAccessCodeByBookingId(bookingId);
+      if (!accessCode) {
+        return res.status(404).json({ message: "No access code found for this booking" });
+      }
+      
+      res.json(accessCode);
+    } catch (error) {
+      console.error("Error fetching access code:", error);
+      res.status(500).json({ message: "Failed to fetch access code" });
+    }
+  });
+
   // Booking routes
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
@@ -1856,6 +2114,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { paymentStatus } = req.body;
       
       const booking = await storage.updatePaymentStatus(id, paymentStatus);
+      
+      // ✅ ALGA SECURE ACCESS: Auto-generate 4-digit access code when payment is confirmed
+      if (paymentStatus === 'paid') {
+        try {
+          // Check if access code already exists
+          const existingCode = await storage.getAccessCodeByBookingId(id);
+          
+          if (!existingCode) {
+            // Get lockbox for this property
+            const lockbox = await storage.getLockboxByPropertyId(booking.propertyId);
+            
+            // Generate 4-digit access code
+            const code = generate4DigitCode();
+            
+            const accessCodeData = {
+              bookingId: id,
+              propertyId: booking.propertyId,
+              lockboxId: lockbox?.id || null,
+              guestId: booking.guestId,
+              code,
+              validFrom: booking.checkIn,
+              validTo: booking.checkOut,
+              status: 'active' as const,
+              generatedBy: 'system' as const,
+              deliveryMethod: 'app' as const,
+            };
+            
+            const accessCode = await storage.createAccessCode(accessCodeData);
+            console.log(`🔐 Access code generated for booking #${id}: ${code}`);
+            
+            // TODO: Send code via SMS/WhatsApp to guest
+            // await smsService.sendAccessCode(booking.guestId, code, booking.checkIn, booking.checkOut);
+          }
+        } catch (accessCodeError) {
+          // Log error but don't fail the payment status update
+          console.error("Failed to create access code:", accessCodeError);
+        }
+      }
+      
       res.json(booking);
     } catch (error) {
       console.error("Error updating payment status:", error);
