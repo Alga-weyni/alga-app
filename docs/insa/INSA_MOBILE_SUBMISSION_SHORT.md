@@ -620,4 +620,105 @@ Alga commits to continuous security improvement, prompt remediation, transparenc
 
 ---
 
+## ANNEX A: HARDWARE SPECIFICATIONS
+
+### Mandatory Security Hardware for All Properties
+
+#### 1. Smart Lockbox System
+
+**Reference Model:** LILIWISE KB01 Key Box (TTLock-Compatible)
+
+**Technical Specifications:**
+- **Material:** Aluminum Alloy (IP65 Weatherproof)
+- **Lock Dimensions:** 130mm(H) × 70mm(W) × 48mm(T)
+- **Battery Life:** 12 Months (4 × AAA batteries)
+- **Working Voltage:** 6V (AAA batteries)
+- **Operating Temperature:** -35°C to +55°C
+- **Working Humidity:** 0% - 95%
+- **Door Thickness Compatibility:** 35 - 60mm
+- **Code Capacity:** Fingerprint: 500, Password: 150, Card: 200
+
+**Unlock Methods:**
+- 4-digit PIN code (primary method for guests)
+- Fingerprint recognition
+- RFID card
+- Bluetooth app (backup)
+- WiFi connectivity (optional)
+- Physical key (emergency)
+
+**Network Protocols:**
+- TTLock BLE (Bluetooth Low Energy)
+- TTLock WiFi (optional gateway)
+- TUYA WiFi
+- BLE WiFi
+
+**Integration:** TTLock Open Platform API  
+**Application:** Residential, Office, Airbnb, Condo & Apartment Projects  
+**Certification:** CE, FCC, RoHS, IP65, ISO
+
+**Key Security Features:**
+- ✅ Offline PIN validation (works without internet)
+- ✅ Time-limited access codes (auto-expire)
+- ✅ IP65 weatherproof rating
+- ✅ Ultra-low power consumption
+- ✅ Easiest installation (no wiring required)
+
+**Visual Reference:**  
+See `attached_assets/IMG_8967_1762821810427.jpeg` - LILIWISE KB01 Product Specifications
+
+#### 2. TTLock Integration Architecture
+
+**System Flow:**
+1. **Application System** (Alga Backend) ↔ **Open API** (TTLock Cloud Platform)
+2. **Mobile App** (Alga Guest/Host App) ↔ **APP SDK** (TTLock Bluetooth Protocol)
+3. **Smart Lockbox** receives commands offline via encrypted algorithm
+
+**API Capabilities:**
+- Remote 4-digit PIN generation
+- Time-limited access codes
+- Real-time lock status
+- Battery level monitoring
+- Access logs and audit trails
+
+**Visual Reference:**  
+See `attached_assets/IMG_8965_1762821810427.jpeg` - TTLock Application Structure Diagram
+
+#### 3. Security Camera Requirements
+
+**Minimum Specifications:**
+- Outdoor/weatherproof rated
+- Covers main entrance and/or parking area
+- Recording capability (local or cloud storage)
+- Night vision (optional but recommended)
+
+**Verification Requirements:**
+- Photographic proof of installation
+- Coverage area documentation
+- Operator visual inspection
+- Functional testing confirmation
+
+---
+
+## ANNEX B: HARDWARE INSTALLATION IMAGES
+
+### Smart Lockbox Installation Examples
+
+**Image 1:** LILIWISE KB01 Key Box - Full Product Specifications  
+**File:** `attached_assets/IMG_8967_1762821810427.jpeg`  
+**Shows:** Product features, dimensions, compatibility, use cases, weatherproof rating
+
+**Image 2:** TTLock System Architecture  
+**File:** `attached_assets/IMG_8965_1762821810427.jpeg`  
+**Shows:** Integration flow between Alga app, TTLock cloud API, and smart lockbox
+
+### Property Verification Process
+
+1. **Host Installation:** Host installs lockbox and camera at property
+2. **Photo Upload:** Host uploads installation photos via Alga Host app
+3. **Operator Review:** Alga operators verify hardware through dashboard
+4. **Approval:** Property approved only after both devices verified
+5. **Code Generation:** Automatic 4-digit PIN generation enabled for bookings
+
+---
+
 **END OF SUBMISSION**
