@@ -1628,6 +1628,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // INSA Security: Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+      
       const property = await storage.getProperty(id);
       
       if (!property) {
