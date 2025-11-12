@@ -4700,6 +4700,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== INTEGRITY ALERTS (Signature Tampering Detection) ====================
+
+  // Get integrity alerts (unresolved in last 30 days)
+  app.get("/api/admin/signatures/alerts", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { resolved, category, limit, offset } = req.query;
+      
+      const result = await storage.getIntegrityAlerts({
+        resolved: resolved === 'true' ? true : resolved === 'false' ? false : undefined,
+        category: category || undefined,
+        limit: limit ? parseInt(limit) : 50,
+        offset: offset ? parseInt(offset) : 0,
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching integrity alerts:", error);
+      res.status(500).json({ message: "Failed to fetch integrity alerts" });
+    }
+  });
+
+  // Acknowledge integrity alerts
+  app.post("/api/admin/signatures/alerts/acknowledge", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { alertIds } = req.body;
+      
+      if (!alertIds || !Array.isArray(alertIds) || alertIds.length === 0) {
+        return res.status(400).json({ message: "alertIds array is required" });
+      }
+      
+      await storage.acknowledgeIntegrityAlerts(alertIds, req.user.id);
+      
+      res.json({ 
+        message: "Alerts acknowledged successfully",
+        count: alertIds.length 
+      });
+    } catch (error) {
+      console.error("Error acknowledging alerts:", error);
+      res.status(500).json({ message: "Failed to acknowledge alerts" });
+    }
+  });
+
+  // Create synthetic test alert (non-production only)
+  app.post("/api/admin/signatures/alerts/test", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ message: "Test alerts are disabled in production" });
+      }
+      
+      const { createTestAlert } = await import("./utils/integrityAlerts");
+      const testSignatureId = await createTestAlert();
+      
+      res.json({ 
+        message: "Test alert created successfully",
+        signatureId: testSignatureId
+      });
+    } catch (error) {
+      console.error("Error creating test alert:", error);
+      res.status(500).json({ message: "Failed to create test alert" });
+    }
+  });
+
   // ==================== END ADMIN SIGNATURE DASHBOARD ROUTES ====================
 
   const httpServer = createServer(app);
