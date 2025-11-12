@@ -1,0 +1,59 @@
+Task Title: Deploy Signature Dashboard (Admin + INSA View) — Ethiopian E-Signature Compliance
+
+⸻
+
+🧭 Goal
+
+Create a centralized dashboard at /admin/signatures where authorized users (Admins, INSA Inspectors) can:
+	•	View and verify all consent logs.
+	•	Validate SHA-256 integrity and AES-256 decryption.
+	•	Export signed records (CSV / PDF / JSON).
+	•	Generate instant INSA-compliance reports.
+
+⸻
+
+✅ Replit Must Include
+	1.	Dashboard Page
+	•	Path: client/src/pages/admin/SignatureDashboard.tsx
+	•	Access restricted to role = admin or role = insa_auditor.
+	•	Display columns: user_id, action, timestamp, verified, signature_hash, otp_id, fayda_id.
+	•	Filters: user ID, date range, action type, verification status.
+	•	Actions:
+	•	🔍 Verify Integrity → recompute SHA-256 and confirm match.
+	•	🔐 Decrypt Audit Info → open modal with decrypted IP/device (read-only).
+	•	📤 Export → CSV/PDF/JSON (with watermark + legal footer).
+	2.	Server Endpoints
+	•	/api/admin/signatures → paginated list with filters.
+	•	/api/admin/signatures/verify/:id → hash re-check.
+	•	/api/admin/signatures/export → export selected rows.
+	3.	Utilities
+	•	server/utils/reportBuilder.ts → build audit PDF with watermark:
+“Alga – Ethiopian Electronic Signature Compliance System © 2025 (INSA Ready)”
+	•	server/utils/crypto.ts → ensure AES-256 + SHA-256 functions already imported.
+	4.	Documentation
+	•	File: docs/ADMIN_SIGNATURE_DASHBOARD_GUIDE.md
+	•	Contents: login flow, permissions, audit export steps, and INSA inspection checklist.
+
+⸻
+
+⚖️ Compliance Notes
+	•	All records immutable — view-only.
+	•	Decrypted data visible only in admin mode, never sent to client logs.
+	•	Legal footer on every page:
+“Compliant with Electronic Signature Proclamation No. 1072/2018 and Electronic Transactions Proclamation No. 1205/2020.”
+	•	No analytics, telemetry, or 3rd-party dependencies.
+
+⸻
+
+🚫 Replit Must Avoid
+	•	❌ Editing or deleting consent logs.
+	•	❌ Unencrypted IP display.
+	•	❌ Third-party commercial libraries (keep open-source).
+
+⸻
+
+🧾 Expected Outcome
+	•	/admin/signatures live, role-restricted dashboard.
+	•	Verified hash & AES decryption test per record.
+	•	Export + INSA PDF report generator working.
+	•	Admin & INSA auditors can monitor, verify, and export in one click.
