@@ -21,6 +21,7 @@ import BecomeProvider from "@/pages/become-provider";
 import BecomeAgent from "@/pages/become-agent";
 import HostDashboard from "@/pages/host-dashboard";
 import AgentDashboard from "@/pages/agent-dashboard";
+import DellalaDashboard from "@/pages/dellala-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
 import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
@@ -146,6 +147,7 @@ function Router() {
         <Route path="/host/dashboard" element={<AnimatedRoute><HostDashboard /></AnimatedRoute>} />
         <Route path="/provider/dashboard" element={<AnimatedRoute><ProviderDashboard /></AnimatedRoute>} />
         <Route path="/agent-dashboard" element={<AnimatedRoute><AgentDashboard /></AnimatedRoute>} />
+        <Route path="/dellala/dashboard" element={<AnimatedRoute><DellalaDashboard /></AnimatedRoute>} />
         <Route path="/admin/dashboard" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
         <Route path="/admin/service-providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
         <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
