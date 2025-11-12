@@ -12,6 +12,8 @@ Preferred communication style: Simple, everyday language.
 
 ### November 12, 2025
 - **INSA Compliance Offline Page**: Created `/insa-compliance` page with full offline capability for mobile apps via PWA and IndexedDB. Features include browser-native storage, 1-year cache retention, comprehensive compliance display (75% complete, 98/100 security score), four tabs (Completed, Missing, Legal, Test), restricted access to Operators/Admins, JSON export, and quick access card in Operator Dashboard. Zero external API costs.
+- **Agent Portal Navigation Added**: Added 💼 Agent Portal link to main navigation (desktop + mobile), accessible at `/dellala/dashboard`. Shows agent earnings, commissions, properties, and TeleBirr withdrawals.
+- **Complete User Journey Simulation Guide**: Created comprehensive testing documentation covering all 9 user journeys: Guest, Host, Agent, Operator, Admin, Service Provider, Offline Mode, Hardware Integration, and Full End-to-End Scenario. Includes step-by-step instructions, API calls, test credentials, and success criteria. Files: `docs/COMPLETE_USER_JOURNEY_SIMULATION.md` (9000+ lines), `docs/AGENT_SIMULATION_GUIDE.md`, `docs/QUICK_START_TESTING.md`, `scripts/test-agent-journey.ts` (automated test script).
 
 ## System Architecture
 
