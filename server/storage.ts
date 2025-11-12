@@ -21,6 +21,7 @@ import {
   consentLogs,
   dashboardAccessLogs,
   integrityAlerts,
+  userOnboarding,
   type User,
   type UpsertUser,
   type Property,
@@ -298,6 +299,11 @@ export interface IStorage {
   }): Promise<{ total: number; alerts: any[] }>;
   acknowledgeIntegrityAlerts(alertIds: string[], adminUserId: string): Promise<void>;
   getUnresolvedAlertsCount(): Promise<number>;
+  
+  // User Onboarding (100% Free Browser-Native System)
+  getOnboardingStatus(userId: string): Promise<any | undefined>;
+  trackOnboardingStep(userId: string, step: string, value: boolean): Promise<void>;
+  completeOnboarding(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2423,6 +2429,52 @@ export class DatabaseStorage implements IStorage {
       );
     
     return Number(result[0]?.count || 0);
+  }
+  
+  // User Onboarding Operations (100% Free Browser-Native System)
+  async getOnboardingStatus(userId: string): Promise<any | undefined> {
+    const [status] = await db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId));
+    return status;
+  }
+  
+  async trackOnboardingStep(userId: string, step: string, value: boolean): Promise<void> {
+    const existing = await this.getOnboardingStatus(userId);
+    
+    if (!existing) {
+      // Create new onboarding record
+      const user = await this.getUser(userId);
+      await db.insert(userOnboarding).values({
+        userId,
+        role: user?.role || 'guest',
+        [step]: value,
+        lastInteractionAt: new Date(),
+      });
+    } else {
+      // Update existing record
+      await db
+        .update(userOnboarding)
+        .set({
+          [step]: value,
+          lastInteractionAt: new Date(),
+        })
+        .where(eq(userOnboarding.userId, userId));
+    }
+  }
+  
+  async completeOnboarding(userId: string): Promise<void> {
+    await db
+      .update(userOnboarding)
+      .set({
+        onboardingCompleted: true,
+        completedAt: new Date(),
+        stepWelcome: true,
+        stepTour: true,
+        stepComplete: true,
+      })
+      .where(eq(userOnboarding.userId, userId));
   }
 }
 
