@@ -74,13 +74,8 @@ export default function BecomeAgent() {
         throw new Error(error.message || "Registration failed");
       }
 
-      // Navigate immediately - no delay
-      setLocation("/agent-dashboard");
-      
-      toast({
-        title: "🎉 Application Submitted!",
-        description: "Redirecting to your dashboard...",
-      });
+      // Use browser navigation for instant redirect (shows browser loading bar instead of white page)
+      window.location.href = "/agent-dashboard";
     } catch (error: any) {
       toast({
         title: "❌ Registration Failed",
