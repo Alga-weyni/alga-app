@@ -82,19 +82,19 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
               <h1 className="text-xl sm:text-2xl font-bold text-eth-brown">Alga</h1>
             </Link>
             
-            {/* Logout Button - Always Visible When Authenticated */}
+            {/* Sign Out Button - Mobile Only */}
             {isAuthenticated && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
-                data-testid="button-logout-header"
-                className="text-xs sm:text-sm border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
+                data-testid="button-signout-mobile"
+                className="md:hidden text-xs border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
                 aria-label="Sign out of your account"
                 role="button"
               >
-                {logoutMutation.isPending ? "..." : "Logout"}
+                {logoutMutation.isPending ? "..." : "Sign out"}
               </Button>
             )}
           </div>
