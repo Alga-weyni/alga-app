@@ -43,7 +43,20 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Cache INSA compliance page for offline access
+        navigateFallback: null,
         runtimeCaching: [
+          {
+            urlPattern: /\/insa-compliance/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'insa-compliance-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year - static content
+              }
+            }
+          },
           {
             urlPattern: /^https:\/\/api\./i,
             handler: 'NetworkFirst',
