@@ -493,6 +493,260 @@ Every export is logged with:
 
 ---
 
+## Integrity Alerts & Response Playbook
+
+### Overview
+The Signature Integrity Alert System automatically monitors all electronic signatures for potential tampering or data corruption. When the daily integrity checker detects anomalies, it creates alerts that appear on the Admin Signature Dashboard.
+
+### How It Works
+
+#### Automated Daily Check
+- **Runs**: Every day at 2:00 AM Ethiopian time (Africa/Addis_Ababa)
+- **Checks**: All signature hashes against stored values
+- **Verifies**: Encrypted data can still be decrypted
+- **Logs**: Results in console and alert database
+
+#### Alert Creation
+When a signature fails verification:
+1. **Auto-categorization**: System analyzes error message
+2. **Database record**: Alert stored in `integrity_alerts` table
+3. **Email notification** (production only): Sent to `legal@alga.et` and `security@alga.et`
+4. **Dashboard banner**: Red alert appears at top of dashboard
+
+### Alert Categories
+
+| Category | Description | Common Causes |
+|----------|-------------|---------------|
+| **HASH_MISMATCH** | SHA-256 hash doesn't match stored value | Database tampering, data corruption |
+| **DECRYPT_FAILURE** | Cannot decrypt IP address or device info | Encryption key changed, data corruption |
+| **DB_INTEGRITY_ERROR** | Database integrity constraint violated | Foreign key issues, constraint failures |
+| **UNKNOWN** | Unclassified failure | New error type, system error |
+
+### Red Alert Banner
+
+#### When It Appears
+The banner displays when:
+- One or more unresolved alerts exist
+- Alerts occurred within last 24 hours
+- Banner hasn't been dismissed in current session
+
+#### Banner Actions
+
+**View Failed Only**
+- Filters table to show only failed verifications (verified = false)
+- Dismisses banner
+- Use this to investigate specific failures
+
+**Export Failures (PDF)**
+- Opens export modal with PDF pre-selected
+- Creates INSA-compliant report of all failures
+- Includes SHA-256 watermark for legal evidence
+
+**Acknowledge All**
+- Marks all unresolved alerts as resolved
+- Logs admin action in audit trail
+- Records acknowledging admin's user ID
+- Dismisses banner
+- **Use only after investigation complete**
+
+### Response Playbook
+
+#### Step 1: Assess Severity
+
+**Low Severity** (1-2 failures):
+- Likely data corruption or temporary issue
+- Review error details
+- Check if signature can be re-verified
+
+**Medium Severity** (3-10 failures):
+- Potential system issue
+- Export failures PDF immediately
+- Contact technical support
+- Do NOT decrypt personal data yet
+
+**High Severity** (>10 failures):
+- CRITICAL: Potential database tampering
+- **STOP**: Do not acknowledge alerts
+- **EXPORT**: Full audit trail PDF
+- **NOTIFY**: Legal team (legal@alga.et)
+- **NOTIFY**: INSA compliance officer
+- **PRESERVE**: All logs and backups
+
+#### Step 2: Investigate
+
+**For HASH_MISMATCH**:
+1. Click **Verify** button on affected signature
+2. Check if hash recalculation matches
+3. Review dashboard access logs for suspicious activity
+4. Check database backups for original value
+
+**For DECRYPT_FAILURE**:
+1. Verify encryption keys haven't changed
+2. Check environment variables for `ENCRYPTION_KEY`
+3. Test decryption on recent signatures
+4. Contact technical team if key rotation occurred
+
+**For DB_INTEGRITY_ERROR**:
+1. Review database logs for constraint violations
+2. Check if related records (user, booking) exist
+3. Run database integrity check
+4. Contact database administrator
+
+#### Step 3: Document
+
+**Required Documentation**:
+- Screenshot of red alert banner
+- Export failures PDF
+- Investigation notes
+- Timeline of discovery
+- Admin actions taken
+
+**For INSA Reporting**:
+- Alert category and count
+- First detection timestamp (Ethiopian time)
+- Root cause analysis
+- Remediation steps taken
+- Preventive measures implemented
+
+#### Step 4: Resolve
+
+**After Investigation**:
+1. Click **Acknowledge All** button
+2. Alert disappears from dashboard
+3. Action logged in `dashboard_access_logs`
+4. Email notification stops
+
+**If Legal Issue Suspected**:
+1. **DO NOT** acknowledge alerts
+2. Export PDF evidence
+3. Contact legal team
+4. Await legal clearance before acknowledging
+
+### Email Alerts (Production Only)
+
+#### Email Recipients
+- **Primary**: legal@alga.et
+- **CC**: security@alga.et
+
+#### Email Content
+- Alert category
+- Signature ID (no PII)
+- User ID (no PII)
+- Action type
+- Timestamp (Ethiopian time)
+- Error summary
+- Link to dashboard
+
+#### Deduplication Rules
+- **Maximum 1 email** per signatureId per 24 hours
+- Prevents alert fatigue
+- Repeated failures increment `occurrence_count`
+
+#### Global Rate Limit
+- **Maximum 20 emails** per day (system-wide)
+- Protects against email spam
+- Critical alerts prioritized
+
+### Testing the Alert System
+
+#### Non-Production Testing
+
+**Create Test Alert**:
+```bash
+curl -X POST http://localhost:5000/api/admin/signatures/alerts/test \
+  -H "Content-Type: application/json" \
+  -b cookies.txt
+```
+
+**Verify Alert Appears**:
+1. Refresh dashboard
+2. Red banner should appear
+3. Check console logs
+
+**Acknowledge Test Alert**:
+1. Click "Acknowledge All"
+2. Banner disappears
+3. Check audit logs
+
+#### Production Testing
+**DO NOT** create test alerts in production. Use manual review:
+1. Review integrity check logs (daily 2:00 AM)
+2. Monitor email alerts
+3. Check dashboard banner daily
+
+### Alert Database Schema
+
+**Table**: `integrity_alerts`
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Alert unique identifier |
+| signatureId | varchar | Reference to consent_logs.signatureId |
+| category | varchar | Alert category (HASH_MISMATCH, etc.) |
+| firstSeenAt | timestamp | First detection time |
+| lastSeenAt | timestamp | Most recent detection |
+| occurrenceCount | integer | Number of times error occurred |
+| resolved | boolean | Whether alert has been acknowledged |
+| acknowledgedBy | varchar | Admin user ID who acknowledged |
+| acknowledgedAt | timestamp | Time of acknowledgment |
+| metadata | jsonb | Additional context (userId, action, errorMessage) |
+
+### API Endpoints
+
+**List Alerts**:
+```
+GET /api/admin/signatures/alerts?resolved=false&limit=50&offset=0
+```
+
+**Acknowledge Alerts**:
+```
+POST /api/admin/signatures/alerts/acknowledge
+Body: { "alertIds": ["uuid1", "uuid2"] }
+```
+
+**Create Test Alert** (non-production):
+```
+POST /api/admin/signatures/alerts/test
+```
+
+### Best Practices
+
+✅ **DO**:
+- Check dashboard daily for new alerts
+- Export failures PDF before acknowledging
+- Document investigation findings
+- Contact legal team for high-severity alerts
+- Monitor email inbox (legal@alga.et)
+
+❌ **DON'T**:
+- Acknowledge alerts without investigation
+- Decrypt personal data unless legally required
+- Ignore repeated alerts for same signature
+- Delete alert records (immutable audit trail)
+- Create test alerts in production
+
+### INSA Compliance Notes
+
+**Audit Trail**:
+- All alerts stored for 5 years minimum
+- Alert acknowledgment logged
+- Immutable records (no deletion)
+- Timestamped in Africa/Addis_Ababa timezone
+
+**Reporting**:
+- Quarterly integrity summary included in INSA reports
+- Alert statistics tracked (total, resolved, pending)
+- Root cause analysis documented
+- Remediation actions logged
+
+**Legal Evidence**:
+- Alerts can serve as evidence of tampering
+- SHA-256 hashes provide cryptographic proof
+- Export PDF includes INSA watermark
+- Chain of custody maintained in audit logs
+
+---
+
 ## Rate Limits & Security
 
 ### Rate Limiting Rules
