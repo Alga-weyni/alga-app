@@ -1150,6 +1150,47 @@ export const insertIntegrityAlertSchema = createInsertSchema(integrityAlerts).om
 export type IntegrityAlert = typeof integrityAlerts.$inferSelect;
 export type InsertIntegrityAlert = z.infer<typeof insertIntegrityAlertSchema>;
 
+// ========================================
+// USER ONBOARDING TRACKING (100% Free Browser-Native System)
+// ========================================
+
+export const userOnboarding = pgTable("user_onboarding", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().unique().references(() => users.id),
+  role: varchar("role").notNull(), // guest, host, dellala, operator, admin
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  
+  // Step tracking
+  stepWelcome: boolean("step_welcome").default(false),
+  stepTour: boolean("step_tour").default(false),
+  stepComplete: boolean("step_complete").default(false),
+  
+  // Welcome image generation
+  welcomeImageGenerated: boolean("welcome_image_generated").default(false),
+  welcomeImageUrl: varchar("welcome_image_url"),
+  
+  // Engagement tracking
+  tourStepsViewed: integer("tour_steps_viewed").default(0),
+  skipCount: integer("skip_count").default(0), // How many times user skipped
+  totalTimeSpent: integer("total_time_spent").default(0), // Seconds
+  
+  // Last interaction
+  lastInteractionAt: timestamp("last_interaction_at").defaultNow(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserOnboardingSchema = createInsertSchema(userOnboarding).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type UserOnboarding = typeof userOnboarding.$inferSelect;
+export type InsertUserOnboarding = z.infer<typeof insertUserOnboardingSchema>;
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
