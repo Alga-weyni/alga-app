@@ -12,6 +12,7 @@ import { useWebVitals } from "@/hooks/useWebVitals";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import LoginPage from "@/pages/login";
+import OnboardingPage from "@/pages/onboarding";
 import Properties from "@/pages/properties";
 import PropertyDetails from "@/pages/property-details";
 import PropertySearch from "@/pages/search";
@@ -139,6 +140,9 @@ function Router() {
         
         {/* Welcome page - shown after login */}
         <Route path="/welcome" element={<AnimatedRoute><Welcome /></AnimatedRoute>} />
+        
+        {/* Onboarding - shown for new users */}
+        <Route path="/onboarding" element={<AnimatedRoute><OnboardingPage /></AnimatedRoute>} />
         
         {/* My Alga - accessible to all, handles auth internally */}
         <Route path="/my-alga" element={<AnimatedRoute><MyAlga /></AnimatedRoute>} />
