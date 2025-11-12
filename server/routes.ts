@@ -327,6 +327,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === E-SIGNATURE CONSENT (Ethiopian Legal Compliance) ===
+  
+  app.post('/api/consent', isAuthenticated, async (req: any, res) => {
+    try {
+      const consentData = req.body;
+      
+      // Add IP address and user agent for audit trail
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+      
+      const consentRecord = await storage.createConsentRecord({
+        ...consentData,
+        ipAddress,
+        userAgent,
+      });
+      
+      res.json({ success: true, consentRecord });
+    } catch (error: any) {
+      console.error('[CONSENT] Failed to record consent:', error);
+      res.status(500).json({ 
+        message: 'Failed to record consent', 
+        error: error.message 
+      });
+    }
+  });
+  
+  app.get('/api/consent/user/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Only allow users to view their own consent records (or admins)
+      if (req.user.id !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Unauthorized' });
+      }
+      
+      const records = await storage.getUserConsentRecords(userId);
+      res.json(records);
+    } catch (error: any) {
+      res.status(500).json({ message: 'Failed to fetch consent records', error: error.message });
+    }
+  });
+
   // === PASSWORDLESS OTP AUTHENTICATION ===
   
   // Request OTP for Phone Registration (Passwordless)
