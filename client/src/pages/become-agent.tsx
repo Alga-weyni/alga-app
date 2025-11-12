@@ -74,8 +74,8 @@ export default function BecomeAgent() {
         throw new Error(error.message || "Registration failed");
       }
 
-      // Use browser navigation for instant redirect (shows browser loading bar instead of white page)
-      window.location.href = "/agent-dashboard";
+      // Use browser navigation for instant redirect to Dellala dashboard
+      window.location.href = "/dellala/dashboard";
     } catch (error: any) {
       toast({
         title: "❌ Registration Failed",

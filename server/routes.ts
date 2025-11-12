@@ -3634,6 +3634,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ====================================================================
+  // AGENT REGISTRATION & DASHBOARD ROUTES
+  // ====================================================================
+
+  // Register new agent
+  app.post('/api/agent/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const {
+        fullName,
+        phoneNumber,
+        paymentMethod,
+        paymentAccount,
+        idNumber,
+        businessName,
+        city,
+        subCity,
+      } = req.body;
+
+      // Check if user already has an agent account
+      const existing = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId))
+        .limit(1);
+
+      if (existing.length > 0) {
+        return res.status(400).json({ message: "You already have an agent account" });
+      }
+
+      // Create agent account
+      const [newAgent] = await db
+        .insert(agents)
+        .values({
+          userId,
+          fullName,
+          phoneNumber,
+          telebirrAccount: paymentAccount,  // Store payment account (works for all payment methods)
+          city,
+          subCity: subCity || null,
+          businessName: businessName || null,
+          idNumber: idNumber || null,
+          status: 'approved',  // Instant approval for verified users
+          totalEarnings: '0.00',
+          totalProperties: 0,
+          activeProperties: 0,
+          referralCode: `AG${Date.now().toString().slice(-8)}`,
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        agent: newAgent,
+        message: "Agent account created successfully!",
+      });
+    } catch (error: any) {
+      console.error("Agent registration error:", error);
+      res.status(500).json({ message: "Failed to create agent account" });
+    }
+  });
+
+  // Get Agent Dashboard (simple version - redirects to Dellala dashboard)
+  app.get('/api/agent/dashboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Find agent by user ID
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      // Get agent performance
+      const performance = await storage.getAgentPerformance(agent.id);
+
+      // Get recent commissions
+      const recentCommissions = await db
+        .select()
+        .from(agentCommissions)
+        .where(eq(agentCommissions.agentId, agent.id))
+        .orderBy(desc(agentCommissions.createdAt))
+        .limit(10);
+
+      const stats = {
+        totalEarnings: performance?.totalCommissionEarned || 0,
+        pendingEarnings: performance?.totalCommissionPending || 0,
+        paidEarnings: performance?.totalWithdrawn || 0,
+        totalProperties: agent.totalProperties,
+        activeProperties: agent.activeProperties,
+        expiredProperties: 0,
+        totalCommissions: recentCommissions.length,
+        recentCommissions: recentCommissions,
+      };
+
+      res.json({
+        agent: {
+          id: agent.id,
+          fullName: agent.fullName,
+          phoneNumber: agent.phoneNumber,
+          telebirrAccount: agent.telebirrAccount,
+          city: agent.city,
+          status: agent.status,
+          totalEarnings: agent.totalEarnings,
+          totalProperties: agent.totalProperties,
+          activeProperties: agent.activeProperties,
+          referralCode: agent.referralCode,
+          createdAt: agent.createdAt,
+        },
+        stats,
+      });
+    } catch (error: any) {
+      console.error("Agent dashboard error:", error);
+      res.status(500).json({ message: "Failed to load agent dashboard" });
+    }
+  });
+
   // DELLALA FINANCIAL DASHBOARD ROUTES
   // ====================================================================
 
