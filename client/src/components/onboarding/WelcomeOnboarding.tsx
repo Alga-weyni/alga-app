@@ -244,10 +244,11 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
               <div className="relative z-10">
                 <button
                   onClick={handleSkip}
-                  className="absolute top-0 right-0 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="absolute -top-2 -right-2 p-3 bg-white/30 hover:bg-white/50 rounded-full transition-all shadow-lg backdrop-blur-sm"
                   data-testid="button-skip-onboarding"
+                  aria-label="Close welcome tour"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6 text-white" />
                 </button>
 
                 <div className="flex items-center gap-4 mb-4">
