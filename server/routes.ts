@@ -22,7 +22,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, paymentTransactions, hardwareDeployments } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments } from "@shared/schema";
 import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
@@ -3750,22 +3750,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Agent account not found" });
       }
 
-      let query = db
+      let whereConditions: any[] = [eq(agentCommissions.agentId, agent.id)];
+
+      if (status) {
+        whereConditions.push(eq(agentCommissions.status, status as string));
+      }
+
+      const commissions = await db
         .select()
         .from(agentCommissions)
-        .where(eq(agentCommissions.agentId, agent.id))
+        .where(and(...whereConditions))
         .orderBy(desc(agentCommissions.createdAt))
         .limit(parseInt(limit as string))
         .offset(parseInt(offset as string));
-
-      if (status) {
-        query = query.where(and(
-          eq(agentCommissions.agentId, agent.id),
-          eq(agentCommissions.status, status as string)
-        ));
-      }
-
-      const commissions = await query;
       res.json(commissions);
     } catch (error) {
       console.error("Error fetching commissions:", error);
