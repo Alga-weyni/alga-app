@@ -1005,6 +1005,27 @@ export const insertConsentLogSchema = createInsertSchema(consentLogs).omit({
   createdAt: true,
 });
 
+// Dashboard Access Logs (INSA Compliance - Admin Audit Trail)
+export const dashboardAccessLogs = pgTable("dashboard_access_logs", {
+  id: serial("id").primaryKey(),
+  adminUserId: varchar("admin_user_id").notNull().references(() => users.id),
+  action: varchar("action").notNull(), // view, verify, decrypt, export
+  recordId: varchar("record_id"), // signature_id being accessed (null for list views)
+  exportFormat: varchar("export_format"), // csv, pdf, json (for export actions)
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata").default('{}'), // Additional context (filters, record count, etc.)
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const insertDashboardAccessLogSchema = createInsertSchema(dashboardAccessLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type DashboardAccessLog = typeof dashboardAccessLogs.$inferSelect;
+export type InsertDashboardAccessLog = z.infer<typeof insertDashboardAccessLogSchema>;
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
