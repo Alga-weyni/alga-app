@@ -2264,6 +2264,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Log error but don't fail the payment status update
           console.error("Failed to create access code:", accessCodeError);
         }
+
+        // 💰 AUTOMATIC SPLIT-PAYMENT: Distribute funds instantly
+        try {
+          const splitResult = await storage.processAutoPaymentSplit(id);
+          if (splitResult.success) {
+            console.log(`💰 SPLIT-PAYMENT SUCCESS for booking #${id}`);
+            console.log(`   Dellala: ${splitResult.dellalaAmount.toFixed(2)} ETB | Owner: ${splitResult.ownerAmount.toFixed(2)} ETB | Alga: ${splitResult.algaFee.toFixed(2)} ETB`);
+          }
+        } catch (splitError) {
+          // Log error but don't fail the payment status update
+          console.error("Failed to process payment split:", splitError);
+        }
       }
       
       res.json(booking);

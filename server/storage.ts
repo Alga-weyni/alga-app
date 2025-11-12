@@ -254,6 +254,12 @@ export interface IStorage {
   getAgentRatings(agentId: number, filters?: { limit?: number; offset?: number }): Promise<AgentRating[]>;
   processAgentWithdrawal(withdrawalId: number, status: string, processedBy: string, transactionRef?: string): Promise<AgentWithdrawal>;
   updateCommissionStatusToPaid(agentId: number, commissionIds: number[]): Promise<void>;
+  processAutoPaymentSplit(bookingId: number): Promise<{
+    dellalaAmount: number;
+    ownerAmount: number;
+    algaFee: number;
+    success: boolean;
+  }>;
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
@@ -2061,6 +2067,108 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(agentPerformance.agentId, agentId));
+  }
+
+  async processAutoPaymentSplit(bookingId: number): Promise<{
+    dellalaAmount: number;
+    ownerAmount: number;
+    algaFee: number;
+    success: boolean;
+  }> {
+    const [booking] = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.id, bookingId));
+
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+
+    if (booking.paymentStatus !== 'paid') {
+      throw new Error('Payment must be confirmed before split processing');
+    }
+
+    const totalAmount = parseFloat(booking.totalPrice);
+    
+    const DELLALA_COMMISSION_RATE = 5.0;
+    const ALGA_SERVICE_FEE_RATE = 2.5;
+
+    const dellalaAmount = (totalAmount * DELLALA_COMMISSION_RATE) / 100;
+    const algaFee = (totalAmount * ALGA_SERVICE_FEE_RATE) / 100;
+    const ownerAmount = totalAmount - dellalaAmount - algaFee;
+
+    const [agentProperty] = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.propertyId, booking.propertyId));
+
+    if (agentProperty && agentProperty.isActive) {
+      const [existingCommission] = await db
+        .select()
+        .from(agentCommissions)
+        .where(eq(agentCommissions.bookingId, bookingId));
+
+      if (!existingCommission) {
+        await db
+          .insert(agentCommissions)
+          .values({
+            agentId: agentProperty.agentId,
+            propertyId: booking.propertyId,
+            bookingId: booking.id,
+            bookingTotal: booking.totalPrice,
+            commissionRate: DELLALA_COMMISSION_RATE.toString(),
+            commissionAmount: dellalaAmount.toFixed(2),
+            status: 'paid',
+            paidAt: new Date(),
+          });
+
+        const performance = await this.getAgentPerformance(agentProperty.agentId);
+        if (performance) {
+          await db
+            .update(agentPerformance)
+            .set({
+              totalCommissionEarned: sql`${agentPerformance.totalCommissionEarned} + ${dellalaAmount}`,
+              availableBalance: sql`${agentPerformance.availableBalance} + ${dellalaAmount}`,
+              totalBookings: sql`${agentPerformance.totalBookings} + 1`,
+              updatedAt: new Date(),
+            })
+            .where(eq(agentPerformance.agentId, agentProperty.agentId));
+        } else {
+          await this.createAgentPerformance(agentProperty.agentId);
+          await db
+            .update(agentPerformance)
+            .set({
+              totalCommissionEarned: dellalaAmount.toFixed(2),
+              availableBalance: dellalaAmount.toFixed(2),
+              totalBookings: 1,
+            })
+            .where(eq(agentPerformance.agentId, agentProperty.agentId));
+        }
+
+        await db
+          .update(agents)
+          .set({
+            totalEarnings: sql`${agents.totalEarnings} + ${dellalaAmount}`,
+          })
+          .where(eq(agents.id, agentProperty.agentId));
+
+        console.log(`💰 AUTO SPLIT-PAYMENT: Booking #${bookingId}`);
+        console.log(`   → Dellala: ${dellalaAmount.toFixed(2)} ETB (5%)`);
+        console.log(`   → Owner: ${ownerAmount.toFixed(2)} ETB (92.5%)`);
+        console.log(`   → Alga: ${algaFee.toFixed(2)} ETB (2.5%)`);
+      }
+    } else {
+      console.log(`💰 AUTO SPLIT-PAYMENT: Booking #${bookingId} (No agent)`);
+      console.log(`   → Owner: ${(totalAmount - algaFee).toFixed(2)} ETB (97.5%)`);
+      console.log(`   → Alga: ${algaFee.toFixed(2)} ETB (2.5%)`);
+    }
+
+    return {
+      dellalaAmount: agentProperty && agentProperty.isActive ? dellalaAmount : 0,
+      ownerAmount: agentProperty && agentProperty.isActive ? ownerAmount : (totalAmount - algaFee),
+      algaFee,
+      success: true,
+    };
   }
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
