@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import cors from "cors";
 import { applyINSAHardening } from "./security/insa-hardening";
+import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
 
 const app = express();
 
@@ -104,5 +105,13 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Schedule daily signature integrity checks (INSA compliance)
+    if (process.env.NODE_ENV === "production") {
+      scheduleIntegrityChecks();
+      log(`✅ Signature integrity checks scheduled (daily at 2:00 AM Ethiopian time)`);
+    } else {
+      log(`⚠️ Signature integrity checks disabled in development mode`);
+    }
   });
 })();
