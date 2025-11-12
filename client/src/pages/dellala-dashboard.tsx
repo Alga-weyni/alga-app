@@ -29,6 +29,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import Header from "@/components/header";
 
 interface AgentPerformance {
   totalCommissionEarned: string;
@@ -107,51 +108,57 @@ export default function DellalaDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-40 w-full" />
-          <div className="grid lg:grid-cols-4 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <Skeleton className="h-40 w-full" />
+            <div className="grid lg:grid-cols-4 gap-4">
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+            </div>
+            <Skeleton className="h-96 w-full" />
           </div>
-          <Skeleton className="h-96 w-full" />
         </div>
-      </div>
+      </>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 flex items-center justify-center">
-        <Card className="max-w-md w-full border-emerald-200 dark:border-emerald-800">
-          <CardHeader>
-            <CardTitle className="text-center text-emerald-900 dark:text-emerald-100">
-              💼 Welcome to the Agent Page
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-gray-600 dark:text-gray-300">
-              Join Alga's agent network and earn 5% commission on every booking for 36 months!
-            </p>
-            <Button
-              onClick={() => {
-                console.log("Button clicked - navigating to /become-agent");
-                window.location.href = "/become-agent";
-              }}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
-              data-testid="button-start-earning"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Start Earning Today
-            </Button>
-            <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-              Register with Fayda ID • List Properties • Start Earning
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 flex items-center justify-center">
+          <Card className="max-w-md w-full border-emerald-200 dark:border-emerald-800">
+            <CardHeader>
+              <CardTitle className="text-center text-emerald-900 dark:text-emerald-100">
+                💼 Welcome to the Agent Page
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-center text-gray-600 dark:text-gray-300">
+                Join Alga's agent network and earn 5% commission on every booking for 36 months!
+              </p>
+              <Button
+                onClick={() => {
+                  console.log("Button clicked - navigating to /become-agent");
+                  window.location.href = "/become-agent";
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
+                data-testid="button-start-earning"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Start Earning Today
+              </Button>
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                Register with Fayda ID • List Properties • Start Earning
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
@@ -181,9 +188,11 @@ export default function DellalaDashboard() {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header with Agent Info */}
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header with Agent Info */}
         <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 dark:from-emerald-700 dark:to-emerald-600 rounded-2xl p-8 text-white shadow-2xl">
           <div className="flex justify-between items-start">
             <div>
@@ -464,5 +473,6 @@ export default function DellalaDashboard() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
