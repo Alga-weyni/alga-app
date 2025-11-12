@@ -98,21 +98,23 @@ async function main() {
     // ============================================================
     await step(1, 'Register User Account (Phone + OTP)');
     
-    // Request OTP
-    await log('📱', 'Requesting OTP for phone number...');
-    const otpRequest = await apiRequest('POST', '/api/auth/register/phone', {
+    // Register with phone
+    await log('📱', 'Registering with phone number...');
+    const registerResponse = await apiRequest('POST', '/api/auth/register/phone', {
       phoneNumber: testAgent.phoneNumber,
-      fullName: testAgent.fullName,
+      password: testAgent.password,
+      firstName: "Meron",
+      lastName: "Tadesse"
     });
     
-    await log('✓', `OTP sent to ${testAgent.phoneNumber}`);
-    console.log('   OTP Code:', otpRequest.otp || '1234 (default test OTP)');
+    await log('✓', `User registered: ${testAgent.phoneNumber}`);
+    console.log('   OTP Code:', registerResponse.otp || '1234 (check SMS)');
 
     // Verify OTP
     await log('🔐', 'Verifying OTP...');
     const otpVerify = await apiRequest('POST', '/api/auth/verify-otp', {
       phoneNumber: testAgent.phoneNumber,
-      otp: '1234' // Default test OTP
+      otp: registerResponse.otp || '1234'
     });
     
     await log('✓', 'Phone number verified! User logged in.');
