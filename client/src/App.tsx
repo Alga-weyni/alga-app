@@ -31,6 +31,7 @@ import LemlemOperationsDashboard from "@/pages/admin/LemlemOperationsDashboard";
 import LemlemOps from "@/pages/admin/LemlemOps";
 import LemlemValidationMetrics from "@/pages/admin/LemlemValidationMetrics";
 import ReportsArchive from "@/pages/admin/ReportsArchive";
+import SignatureDashboard from "@/pages/admin/SignatureDashboard";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import AgentProgram from "@/pages/agent-program";
 import ProviderDashboard from "@/pages/provider-dashboard";
@@ -156,6 +157,7 @@ function Router() {
         <Route path="/admin/lemlem-validation" element={<AnimatedRoute><LemlemValidationMetrics /></AnimatedRoute>} />
         <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><LemlemOperationsDashboard /></AnimatedRoute>} />
         <Route path="/admin/reports" element={<AnimatedRoute><ReportsArchive /></AnimatedRoute>} />
+        <Route path="/admin/signatures" element={<AnimatedRoute><SignatureDashboard /></AnimatedRoute>} />
         <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
         
         {/* Protected user routes - accessible to all, each page handles auth */}
