@@ -1535,6 +1535,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Manual Split-Payment Trigger (for testing)
+  app.post('/api/admin/trigger-split/:bookingId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (userRole !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const bookingId = parseInt(req.params.bookingId);
+      
+      const splitResult = await storage.processAutoPaymentSplit(bookingId);
+      
+      res.json({
+        success: true,
+        message: 'Payment split processed successfully',
+        distribution: splitResult
+      });
+    } catch (error: any) {
+      console.error("Error processing manual split-payment:", error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message || "Failed to process payment split" 
+      });
+    }
+  });
+
   // Operator-specific routes for verification
   app.get('/api/operator/pending-documents', isAuthenticated, async (req: any, res) => {
     try {
