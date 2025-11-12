@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Home,
   Wrench,
@@ -27,6 +27,19 @@ interface HelpCard {
 
 export default function Support() {
   const [showLemlem, setShowLemlem] = useState(false);
+
+  useEffect(() => {
+    document.title = "Ask Lemlem - Your AI Travel Assistant | Alga";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Chat with Lemlem, your AI travel assistant for Ethiopian property rentals. Get instant help with bookings, payments, safety, and local guidance in Amharic, Oromiffa, and English.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Chat with Lemlem, your AI travel assistant for Ethiopian property rentals. Get instant help with bookings, payments, safety, and local guidance in Amharic, Oromiffa, and English.';
+      document.head.appendChild(meta);
+    }
+  }, []);
 
   const helpTopics: HelpCard[] = [
     {
