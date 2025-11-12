@@ -981,6 +981,29 @@ export const insertInsaComplianceSchema = createInsertSchema(insaCompliance).omi
   updatedAt: true,
 });
 
+// E-Signature Consent Records (Ethiopian Legal Compliance)
+export const consentRecords = pgTable("consent_records", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  actionType: varchar("action_type").notNull(), // booking, submit, confirm, payment
+  consentText: text("consent_text").notNull(), // Full consent text shown to user
+  legalReference: varchar("legal_reference").notNull().default("Proclamation No. 1072/2018"), // Ethiopian e-signature law
+  identificationMethod: varchar("identification_method").notNull(), // fayda_id, otp_phone, otp_email
+  identificationValue: varchar("identification_value").notNull(), // Fayda ID number, phone number, or email
+  ipAddress: varchar("ip_address"), // For audit trail
+  userAgent: text("user_agent"), // Browser/device info
+  relatedEntityType: varchar("related_entity_type"), // booking, property, service_booking
+  relatedEntityId: varchar("related_entity_id"), // ID of the related entity
+  consentGiven: boolean("consent_given").notNull().default(true),
+  metadata: jsonb("metadata").default('{}'), // Additional context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertConsentRecordSchema = createInsertSchema(consentRecords).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -1034,3 +1057,5 @@ export type InsertSystemAlert = z.infer<typeof insertSystemAlertSchema>;
 export type SystemAlert = typeof systemAlerts.$inferSelect;
 export type InsertInsaCompliance = z.infer<typeof insertInsaComplianceSchema>;
 export type InsaCompliance = typeof insaCompliance.$inferSelect;
+export type InsertConsentRecord = z.infer<typeof insertConsentRecordSchema>;
+export type ConsentRecord = typeof consentRecords.$inferSelect;
