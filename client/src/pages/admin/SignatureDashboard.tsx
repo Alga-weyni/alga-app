@@ -245,12 +245,12 @@ export default function SignatureDashboard() {
           
           <div>
             <label className="text-sm font-medium mb-1 block">Action</label>
-            <Select value={action} onValueChange={setAction}>
+            <Select value={action || "all"} onValueChange={(val) => setAction(val === "all" ? "" : val)}>
               <SelectTrigger data-testid="select-filter-action">
                 <SelectValue placeholder="All actions" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All actions</SelectItem>
+                <SelectItem value="all">All actions</SelectItem>
                 <SelectItem value="booking">Booking</SelectItem>
                 <SelectItem value="payment">Payment</SelectItem>
                 <SelectItem value="confirm">Confirm</SelectItem>
@@ -261,12 +261,12 @@ export default function SignatureDashboard() {
           
           <div>
             <label className="text-sm font-medium mb-1 block">Verification Status</label>
-            <Select value={verified} onValueChange={setVerified}>
+            <Select value={verified || "all"} onValueChange={(val) => setVerified(val === "all" ? "" : val)}>
               <SelectTrigger data-testid="select-filter-verified">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="true">Verified</SelectItem>
                 <SelectItem value="false">Not Verified</SelectItem>
               </SelectContent>
