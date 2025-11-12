@@ -869,6 +869,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Onboarding routes (100% Free Browser-Native System)
+  app.get('/api/onboarding/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const status = await storage.getOnboardingStatus(userId);
+      res.json(status || { onboardingCompleted: false });
+    } catch (error) {
+      console.error("Error fetching onboarding status:", error);
+      res.status(500).json({ message: "Failed to fetch onboarding status" });
+    }
+  });
+
+  app.post('/api/onboarding/track', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { step, value } = req.body;
+      
+      if (!step || typeof value !== 'boolean') {
+        return res.status(400).json({ message: "Step and value are required" });
+      }
+
+      await storage.trackOnboardingStep(userId, step, value);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking onboarding step:", error);
+      res.status(500).json({ message: "Failed to track onboarding step" });
+    }
+  });
+
+  app.post('/api/onboarding/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.completeOnboarding(userId);
+      res.json({ success: true, message: "Onboarding completed successfully" });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Failed to complete onboarding" });
+    }
+  });
+
   // Admin routes for user role management
   app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
