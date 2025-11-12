@@ -226,6 +226,30 @@ export default function OperatorDashboard() {
           </p>
         </div>
 
+        {/* INSA Compliance Quick Access */}
+        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div>
+                  <h3 className="font-semibold text-eth-brown dark:text-cream">INSA Compliance Dashboard</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">View offline compliance status & documentation</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate("/insa-compliance")}
+                variant="outline"
+                size="sm"
+                className="bg-white dark:bg-gray-900"
+                data-testid="button-insa-compliance"
+              >
+                View
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="documents" className="space-y-4 sm:space-y-6">
           <TabsList className="bg-white w-full grid grid-cols-2">
             <TabsTrigger value="documents" data-testid="tab-documents" className="text-xs sm:text-sm">

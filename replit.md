@@ -8,6 +8,11 @@ Preferred communication style: Simple, everyday language.
 
 **Company Identity**: Alga is a women-run, women-owned, and women-operated company. All guidance, materials, and communications should reflect and honor this foundation.
 
+## Recent Changes
+
+### November 12, 2025
+- **INSA Compliance Offline Page**: Created `/insa-compliance` page with full offline capability for mobile apps via PWA and IndexedDB. Features include browser-native storage, 1-year cache retention, comprehensive compliance display (75% complete, 98/100 security score), four tabs (Completed, Missing, Legal, Test), restricted access to Operators/Admins, JSON export, and quick access card in Operator Dashboard. Zero external API costs.
+
 ## System Architecture
 
 ### UI/UX Design
