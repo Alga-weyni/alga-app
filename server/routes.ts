@@ -3594,6 +3594,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ====================================================================
+  // DELLALA FINANCIAL DASHBOARD ROUTES
+  // ====================================================================
+
+  // Get Dellala Dashboard data with real-time commissions
+  app.get('/api/dellala/dashboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Find agent by user ID
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      // Get agent performance data
+      const performance = await storage.getAgentPerformance(agent.id);
+
+      // Get recent commissions (last 30)
+      const recentCommissions = await db
+        .select()
+        .from(agentCommissions)
+        .where(eq(agentCommissions.agentId, agent.id))
+        .orderBy(desc(agentCommissions.createdAt))
+        .limit(30);
+
+      // Get recent withdrawals
+      const recentWithdrawals = await db
+        .select()
+        .from(agentWithdrawals)
+        .where(eq(agentWithdrawals.agentId, agent.id))
+        .orderBy(desc(agentWithdrawals.requestedAt))
+        .limit(20);
+
+      res.json({
+        agent: {
+          id: agent.id,
+          fullName: agent.fullName,
+          phoneNumber: agent.phoneNumber,
+          telebirrAccount: agent.telebirrAccount,
+          status: agent.status,
+        },
+        performance: performance || {
+          totalCommissionEarned: "0.00",
+          totalCommissionPending: "0.00",
+          availableBalance: "0.00",
+          totalWithdrawn: "0.00",
+          totalBookings: 0,
+          totalPropertiesListed: 0,
+          lastUpdated: new Date().toISOString(),
+        },
+        recentCommissions,
+        recentWithdrawals,
+      });
+    } catch (error) {
+      console.error("Error fetching Dellala dashboard:", error);
+      res.status(500).json({ message: "Failed to load dashboard" });
+    }
+  });
+
+  // Request withdrawal (Telebirr/Addispay)
+  app.post('/api/dellala/withdraw', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { amount, method, accountNumber } = req.body;
+
+      // Find agent by user ID
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      // Check available balance
+      const performance = await storage.getAgentPerformance(agent.id);
+      const availableBalance = parseFloat(performance?.availableBalance || "0");
+      const requestedAmount = parseFloat(amount);
+
+      if (requestedAmount > availableBalance) {
+        return res.status(400).json({ 
+          message: "Insufficient balance",
+          availableBalance: availableBalance.toFixed(2),
+        });
+      }
+
+      if (requestedAmount < 100) {
+        return res.status(400).json({ 
+          message: "Minimum withdrawal amount is 100 ETB" 
+        });
+      }
+
+      // Create withdrawal request
+      const withdrawal = await storage.createAgentWithdrawal({
+        agentId: agent.id,
+        amount: amount,
+        method,
+        accountNumber,
+        status: "pending",
+      });
+
+      console.log(`💸 WITHDRAWAL REQUEST: Agent #${agent.id} - ${amount} ETB via ${method}`);
+
+      res.json({
+        success: true,
+        withdrawal,
+        message: "Withdrawal request submitted successfully. Funds will be transferred within 24 hours.",
+      });
+    } catch (error) {
+      console.error("Error processing withdrawal request:", error);
+      res.status(500).json({ message: "Failed to process withdrawal" });
+    }
+  });
+
+  // Get withdrawal history
+  app.get('/api/dellala/withdrawals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      const withdrawals = await storage.getAgentWithdrawals(agent.id);
+      res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+      res.status(500).json({ message: "Failed to fetch withdrawals" });
+    }
+  });
+
+  // Get commission history with filters
+  app.get('/api/dellala/commissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { status, limit = "50", offset = "0" } = req.query;
+
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      let query = db
+        .select()
+        .from(agentCommissions)
+        .where(eq(agentCommissions.agentId, agent.id))
+        .orderBy(desc(agentCommissions.createdAt))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string));
+
+      if (status) {
+        query = query.where(and(
+          eq(agentCommissions.agentId, agent.id),
+          eq(agentCommissions.status, status as string)
+        ));
+      }
+
+      const commissions = await query;
+      res.json(commissions);
+    } catch (error) {
+      console.error("Error fetching commissions:", error);
+      res.status(500).json({ message: "Failed to fetch commissions" });
+    }
+  });
+
+  // Get referral stats
+  app.get('/api/dellala/referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      const referrals = await storage.getAgentReferrals(agent.id);
+      const referralStats = await storage.getAgentReferralStats(agent.id);
+
+      res.json({
+        referrals,
+        stats: referralStats,
+      });
+    } catch (error) {
+      console.error("Error fetching referrals:", error);
+      res.status(500).json({ message: "Failed to fetch referrals" });
+    }
+  });
+
+  // ====================================================================
   // LEMLEM OPERATIONS ASSISTANT ROUTES
   // ====================================================================
 
