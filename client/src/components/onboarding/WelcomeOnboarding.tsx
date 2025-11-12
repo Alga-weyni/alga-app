@@ -22,6 +22,7 @@ const roleContent = {
     icon: Home,
     proverb: "Coffee is our bread - hospitality is essential",
     description: "Discover unique Ethiopian accommodations and immersive cultural experiences",
+    videoUrl: "/videos/guest_welcome.mp4",
     steps: [
       {
         title: "Search & Discover",
@@ -48,6 +49,7 @@ const roleContent = {
     icon: DollarSign,
     proverb: "A single stick may smoke, but it will not burn - together we thrive",
     description: "Share your unique space and earn income through Alga's trusted platform",
+    videoUrl: "/videos/host_welcome.mp4",
     steps: [
       {
         title: "List Your Property",
@@ -74,6 +76,7 @@ const roleContent = {
     icon: Sparkles,
     proverb: "He who learns, teaches - share your knowledge and earn",
     description: "Earn 5% recurring commissions for 36 months by connecting properties with travelers",
+    videoUrl: "/videos/dellala_welcome.mp4",
     steps: [
       {
         title: "Refer Properties",
@@ -125,6 +128,7 @@ const roleContent = {
     color: "from-purple-600 to-pink-600",
     icon: Users,
     proverb: "Together we build - Alga is a women-run platform serving Ethiopia",
+    videoUrl: "/videos/admin_welcome.mp4",
     description: "Manage all operations through the Lemlem Operations Dashboard",
     steps: [
       {
@@ -275,6 +279,23 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
                     className="space-y-6"
                     data-testid="onboarding-welcome-screen"
                   >
+                    {/* Welcome Video */}
+                    {content.videoUrl && (
+                      <div className="relative rounded-xl overflow-hidden bg-black shadow-lg">
+                        <video
+                          className="w-full h-auto max-h-80 object-cover"
+                          controls
+                          playsInline
+                          preload="metadata"
+                          poster={`${content.videoUrl.replace('.mp4', '')}_poster.jpg`}
+                          data-testid="onboarding-welcome-video"
+                        >
+                          <source src={content.videoUrl} type="video/mp4" />
+                          <p className="text-white p-4">Your browser doesn't support video playback.</p>
+                        </video>
+                      </div>
+                    )}
+
                     <div className="flex items-start gap-4">
                       <IconComponent className={`w-8 h-8 text-gradient-to-br ${content.color}`} />
                       <div>

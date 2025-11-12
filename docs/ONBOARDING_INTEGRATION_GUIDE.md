@@ -147,6 +147,45 @@ function DellalaDashboard() {
 }
 ```
 
+## Welcome Videos (Optional)
+
+### Video Integration
+The onboarding system supports role-specific welcome videos for a premium experience:
+
+**Video Locations** (in `/public/videos/`):
+- `guest_welcome.mp4` - Guest onboarding video
+- `host_welcome.mp4` - Host onboarding video
+- `dellala_welcome.mp4` - Dellala (Agent) onboarding video
+- `admin_welcome.mp4` - Admin onboarding video
+- `operator_welcome.mp4` - Operator onboarding video (optional)
+
+**Features**:
+- Auto-detected and displayed on the welcome screen
+- HTML5 video player with native controls
+- `preload="metadata"` for 2G network optimization
+- Falls back gracefully if videos don't exist
+- Supports poster images (`*_poster.jpg`) for thumbnails
+
+**Video Specifications** (Recommended):
+- Format: MP4 (H.264 codec)
+- Resolution: 1280x720 (720p)
+- Duration: 15-30 seconds
+- File size: < 5MB per video
+- Aspect ratio: 16:9
+- Frame rate: 30fps
+
+**Adding Videos**:
+```bash
+# Place your videos in public/videos/
+public/videos/
+ ├── guest_welcome.mp4
+ ├── host_welcome.mp4
+ ├── dellala_welcome.mp4
+ └── admin_welcome.mp4
+```
+
+Videos are optional - the system works perfectly without them using animated text and Framer Motion.
+
 ## Animations & Performance
 
 ### Framer Motion Effects
@@ -158,8 +197,9 @@ function DellalaDashboard() {
 ### 2G Network Optimization
 - **Progressive enhancement**: Animations degrade gracefully
 - **Static fallback**: Works without animations if needed
-- **Lazy-loaded images**: Welcome images load after critical content
-- **Minimal payload**: < 50KB total component size
+- **Lazy-loaded videos**: Videos use `preload="metadata"` to minimize bandwidth
+- **Minimal payload**: < 50KB base component (videos optional and on-demand)
+- **Video controls**: Users can skip or pause videos to save data
 
 ## AI-Generated Welcome Images (Optional)
 
@@ -255,9 +295,13 @@ Consider building an admin analytics dashboard to view:
 |-----------|------|-------|
 | Framer Motion | FREE | Client-side animation library |
 | Database Storage | FREE | Uses existing Neon PostgreSQL |
-| Gemini AI Images | FREE | Replit provides free credits |
+| Gemini AI Images | FREE | Replit provides free credits (optional) |
+| Welcome Videos | FREE | Static MP4 files (optional, user-provided) |
 | Backend API | FREE | Express.js routes on existing server |
+| Video Hosting | FREE | Served from `/public/videos/` directory |
 | Total | **$0.00** | 100% free solution |
+
+**Note**: Welcome videos are optional and must be provided by you. The system works perfectly without them.
 
 ## Future Enhancements
 
