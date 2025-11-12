@@ -3753,6 +3753,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OWNER PAYOUT DASHBOARD ROUTES
+  // ====================================================================
+
+  // Get Owner Payout data - shows rental income minus all deductions
+  app.get('/api/owner/payout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get current user details
+      const [currentUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's first property (for now, we'll show data for their first property)
+      const [property] = await db
+        .select()
+        .from(properties)
+        .where(eq(properties.hostId, userId))
+        .limit(1);
+
+      if (!property) {
+        return res.status(404).json({ message: "No properties found. Please add a property first." });
+      }
+
+      // Get all completed bookings for this property
+      const completedBookings = await db
+        .select()
+        .from(bookings)
+        .where(and(
+          eq(bookings.propertyId, property.id),
+          eq(bookings.status, 'confirmed')
+        ));
+
+      // Calculate financials
+      const totalBookings = completedBookings.length;
+      const pricePerNight = parseFloat(property.pricePerNight);
+      
+      // Calculate gross revenue (total from all bookings)
+      const grossRevenue = completedBookings.reduce((total, booking) => {
+        return total + parseFloat(booking.totalPrice);
+      }, 0);
+
+      // Calculate deductions
+      const vat = grossRevenue * 0.15;  // 15% VAT
+      const platformFee = grossRevenue * 0.10;  // 10% Alga platform fee
+      const agentCommission = grossRevenue * 0.05;  // 5% to Dellala agent
+      const totalDeductions = vat + platformFee + agentCommission;
+      const netPayout = grossRevenue - totalDeductions;
+
+      // Expected occupancy (mock calculation - would be based on calendar in production)
+      const expectedOccupancy = Math.min(85, totalBookings * 5);
+
+      res.json({
+        owner: {
+          id: currentUser.id,
+          fullName: `${currentUser.firstName} ${currentUser.lastName}`,
+          phoneNumber: currentUser.phoneNumber || 'Not provided',
+          email: currentUser.email || 'Not provided',
+        },
+        property: {
+          id: property.id,
+          title: property.title,
+          location: property.location,
+          city: property.city,
+          pricePerNight: property.pricePerNight,
+        },
+        earnings: {
+          totalBookings,
+          expectedOccupancy,
+          grossRevenue,
+          vat,
+          platformFee,
+          agentCommission,
+          totalDeductions,
+          netPayout,
+        },
+      });
+    } catch (error: any) {
+      console.error("Owner payout error:", error);
+      res.status(500).json({ message: "Failed to load owner payout data" });
+    }
+  });
+
   // DELLALA FINANCIAL DASHBOARD ROUTES
   // ====================================================================
 
