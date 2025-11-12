@@ -1026,6 +1026,29 @@ export const insertDashboardAccessLogSchema = createInsertSchema(dashboardAccess
 export type DashboardAccessLog = typeof dashboardAccessLogs.$inferSelect;
 export type InsertDashboardAccessLog = z.infer<typeof insertDashboardAccessLogSchema>;
 
+// Integrity Alerts (Signature Tampering Detection & Incident Response)
+export const integrityAlerts = pgTable("integrity_alerts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  signatureId: varchar("signature_id").notNull(), // References consent_logs.signature_id
+  category: varchar("category").notNull(), // HASH_MISMATCH, DECRYPT_FAILURE, DB_INTEGRITY_ERROR, UNKNOWN
+  firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
+  occurrenceCount: integer("occurrence_count").default(1).notNull(),
+  resolved: boolean("resolved").default(false).notNull(),
+  acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  metadata: jsonb("metadata").default('{}'), // Additional context about the failure
+});
+
+export const insertIntegrityAlertSchema = createInsertSchema(integrityAlerts).omit({
+  id: true,
+  firstSeenAt: true,
+  lastSeenAt: true,
+});
+
+export type IntegrityAlert = typeof integrityAlerts.$inferSelect;
+export type InsertIntegrityAlert = z.infer<typeof insertIntegrityAlertSchema>;
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
