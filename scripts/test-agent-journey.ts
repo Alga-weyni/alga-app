@@ -98,27 +98,51 @@ async function main() {
     // ============================================================
     await step(1, 'Register User Account (Phone + OTP)');
     
-    // Register with phone
-    await log('📱', 'Registering with phone number...');
-    const registerResponse = await apiRequest('POST', '/api/auth/register/phone', {
-      phoneNumber: testAgent.phoneNumber,
-      password: testAgent.password,
-      firstName: "Meron",
-      lastName: "Tadesse"
-    });
+    // Register or Login with phone
+    await log('📱', 'Attempting registration...');
+    let otpCode = '1234';
     
-    await log('✓', `User registered: ${testAgent.phoneNumber}`);
-    console.log('   OTP Code:', registerResponse.otp || '1234 (check SMS)');
+    try {
+      const registerResponse = await apiRequest('POST', '/api/auth/register/phone', {
+        phoneNumber: testAgent.phoneNumber,
+        password: testAgent.password,
+        firstName: "Meron",
+        lastName: "Tadesse"
+      });
+      
+      await log('✓', `New user registered: ${testAgent.phoneNumber}`);
+      otpCode = registerResponse.otp || '1234';
+    } catch (error: any) {
+      if (error.message.includes('already registered')) {
+        await log('ℹ️', 'User already exists. Logging in...');
+        const loginResponse = await apiRequest('POST', '/api/auth/login/phone', {
+          phoneNumber: testAgent.phoneNumber,
+          password: testAgent.password
+        });
+        await log('✓', 'Logged in successfully!');
+        console.log('   User ID:', loginResponse.user?.id);
+        
+        // Skip OTP verification if already logged in
+        await step(2, 'Fayda ID Verification (eKYC)');
+        await log('🆔', 'User already authenticated, continuing...');
+        // Continue to next step
+        otpCode = null as any; // Skip OTP
+      } else {
+        throw error;
+      }
+    }
 
-    // Verify OTP
-    await log('🔐', 'Verifying OTP...');
-    const otpVerify = await apiRequest('POST', '/api/auth/verify-otp', {
-      phoneNumber: testAgent.phoneNumber,
-      otp: registerResponse.otp || '1234'
-    });
-    
-    await log('✓', 'Phone number verified! User logged in.');
-    console.log('   User ID:', otpVerify.user?.id || 'logged-in');
+    // Verify OTP only if we just registered
+    if (otpCode) {
+      await log('🔐', 'Verifying OTP...');
+      const otpVerify = await apiRequest('POST', '/api/auth/verify-otp', {
+        phoneNumber: testAgent.phoneNumber,
+        otp: otpCode
+      });
+      
+      await log('✓', 'Phone number verified! User logged in.');
+      console.log('   User ID:', otpVerify.user?.id || 'logged-in');
+    }
 
     // ============================================================
     // STEP 2: FAYDA ID VERIFICATION

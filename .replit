@@ -9,6 +9,7 @@ packages = ["zulu23", "wget", "unzipNLS", "nano"]
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
+run = ["node", "dist/index.js"]
 
 [workflows]
 runButton = "Project"
