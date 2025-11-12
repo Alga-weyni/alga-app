@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
-import { Search, Download, ShieldCheck, Unlock, AlertCircle, CheckCircle2, Filter } from "lucide-react";
+import { Search, Download, ShieldCheck, Unlock, AlertCircle, CheckCircle2, Filter, AlertTriangle, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ConsentLog {
@@ -52,6 +53,46 @@ export default function SignatureDashboard() {
   
   // Auto-close timer for decrypt modal
   const [modalTimer, setModalTimer] = useState<number | null>(null);
+  
+  // Alert banner state
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  
+  // Fetch unresolved alerts count
+  const { data: alertsData } = useQuery({
+    queryKey: ["/api/admin/signatures/alerts"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/signatures/alerts?resolved=false&limit=100");
+      if (!res.ok) return { total: 0, alerts: [] };
+      return res.json();
+    },
+    refetchInterval: 60000, // Refresh every minute
+  });
+  
+  const unresolvedCount = alertsData?.total || 0;
+  
+  // Acknowledge all alerts mutation
+  const acknowledgeAllMutation = useMutation({
+    mutationFn: async () => {
+      const alertIds = alertsData?.alerts?.map((alert: any) => alert.id) || [];
+      if (alertIds.length === 0) return;
+      await apiRequest("POST", "/api/admin/signatures/alerts/acknowledge", { alertIds });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/signatures/alerts"] });
+      toast({
+        title: "Alerts Acknowledged",
+        description: `${unresolvedCount} alert(s) have been acknowledged`,
+      });
+      setBannerDismissed(true);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to acknowledge alerts",
+        variant: "destructive",
+      });
+    },
+  });
   
   // Build query params
   const queryParams = new URLSearchParams();
@@ -224,6 +265,70 @@ export default function SignatureDashboard() {
           Compliant with Proclamation No. 1072/2018 & No. 1205/2020 – Alga Technologies PLC © 2025
         </p>
       </div>
+      
+      {/* Integrity Alert Banner */}
+      {unresolvedCount > 0 && !bannerDismissed && (
+        <Alert variant="destructive" className="mb-6" data-testid="alert-banner">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle className="flex items-center justify-between">
+            <span>🚨 Signature Integrity Alert</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setBannerDismissed(true)}
+              className="h-6 w-6 p-0"
+              data-testid="button-dismiss-banner"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </AlertTitle>
+          <AlertDescription>
+            <div className="mt-2 mb-4">
+              <strong>{unresolvedCount}</strong> unresolved signature failure(s) detected in the last 24 hours.
+              Potential tampering or data integrity issues require immediate attention.
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setVerified("false");
+                  setBannerDismissed(true);
+                }}
+                className="bg-background"
+                data-testid="button-view-failed"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                View Failed Only
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setExportFormat("pdf");
+                  setExportModalOpen(true);
+                }}
+                className="bg-background"
+                data-testid="button-export-failures"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Failures (PDF)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => acknowledgeAllMutation.mutate()}
+                disabled={acknowledgeAllMutation.isPending}
+                className="bg-background"
+                data-testid="button-acknowledge-all"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                {acknowledgeAllMutation.isPending ? "Acknowledging..." : "Acknowledge All"}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {/* Filters */}
       <Card className="p-6 mb-6">
