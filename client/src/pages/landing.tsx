@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import SearchBanner from "@/components/search-banner";
 import Footer from "@/components/footer";
@@ -22,6 +25,21 @@ export default function Landing() {
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("GET", "/api/logout");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      navigate("/");
+      toast({
+        title: "Signed Out",
+        description: "See you soon! 👋",
+      });
+    },
+  });
 
   const openAuthDialog = (mode: "login" | "register") => {
     setAuthMode(mode);
@@ -62,14 +80,40 @@ export default function Landing() {
                 <a href="#contact" className="text-sm font-medium text-[#5a4a42] hover:text-[#2d1405] transition-colors">
                   Contact
                 </a>
-                <Button 
-                  onClick={() => openAuthDialog("login")} 
-                  className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-6 py-2 text-sm font-medium transition-all hover:shadow-md"
-                  data-testid="button-signin"
-                >
-                  Sign In
-                </Button>
+                {isAuthenticated ? (
+                  <Button 
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    variant="outline"
+                    className="border-[#2d1405] text-[#2d1405] hover:bg-[#2d1405] hover:text-white rounded-lg px-6 py-2 text-sm font-medium transition-all"
+                    data-testid="button-signout"
+                  >
+                    {logoutMutation.isPending ? "..." : "Sign out"}
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => openAuthDialog("login")} 
+                    className="bg-[#2d1405] hover:bg-[#3d1f0a] text-white rounded-lg px-6 py-2 text-sm font-medium transition-all hover:shadow-md"
+                    data-testid="button-signin"
+                  >
+                    Sign In
+                  </Button>
+                )}
               </nav>
+              
+              {/* Mobile Sign Out Button */}
+              {isAuthenticated && (
+                <Button
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden border-[#2d1405] text-[#2d1405] hover:bg-[#2d1405] hover:text-white text-sm"
+                  data-testid="button-signout-mobile"
+                >
+                  {logoutMutation.isPending ? "..." : "Sign out"}
+                </Button>
+              )}
             </div>
           </div>
         </header>
