@@ -57,6 +57,7 @@ import PaymentSettings from "@/pages/settings/payment";
 import LanguageSettings from "@/pages/settings/language";
 import PaymentsHelp from "@/pages/help/payments";
 import SafetyHelp from "@/pages/help/safety";
+import TermsOfService from "@/pages/terms";
 import { LemlemChat } from "@/components/lemlem-chat";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import OfflineIndicator from "@/components/offline-indicator";
@@ -123,6 +124,7 @@ function Router() {
         <Route path="/booking/cancelled" element={<AnimatedRoute><BookingCancelled /></AnimatedRoute>} />
         <Route path="/scan-id" element={<AnimatedRoute><ScanIDPage /></AnimatedRoute>} />
         <Route path="/test-id-scanner" element={<AnimatedRoute><TestIDScanner /></AnimatedRoute>} />
+        <Route path="/terms" element={<AnimatedRoute><TermsOfService /></AnimatedRoute>} />
         
         {/* Service marketplace routes - public */}
         <Route path="/services" element={<AnimatedRoute><Services /></AnimatedRoute>} />
