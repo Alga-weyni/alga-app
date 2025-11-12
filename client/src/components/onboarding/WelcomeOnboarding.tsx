@@ -207,7 +207,14 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
 
   const handleSkip = async () => {
     setIsSkipped(true);
-    await trackOnboarding("skip_count", true);
+    try {
+      await trackOnboarding("skip_count", true);
+      await apiRequest("/api/onboarding/complete", "POST", {});
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/onboarding/status"] });
+    } catch (error) {
+      console.error("Error skipping onboarding:", error);
+    }
     setTimeout(() => {
       onComplete();
     }, 500);
