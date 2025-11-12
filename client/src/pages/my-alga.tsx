@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/header";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 import { 
   Home, 
   Wrench, 
@@ -34,6 +35,9 @@ export default function MyAlga() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const firstName = user?.firstName || "Guest";
+
+  // Check if user needs onboarding - redirects automatically if needed
+  useOnboardingCheck();
 
   // Fetch data based on role
   const { data: bookings } = useQuery<Booking[]>({
