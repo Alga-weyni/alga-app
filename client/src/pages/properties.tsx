@@ -179,7 +179,7 @@ export default function Properties() {
                 variant="outline"
                 size="sm"
                 onClick={() => setHasSearched(false)}
-                className="border-eth-brown/30 text-eth-brown hover:bg-eth-brown hover:text-white"
+                className="border-eth-brown/30 text-eth-brown hover:text-white"
                 data-testid="button-new-search"
               >
                 <Search className="h-4 w-4 mr-2" />
@@ -189,7 +189,8 @@ export default function Properties() {
           </div>
           
           {/* Enhanced Search & Filters */}
-          <div>
+          {hasSearched && (
+            <div>
             {/* Keyword Search & Controls Bar */}
             <div className="mb-4 space-y-3">
               <div className="flex flex-col sm:flex-row gap-3">
@@ -386,9 +387,11 @@ export default function Properties() {
                 </div>
               )}
             </div>
+            </div>
+          )}
 
-            {/* Results Count & Loading State */}
-            <div className="flex items-center justify-between mb-4" data-section="all-properties">
+          {/* Results Count & Loading State */}
+          <div className="flex items-center justify-between mb-4" data-section="all-properties">
               {isLoading ? (
                 <div className="flex items-center gap-2 text-eth-brown">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -477,19 +480,20 @@ export default function Properties() {
               </>
             )}
           </div>
-        </div>
 
         {/* Show featured sections only on initial page load (no search filters) */}
-        {!hasSearched && (
-          <>
-            <FeaturedProperties />
-            <HowItWorks />
-            <TrustSection />
-            <Testimonials />
-          </>
-        )}
+        <div>
+          {!hasSearched && (
+            <>
+              <FeaturedProperties />
+              <HowItWorks />
+              <TrustSection />
+              <Testimonials />
+            </>
+          )}
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </div>
   );
