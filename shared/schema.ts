@@ -834,6 +834,107 @@ export const insertAgentCommissionSchema = createInsertSchema(agentCommissions).
   updatedAt: true,
 });
 
+// Agent Withdrawals (Telebirr/Addispay payouts)
+export const agentWithdrawals = pgTable("agent_withdrawals", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("ETB").notNull(),
+  method: varchar("method").notNull(), // telebirr, addispay, bank_transfer
+  accountNumber: varchar("account_number").notNull(), // Telebirr/Addispay number or bank account
+  status: varchar("status").notNull().default("pending"), // pending, processing, completed, failed, cancelled
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  processedAt: timestamp("processed_at"),
+  processedBy: varchar("processed_by").references(() => users.id), // Admin who processed
+  transactionId: varchar("transaction_id"), // Payment provider transaction ID
+  failureReason: text("failure_reason"),
+  notes: text("notes"), // Admin notes
+  metadata: jsonb("metadata").default('{}'), // Additional payment details
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Agent Ratings & Reviews (from hosts/guests)
+export const agentRatings = pgTable("agent_ratings", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id),
+  raterId: varchar("rater_id").notNull().references(() => users.id), // Host or guest who rated
+  raterType: varchar("rater_type").notNull(), // host, guest
+  propertyId: integer("property_id").references(() => properties.id), // Property context
+  rating: integer("rating").notNull(), // 1-5 stars
+  review: text("review"),
+  tags: text("tags").array(), // helpful, professional, responsive, knowledgeable
+  isVerified: boolean("is_verified").default(false), // Verified by admin
+  status: varchar("status").notNull().default("active"), // active, hidden, reported
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Agent Referrals (invite system for recruiting new agents)
+export const agentReferrals = pgTable("agent_referrals", {
+  id: serial("id").primaryKey(),
+  referrerId: integer("referrer_id").notNull().references(() => agents.id), // Agent who referred
+  referredUserId: varchar("referred_user_id").references(() => users.id), // User who signed up
+  referredAgentId: integer("referred_agent_id").references(() => agents.id), // If referred became agent
+  referralCode: varchar("referral_code").notNull(), // Unique code used
+  status: varchar("status").notNull().default("pending"), // pending, converted, expired
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }).default("0"), // Referral bonus earned
+  bonusPaid: boolean("bonus_paid").default(false),
+  convertedAt: timestamp("converted_at"), // When referred user became agent
+  expiresAt: timestamp("expires_at"), // Referral link expiry
+  metadata: jsonb("metadata").default('{}'), // Source, campaign, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Agent Performance Analytics (cached/aggregated data for dashboard)
+export const agentPerformance = pgTable("agent_performance", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id).unique(),
+  totalPropertiesListed: integer("total_properties_listed").default(0),
+  activeProperties: integer("active_properties").default(0),
+  totalBookings: integer("total_bookings").default(0),
+  totalCommissionEarned: decimal("total_commission_earned", { precision: 10, scale: 2 }).default("0"),
+  totalCommissionPending: decimal("total_commission_pending", { precision: 10, scale: 2 }).default("0"),
+  totalWithdrawn: decimal("total_withdrawn", { precision: 10, scale: 2 }).default("0"),
+  availableBalance: decimal("available_balance", { precision: 10, scale: 2 }).default("0"),
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"),
+  totalRatings: integer("total_ratings").default(0),
+  totalReferrals: integer("total_referrals").default(0),
+  successfulReferrals: integer("successful_referrals").default(0),
+  isVerified: boolean("is_verified").default(false), // Alga-verified badge
+  verifiedBadgeLevel: varchar("verified_badge_level"), // bronze, silver, gold, platinum
+  lastActivityAt: timestamp("last_activity_at"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertAgentWithdrawalSchema = createInsertSchema(agentWithdrawals).omit({
+  id: true,
+  requestedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentRatingSchema = createInsertSchema(agentRatings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentReferralSchema = createInsertSchema(agentReferrals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentPerformanceSchema = createInsertSchema(agentPerformance).omit({
+  id: true,
+  joinedAt: true,
+  updatedAt: true,
+});
+
 // ========================================
 // LEMLEM OPERATIONS DASHBOARD TABLES
 // ========================================
@@ -1104,3 +1205,11 @@ export type InsertInsaCompliance = z.infer<typeof insertInsaComplianceSchema>;
 export type InsaCompliance = typeof insaCompliance.$inferSelect;
 export type InsertConsentLog = z.infer<typeof insertConsentLogSchema>;
 export type ConsentLog = typeof consentLogs.$inferSelect;
+export type InsertAgentWithdrawal = z.infer<typeof insertAgentWithdrawalSchema>;
+export type AgentWithdrawal = typeof agentWithdrawals.$inferSelect;
+export type InsertAgentRating = z.infer<typeof insertAgentRatingSchema>;
+export type AgentRating = typeof agentRatings.$inferSelect;
+export type InsertAgentReferral = z.infer<typeof insertAgentReferralSchema>;
+export type AgentReferral = typeof agentReferrals.$inferSelect;
+export type InsertAgentPerformance = z.infer<typeof insertAgentPerformanceSchema>;
+export type AgentPerformance = typeof agentPerformance.$inferSelect;
