@@ -128,7 +128,7 @@ export default function DellalaDashboard() {
         <Card className="max-w-md w-full border-emerald-200 dark:border-emerald-800">
           <CardHeader>
             <CardTitle className="text-center text-emerald-900 dark:text-emerald-100">
-              💼 Welcome to Dellala
+              💼 Welcome to the Agent Page
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -136,9 +136,9 @@ export default function DellalaDashboard() {
               Join Alga's agent network and earn 5% commission on every booking for 36 months!
             </p>
             <Button
-              onClick={() => setLocation("/become-agent")}
+              onClick={() => setLocation("/dellala/dashboard")}
               className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
-              data-testid="button-become-agent"
+              data-testid="button-start-earning"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Start Earning Today
