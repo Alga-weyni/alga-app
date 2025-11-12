@@ -14,6 +14,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
+import Header from "@/components/header";
 
 interface AgentCommission {
   id: number;
@@ -62,42 +63,48 @@ export default function AgentDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cream/30 dark:bg-gray-900 p-4">
-        <div className="max-w-6xl mx-auto space-y-4">
-          <Skeleton className="h-32 w-full" />
-          <div className="grid md:grid-cols-4 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+      <>
+        <Header />
+        <div className="min-h-screen bg-cream/30 dark:bg-gray-900 p-4">
+          <div className="max-w-6xl mx-auto space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <div className="grid md:grid-cols-4 gap-4">
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+            </div>
+            <Skeleton className="h-64 w-full" />
           </div>
-          <Skeleton className="h-64 w-full" />
         </div>
-      </div>
+      </>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-cream/30 dark:bg-gray-900 p-4 flex items-center justify-center">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <CardTitle className="text-center">❌ No Agent Account</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-medium-brown dark:text-cream/80">
-              You haven't registered as an agent yet.
-            </p>
-            <Button
-              onClick={() => setLocation("/become-agent")}
-              className="w-full bg-medium-brown hover:bg-dark-brown dark:bg-cream dark:hover:bg-cream/90 dark:text-dark-brown"
-              data-testid="button-become-agent"
-            >
-              💼 Become an Agent
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <Header />
+        <div className="min-h-screen bg-cream/30 dark:bg-gray-900 p-4 flex items-center justify-center">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <CardTitle className="text-center">❌ No Agent Account</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-center text-medium-brown dark:text-cream/80">
+                You haven't registered as an agent yet.
+              </p>
+              <Button
+                onClick={() => setLocation("/become-agent")}
+                className="w-full bg-medium-brown hover:bg-dark-brown dark:bg-cream dark:hover:bg-cream/90 dark:text-dark-brown"
+                data-testid="button-become-agent"
+              >
+                💼 Become an Agent
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
@@ -114,10 +121,12 @@ export default function AgentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-cream/30 dark:bg-gray-900 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-start">
+    <>
+      <Header />
+      <div className="min-h-screen bg-cream/30 dark:bg-gray-900 py-8 px-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-dark-brown dark:text-cream mb-2">
               💼 Agent Dashboard
@@ -345,5 +354,6 @@ export default function AgentDashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }
