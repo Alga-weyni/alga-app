@@ -252,6 +252,8 @@ export interface IStorage {
     totalEarned: string;
   }>;
   getAgentRatings(agentId: number, filters?: { limit?: number; offset?: number }): Promise<AgentRating[]>;
+  processAgentWithdrawal(withdrawalId: number, status: string, processedBy: string, transactionRef?: string): Promise<AgentWithdrawal>;
+  updateCommissionStatusToPaid(agentId: number, commissionIds: number[]): Promise<void>;
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
@@ -1697,6 +1699,38 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(agents.id, agentProperty.agentId));
     
+    // Update agent_performance table for Dellala dashboard
+    const performance = await this.getAgentPerformance(agentProperty.agentId);
+    if (performance) {
+      await db
+        .update(agentPerformance)
+        .set({
+          totalCommissionEarned: sql`${agentPerformance.totalCommissionEarned} + ${commissionAmount}`,
+          totalCommissionPending: sql`${agentPerformance.totalCommissionPending} + ${commissionAmount}`,
+          availableBalance: sql`${agentPerformance.availableBalance} + ${commissionAmount}`,
+          totalBookings: sql`${agentPerformance.totalBookings} + 1`,
+          totalPropertiesListed: sql`GREATEST(${agentPerformance.totalPropertiesListed}, (
+            SELECT COUNT(DISTINCT property_id) 
+            FROM agent_properties 
+            WHERE agent_id = ${agentProperty.agentId}
+          ))`,
+          updatedAt: new Date(),
+        })
+        .where(eq(agentPerformance.agentId, agentProperty.agentId));
+    } else {
+      // Create performance record if it doesn't exist
+      await this.createAgentPerformance(agentProperty.agentId);
+      await db
+        .update(agentPerformance)
+        .set({
+          totalCommissionEarned: commissionAmount.toFixed(2),
+          totalCommissionPending: commissionAmount.toFixed(2),
+          availableBalance: commissionAmount.toFixed(2),
+          totalBookings: 1,
+        })
+        .where(eq(agentPerformance.agentId, agentProperty.agentId));
+    }
+    
     return commission;
   }
 
@@ -1922,6 +1956,111 @@ export class DatabaseStorage implements IStorage {
       .offset(offset);
 
     return results;
+  }
+
+  async processAgentWithdrawal(
+    withdrawalId: number,
+    status: string,
+    processedBy: string,
+    transactionRef?: string
+  ): Promise<AgentWithdrawal> {
+    const [withdrawal] = await db
+      .select()
+      .from(agentWithdrawals)
+      .where(eq(agentWithdrawals.id, withdrawalId));
+
+    if (!withdrawal) {
+      throw new Error('Withdrawal request not found');
+    }
+
+    if (withdrawal.status !== 'pending') {
+      throw new Error('Withdrawal has already been processed');
+    }
+
+    const withdrawAmount = parseFloat(withdrawal.amount);
+
+    if (status === 'approved') {
+      // Update withdrawal record
+      const [updatedWithdrawal] = await db
+        .update(agentWithdrawals)
+        .set({
+          status: 'approved',
+          processedBy,
+          processedAt: new Date(),
+          transactionId: transactionRef || null,
+        })
+        .where(eq(agentWithdrawals.id, withdrawalId))
+        .returning();
+
+      // Update agent_performance balances
+      await db
+        .update(agentPerformance)
+        .set({
+          availableBalance: sql`${agentPerformance.availableBalance} - ${withdrawAmount}`,
+          totalWithdrawn: sql`${agentPerformance.totalWithdrawn} + ${withdrawAmount}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(agentPerformance.agentId, withdrawal.agentId));
+
+      return updatedWithdrawal;
+    } else {
+      // Rejection - just update status
+      const [updatedWithdrawal] = await db
+        .update(agentWithdrawals)
+        .set({
+          status: 'rejected',
+          processedBy,
+          processedAt: new Date(),
+        })
+        .where(eq(agentWithdrawals.id, withdrawalId))
+        .returning();
+
+      return updatedWithdrawal;
+    }
+  }
+
+  async updateCommissionStatusToPaid(agentId: number, commissionIds: number[]): Promise<void> {
+    if (commissionIds.length === 0) return;
+
+    // Get total commission amount being paid
+    const commissions = await db
+      .select()
+      .from(agentCommissions)
+      .where(
+        and(
+          eq(agentCommissions.agentId, agentId),
+          inArray(agentCommissions.id, commissionIds),
+          eq(agentCommissions.status, 'pending')
+        )
+      );
+
+    const totalPaidAmount = commissions.reduce(
+      (sum, c) => sum + parseFloat(c.commissionAmount),
+      0
+    );
+
+    // Update commission status to paid
+    await db
+      .update(agentCommissions)
+      .set({
+        status: 'paid',
+        paidAt: new Date(),
+      })
+      .where(
+        and(
+          eq(agentCommissions.agentId, agentId),
+          inArray(agentCommissions.id, commissionIds)
+        )
+      );
+
+    // Update agent_performance to reflect paid commissions
+    await db
+      .update(agentPerformance)
+      .set({
+        totalCommissionPending: sql`${agentPerformance.totalCommissionPending} - ${totalPaidAmount}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(agentPerformance.agentId, agentId));
   }
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
