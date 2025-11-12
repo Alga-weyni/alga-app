@@ -70,16 +70,34 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18">
           {/* Logo - Bigger & Friendlier */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer"
-            aria-label="Alga home"
-          >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-eth-brown rounded-2xl flex items-center justify-center shadow-md">
-              <Home className="text-white text-xl" aria-hidden="true" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-eth-brown">Alga</h1>
-          </Link>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link 
+              to="/" 
+              className="flex items-center space-x-2 sm:space-x-3 cursor-pointer"
+              aria-label="Alga home"
+            >
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-eth-brown rounded-2xl flex items-center justify-center shadow-md">
+                <Home className="text-white text-xl" aria-hidden="true" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-eth-brown">Alga</h1>
+            </Link>
+            
+            {/* Logout Button - Always Visible When Authenticated */}
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="button-logout-header"
+                className="text-xs sm:text-sm border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
+                aria-label="Sign out of your account"
+                role="button"
+              >
+                {logoutMutation.isPending ? "..." : "Logout"}
+              </Button>
+            )}
+          </div>
 
           {/* Mobile Menu */}
           {!hideNavigation && (
