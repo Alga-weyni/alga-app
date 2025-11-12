@@ -154,6 +154,12 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSkipped, setIsSkipped] = useState(false);
   const { toast } = useToast();
+  
+  // Safety check: If user is undefined, redirect to login
+  if (!user) {
+    return null;
+  }
+  
   const role = user.role as keyof typeof roleContent;
   const content = roleContent[role] || roleContent.guest;
   const totalSteps = content.steps.length + 1; // +1 for welcome screen
