@@ -22,12 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, TrendingUp, Clock, Banknote } from "lucide-react";
+import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle } from "lucide-react";
+import { Html5Qrcode } from "html5-qrcode";
 
 const agentRegistrationSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   phoneNumber: z.string().min(10, "Valid phone number is required"),
-  telebirrAccount: z.string().min(10, "TeleBirr account is required"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+  paymentAccount: z.string().min(10, "Payment account is required"),
   idNumber: z.string().optional(),
   businessName: z.string().optional(),
   city: z.string().min(1, "City is required"),
@@ -40,13 +42,16 @@ export default function BecomeAgent() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedId, setScannedId] = useState<string | null>(null);
 
   const form = useForm<AgentRegistrationForm>({
     resolver: zodResolver(agentRegistrationSchema),
     defaultValues: {
       fullName: "",
       phoneNumber: "",
-      telebirrAccount: "",
+      paymentMethod: "",
+      paymentAccount: "",
       idNumber: "",
       businessName: "",
       city: "",
@@ -84,6 +89,43 @@ export default function BecomeAgent() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const scanFaydaId = async () => {
+    setIsScanning(true);
+    try {
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      
+      const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
+      
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        qrConfig,
+        (decodedText) => {
+          // Extract ID from Fayda QR code
+          setScannedId(decodedText);
+          form.setValue("idNumber", decodedText);
+          
+          toast({
+            title: "✅ Fayda ID Scanned",
+            description: "Your ID has been verified successfully!",
+          });
+          
+          html5QrCode.stop();
+          setIsScanning(false);
+        },
+        (errorMessage) => {
+          // Scanning error - ignore
+        }
+      );
+    } catch (error: any) {
+      toast({
+        title: "❌ Camera Error",
+        description: "Unable to access camera. Please enter ID manually.",
+        variant: "destructive",
+      });
+      setIsScanning(false);
     }
   };
 
@@ -142,14 +184,14 @@ export default function BecomeAgent() {
             </CardContent>
           </Card>
 
-          <Card className="border-medium-brown/20 dark:border-cream/20" data-testid="card-benefit-telebirr">
+          <Card className="border-medium-brown/20 dark:border-cream/20" data-testid="card-benefit-payouts">
             <CardHeader className="pb-3">
               <Banknote className="h-8 w-8 text-medium-brown dark:text-cream mb-2" />
-              <CardTitle className="text-lg">TeleBirr Payouts</CardTitle>
+              <CardTitle className="text-lg">Flexible Payouts</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-medium-brown dark:text-cream/80">
-                Instant commission payments directly to your TeleBirr account
+                Get paid via TeleBirr, CBE Birr, M-Pesa, or HelloCash
               </p>
             </CardContent>
           </Card>
@@ -199,29 +241,80 @@ export default function BecomeAgent() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="telebirrAccount">TeleBirr Account *</Label>
-                  <Input
-                    id="telebirrAccount"
-                    data-testid="input-telebirrAccount"
-                    {...form.register("telebirrAccount")}
-                    placeholder="+251911234567"
-                  />
-                  {form.formState.errors.telebirrAccount && (
+                  <Label htmlFor="paymentMethod">Payment Method *</Label>
+                  <Select
+                    onValueChange={(value) => form.setValue("paymentMethod", value)}
+                  >
+                    <SelectTrigger data-testid="select-paymentMethod">
+                      <SelectValue placeholder="Select payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="telebirr">TeleBirr</SelectItem>
+                      <SelectItem value="cbebirr">CBE Birr</SelectItem>
+                      <SelectItem value="mpesa">M-Pesa</SelectItem>
+                      <SelectItem value="awash">Awash Birr</SelectItem>
+                      <SelectItem value="helloCash">HelloCash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.paymentMethod && (
                     <p className="text-sm text-red-500 mt-1">
-                      {form.formState.errors.telebirrAccount.message}
+                      {form.formState.errors.paymentMethod.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="idNumber">ID Number (Optional)</Label>
+                  <Label htmlFor="paymentAccount">Payment Account *</Label>
                   <Input
-                    id="idNumber"
-                    data-testid="input-idNumber"
-                    {...form.register("idNumber")}
-                    placeholder="ID or Passport Number"
+                    id="paymentAccount"
+                    data-testid="input-paymentAccount"
+                    {...form.register("paymentAccount")}
+                    placeholder="+251911234567"
                   />
+                  {form.formState.errors.paymentAccount && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.paymentAccount.message}
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="idNumber">Fayda ID Number (Optional)</Label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      id="idNumber"
+                      data-testid="input-idNumber"
+                      {...form.register("idNumber")}
+                      placeholder="ID or Passport Number"
+                      value={scannedId || form.watch("idNumber") || ""}
+                      onChange={(e) => form.setValue("idNumber", e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={scanFaydaId}
+                    disabled={isScanning}
+                    variant="outline"
+                    className="border-medium-brown text-medium-brown hover:bg-medium-brown/10"
+                    data-testid="button-scan-fayda"
+                  >
+                    {isScanning ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : scannedId ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <QrCode className="h-4 w-4" />
+                    )}
+                    <span className="ml-2">
+                      {isScanning ? "Scanning..." : scannedId ? "Verified" : "Scan Fayda"}
+                    </span>
+                  </Button>
+                </div>
+                {isScanning && (
+                  <div id="qr-reader" className="mt-2 max-w-sm mx-auto"></div>
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -275,9 +368,10 @@ export default function BecomeAgent() {
                 </h4>
                 <ol className="space-y-1 text-sm text-medium-brown dark:text-cream/80">
                   <li>1. Submit this application (instant approval for verified users)</li>
-                  <li>2. List properties you know about or own</li>
-                  <li>3. Earn 5% from every booking for 36 months from first rental</li>
-                  <li>4. Get paid automatically to your TeleBirr account</li>
+                  <li>2. Verify your identity with Fayda ID (optional)</li>
+                  <li>3. List properties you know about or own</li>
+                  <li>4. Earn 5% from every booking for 36 months from first rental</li>
+                  <li>5. Get paid automatically to your chosen mobile money account</li>
                 </ol>
               </div>
 
