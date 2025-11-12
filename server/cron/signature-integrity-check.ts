@@ -205,16 +205,6 @@ export function scheduleIntegrityChecks() {
 
 /**
  * Run manual integrity check (for testing or on-demand verification)
+ * 
+ * Usage: npx tsx server/cron/signature-integrity-check.ts
  */
-if (require.main === module) {
-  runSignatureIntegrityCheck()
-    .then((result) => {
-      console.log('\n[INTEGRITY CHECK] Manual check complete:');
-      console.log(JSON.stringify(result, null, 2));
-      process.exit(result.invalidSignatures > 0 ? 1 : 0);
-    })
-    .catch((error) => {
-      console.error('[INTEGRITY CHECK] Manual check failed:', error);
-      process.exit(1);
-    });
-}
