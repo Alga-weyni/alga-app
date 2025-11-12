@@ -1,0 +1,57 @@
+Use the existing admin role for access control to the Signature Dashboard.
+Rationale:
+	•	Keeps schema stable — no database migrations or role-mapping changes.
+	•	Maintains centralized accountability under one governance tier (the admin role already covers legal/operational oversight).
+	•	INSA audits will occur under escorted sessions anyway; if a separate insa_auditor role is needed later, it can be added with minimal refactoring.
+
+⸻
+
+🔧 Directive Update for Replit
+
+Incorporate the following clarifications into the active build plan:
+	1.	Role Access
+	•	Restrict /admin/signatures strictly to role = 'admin'.
+	•	Enforce authentication middleware at route level and front-end guard.
+	2.	Pagination & Performance
+	•	Default page size: 50 records
+	•	Max page size: 200 records
+	•	Required date-range picker for queries > 5 days span.
+	•	Add user ID / signature ID search box.
+	3.	PDF Watermark
+	•	Use existing jspdf dependency.
+	•	Apply diagonal watermark text: “INSA-READY AUDIT COPY”.
+	•	Footer (every page):
+“Compliant with Proclamation No. 1072/2018 & No. 1205/2020 – Alga Technologies PLC © 2025.”
+	•	Insert Alga logo (top-right, 40 px height) if available.
+	4.	Decryption Modal Security
+	•	Decrypt server-side only.
+	•	Return decrypted payload over HTTPS.
+	•	Modal auto-closes after 30 seconds and disables copy-paste.
+	5.	Audit Trail Logging
+	•	New table dashboard_access_logs:
+id, admin_user_id, action, record_id, timestamp.
+	•	Log every view, verify, decrypt, export action.
+	6.	Rate Limiting
+	•	100 exports per admin per day.
+	•	20 decrypt operations per hour.
+	7.	Export File Naming
+	•	Use dynamic timestamp and actor:
+	•	alga_signatures_export_2025-11-12_14-30-45_admin-john.pdf
+	•	alga_signatures_export_INSA_Q1_2025.csv
+
+⸻
+
+🧾 Final Deliverables (Unchanged)
+	•	/admin/signatures page (admin-only)
+	•	/api/admin/signatures backend suite (list, verify, decrypt, export)
+	•	server/utils/reportBuilder.ts (PDF with watermark + footer)
+	•	docs/ADMIN_SIGNATURE_DASHBOARD_GUIDE.md (complete guide)
+
+⸻
+
+📅 Implementation Status
+
+✅ Specifications finalized
+✅ Role access confirmed
+✅ Performance constraints set
+✅ Security parameters validated

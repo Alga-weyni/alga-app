@@ -15,6 +15,7 @@ import {
   agentProperties,
   agentCommissions,
   consentLogs,
+  dashboardAccessLogs,
   type User,
   type UpsertUser,
   type Property,
@@ -45,6 +46,8 @@ import {
   type InsertAgentCommission,
   type ConsentLog,
   type InsertConsentLog,
+  type DashboardAccessLog,
+  type InsertDashboardAccessLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -226,6 +229,19 @@ export interface IStorage {
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
   getUserConsentLogs(userId: string): Promise<ConsentLog[]>;
   getConsentLogsByEntity(entityType: string, entityId: string): Promise<ConsentLog[]>;
+  
+  // Dashboard Access Logs (INSA Compliance - Admin Audit Trail)
+  createDashboardAccessLog(log: InsertDashboardAccessLog): Promise<DashboardAccessLog>;
+  getDashboardAccessLogs(filters?: {
+    adminUserId?: string;
+    action?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }): Promise<DashboardAccessLog[]>;
+  getAdminExportCount(adminUserId: string, since: Date): Promise<number>;
+  getAdminDecryptCount(adminUserId: string, since: Date): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1731,6 +1747,87 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(consentLogs.createdAt));
+  }
+  
+  // Dashboard Access Logs (INSA Compliance - Admin Audit Trail)
+  async createDashboardAccessLog(log: InsertDashboardAccessLog): Promise<DashboardAccessLog> {
+    const [record] = await db
+      .insert(dashboardAccessLogs)
+      .values(log)
+      .returning();
+    return record;
+  }
+  
+  async getDashboardAccessLogs(filters: {
+    adminUserId?: string;
+    action?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<DashboardAccessLog[]> {
+    const { adminUserId, action, startDate, endDate, limit = 50, offset = 0 } = filters;
+    
+    const conditions = [];
+    
+    if (adminUserId) {
+      conditions.push(eq(dashboardAccessLogs.adminUserId, adminUserId));
+    }
+    
+    if (action) {
+      conditions.push(eq(dashboardAccessLogs.action, action));
+    }
+    
+    if (startDate) {
+      conditions.push(gte(dashboardAccessLogs.timestamp, startDate));
+    }
+    
+    if (endDate) {
+      conditions.push(lte(dashboardAccessLogs.timestamp, endDate));
+    }
+    
+    const query = db
+      .select()
+      .from(dashboardAccessLogs)
+      .orderBy(desc(dashboardAccessLogs.timestamp))
+      .limit(limit)
+      .offset(offset);
+    
+    if (conditions.length > 0) {
+      return await query.where(and(...conditions));
+    }
+    
+    return await query;
+  }
+  
+  async getAdminExportCount(adminUserId: string, since: Date): Promise<number> {
+    const results = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(dashboardAccessLogs)
+      .where(
+        and(
+          eq(dashboardAccessLogs.adminUserId, adminUserId),
+          eq(dashboardAccessLogs.action, 'export'),
+          gte(dashboardAccessLogs.timestamp, since)
+        )
+      );
+    
+    return Number(results[0]?.count || 0);
+  }
+  
+  async getAdminDecryptCount(adminUserId: string, since: Date): Promise<number> {
+    const results = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(dashboardAccessLogs)
+      .where(
+        and(
+          eq(dashboardAccessLogs.adminUserId, adminUserId),
+          eq(dashboardAccessLogs.action, 'decrypt'),
+          gte(dashboardAccessLogs.timestamp, since)
+        )
+      );
+    
+    return Number(results[0]?.count || 0);
   }
 }
 
