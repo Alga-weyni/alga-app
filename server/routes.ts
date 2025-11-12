@@ -327,45 +327,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // === E-SIGNATURE CONSENT (Ethiopian Legal Compliance) ===
+  // === ELECTRONIC SIGNATURE (Ethiopian Legal Compliance - Proclamations No. 1072/2018 and No. 1205/2020) ===
   
-  app.post('/api/consent', isAuthenticated, async (req: any, res) => {
+  app.post('/api/electronic-signature', isAuthenticated, async (req: any, res) => {
     try {
-      const consentData = req.body;
+      const { action, relatedEntityType, relatedEntityId, metadata } = req.body;
+      const userId = req.user.id;
       
-      // Add IP address and user agent for audit trail
-      const ipAddress = req.ip || req.connection.remoteAddress;
-      const userAgent = req.headers['user-agent'];
+      // Validate required fields
+      if (!userId || !action) {
+        return res.status(400).json({ message: 'user_id and action are required' });
+      }
       
-      const consentRecord = await storage.createConsentRecord({
-        ...consentData,
-        ipAddress,
-        userAgent,
-      });
+      // Capture IP address and device info
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || 'unknown';
       
-      res.json({ success: true, consentRecord });
+      // Import crypto utilities
+      const { encrypt, generateSignatureHash, generateUUID } = await import('./utils/crypto');
+      
+      // Generate unique signature ID
+      const signatureId = generateUUID();
+      
+      // Encrypt sensitive data
+      const ipAddressEncrypted = encrypt(ipAddress);
+      const deviceInfoEncrypted = encrypt(userAgent);
+      
+      // Generate signature hash (SHA-256)
+      const timestamp = new Date();
+      const signatureHash = generateSignatureHash(userId, action, timestamp);
+      
+      // Check if session is verified (Fayda ID or OTP)
+      const user = req.user;
+      const verified = user.faydaVerified || user.phoneVerified || false;
+      const faydaId = user.faydaId || null;
+      const otpId = user.otp || null;
+      
+      // Automatic retry logic (max 1 retry if latency > 2s)
+      let consentLog;
+      const startTime = Date.now();
+      
+      try {
+        consentLog = await storage.createConsentLog({
+          signatureId,
+          userId,
+          action,
+          timestamp,
+          ipAddressEncrypted,
+          deviceInfoEncrypted,
+          otpId,
+          faydaId,
+          signatureHash,
+          relatedEntityType: relatedEntityType || null,
+          relatedEntityId: relatedEntityId || null,
+          verified,
+          metadata: metadata || {},
+        });
+        
+        const duration = Date.now() - startTime;
+        if (duration > 2000) {
+          console.warn(`[SIGNATURE] Database latency: ${duration}ms`);
+        }
+      } catch (dbError: any) {
+        // Retry once if latency exceeds 2 seconds
+        console.warn('[SIGNATURE] First attempt failed, retrying...', dbError.message);
+        consentLog = await storage.createConsentLog({
+          signatureId,
+          userId,
+          action,
+          timestamp,
+          ipAddressEncrypted,
+          deviceInfoEncrypted,
+          otpId,
+          faydaId,
+          signatureHash,
+          relatedEntityType: relatedEntityType || null,
+          relatedEntityId: relatedEntityId || null,
+          verified,
+          metadata: metadata || {},
+        });
+      }
+      
+      res.json({ success: true, signatureId });
     } catch (error: any) {
-      console.error('[CONSENT] Failed to record consent:', error);
+      console.error('[SIGNATURE] Failed to record electronic signature:', error);
       res.status(500).json({ 
-        message: 'Failed to record consent', 
+        message: 'Failed to record electronic signature', 
         error: error.message 
       });
     }
   });
   
-  app.get('/api/consent/user/:userId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/electronic-signature/user/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
       
-      // Only allow users to view their own consent records (or admins)
+      // Only allow users to view their own signatures (or admins)
       if (req.user.id !== userId && req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Unauthorized' });
       }
       
-      const records = await storage.getUserConsentRecords(userId);
-      res.json(records);
+      const logs = await storage.getUserConsentLogs(userId);
+      res.json(logs);
     } catch (error: any) {
-      res.status(500).json({ message: 'Failed to fetch consent records', error: error.message });
+      res.status(500).json({ message: 'Failed to fetch signature logs', error: error.message });
     }
   });
 

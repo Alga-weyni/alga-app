@@ -1,0 +1,72 @@
+Implement a legally compliant, seamless click-to-sign system across all Alga App modules (Host, Guest, Dellala, and Service Provider) in full alignment with:
+	•	Electronic Signature Proclamation No. 1072/2018
+	•	Electronic Transactions Proclamation No. 1205/2020
+
+⸻
+
+✅ Core Requirements
+
+Replit must ensure:
+	1.	Consent Component
+	•	Create a single, reusable React component named ElectronicSignatureConsent.
+	•	Display the following legal text verbatim:
+“By clicking ‘I Agree,’ you consent that this action constitutes your electronic signature under Ethiopian law (Proclamations No. 1072/2018 and No. 1205/2020).”
+	•	Style it using Alga’s default Tailwind palette.
+	•	Include a primary confirmation button labeled “I Agree” and an optional link to “View Terms.”
+	•	This component must render at the end of every key user action:
+	•	Host registration
+	•	Guest booking confirmation
+	•	Dellala (agent) commission agreement
+	•	Service provider contract acceptance
+	2.	Legal Traceability
+	•	On every click event, capture and securely store:
+	•	user_id, action, timestamp, ip_address, device_info, and otp_id (if available).
+	•	Insert data into a consent_logs table (if not existing, create one).
+	•	Encrypt sensitive fields (IP, device) before storage.
+	•	Implement automated backup to ensure logs are immutable and auditable.
+	3.	Reliability and Identity Verification
+	•	Integrate Fayda ID and OTP verification hooks where available.
+	•	Require verified sessions before signature recording.
+	•	Automatically reject unsigned or unverifiable actions.
+	4.	Frontend Integration
+	•	Ensure the consent component cannot be bypassed (mandatory acceptance).
+	•	Disable the primary action button until user clicks “I Agree.”
+	•	Confirm visual and UX consistency across mobile, tablet, and desktop.
+	5.	Backend Logging
+	•	Create /api/electronic-signature endpoint to handle all log events.
+	•	Include validation middleware for user_id and timestamp.
+	•	Return JSON response {success:true,signatureId:UUID}.
+	•	Automatically retry once if database latency exceeds 2 seconds.
+	6.	Data Integrity
+	•	Hash the combination of user_id + action + timestamp (SHA-256) to generate a unique signature token.
+	•	Store token in a column signature_hash for later verification.
+	•	Enable read-only access for audit retrieval.
+	7.	PDF Export (Optional)
+	•	Auto-generate a simple PDF receipt (using pdfkit or native library) summarizing:
+	•	User name
+	•	Action signed
+	•	Date and time
+	•	Signature token
+	•	Legal statement reference
+	8.	Compliance Notes
+	•	Reference INSA as the regulatory authority.
+	•	Support offline cache for audit continuity if internet connection fails.
+	•	Ensure GDPR-style data retention limits (5 years default).
+
+⸻
+
+🚫 What to Avoid
+	•	Do not add visible signature pads or handwritten drawing fields.
+	•	Do not use third-party paid APIs (DocuSign, HelloSign, etc.).
+	•	Do not expose private Fayda IDs or OTPs in console logs or front-end.
+	•	Do not alter or paraphrase the legal text. It must remain verbatim.
+	•	Do not store raw IP addresses without encryption.
+
+⸻
+
+🧾 Output Expectation
+	•	Component name: ElectronicSignatureConsent.tsx
+	•	Endpoint: /api/electronic-signature
+	•	Database table: consent_logs
+	•	Confirmation response: signatureId UUID returned to frontend
+	•	Optional artifact: downloadable PDF receipt
