@@ -19,7 +19,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, User, Wrench, HelpCircle } from "lucide-react";
+import { Home, Menu, User, Wrench, HelpCircle, Briefcase } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
@@ -61,6 +61,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const navItems = [
     { path: "/properties", icon: Home, emoji: "🏠", label: "Stays", ariaLabel: "Browse places to stay", testId: "stays" },
     { path: "/services", icon: Wrench, emoji: "🧰", label: "Services", ariaLabel: "Browse services and help", testId: "services" },
+    { path: "/dellala/dashboard", icon: Briefcase, emoji: "💼", label: "Agent Portal", ariaLabel: "View agent dashboard and earnings", testId: "agent-portal" },
     { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
     { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem (ለምለም)", ariaLabel: "Ask Lemlem (ለምለም) - your AI agent", testId: "help" },
   ];
