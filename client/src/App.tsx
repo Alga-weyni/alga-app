@@ -23,6 +23,7 @@ import BecomeAgent from "@/pages/become-agent";
 import HostDashboard from "@/pages/host-dashboard";
 import AgentDashboard from "@/pages/agent-dashboard";
 import DellalaDashboard from "@/pages/dellala-dashboard";
+import OwnerPayout from "@/pages/owner-payout";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminServiceProviders from "@/pages/admin-service-providers";
 import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
@@ -151,6 +152,7 @@ function Router() {
         
         {/* Dashboard routes - accessible to all, each dashboard handles auth */}
         <Route path="/host/dashboard" element={<AnimatedRoute><HostDashboard /></AnimatedRoute>} />
+        <Route path="/owner/payout" element={<AnimatedRoute><OwnerPayout /></AnimatedRoute>} />
         <Route path="/provider/dashboard" element={<AnimatedRoute><ProviderDashboard /></AnimatedRoute>} />
         <Route path="/agent-dashboard" element={<AnimatedRoute><AgentDashboard /></AnimatedRoute>} />
         <Route path="/dellala/dashboard" element={<AnimatedRoute><DellalaDashboard /></AnimatedRoute>} />
