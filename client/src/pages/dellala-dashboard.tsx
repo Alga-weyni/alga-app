@@ -136,15 +136,15 @@ export default function DellalaDashboard() {
               Join Alga's agent network and earn 5% commission on every booking for 36 months!
             </p>
             <Button
-              disabled
-              className="w-full bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed opacity-60"
+              onClick={() => setLocation("/become-agent")}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
               data-testid="button-start-earning"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Start Earning Today
             </Button>
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400 italic">
-              Agent registration is currently unavailable
+            <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+              Register with Fayda ID • List Properties • Start Earning
             </p>
           </CardContent>
         </Card>
