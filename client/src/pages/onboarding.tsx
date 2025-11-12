@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { WelcomeOnboarding } from "@/components/onboarding/WelcomeOnboarding";
 import { Loader2 } from "lucide-react";
+import type { User } from "@shared/schema";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
   
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
 
-  const { data: onboardingStatus } = useQuery({
+  const { data: onboardingStatus } = useQuery<{ onboardingCompleted: boolean }>({
     queryKey: ["/api/onboarding/status"],
     enabled: !!user,
   });
@@ -56,8 +57,7 @@ export default function OnboardingPage() {
 
   return (
     <WelcomeOnboarding
-      role={user.role as any}
-      userName={user.fullName}
+      user={user}
       onComplete={handleComplete}
     />
   );

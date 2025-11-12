@@ -155,11 +155,6 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
   const [isSkipped, setIsSkipped] = useState(false);
   const { toast } = useToast();
   
-  // Safety check: If user is undefined, redirect to login
-  if (!user) {
-    return null;
-  }
-  
   const role = user.role as keyof typeof roleContent;
   const content = roleContent[role] || roleContent.guest;
   const totalSteps = content.steps.length + 1; // +1 for welcome screen
@@ -286,7 +281,7 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
                     data-testid="onboarding-welcome-screen"
                   >
                     {/* Welcome Video */}
-                    {content.videoUrl && (
+                    {'videoUrl' in content && content.videoUrl && (
                       <div className="relative rounded-xl overflow-hidden bg-black shadow-lg">
                         <video
                           className="w-full h-auto max-h-80 object-cover"
