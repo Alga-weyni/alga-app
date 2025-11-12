@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import Header from "@/components/header";
 
 const agentRegistrationSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -144,8 +145,10 @@ export default function BecomeAgent() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream/30 dark:bg-gray-900 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <Header />
+      <div className="min-h-screen bg-cream/30 dark:bg-gray-900 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-dark-brown dark:text-cream mb-4">
@@ -393,5 +396,6 @@ export default function BecomeAgent() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
