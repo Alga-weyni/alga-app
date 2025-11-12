@@ -3753,6 +3753,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AGENT SUCCESS PAGE - Property & Owner Details
+  // ====================================================================
+
+  // Get property and owner details for agent success page
+  app.get('/api/agent/property-details', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Find agent by user ID
+      const [agent] = await db
+        .select()
+        .from(agents)
+        .where(eq(agents.userId, userId));
+
+      if (!agent) {
+        return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      // Get the first property (in production, this would be linked to the agent)
+      const [property] = await db
+        .select()
+        .from(properties)
+        .limit(1);
+
+      if (!property) {
+        return res.status(404).json({ message: "No properties available yet" });
+      }
+
+      // Get property owner details
+      const [owner] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, property.hostId));
+
+      if (!owner) {
+        return res.status(404).json({ message: "Property owner not found" });
+      }
+
+      // Calculate commission details
+      const pricePerNight = parseFloat(property.pricePerNight);
+      const commissionRate = 0.05; // 5%
+      const estimatedPerNight = pricePerNight * commissionRate;
+      const durationMonths = 36; // 36 months as per requirements
+
+      res.json({
+        property: {
+          id: property.id,
+          title: property.title,
+          location: property.location,
+          city: property.city,
+          pricePerNight: property.pricePerNight,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          maxGuests: property.maxGuests,
+        },
+        owner: {
+          fullName: `${owner.firstName} ${owner.lastName}`,
+          phoneNumber: owner.phoneNumber || 'Not provided',
+          email: owner.email || 'Not provided',
+          paymentAccount: agent.telebirrAccount || agent.paymentAccount || 'Not provided',
+          paymentMethod: agent.paymentMethod || 'TeleBirr',
+        },
+        commission: {
+          ratePercentage: commissionRate * 100,
+          estimatedPerNight,
+          durationMonths,
+        },
+      });
+    } catch (error: any) {
+      console.error("Agent property details error:", error);
+      res.status(500).json({ message: "Failed to load property details" });
+    }
+  });
+
   // OWNER PAYOUT DASHBOARD ROUTES
   // ====================================================================
 
