@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Wrench, User, HelpCircle } from "lucide-react";
+import { Home, Wrench, User, Sparkles } from "lucide-react";
 
 interface NavItem {
   path: string;
@@ -16,7 +16,7 @@ export default function BottomNav() {
     { path: "/properties", icon: Home, label: "Stays", testId: "stays" },
     { path: "/services", icon: Wrench, label: "Services", testId: "services" },
     { path: "/my-alga", icon: User, label: "Me", testId: "me" },
-    { path: "/support", icon: HelpCircle, label: "Help", testId: "help" },
+    { path: "/support", icon: Sparkles, label: "Lemlem", testId: "lemlem" },
   ];
 
   const isActive = (path: string) => {

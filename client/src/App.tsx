@@ -136,8 +136,9 @@ function Router() {
         <Route path="/services/:type" element={<AnimatedRoute><ServiceCategory /></AnimatedRoute>} />
         <Route path="/service-providers/:id" element={<AnimatedRoute><ServiceProviderDetails /></AnimatedRoute>} />
         
-        {/* Support/Help - public */}
+        {/* Support/Help/Ask Lemlem - public */}
         <Route path="/support" element={<AnimatedRoute><Support /></AnimatedRoute>} />
+        <Route path="/ask-lemlem" element={<AnimatedRoute><Support /></AnimatedRoute>} />
         
         {/* Welcome page - shown after login */}
         <Route path="/welcome" element={<AnimatedRoute><Welcome /></AnimatedRoute>} />
