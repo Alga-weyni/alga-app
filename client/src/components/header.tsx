@@ -37,11 +37,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const isMobile = isMobileApp();
-  
-  // Don't render header in mobile app mode - MobileLayout has its own header
-  if (isMobile) {
-    return null;
-  }
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -56,6 +51,11 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       });
     },
   });
+  
+  // Don't render header in mobile app mode - MobileLayout has its own header
+  if (isMobile) {
+    return null;
+  }
 
   // Navigation items with emojis for universal recognition - Airbnb-style minimal
   const navItems = [
