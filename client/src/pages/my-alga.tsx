@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/header";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOnboardingCheck } from "@/hooks/useOnboardingCheck";
 import { 
   Home, 
@@ -15,10 +15,13 @@ import {
   Users,
   FileCheck,
   TrendingUp,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  LogOut
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Booking, ServiceBooking, Property } from "@shared/schema";
 
 interface DashboardCard {
@@ -34,10 +37,33 @@ interface DashboardCard {
 export default function MyAlga() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const firstName = user?.firstName || "Guest";
 
   // Check if user needs onboarding - redirects automatically if needed
   useOnboardingCheck();
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/logout", {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Signed out",
+        description: "You've been signed out successfully",
+      });
+      navigate("/");
+      window.location.reload();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch data based on role
   const { data: bookings } = useQuery<Booking[]>({
@@ -239,7 +265,7 @@ export default function MyAlga() {
             </div>
             
             {/* Greeting */}
-            <div>
+            <div className="flex-1">
               <h1 className="text-2xl sm:text-4xl font-bold mb-1" style={{ color: "#2d1405" }}>
                 Hello, {firstName}! 👋
               </h1>
@@ -247,6 +273,18 @@ export default function MyAlga() {
                 Welcome back to your dashboard
               </p>
             </div>
+
+            {/* Sign Out Button - Mobile Only */}
+            <button
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              className="md:hidden flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              style={{ color: "#2d1405" }}
+              data-testid="button-signout-mobile"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sign out</span>
+            </button>
           </div>
         </div>
       </div>
