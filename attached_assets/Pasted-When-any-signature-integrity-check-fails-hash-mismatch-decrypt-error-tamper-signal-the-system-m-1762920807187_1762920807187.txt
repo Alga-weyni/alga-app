@@ -1,0 +1,76 @@
+When any signature integrity check fails (hash mismatch, decrypt error, tamper signal), the system must:
+	•	Email legal@alga.et immediately (production only).
+	•	Surface a red banner in the /admin/signatures dashboard with actionable details.
+	•	Log the incident (immutable) and deduplicate alerts.
+
+⸻
+
+✅ Scope & Requirements (build exactly as stated)
+	1.	Alert Triggers
+	•	Trigger on any failure from:
+	•	Daily cron signature-integrity-check (02:00 Africa/Addis_Ababa).
+	•	On-demand verify endpoint for a record.
+	•	Failure categories: HASH_MISMATCH, DECRYPT_FAILURE, DB_INTEGRITY_ERROR, UNKNOWN.
+	2.	Email Alerts (Production only)
+	•	From: no-reply@alga.et
+	•	To: legal@alga.et (primary), security@alga.et (cc if exists).
+	•	Subject: ALERT: Signature Integrity Failure – <signatureId> – <CATEGORY>
+	•	Body (plain + HTML):
+	•	Summary (category, signatureId, action, timestamp EAT).
+	•	Minimal subject user info (user_id only; no PII, no decrypted IP/device).
+	•	Links:
+	•	View record: /admin/signatures?signatureId=<id>
+	•	Generate report: Export filter preset for that record
+	•	Deduplication: Do not send more than 1 email per signatureId per 24 hours.
+	3.	Admin UI Banner (Dashboard)
+	•	Location: /admin/signatures top region, admin-only.
+	•	Red banner with count of unresolved failures in last 24h, CTA buttons:
+	•	View Failed Only (applies filter)
+	•	Export Failures (PDF) (instant)
+	•	Acknowledge All (marks acknowledged; no deletion)
+	•	Per-admin dismissal persists for the session; does not clear unresolved status.
+	4.	APIs (Admin-only)
+	•	POST /api/admin/signatures/alerts/test → generates one synthetic failure for smoke test (non-production only).
+	•	GET /api/admin/signatures/alerts → list unresolved failures (paginated, last 30 days).
+	•	POST /api/admin/signatures/alerts/acknowledge → bulk acknowledge by ids (no delete).
+	5.	Storage & Logging
+	•	Table: integrity_alerts
+	•	id (uuid PK), signature_id, category, first_seen_at, last_seen_at,
+occurrence_count, resolved (bool default false), acknowledged_by, acknowledged_at.
+	•	Immutability: No update to historical consent log rows; alerts live in separate table.
+	•	Audit Extension: Log admin actions (view/acknowledge/export) to dashboard_access_logs.
+	6.	Rate Limits & Guardrails
+	•	Emails: max 20 alert emails/day (global), dedupe per signatureId/24h.
+	•	API export of failures: 10 per hour per admin.
+	•	Test endpoint disabled in production.
+	7.	Operational Rules
+	•	Timezone: Africa/Addis_Ababa for all timestamps in emails/exports.
+	•	Security: Never include decrypted IP/device in emails or banner; viewable only via existing Decrypt Audit Info modal.
+	•	Footer (emails & PDF exports):
+“Compliant with Proclamation No. 1072/2018 & No. 1205/2020 — Alga Technologies PLC © 2025.”
+	8.	Environment & Config
+	•	Use existing mailer config; if missing, require:
+	•	ALERTS_ENABLED=true (prod only)
+	•	ALERTS_EMAIL_TO=legal@alga.et
+	•	Honor NODE_ENV to disable outbound alerts in non-prod.
+	•	No third-party paid services; use current mail stack.
+	9.	Acceptance Criteria
+	•	Trigger a synthetic failure (non-prod): banner appears, alert email generated, alert logged, export works, dedupe respected.
+	•	Real failure during daily cron: same behavior; banner persists until acknowledged.
+	•	Acknowledgement updates alert state; does not delete records.
+
+⸻
+
+🚫 Do Not
+	•	Send decrypted IP/device via email or banner.
+	•	Allow non-admins to access alert APIs.
+	•	Create more than one email per signature/24h.
+	•	Modify or delete consent_logs entries.
+
+⸻
+
+📦 Deliverables
+	•	Alert pipeline (email + UI banner) live and gated to admin role.
+	•	New table integrity_alerts with dedupe/ack flow.
+	•	Admin APIs (alerts, acknowledge, test).
+	•	Updated Admin Guide section: Integrity Alerts & Response Playbook.
