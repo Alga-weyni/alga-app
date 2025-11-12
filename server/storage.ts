@@ -229,6 +229,16 @@ export interface IStorage {
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
   getUserConsentLogs(userId: string): Promise<ConsentLog[]>;
   getConsentLogsByEntity(entityType: string, entityId: string): Promise<ConsentLog[]>;
+  getAllConsentLogs(filters?: {
+    userId?: string;
+    action?: string;
+    verified?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ total: number; logs: ConsentLog[] }>;
+  getConsentLogBySignatureId(signatureId: string): Promise<ConsentLog | undefined>;
   
   // Dashboard Access Logs (INSA Compliance - Admin Audit Trail)
   createDashboardAccessLog(log: InsertDashboardAccessLog): Promise<DashboardAccessLog>;
@@ -1747,6 +1757,77 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(consentLogs.createdAt));
+  }
+  
+  async getAllConsentLogs(filters: {
+    userId?: string;
+    action?: string;
+    verified?: boolean;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<{ total: number; logs: ConsentLog[] }> {
+    const { userId, action, verified, startDate, endDate, limit = 50, offset = 0 } = filters;
+    
+    const conditions = [];
+    
+    if (userId) {
+      conditions.push(eq(consentLogs.userId, userId));
+    }
+    
+    if (action) {
+      conditions.push(eq(consentLogs.action, action));
+    }
+    
+    if (verified !== undefined) {
+      conditions.push(eq(consentLogs.verified, verified));
+    }
+    
+    if (startDate) {
+      conditions.push(gte(consentLogs.timestamp, startDate));
+    }
+    
+    if (endDate) {
+      conditions.push(lte(consentLogs.timestamp, endDate));
+    }
+    
+    // Get total count
+    const countQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(consentLogs);
+    
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    
+    const countResults = await countQuery;
+    const total = Number(countResults[0]?.count || 0);
+    
+    // Get paginated logs
+    const logsQuery = db
+      .select()
+      .from(consentLogs)
+      .orderBy(desc(consentLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    if (conditions.length > 0) {
+      logsQuery.where(and(...conditions));
+    }
+    
+    const logs = await logsQuery;
+    
+    return { total, logs };
+  }
+  
+  async getConsentLogBySignatureId(signatureId: string): Promise<ConsentLog | undefined> {
+    const [log] = await db
+      .select()
+      .from(consentLogs)
+      .where(eq(consentLogs.signatureId, signatureId));
+    
+    return log;
   }
   
   // Dashboard Access Logs (INSA Compliance - Admin Audit Trail)

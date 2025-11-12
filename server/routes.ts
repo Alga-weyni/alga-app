@@ -4473,6 +4473,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== END LEMLEM OPERATIONS DASHBOARD ROUTES ====================
 
+  // ==================== ADMIN SIGNATURE DASHBOARD ROUTES (INSA COMPLIANCE) ====================
+
+  // Admin middleware
+  const requireAdmin = (req: any, res: any, next: any) => {
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admin role required." });
+    }
+    next();
+  };
+
+  // Get all signature consent logs (with filters and pagination)
+  app.get("/api/admin/signatures", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { userId, action, verified, startDate, endDate, page = 1, pageSize = 50 } = req.query;
+      
+      const filters: any = {};
+      
+      if (userId) filters.userId = userId;
+      if (action) filters.action = action;
+      if (verified !== undefined) filters.verified = verified === 'true';
+      if (startDate) filters.startDate = new Date(startDate);
+      if (endDate) filters.endDate = new Date(endDate);
+      
+      const limit = Math.min(parseInt(pageSize), 200);
+      const offset = (parseInt(page) - 1) * limit;
+      
+      filters.limit = limit;
+      filters.offset = offset;
+      
+      const result = await storage.getAllConsentLogs(filters);
+      
+      // Log dashboard access
+      await storage.createDashboardAccessLog({
+        adminUserId: req.user.id,
+        action: 'view',
+        recordId: null,
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        metadata: { filters, totalRecords: result.total },
+      });
+      
+      res.json({
+        total: result.total,
+        page: parseInt(page),
+        pageSize: limit,
+        totalPages: Math.ceil(result.total / limit),
+        logs: result.logs,
+      });
+    } catch (error) {
+      console.error("Error fetching signature logs:", error);
+      res.status(500).json({ message: "Failed to fetch signature logs" });
+    }
+  });
+
+  // Verify signature integrity (recompute SHA-256 hash)
+  app.post("/api/admin/signatures/verify/:signatureId", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { signatureId } = req.params;
+      const log = await storage.getConsentLogBySignatureId(signatureId);
+      
+      if (!log) {
+        return res.status(404).json({ message: "Signature not found" });
+      }
+      
+      // Recompute hash
+      const { generateSignatureHash } = await import("./utils/crypto");
+      const recomputedHash = generateSignatureHash(log.userId, log.action, log.timestamp);
+      
+      const isValid = recomputedHash === log.signatureHash;
+      
+      // Log dashboard access
+      await storage.createDashboardAccessLog({
+        adminUserId: req.user.id,
+        action: 'verify',
+        recordId: signatureId,
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        metadata: { isValid, originalHash: log.signatureHash, recomputedHash },
+      });
+      
+      res.json({
+        signatureId,
+        isValid,
+        originalHash: log.signatureHash,
+        recomputedHash,
+        message: isValid ? "Signature integrity verified" : "Signature hash mismatch - potential tampering detected",
+      });
+    } catch (error) {
+      console.error("Error verifying signature:", error);
+      res.status(500).json({ message: "Failed to verify signature" });
+    }
+  });
+
+  // Decrypt audit info (IP address, device info) - Admin only
+  app.get("/api/admin/signatures/decrypt/:signatureId", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { signatureId } = req.params;
+      
+      // Rate limit check (20 decrypts per hour)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const decryptCount = await storage.getAdminDecryptCount(req.user.id, oneHourAgo);
+      
+      if (decryptCount >= 20) {
+        return res.status(429).json({ 
+          message: "Rate limit exceeded. Maximum 20 decrypt operations per hour.",
+          nextAvailableAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        });
+      }
+      
+      const log = await storage.getConsentLogBySignatureId(signatureId);
+      
+      if (!log) {
+        return res.status(404).json({ message: "Signature not found" });
+      }
+      
+      // Decrypt sensitive data (server-side only)
+      const { decrypt } = await import("./utils/crypto");
+      const ipAddress = log.ipAddressEncrypted ? decrypt(log.ipAddressEncrypted) : 'N/A';
+      const deviceInfo = log.deviceInfoEncrypted ? decrypt(log.deviceInfoEncrypted) : 'N/A';
+      
+      // Log dashboard access
+      await storage.createDashboardAccessLog({
+        adminUserId: req.user.id,
+        action: 'decrypt',
+        recordId: signatureId,
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        metadata: { decryptedSuccessfully: true },
+      });
+      
+      res.json({
+        signatureId,
+        userId: log.userId,
+        action: log.action,
+        timestamp: log.timestamp,
+        ipAddress,
+        deviceInfo,
+        sessionInfo: {
+          verified: log.verified,
+          otpId: log.otpId,
+          faydaId: log.faydaId,
+        },
+      });
+    } catch (error) {
+      console.error("Error decrypting audit info:", error);
+      res.status(500).json({ message: "Failed to decrypt audit information" });
+    }
+  });
+
+  // Export signature logs (CSV, PDF, JSON)
+  app.post("/api/admin/signatures/export", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { format = 'csv', filters = {} } = req.body;
+      
+      // Rate limit check (100 exports per day)
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const exportCount = await storage.getAdminExportCount(req.user.id, oneDayAgo);
+      
+      if (exportCount >= 100) {
+        return res.status(429).json({ 
+          message: "Rate limit exceeded. Maximum 100 exports per day.",
+          nextAvailableAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        });
+      }
+      
+      // Get filtered records (no pagination for export)
+      const result = await storage.getAllConsentLogs({
+        ...filters,
+        limit: 10000, // Max export limit
+        offset: 0,
+      });
+      
+      const { generateSignatureReportPDF, generateSignatureReportCSV, generateSignatureReportJSON } = await import("./utils/reportBuilder");
+      
+      let fileContent: Buffer | string;
+      let fileName: string;
+      let contentType: string;
+      
+      const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+      const adminName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.id;
+      
+      switch (format) {
+        case 'pdf':
+          fileContent = generateSignatureReportPDF(result.logs, {
+            title: 'Electronic Signature Compliance Report',
+            adminName,
+            adminUserId: req.user.id,
+            exportDate: new Date(),
+          });
+          fileName = `alga_signatures_export_${timestamp}_${req.user.id}.pdf`;
+          contentType = 'application/pdf';
+          break;
+        
+        case 'json':
+          fileContent = generateSignatureReportJSON(result.logs);
+          fileName = `alga_signatures_export_${timestamp}_${req.user.id}.json`;
+          contentType = 'application/json';
+          break;
+        
+        case 'csv':
+        default:
+          fileContent = generateSignatureReportCSV(result.logs);
+          fileName = `alga_signatures_export_${timestamp}_${req.user.id}.csv`;
+          contentType = 'text/csv';
+          break;
+      }
+      
+      // Log dashboard access
+      await storage.createDashboardAccessLog({
+        adminUserId: req.user.id,
+        action: 'export',
+        recordId: null,
+        exportFormat: format,
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        metadata: { filters, recordCount: result.logs.length, fileName },
+      });
+      
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Content-Type', contentType);
+      res.send(fileContent);
+    } catch (error) {
+      console.error("Error exporting signatures:", error);
+      res.status(500).json({ message: "Failed to export signature logs" });
+    }
+  });
+
+  // ==================== END ADMIN SIGNATURE DASHBOARD ROUTES ====================
+
   const httpServer = createServer(app);
   return httpServer;
 }
