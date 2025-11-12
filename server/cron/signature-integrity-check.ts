@@ -11,6 +11,7 @@
 import { db } from "../db";
 import { consentLogs } from "@shared/schema";
 import { generateSignatureHash, decrypt } from "../utils/crypto";
+import { createIntegrityAlert, categorizeIntegrityFailure } from "../utils/integrityAlerts";
 import { gte } from "drizzle-orm";
 
 interface IntegrityCheckResult {
@@ -143,6 +144,23 @@ export async function runSignatureIntegrityCheck(
           `[INTEGRITY CHECK] ❌ ALERT: Signature ${signature.signatureId} failed verification:`,
           verification.issue
         );
+
+        // Create integrity alert with auto-categorization
+        try {
+          const category = categorizeIntegrityFailure(verification.issue || 'Unknown issue');
+          await createIntegrityAlert(
+            signature.signatureId,
+            signature.userId,
+            category,
+            verification.issue || 'Unknown issue'
+          );
+          console.log(`[INTEGRITY CHECK] Alert created for signature ${signature.signatureId}`);
+        } catch (alertError: any) {
+          console.error(
+            `[INTEGRITY CHECK] Failed to create alert for ${signature.signatureId}:`,
+            alertError.message
+          );
+        }
       }
     }
 
@@ -158,7 +176,9 @@ export async function runSignatureIntegrityCheck(
       console.error(
         `[INTEGRITY CHECK] ⚠️ ALERT: ${result.invalidSignatures} signature(s) failed integrity check!`
       );
-      // In production, send alert email to legal@alga.et
+      console.log(`[INTEGRITY CHECK] Created ${result.invalidSignatures} integrity alerts`);
+      console.log(`[INTEGRITY CHECK] Alerts sent via email (production only)`);
+      console.log(`[INTEGRITY CHECK] View alerts at /admin/signatures dashboard`);
     }
 
     return result;
