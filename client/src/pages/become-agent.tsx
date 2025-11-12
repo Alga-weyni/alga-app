@@ -73,21 +73,19 @@ export default function BecomeAgent() {
         throw new Error(error.message || "Registration failed");
       }
 
+      // Navigate immediately - no delay
+      setLocation("/agent-dashboard");
+      
       toast({
         title: "🎉 Application Submitted!",
-        description: "Your agent application is under review. We'll notify you once verified.",
+        description: "Redirecting to your dashboard...",
       });
-
-      setTimeout(() => {
-        setLocation("/agent-dashboard");
-      }, 2000);
     } catch (error: any) {
       toast({
         title: "❌ Registration Failed",
         description: error.message || "Failed to submit application. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
