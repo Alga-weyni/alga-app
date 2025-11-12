@@ -14,7 +14,7 @@ import {
   agents,
   agentProperties,
   agentCommissions,
-  consentRecords,
+  consentLogs,
   type User,
   type UpsertUser,
   type Property,
@@ -43,8 +43,8 @@ import {
   type InsertAgentProperty,
   type AgentCommission,
   type InsertAgentCommission,
-  type ConsentRecord,
-  type InsertConsentRecord,
+  type ConsentLog,
+  type InsertConsentLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -222,10 +222,10 @@ export interface IStorage {
     recentCommissions: AgentCommission[];
   }>;
   
-  // Consent operations (Ethiopian e-signature legal compliance)
-  createConsentRecord(consent: InsertConsentRecord): Promise<ConsentRecord>;
-  getUserConsentRecords(userId: string): Promise<ConsentRecord[]>;
-  getConsentRecordsByEntity(entityType: string, entityId: string): Promise<ConsentRecord[]>;
+  // E-Signature Consent Logs (Ethiopian legal compliance)
+  createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
+  getUserConsentLogs(userId: string): Promise<ConsentLog[]>;
+  getConsentLogsByEntity(entityType: string, entityId: string): Promise<ConsentLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1703,34 +1703,34 @@ export class DatabaseStorage implements IStorage {
     };
   }
   
-  // Consent operations (Ethiopian e-signature legal compliance)
-  async createConsentRecord(consent: InsertConsentRecord): Promise<ConsentRecord> {
+  // E-Signature Consent Logs (Ethiopian legal compliance)
+  async createConsentLog(log: InsertConsentLog): Promise<ConsentLog> {
     const [record] = await db
-      .insert(consentRecords)
-      .values(consent)
+      .insert(consentLogs)
+      .values(log)
       .returning();
     return record;
   }
   
-  async getUserConsentRecords(userId: string): Promise<ConsentRecord[]> {
+  async getUserConsentLogs(userId: string): Promise<ConsentLog[]> {
     return await db
       .select()
-      .from(consentRecords)
-      .where(eq(consentRecords.userId, userId))
-      .orderBy(desc(consentRecords.createdAt));
+      .from(consentLogs)
+      .where(eq(consentLogs.userId, userId))
+      .orderBy(desc(consentLogs.createdAt));
   }
   
-  async getConsentRecordsByEntity(entityType: string, entityId: string): Promise<ConsentRecord[]> {
+  async getConsentLogsByEntity(entityType: string, entityId: string): Promise<ConsentLog[]> {
     return await db
       .select()
-      .from(consentRecords)
+      .from(consentLogs)
       .where(
         and(
-          eq(consentRecords.relatedEntityType, entityType),
-          eq(consentRecords.relatedEntityId, entityId)
+          eq(consentLogs.relatedEntityType, entityType),
+          eq(consentLogs.relatedEntityId, entityId)
         )
       )
-      .orderBy(desc(consentRecords.createdAt));
+      .orderBy(desc(consentLogs.createdAt));
   }
 }
 
