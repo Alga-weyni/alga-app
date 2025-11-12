@@ -349,6 +349,46 @@ export async function triggerIntegrityAlert(context: AlertContext): Promise<void
   }
 }
 
+/**
+ * Categorize integrity failure based on error message
+ * Used by daily integrity checker to auto-classify alerts
+ */
+export function categorizeIntegrityFailure(errorMessage: string): AlertCategory {
+  const lowerMessage = errorMessage.toLowerCase();
+  
+  if (lowerMessage.includes('hash mismatch') || lowerMessage.includes('expected')) {
+    return 'HASH_MISMATCH';
+  }
+  
+  if (lowerMessage.includes('decrypt') || lowerMessage.includes('decryption')) {
+    return 'DECRYPT_FAILURE';
+  }
+  
+  if (lowerMessage.includes('database') || lowerMessage.includes('db integrity')) {
+    return 'DB_INTEGRITY_ERROR';
+  }
+  
+  return 'UNKNOWN';
+}
+
+/**
+ * Public wrapper to create integrity alert (called by daily checker)
+ * Creates alert in database and sends email (production only)
+ */
+export async function createIntegrityAlert(
+  signatureId: string,
+  userId: string,
+  category: AlertCategory,
+  errorMessage: string
+): Promise<void> {
+  await triggerIntegrityAlert({
+    signatureId,
+    userId,
+    category,
+    errorMessage,
+  });
+}
+
 // Get unresolved alerts (for admin dashboard)
 export async function getUnresolvedAlerts(limit: number = 50, offset: number = 0) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
