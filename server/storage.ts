@@ -14,6 +14,10 @@ import {
   agents,
   agentProperties,
   agentCommissions,
+  agentWithdrawals,
+  agentRatings,
+  agentReferrals,
+  agentPerformance,
   consentLogs,
   dashboardAccessLogs,
   integrityAlerts,
@@ -45,6 +49,14 @@ import {
   type InsertAgentProperty,
   type AgentCommission,
   type InsertAgentCommission,
+  type AgentWithdrawal,
+  type InsertAgentWithdrawal,
+  type AgentRating,
+  type InsertAgentRating,
+  type AgentReferral,
+  type InsertAgentReferral,
+  type AgentPerformance,
+  type InsertAgentPerformance,
   type ConsentLog,
   type InsertConsentLog,
   type DashboardAccessLog,
@@ -226,6 +238,20 @@ export interface IStorage {
     totalCommissions: number;
     recentCommissions: AgentCommission[];
   }>;
+  
+  // Dellala Portal - Enhanced agent operations
+  getAgentPerformance(agentId: number): Promise<AgentPerformance | undefined>;
+  createAgentPerformance(agentId: number): Promise<AgentPerformance>;
+  getAgentProperties(agentId: number): Promise<Property[]>;
+  getAgentWithdrawals(agentId: number, filters?: { status?: string }): Promise<AgentWithdrawal[]>;
+  createAgentWithdrawal(withdrawal: InsertAgentWithdrawal): Promise<AgentWithdrawal>;
+  getAgentReferrals(agentId: number): Promise<AgentReferral[]>;
+  getAgentReferralStats(agentId: number): Promise<{
+    totalReferrals: number;
+    activeReferrals: number;
+    totalEarned: string;
+  }>;
+  getAgentRatings(agentId: number, filters?: { limit?: number; offset?: number }): Promise<AgentRating[]>;
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
@@ -1739,6 +1765,163 @@ export class DatabaseStorage implements IStorage {
       totalCommissions: allCommissions.length,
       recentCommissions: allCommissions.slice(0, 10),
     };
+  }
+
+  // Dellala Portal - Enhanced agent operations
+  async getAgentPerformance(agentId: number): Promise<AgentPerformance | undefined> {
+    const [performance] = await db
+      .select()
+      .from(agentPerformance)
+      .where(eq(agentPerformance.agentId, agentId));
+    return performance;
+  }
+
+  async createAgentPerformance(agentId: number): Promise<AgentPerformance> {
+    const [performance] = await db
+      .insert(agentPerformance)
+      .values({
+        agentId,
+        totalCommissionEarned: "0",
+        totalCommissionPending: "0",
+        availableBalance: "0",
+        totalWithdrawn: "0",
+        totalReferrals: 0,
+        successfulReferrals: 0,
+        totalRatings: 0,
+        averageRating: "0",
+        totalPropertiesListed: 0,
+        activeProperties: 0,
+        totalBookings: 0,
+      })
+      .returning();
+    return performance;
+  }
+
+  async getAgentProperties(agentId: number): Promise<Property[]> {
+    const agentProps = await db
+      .select()
+      .from(agentProperties)
+      .where(eq(agentProperties.agentId, agentId));
+
+    if (agentProps.length === 0) {
+      return [];
+    }
+
+    const propertyIds = agentProps.map(ap => ap.propertyId);
+    const props = await db
+      .select()
+      .from(properties)
+      .where(inArray(properties.id, propertyIds));
+
+    return props;
+  }
+
+  async getAgentWithdrawals(
+    agentId: number,
+    filters?: { status?: string }
+  ): Promise<AgentWithdrawal[]> {
+    const conditions = [eq(agentWithdrawals.agentId, agentId)];
+
+    if (filters?.status) {
+      conditions.push(eq(agentWithdrawals.status, filters.status));
+    }
+
+    const results = await db
+      .select()
+      .from(agentWithdrawals)
+      .where(and(...conditions))
+      .orderBy(desc(agentWithdrawals.createdAt));
+
+    return results;
+  }
+
+  async createAgentWithdrawal(withdrawal: InsertAgentWithdrawal): Promise<AgentWithdrawal> {
+    const { agentId, amount } = withdrawal;
+
+    const pendingWithdrawals = await db
+      .select()
+      .from(agentWithdrawals)
+      .where(
+        and(
+          eq(agentWithdrawals.agentId, agentId),
+          eq(agentWithdrawals.status, 'pending')
+        )
+      );
+
+    if (pendingWithdrawals.length > 0) {
+      throw new Error('You already have a pending withdrawal request. Please wait for it to be processed.');
+    }
+
+    const performance = await this.getAgentPerformance(agentId);
+    if (!performance) {
+      throw new Error('Agent performance record not found');
+    }
+
+    const availableBalance = parseFloat(performance.availableBalance || '0');
+    const withdrawAmount = parseFloat(amount);
+
+    if (withdrawAmount > availableBalance) {
+      throw new Error(`Insufficient balance. Available: ${availableBalance} ETB`);
+    }
+
+    const [newWithdrawal] = await db
+      .insert(agentWithdrawals)
+      .values(withdrawal)
+      .returning();
+
+    return newWithdrawal;
+  }
+
+  async getAgentReferrals(agentId: number): Promise<AgentReferral[]> {
+    const results = await db
+      .select()
+      .from(agentReferrals)
+      .where(eq(agentReferrals.referrerId, agentId))
+      .orderBy(desc(agentReferrals.createdAt));
+
+    return results;
+  }
+
+  async getAgentReferralStats(agentId: number): Promise<{
+    totalReferrals: number;
+    activeReferrals: number;
+    totalEarned: string;
+  }> {
+    const referrals = await db
+      .select()
+      .from(agentReferrals)
+      .where(eq(agentReferrals.referrerId, agentId));
+
+    const activeReferrals = referrals.filter(r => r.status === 'converted');
+    
+    const totalEarned = referrals.reduce(
+      (sum, r) => sum + parseFloat(r.bonusAmount || '0'),
+      0
+    );
+
+    return {
+      totalReferrals: referrals.length,
+      activeReferrals: activeReferrals.length,
+      totalEarned: totalEarned.toFixed(2),
+    };
+  }
+
+  async getAgentRatings(
+    agentId: number,
+    filters?: { limit?: number; offset?: number }
+  ): Promise<AgentRating[]> {
+    const limit = filters?.limit || 20;
+    const offset = filters?.offset || 0;
+
+    const results = await db
+      .select()
+      .from(agentRatings)
+      .where(eq(agentRatings.agentId, agentId))
+      .orderBy(desc(agentRatings.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return results;
   }
   
   // E-Signature Consent Logs (Ethiopian legal compliance)
