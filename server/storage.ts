@@ -14,6 +14,7 @@ import {
   agents,
   agentProperties,
   agentCommissions,
+  consentRecords,
   type User,
   type UpsertUser,
   type Property,
@@ -42,6 +43,8 @@ import {
   type InsertAgentProperty,
   type AgentCommission,
   type InsertAgentCommission,
+  type ConsentRecord,
+  type InsertConsentRecord,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -218,6 +221,11 @@ export interface IStorage {
     totalCommissions: number;
     recentCommissions: AgentCommission[];
   }>;
+  
+  // Consent operations (Ethiopian e-signature legal compliance)
+  createConsentRecord(consent: InsertConsentRecord): Promise<ConsentRecord>;
+  getUserConsentRecords(userId: string): Promise<ConsentRecord[]>;
+  getConsentRecordsByEntity(entityType: string, entityId: string): Promise<ConsentRecord[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1693,6 +1701,36 @@ export class DatabaseStorage implements IStorage {
       totalCommissions: allCommissions.length,
       recentCommissions: allCommissions.slice(0, 10),
     };
+  }
+  
+  // Consent operations (Ethiopian e-signature legal compliance)
+  async createConsentRecord(consent: InsertConsentRecord): Promise<ConsentRecord> {
+    const [record] = await db
+      .insert(consentRecords)
+      .values(consent)
+      .returning();
+    return record;
+  }
+  
+  async getUserConsentRecords(userId: string): Promise<ConsentRecord[]> {
+    return await db
+      .select()
+      .from(consentRecords)
+      .where(eq(consentRecords.userId, userId))
+      .orderBy(desc(consentRecords.createdAt));
+  }
+  
+  async getConsentRecordsByEntity(entityType: string, entityId: string): Promise<ConsentRecord[]> {
+    return await db
+      .select()
+      .from(consentRecords)
+      .where(
+        and(
+          eq(consentRecords.relatedEntityType, entityType),
+          eq(consentRecords.relatedEntityId, entityId)
+        )
+      )
+      .orderBy(desc(consentRecords.createdAt));
   }
 }
 
