@@ -16,6 +16,7 @@ import {
   agentCommissions,
   consentLogs,
   dashboardAccessLogs,
+  integrityAlerts,
   type User,
   type UpsertUser,
   type Property,
@@ -48,6 +49,7 @@ import {
   type InsertConsentLog,
   type DashboardAccessLog,
   type InsertDashboardAccessLog,
+  type IntegrityAlert,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -252,6 +254,16 @@ export interface IStorage {
   }): Promise<DashboardAccessLog[]>;
   getAdminExportCount(adminUserId: string, since: Date): Promise<number>;
   getAdminDecryptCount(adminUserId: string, since: Date): Promise<number>;
+  
+  // Integrity Alerts (Signature Tampering Detection)
+  getIntegrityAlerts(filters?: {
+    resolved?: boolean;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ total: number; alerts: any[] }>;
+  acknowledgeIntegrityAlerts(alertIds: string[], adminUserId: string): Promise<void>;
+  getUnresolvedAlertsCount(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1909,6 +1921,78 @@ export class DatabaseStorage implements IStorage {
       );
     
     return Number(results[0]?.count || 0);
+  }
+  
+  // Integrity Alerts (Signature Tampering Detection)
+  async getIntegrityAlerts(filters?: {
+    resolved?: boolean;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ total: number; alerts: IntegrityAlert[] }> {
+    const { resolved, category, limit = 50, offset = 0 } = filters || {};
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    
+    const conditions = [gte(integrityAlerts.firstSeenAt, thirtyDaysAgo)];
+    
+    if (resolved !== undefined) {
+      conditions.push(eq(integrityAlerts.resolved, resolved));
+    }
+    
+    if (category) {
+      conditions.push(eq(integrityAlerts.category, category));
+    }
+    
+    const alerts = await db
+      .select()
+      .from(integrityAlerts)
+      .where(and(...conditions))
+      .orderBy(desc(integrityAlerts.lastSeenAt))
+      .limit(limit)
+      .offset(offset);
+    
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(integrityAlerts)
+      .where(and(...conditions));
+    
+    return {
+      total: Number(totalResult[0]?.count || 0),
+      alerts,
+    };
+  }
+  
+  async acknowledgeIntegrityAlerts(alertIds: string[], adminUserId: string): Promise<void> {
+    await db
+      .update(integrityAlerts)
+      .set({
+        resolved: true,
+        acknowledgedBy: adminUserId,
+        acknowledgedAt: new Date(),
+      })
+      .where(sql`${integrityAlerts.id}::text = ANY(${alertIds})`);
+    
+    await db.insert(dashboardAccessLogs).values({
+      adminUserId: adminUserId,
+      action: 'acknowledge_alerts',
+      metadata: { alertIds, count: alertIds.length },
+    });
+  }
+  
+  async getUnresolvedAlertsCount(): Promise<number> {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(integrityAlerts)
+      .where(
+        and(
+          eq(integrityAlerts.resolved, false),
+          gte(integrityAlerts.lastSeenAt, twentyFourHoursAgo)
+        )
+      );
+    
+    return Number(result[0]?.count || 0);
   }
 }
 
