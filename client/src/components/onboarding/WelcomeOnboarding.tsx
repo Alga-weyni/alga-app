@@ -167,7 +167,7 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
 
   const trackOnboarding = async (step: string, value: boolean) => {
     try {
-      await apiRequest("/api/onboarding/track", "POST", { step, value });
+      await apiRequest("POST", "/api/onboarding/track", { step, value });
     } catch (error) {
       console.error("Error tracking onboarding:", error);
     }
@@ -184,7 +184,7 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
 
   const handleComplete = async () => {
     try {
-      await apiRequest("/api/onboarding/complete", "POST", {});
+      await apiRequest("POST", "/api/onboarding/complete", {});
       
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       
@@ -209,7 +209,7 @@ export function WelcomeOnboarding({ user, onComplete }: WelcomeOnboardingProps) 
     setIsSkipped(true);
     try {
       await trackOnboarding("skip_count", true);
-      await apiRequest("/api/onboarding/complete", "POST", {});
+      await apiRequest("POST", "/api/onboarding/complete", {});
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/onboarding/status"] });
     } catch (error) {
