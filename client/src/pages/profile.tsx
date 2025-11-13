@@ -317,14 +317,24 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <Button 
-                      variant="ghost" 
-                      className="w-full justify-start hover:bg-gray-100"
-                      data-testid="button-notifications"
-                      onClick={() => setLocation("/settings/notifications")}
+                      className="w-full mb-2" 
+                      onClick={() => setLocation("/settings")}
+                      data-testid="button-all-settings"
                     >
-                      <Bell className="w-4 h-4 mr-3" />
-                      Notifications
+                      <Settings className="w-4 h-4 mr-2" />
+                      View All Settings
                     </Button>
+                    
+                    <div className="border-t pt-2 mt-2 space-y-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-notifications"
+                        onClick={() => setLocation("/settings/notifications")}
+                      >
+                        <Bell className="w-4 h-4 mr-3" />
+                        Notifications
+                      </Button>
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start hover:bg-gray-100"
@@ -343,15 +353,16 @@ export default function Profile() {
                       <CreditCard className="w-4 h-4 mr-3" />
                       Payment Methods
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start hover:bg-gray-100"
-                      data-testid="button-language"
-                      onClick={() => setLocation("/settings/language")}
-                    >
-                      <Globe className="w-4 h-4 mr-3" />
-                      Language & Region
-                    </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gray-100"
+                        data-testid="button-language"
+                        onClick={() => setLocation("/settings/language")}
+                      >
+                        <Globe className="w-4 h-4 mr-3" />
+                        Language & Region
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
