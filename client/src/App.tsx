@@ -151,7 +151,7 @@ function Router() {
         <Route path="/onboarding" element={<AnimatedRoute><OnboardingPage /></AnimatedRoute>} />
         
         {/* My Alga - accessible to all, handles auth internally */}
-        <Route path="/my-alga" element={<AnimatedRoute><MyAlga /></AnimatedRoute>} />
+        <Route path="/my-alga" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
         
         {/* Dashboard routes - accessible to all, each dashboard handles auth */}
         <Route path="/host/dashboard" element={<AnimatedRoute><HostDashboard /></AnimatedRoute>} />
