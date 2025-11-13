@@ -59,9 +59,6 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
 
   // Navigation items with emojis for universal recognition - Airbnb-style minimal
   const navItems = [
-    { path: "/properties", icon: Home, emoji: "🏠", label: "Stays", ariaLabel: "Browse places to stay", testId: "stays" },
-    { path: "/services", icon: Wrench, emoji: "🧰", label: "Services", ariaLabel: "Browse services and help", testId: "services" },
-    { path: "/dellala/dashboard", icon: Briefcase, emoji: "💼", label: "Agent (ደላላ)", ariaLabel: "View agent dashboard and earnings", testId: "agent-portal" },
     { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
     { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem (ለምለም)", ariaLabel: "Ask Lemlem (ለምለም) - your AI agent", testId: "help" },
   ];
