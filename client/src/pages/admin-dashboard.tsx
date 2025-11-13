@@ -268,10 +268,6 @@ export default function AdminDashboard() {
     <>
       <Header />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
-        <div className="mb-4 sm:mb-6">
-          <BackButton />
-        </div>
-      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
@@ -279,16 +275,6 @@ export default function AdminDashboard() {
             Manage users, properties, and system operations
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={() => signOutMutation.mutate()}
-          disabled={signOutMutation.isPending}
-          data-testid="button-signout-admin"
-          className="w-full sm:w-auto"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          {signOutMutation.isPending ? "Signing out..." : "Sign Out"}
-        </Button>
       </div>
 
       {/* System Statistics */}
