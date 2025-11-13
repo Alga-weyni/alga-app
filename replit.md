@@ -1,12 +1,63 @@
 # Alga
 
 ## Overview
-Alga (አልጋ - "bed" in Amharic) is a full-stack web application designed for the Ethiopian property rental market, incorporating a **Lemlem Operations Dashboard** for comprehensive administrative control. It aims to connect property owners with travelers, offering a diverse range of accommodations with a focus on local culture, safety, and multi-city support across Ethiopia. The platform seeks to provide a secure and culturally immersive rental experience through host/property verification, varied payment options, and role-based access. Alga's ambition is to become the leading platform for Ethiopian hospitality, fostering cultural immersion and economic opportunities, and addresses the cold start problem by incentivizing informal property agents ("Delalas") through a commission system to rapidly expand listings.
+Alga (አልጋ - "bed" in Amharic) is a **short-term rental platform** designed for the Ethiopian hospitality market, similar to Airbnb and Booking.com. It incorporates a **Lemlem Operations Dashboard** for comprehensive administrative control. The platform connects property owners with travelers, offering diverse accommodations with a focus on local culture, safety, and multi-city support across Ethiopia. It provides a secure and culturally immersive rental experience through host/property verification, varied payment options, and role-based access. Alga's ambition is to become the leading platform for Ethiopian hospitality, fostering cultural immersion and economic opportunities, and addresses the cold start problem by incentivizing informal property agents ("Delalas") through a commission system to rapidly expand listings.
+
+**Business Model**: Short-term stays (hospitality sector) - NOT long-term residential renting.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 **Company Identity**: Alga is a women-run, women-owned, and women-operated company. All guidance, materials, and communications should reflect and honor this foundation.
+
+## Critical Business Rules
+
+### Pricing Freedom Policy (SHORT-TERM RENTALS)
+
+**IMPORTANT**: Alga is a **short-term rental platform** (hospitality sector), similar to Airbnb/Booking.com. Ethiopian rent-control laws **DO NOT APPLY** to short-term rentals.
+
+**Core Principles:**
+
+1. **Complete Price Freedom**
+   - Hosts MUST have full technical freedom to change nightly rates at ANY time
+   - NO administrative approval required for price changes
+   - NO price-change freezes or restrictions
+   - NO contract registration requirements for bookings
+   - NO fixed-price ceilings or rent-control enforcement
+
+2. **What NOT to Implement**
+   - ❌ Rent-control restrictions
+   - ❌ Price approval workflows
+   - ❌ Legal references to Ethiopian rent-control laws (they don't apply here)
+   - ❌ Mandatory price-change explanations
+   - ❌ Hard controls blocking price adjustments
+
+3. **Smart Incentive System (Optional, Non-Enforced)**
+   Instead of restrictions, use **positive incentives** to encourage stable pricing:
+   
+   **Analytics & Guidance:**
+   - "Recommended Price Range" based on market data
+   - Price analytics (demand, occupancy, seasonality trends)
+   - Warnings when price is unusually high or low
+   
+   **Rewards & Recognition:**
+   - ⭐ **"Fair Price Badge"** for hosts with consistent pricing
+   - ⭐ **Enhanced star ratings** for price stability
+   - ⭐ **Visibility boosts** in search results for stable pricing
+   - ⭐ **Better platform rankings** for reasonable pricing
+   
+   **Educational Tools:**
+   - Market insights and competitor analysis
+   - Seasonal pricing suggestions
+   - Occupancy optimization tips
+
+4. **Implementation Philosophy**
+   - **Influence, not control** - Encourage reasonable pricing through incentives
+   - **Transparency** - Show hosts how pricing affects their visibility and bookings
+   - **Freedom first** - Never block or restrict a host's pricing decisions
+   - **Data-driven guidance** - Provide market intelligence to help hosts make informed decisions
+
+**Why This Matters**: Alga operates in the **hospitality/short-stay marketplace**, where dynamic pricing is essential and legally permissible. The goal is to guide hosts toward competitive pricing through positive reinforcement, not enforcement.
 
 ## System Architecture
 
