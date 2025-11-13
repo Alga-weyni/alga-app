@@ -109,11 +109,12 @@ const propertySchema = z.object({
   pricePerNight: z.string().min(1, "Price is required"),
   amenities: z.array(z.string()).optional(),
   
-  // Owner information fields
+  // Owner information fields (REQUIRED for legitimacy verification)
   ownerFullName: z.string().min(1, "Owner full name is required"),
   ownerPhone: z.string().min(10, "Owner phone number is required"),
   ownerEmail: z.string().email("Valid email required").optional(),
-  ownerIdNumber: z.string().optional(),
+  ownerIdNumber: z.string().min(1, "Owner ID number is required for verification"),
+  propertyDeedUrl: z.string().min(1, "Property title deed document is required"),
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
@@ -127,6 +128,9 @@ export default function DellalaListProperty() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [propertyDeedUrl, setPropertyDeedUrl] = useState<string>("");
+  const [uploadingDeed, setUploadingDeed] = useState(false);
+  const deedInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
@@ -147,13 +151,15 @@ export default function DellalaListProperty() {
       ownerPhone: "",
       ownerEmail: "",
       ownerIdNumber: "",
+      propertyDeedUrl: "",
     },
   });
 
   useEffect(() => {
     form.setValue("images", imageUrls);
     form.setValue("amenities", selectedAmenities);
-  }, [imageUrls, selectedAmenities, form]);
+    form.setValue("propertyDeedUrl", propertyDeedUrl);
+  }, [imageUrls, selectedAmenities, propertyDeedUrl, form]);
 
   const createPropertyMutation = useMutation({
     mutationFn: async (data: PropertyFormData) => {
@@ -258,6 +264,61 @@ export default function DellalaListProperty() {
 
   const removeImageUrl = (urlToRemove: string) => {
     setImageUrls(imageUrls.filter(url => url !== urlToRemove));
+  };
+
+  const handleDeedUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image or PDF document",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Document must be under 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingDeed(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "property-deeds");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+      setPropertyDeedUrl(result.url);
+      toast({
+        title: "Document Uploaded",
+        description: "Property title deed uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload property deed document",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingDeed(false);
+    }
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -396,14 +457,105 @@ export default function DellalaListProperty() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-eth-brown">
-                            Owner ID Number <span className="text-gray-500">(optional)</span>
+                            Owner ID Number <span className="text-red-600">*</span>
                           </FormLabel>
                           <FormControl>
                             <Input 
                               {...field} 
                               placeholder="Ethiopian ID or Passport..."
+                              required
                               data-testid="input-owner-id"
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Property Title Deed Upload */}
+                  <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-950 border-2 border-yellow-300 dark:border-yellow-700 rounded-lg">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Shield className="h-5 w-5 text-yellow-700 mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold text-eth-brown mb-1">Ownership Verification Required</h4>
+                        <p className="text-sm text-eth-brown/80">
+                          To ensure legitimacy and protect property owners, we require proof of ownership. 
+                          Upload a clear photo or scan of the property title deed.
+                        </p>
+                      </div>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="propertyDeedUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-eth-brown">
+                            Property Title Deed <span className="text-red-600">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <div className="space-y-3">
+                              <input
+                                ref={deedInputRef}
+                                type="file"
+                                accept="image/*,application/pdf"
+                                onChange={handleDeedUpload}
+                                className="hidden"
+                                data-testid="input-deed-upload"
+                              />
+                              
+                              {!propertyDeedUrl ? (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => deedInputRef.current?.click()}
+                                  disabled={uploadingDeed}
+                                  className="w-full border-2 border-dashed border-yellow-500 hover:border-yellow-600 hover:bg-yellow-50"
+                                  data-testid="button-upload-deed"
+                                >
+                                  {uploadingDeed ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Uploading...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FileText className="mr-2 h-4 w-4" />
+                                      Upload Property Title Deed (Image or PDF)
+                                    </>
+                                  )}
+                                </Button>
+                              ) : (
+                                <div className="flex items-center justify-between p-3 bg-green-50 border-2 border-green-300 rounded-lg">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-green-700" />
+                                    <span className="text-sm font-medium text-green-800">
+                                      ✓ Document Uploaded
+                                    </span>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setPropertyDeedUrl("");
+                                      if (deedInputRef.current) {
+                                        deedInputRef.current.value = "";
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    data-testid="button-remove-deed"
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              )}
+                              <p className="text-xs text-eth-brown/60">
+                                Accepted formats: JPG, PNG, PDF • Max 10MB
+                              </p>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
