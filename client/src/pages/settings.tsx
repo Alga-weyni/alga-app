@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/header";
 import {
   User,
@@ -18,6 +18,26 @@ import {
 export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isAgent, setIsAgent] = useState(false);
+
+  useEffect(() => {
+    // Check if user is an agent
+    const checkAgent = async () => {
+      try {
+        const response = await fetch("/api/dellala/dashboard");
+        if (response.ok) {
+          setIsAgent(true);
+        }
+      } catch (error) {
+        // User is not an agent
+        setIsAgent(false);
+      }
+    };
+
+    if (user) {
+      checkAgent();
+    }
+  }, [user]);
 
   if (!user) {
     navigate("/");
@@ -83,26 +103,16 @@ export default function Settings() {
     });
   }
 
-  // Check if user is an agent
-  const checkAgent = async () => {
-    try {
-      const response = await fetch("/api/dellala/dashboard");
-      if (response.ok) {
-        roleSpecificSections.push({
-          title: "Agent Settings",
-          description: "Commission payout, team info",
-          icon: Briefcase,
-          path: "/dellala/dashboard",
-          color: "text-emerald-600",
-          bgColor: "bg-emerald-50 dark:bg-emerald-950",
-        });
-      }
-    } catch (error) {
-      // User is not an agent
-    }
-  };
-
-  checkAgent();
+  if (isAgent) {
+    roleSpecificSections.push({
+      title: "Agent Settings",
+      description: "Commission payout, team info",
+      icon: Briefcase,
+      path: "/dellala/dashboard",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50 dark:bg-emerald-950",
+    });
+  }
 
   return (
     <>
@@ -134,7 +144,7 @@ export default function Settings() {
                 return (
                   <Card
                     key={section.path}
-                    className="cursor-pointer hover:shadow-lg transition-shadow border-eth-brown/20 dark:border-gray-700"
+                    className="cursor-pointer hover:shadow-lg transition-shadow border-eth-brown/20 dark:border-gray-700 bg-white dark:bg-gray-800"
                     onClick={() => navigate(section.path)}
                     data-testid={`card-settings-${section.path.replace(/\//g, "-")}`}
                   >
@@ -148,7 +158,9 @@ export default function Settings() {
                             <h3 className="text-lg font-semibold text-eth-brown dark:text-cream flex items-center gap-2">
                               {section.title}
                               {SensitiveIcon && (
-                                <Shield className="w-4 h-4 text-amber-600" title="Requires OTP verification" />
+                                <span title="Requires OTP verification">
+                                  <Shield className="w-4 h-4 text-amber-600" />
+                                </span>
                               )}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -177,7 +189,7 @@ export default function Settings() {
                   return (
                     <Card
                       key={section.path}
-                      className="cursor-pointer hover:shadow-lg transition-shadow border-eth-brown/20 dark:border-gray-700"
+                      className="cursor-pointer hover:shadow-lg transition-shadow border-eth-brown/20 dark:border-gray-700 bg-white dark:bg-gray-800"
                       onClick={() => navigate(section.path)}
                       data-testid={`card-settings-${section.path.replace(/\//g, "-")}`}
                     >
