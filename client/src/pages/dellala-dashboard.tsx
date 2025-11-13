@@ -142,10 +142,7 @@ export default function DellalaDashboard() {
                 Join Alga's agent network and earn 5% commission on every booking for 36 months!
               </p>
               <Button
-                onClick={() => {
-                  console.log("Button clicked - navigating to /become-agent");
-                  window.location.href = "/become-agent";
-                }}
+                onClick={() => setLocation("/become-agent")}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
                 data-testid="button-start-earning"
               >
