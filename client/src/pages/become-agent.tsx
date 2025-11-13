@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle } from "lucide-react";
-import { Html5Qrcode } from "html5-qrcode";
 import Header from "@/components/header";
 
 const agentRegistrationSchema = z.object({
@@ -89,6 +88,8 @@ export default function BecomeAgent() {
   const scanFaydaId = async () => {
     setIsScanning(true);
     try {
+      // Lazy load the QR scanner library only when needed
+      const { Html5Qrcode } = await import("html5-qrcode");
       const html5QrCode = new Html5Qrcode("qr-reader");
       
       const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
