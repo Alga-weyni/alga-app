@@ -19,7 +19,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Home, Menu, User, Wrench, HelpCircle, Briefcase } from "lucide-react";
+import { Home, Menu, User, Wrench, HelpCircle, Briefcase, Building2, ShoppingBag, UserCog } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
@@ -57,11 +57,23 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
     return null;
   }
 
+  // Check if current page is admin page
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   // Navigation items with emojis for universal recognition - Airbnb-style minimal
-  const navItems = [
+  const publicNavItems = [
+    { path: "/", icon: Building2, emoji: "🏠", label: "Stay", ariaLabel: "Browse accommodations", testId: "stay" },
+    { path: "/services", icon: ShoppingBag, emoji: "🛍️", label: "Service", ariaLabel: "Browse add-on services", testId: "service" },
+    { path: "/dellala-dashboard", icon: UserCog, emoji: "🤝", label: "Agent", ariaLabel: "Dellala agent portal", testId: "agent" },
+  ];
+
+  const userNavItems = [
     { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
     { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem (ለምለም)", ariaLabel: "Ask Lemlem (ለምለም) - your AI agent", testId: "help" },
   ];
+
+  // Combine nav items based on whether it's admin page or not
+  const navItems = isAdminPage ? userNavItems : [...publicNavItems, ...userNavItems];
 
   return (
     <header className="bg-[#F8F1E7] shadow-sm sticky top-0 z-50 border-b border-[#E5D9C8]">
