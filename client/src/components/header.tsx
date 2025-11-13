@@ -84,7 +84,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   const publicNavItems = [
     { path: "/", icon: Building2, emoji: "🏠", label: "Stay", ariaLabel: "Browse accommodations", testId: "stay" },
     { path: "/services", icon: ShoppingBag, emoji: "🛍️", label: "Service", ariaLabel: "Browse add-on services", testId: "service" },
-    { path: "/dellala/dashboard", icon: UserCog, emoji: "🤝", label: "Agent", ariaLabel: "Dellala agent portal", testId: "agent" },
+    { path: "/dellala/dashboard", icon: UserCog, emoji: "🤝", label: "Agent (ደላላ)", ariaLabel: "Dellala agent portal", testId: "agent" },
   ];
 
   const userNavItems = [
