@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Upload, Plus, X, ImageIcon, ArrowLeft, Home, User, Phone, Mail } from "lucide-react";
+import { Loader2, Upload, Plus, X, ImageIcon, ArrowLeft, Home, User, Phone, Mail, FileText, Shield, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -313,8 +313,8 @@ export default function DellalaListProperty() {
                 {/* Owner Information Section */}
                 <div className="space-y-4 p-6 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200 dark:border-blue-800">
                   <div className="flex items-center gap-2 mb-4">
-                    <User className="h-5 w-5 text-blue-700" />
-                    <h3 className="text-lg font-bold text-eth-brown">Property Owner Information</h3>
+                    <User className="h-5 w-5 text-red-700" />
+                    <h3 className="text-lg font-bold text-red-700">Property Owner Information (NOT ደላላ information!)</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
