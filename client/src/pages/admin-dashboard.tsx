@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type User as UserType, type Property } from "@shared/schema";
 import { BackButton } from "@/components/back-button";
+import Header from "@/components/header";
 import { 
   Users, 
   User,
@@ -264,10 +265,12 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
-      <div className="mb-4 sm:mb-6">
-        <BackButton />
-      </div>
+    <>
+      <Header />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
+        <div className="mb-4 sm:mb-6">
+          <BackButton />
+        </div>
       
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -1425,6 +1428,7 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+      </div>
+    </>
   );
 }
