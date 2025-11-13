@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
+import { useLocation, Link as WouterLink } from "wouter";
 import {
   Wallet,
   TrendingUp,
@@ -141,17 +141,16 @@ export default function DellalaDashboard() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Join Alga's agent network and earn 5% commission on every booking for 36 months!
               </p>
-              <Button
-                onClick={() => {
-                  console.log("Button clicked, navigating to /become-agent");
-                  window.location.href = "/become-agent";
-                }}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
-                data-testid="button-start-earning"
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Start Earning Today
-              </Button>
+              <WouterLink href="/become-agent">
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
+                  data-testid="button-start-earning"
+                  type="button"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Start Earning Today
+                </Button>
+              </WouterLink>
               <p className="text-center text-xs text-gray-500 dark:text-gray-400">
                 Register with Fayda ID • List Properties • Start Earning
               </p>
