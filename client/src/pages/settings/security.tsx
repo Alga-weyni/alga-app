@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Lock, Shield, Eye, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
 
 export default function SecuritySettings() {
   const { user } = useAuth();
@@ -36,17 +37,19 @@ export default function SecuritySettings() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#faf5f0" }}>
+    <>
+      <Header />
+      <div className="min-h-screen" style={{ background: "#faf5f0" }}>
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button 
             variant="ghost" 
             className="mb-4" 
-            onClick={() => navigate("/profile")}
-            data-testid="button-back-profile"
+            onClick={() => navigate("/settings")}
+            data-testid="button-back-settings"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Profile
+            Back to Settings
           </Button>
           <div className="flex items-center gap-3">
             <Lock className="w-8 h-8" style={{ color: "#2d1405" }} />
@@ -163,5 +166,6 @@ export default function SecuritySettings() {
         </div>
       </div>
     </div>
+    </>
   );
 }

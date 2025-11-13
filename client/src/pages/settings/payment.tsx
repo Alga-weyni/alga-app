@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CreditCard, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/header";
 
 export default function PaymentSettings() {
   const { user } = useAuth();
@@ -23,17 +24,19 @@ export default function PaymentSettings() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#faf5f0" }}>
+    <>
+      <Header />
+      <div className="min-h-screen" style={{ background: "#faf5f0" }}>
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button 
             variant="ghost" 
             className="mb-4" 
-            onClick={() => navigate("/profile")}
-            data-testid="button-back-profile"
+            onClick={() => navigate("/settings")}
+            data-testid="button-back-settings"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Profile
+            Back to Settings
           </Button>
           <div className="flex items-center gap-3">
             <CreditCard className="w-8 h-8" style={{ color: "#2d1405" }} />
@@ -103,5 +106,6 @@ export default function PaymentSettings() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
