@@ -23,6 +23,7 @@ import BecomeAgent from "@/pages/become-agent";
 import HostDashboard from "@/pages/host-dashboard";
 import AgentDashboard from "@/pages/agent-dashboard";
 import DellalaDashboard from "@/pages/dellala-dashboard";
+import DellalaListProperty from "@/pages/dellala-list-property";
 import OwnerPayout from "@/pages/owner-payout";
 import AgentSuccess from "@/pages/agent-success";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -159,6 +160,7 @@ function Router() {
         <Route path="/agent-dashboard" element={<AnimatedRoute><AgentDashboard /></AnimatedRoute>} />
         <Route path="/agent/success" element={<AnimatedRoute><AgentSuccess /></AnimatedRoute>} />
         <Route path="/dellala/dashboard" element={<AnimatedRoute><DellalaDashboard /></AnimatedRoute>} />
+        <Route path="/dellala/list-property" element={<AnimatedRoute><DellalaListProperty /></AnimatedRoute>} />
         <Route path="/admin/dashboard" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
         <Route path="/admin/service-providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
         <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />

@@ -220,7 +220,7 @@ export default function DellalaDashboard() {
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-4">
           <Button
-            onClick={() => navigate("/become-host")}
+            onClick={() => navigate("/dellala/list-property")}
             size="lg"
             className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white h-16 text-lg"
             data-testid="button-list-property"
