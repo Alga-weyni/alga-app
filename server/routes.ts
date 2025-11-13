@@ -3918,66 +3918,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DELLALA FINANCIAL DASHBOARD ROUTES
   // ====================================================================
 
-  // Get Dellala Dashboard data with real-time commissions
-  app.get('/api/dellala/dashboard', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-
-      // Find agent by user ID
-      const [agent] = await db
-        .select()
-        .from(agents)
-        .where(eq(agents.userId, userId));
-
-      if (!agent) {
-        return res.status(404).json({ message: "Agent account not found" });
-      }
-
-      // Get agent performance data
-      const performance = await storage.getAgentPerformance(agent.id);
-
-      // Get recent commissions (last 30)
-      const recentCommissions = await db
-        .select()
-        .from(agentCommissions)
-        .where(eq(agentCommissions.agentId, agent.id))
-        .orderBy(desc(agentCommissions.createdAt))
-        .limit(30);
-
-      // Get recent withdrawals
-      const recentWithdrawals = await db
-        .select()
-        .from(agentWithdrawals)
-        .where(eq(agentWithdrawals.agentId, agent.id))
-        .orderBy(desc(agentWithdrawals.requestedAt))
-        .limit(20);
-
-      res.json({
-        agent: {
-          id: agent.id,
-          fullName: agent.fullName,
-          phoneNumber: agent.phoneNumber,
-          telebirrAccount: agent.telebirrAccount,
-          status: agent.status,
-        },
-        performance: performance || {
-          totalCommissionEarned: "0.00",
-          totalCommissionPending: "0.00",
-          availableBalance: "0.00",
-          totalWithdrawn: "0.00",
-          totalBookings: 0,
-          totalPropertiesListed: 0,
-          lastUpdated: new Date().toISOString(),
-        },
-        recentCommissions,
-        recentWithdrawals,
-      });
-    } catch (error) {
-      console.error("Error fetching Dellala dashboard:", error);
-      res.status(500).json({ message: "Failed to load dashboard" });
-    }
-  });
-
   // Request withdrawal (Telebirr/Addispay)
   app.post('/api/dellala/withdraw', isAuthenticated, async (req: any, res) => {
     try {
@@ -4827,6 +4767,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get recent commissions
       const recentCommissions = await storage.getAgentCommissions(agent.id, { limit: 10 });
 
+      // Get recent withdrawals
+      const recentWithdrawals = await storage.getAgentWithdrawals(agent.id, { limit: 10 });
+
       // Get properties managed by this agent
       const properties = await storage.getAgentProperties(agent.id);
 
@@ -4840,6 +4783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         agent,
         performance,
         recentCommissions,
+        recentWithdrawals,
         properties,
         referralStats,
         ratings,

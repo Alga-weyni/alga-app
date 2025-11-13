@@ -61,6 +61,25 @@ interface Withdrawal {
   processedAt?: string;
 }
 
+interface AgentProperty {
+  id: number;
+  propertyId: number;
+  agentId: number;
+  totalBookings: number;
+  totalCommissionEarned: string;
+  isActive: boolean;
+  createdAt: string;
+  property: {
+    id: number;
+    title: string;
+    city: string;
+    status: string;
+    isActive: boolean;
+    images: string[];
+    pricePerNight: string;
+  };
+}
+
 interface DellalaData {
   agent: {
     id: number;
@@ -72,6 +91,7 @@ interface DellalaData {
   performance: AgentPerformance;
   recentCommissions: Commission[];
   recentWithdrawals: Withdrawal[];
+  properties: AgentProperty[];
 }
 
 export default function DellalaDashboard() {
@@ -161,7 +181,7 @@ export default function DellalaDashboard() {
     );
   }
 
-  const { agent, performance, recentCommissions, recentWithdrawals } = data;
+  const { agent, performance, recentCommissions, recentWithdrawals, properties = [] } = data;
   const availableBalance = parseFloat(performance.availableBalance);
 
   const handleWithdrawal = (method: "telebirr" | "addispay") => {
@@ -459,6 +479,106 @@ export default function DellalaDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Properties I Brought In */}
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <CardTitle className="text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <Home className="h-5 w-5" />
+              My Properties ({properties.length})
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Properties you brought to Alga and their performance
+            </p>
+          </CardHeader>
+          <CardContent>
+            {properties.length > 0 ? (
+              <div className="grid gap-4">
+                {properties.map((agentProp) => (
+                  <div
+                    key={agentProp.id}
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-purple-300 dark:hover:border-purple-600 transition-all cursor-pointer"
+                    onClick={() => navigate(`/properties/${agentProp.property.id}`)}
+                    data-testid={`property-${agentProp.propertyId}`}
+                  >
+                    <div className="flex gap-4">
+                      {/* Property Image */}
+                      <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                        <img
+                          src={agentProp.property.images[0] || "https://images.unsplash.com/photo-1568605114967-8130f3a36994"}
+                          alt={agentProp.property.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      {/* Property Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 truncate">
+                              {agentProp.property.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {agentProp.property.city} • {agentProp.property.pricePerNight} ETB/night
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge
+                              variant={agentProp.property.status === "approved" ? "default" : "secondary"}
+                              className={
+                                agentProp.property.status === "approved"
+                                  ? "bg-green-600 text-white"
+                                  : agentProp.property.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }
+                            >
+                              {agentProp.property.status === "approved" && agentProp.property.isActive
+                                ? "✅ Active"
+                                : agentProp.property.status === "pending"
+                                ? "⏳ Pending Review"
+                                : "⚠️ Inactive"}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Property Stats */}
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          <div className="flex items-center gap-1 text-purple-700 dark:text-purple-400">
+                            <Calendar className="h-4 w-4" />
+                            <span className="font-medium">{agentProp.totalBookings}</span>
+                            <span className="text-gray-600 dark:text-gray-400">bookings</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
+                            <TrendingUp className="h-4 w-4" />
+                            <span className="font-medium">
+                              {parseFloat(agentProp.totalCommissionEarned || "0").toFixed(2)} ETB
+                            </span>
+                            <span className="text-gray-600 dark:text-gray-400">earned</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                            <Clock className="h-4 w-4" />
+                            <span>Listed {format(new Date(agentProp.createdAt), "MMM dd, yyyy")}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Home className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium mb-2">No Properties Yet</p>
+                <p className="text-sm mb-4">Start bringing properties to Alga and earn commissions!</p>
+                <Button onClick={() => navigate("/dellala/list-property")} className="bg-purple-600 hover:bg-purple-700">
+                  <Home className="mr-2 h-4 w-4" />
+                  List Your First Property
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Info Banner */}
         <Card className="border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/50">
