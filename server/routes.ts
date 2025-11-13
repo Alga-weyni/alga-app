@@ -969,8 +969,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
       
-      const properties = await storage.getAllPropertiesForVerification();
-      res.json(properties);
+      // Get all properties with host and agent information
+      const propertiesWithDetails = await db
+        .select({
+          property: properties,
+          host: users,
+          agentProperty: agentProperties,
+          agent: agents,
+        })
+        .from(properties)
+        .leftJoin(users, eq(properties.hostId, users.id))
+        .leftJoin(agentProperties, eq(agentProperties.propertyId, properties.id))
+        .leftJoin(agents, eq(agentProperties.agentId, agents.id))
+        .orderBy(desc(properties.createdAt));
+
+      // Format the response
+      const formattedProperties = propertiesWithDetails.map(({ property, host, agentProperty, agent }) => ({
+        ...property,
+        host: host ? {
+          id: host.id,
+          email: host.email,
+          firstName: host.firstName,
+          lastName: host.lastName,
+          phoneNumber: host.phoneNumber,
+        } : null,
+        agentInfo: agent ? {
+          id: agent.id,
+          fullName: agent.fullName,
+          phoneNumber: agent.phoneNumber,
+          status: agent.status,
+          totalCommissionEarned: agentProperty?.totalCommissionEarned || "0.00",
+        } : null,
+      }));
+
+      res.json(formattedProperties);
     } catch (error) {
       console.error("Error fetching properties for verification:", error);
       res.status(500).json({ message: "Failed to fetch properties" });

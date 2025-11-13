@@ -714,11 +714,132 @@ export default function AdminDashboard() {
 
         {/* Property Verification Tab */}
         <TabsContent value="properties">
+          {/* Dellala Properties Section */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-purple-600" />
+                Dellala Properties ({properties.filter((p: any) => p.agentInfo).length})
+              </CardTitle>
+              <CardDescription>
+                Properties brought in by Dellala agents - verify ownership and listings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Property</TableHead>
+                    <TableHead>Owner</TableHead>
+                    <TableHead>Dellala Agent</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {properties.filter((p: any) => p.agentInfo).length > 0 ? (
+                    properties.filter((p: any) => p.agentInfo).map((property: any) => (
+                      <TableRow key={property.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={property.images?.[0] || '/placeholder-property.png'}
+                              alt={property.title}
+                              className="h-12 w-12 rounded object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                              onClick={() => navigate(`/properties/${property.id}`)}
+                              data-testid={`img-property-${property.id}`}
+                            />
+                            <div>
+                              <div className="font-medium">{property.title}</div>
+                              <div className="text-sm text-muted-foreground">{property.type}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{property.host?.firstName} {property.host?.lastName}</div>
+                            <div className="text-xs text-muted-foreground">{property.host?.phoneNumber}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-purple-700">{property.agentInfo.fullName}</div>
+                            <div className="text-xs text-muted-foreground">{property.agentInfo.phoneNumber}</div>
+                            <Badge variant="outline" className="mt-1 text-xs">
+                              {parseFloat(property.agentInfo.totalCommissionEarned).toFixed(2)} ETB earned
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>{property.city}, {property.region}</TableCell>
+                        <TableCell>
+                          <Badge variant={getVerificationBadgeColor(property.status)}>
+                            {property.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/properties/${property.id}`)}
+                              data-testid={`button-view-property-${property.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            
+                            {property.status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => 
+                                    verifyPropertyMutation.mutate({ 
+                                      propertyId: property.id, 
+                                      status: 'approved' 
+                                    })
+                                  }
+                                  data-testid={`button-approve-property-${property.id}`}
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                                
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setSelectedProperty(property)}
+                                  data-testid={`button-reject-property-${property.id}`}
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        <Briefcase className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                        <p>No Dellala properties yet</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Regular Properties Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Property Verification</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="h-5 w-5 text-blue-600" />
+                Direct Properties ({properties.filter((p: any) => !p.agentInfo).length})
+              </CardTitle>
               <CardDescription>
-                Review and approve property listings
+                Properties listed directly by hosts
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -733,69 +854,78 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {properties.map((property: any) => (
-                    <TableRow key={property.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={property.images?.[0] || '/placeholder-property.png'}
-                            alt={property.title}
-                            className="h-12 w-12 rounded object-cover cursor-pointer hover:opacity-75 transition-opacity"
-                            onClick={() => navigate(`/properties/${property.id}`)}
-                            data-testid={`img-property-${property.id}`}
-                          />
-                          <div>
-                            <div className="font-medium">{property.title}</div>
-                            <div className="text-sm text-muted-foreground">{property.type}</div>
+                  {properties.filter((p: any) => !p.agentInfo).length > 0 ? (
+                    properties.filter((p: any) => !p.agentInfo).map((property: any) => (
+                      <TableRow key={property.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={property.images?.[0] || '/placeholder-property.png'}
+                              alt={property.title}
+                              className="h-12 w-12 rounded object-cover cursor-pointer hover:opacity-75 transition-opacity"
+                              onClick={() => navigate(`/properties/${property.id}`)}
+                              data-testid={`img-property-${property.id}`}
+                            />
+                            <div>
+                              <div className="font-medium">{property.title}</div>
+                              <div className="text-sm text-muted-foreground">{property.type}</div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{property.host?.firstName} {property.host?.lastName}</TableCell>
-                      <TableCell>{property.city}, {property.region}</TableCell>
-                      <TableCell>
-                        <Badge variant={getVerificationBadgeColor(property.status)}>
-                          {property.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate(`/properties/${property.id}`)}
-                            data-testid={`button-view-property-${property.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          
-                          {property.status === 'pending' && (
-                            <>
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => 
-                                  verifyPropertyMutation.mutate({ 
-                                    propertyId: property.id, 
-                                    status: 'approved' 
-                                  })
-                                }
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                              
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => setSelectedProperty(property)}
-                              >
-                                <XCircle className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
+                        </TableCell>
+                        <TableCell>{property.host?.firstName} {property.host?.lastName}</TableCell>
+                        <TableCell>{property.city}, {property.region}</TableCell>
+                        <TableCell>
+                          <Badge variant={getVerificationBadgeColor(property.status)}>
+                            {property.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/properties/${property.id}`)}
+                              data-testid={`button-view-property-${property.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            
+                            {property.status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => 
+                                    verifyPropertyMutation.mutate({ 
+                                      propertyId: property.id, 
+                                      status: 'approved' 
+                                    })
+                                  }
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                                
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setSelectedProperty(property)}
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        <Home className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                        <p>No direct properties yet</p>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
