@@ -60,15 +60,35 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
   // Check if current page is admin page
   const isAdminPage = location.pathname.startsWith('/admin');
 
+  // Get "Me" path based on user role
+  const getMePath = () => {
+    if (!user) return "/my-alga";
+    
+    switch (user.role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'dellala':
+        return '/dellala/dashboard';
+      case 'host':
+        return '/host/dashboard';
+      case 'operator':
+        return '/operator-dashboard';
+      case 'provider':
+        return '/provider-dashboard';
+      default:
+        return '/my-alga';
+    }
+  };
+
   // Navigation items with emojis for universal recognition - Airbnb-style minimal
   const publicNavItems = [
     { path: "/", icon: Building2, emoji: "🏠", label: "Stay", ariaLabel: "Browse accommodations", testId: "stay" },
     { path: "/services", icon: ShoppingBag, emoji: "🛍️", label: "Service", ariaLabel: "Browse add-on services", testId: "service" },
-    { path: "/dellala-dashboard", icon: UserCog, emoji: "🤝", label: "Agent", ariaLabel: "Dellala agent portal", testId: "agent" },
+    { path: "/dellala/dashboard", icon: UserCog, emoji: "🤝", label: "Agent", ariaLabel: "Dellala agent portal", testId: "agent" },
   ];
 
   const userNavItems = [
-    { path: "/my-alga", icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
+    { path: getMePath(), icon: User, emoji: "👤", label: "Me", ariaLabel: "View my dashboard", testId: "me" },
     { path: "/support", icon: HelpCircle, emoji: "👵🏾", label: "Ask Lemlem (ለምለም)", ariaLabel: "Ask Lemlem (ለምለም) - your AI agent", testId: "help" },
   ];
 
