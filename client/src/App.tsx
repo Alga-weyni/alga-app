@@ -54,6 +54,7 @@ import MealSupport from "@/pages/services/meal-support";
 import MyAlga from "@/pages/my-alga";
 import MyServices from "@/pages/my-services";
 import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
 import Support from "@/pages/support";
 import Welcome from "@/pages/welcome";
 import NotFound from "@/pages/not-found";
@@ -181,6 +182,7 @@ function Router() {
         <Route path="/profile" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
         
         {/* Settings routes - accessible to authenticated users */}
+        <Route path="/settings" element={<AnimatedRoute><Settings /></AnimatedRoute>} />
         <Route path="/settings/notifications" element={<AnimatedRoute><NotificationsSettings /></AnimatedRoute>} />
         <Route path="/settings/security" element={<AnimatedRoute><SecuritySettings /></AnimatedRoute>} />
         <Route path="/settings/payment" element={<AnimatedRoute><PaymentSettings /></AnimatedRoute>} />
