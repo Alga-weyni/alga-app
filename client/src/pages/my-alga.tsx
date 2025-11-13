@@ -46,7 +46,7 @@ export default function MyAlga() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout", {});
+      await apiRequest("GET", "/api/logout");
     },
     onSuccess: () => {
       toast({
