@@ -5622,6 +5622,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== END ADMIN SIGNATURE DASHBOARD ROUTES ====================
 
+  // ==================== DELLALA AGENT MANAGEMENT ROUTES ====================
+  
+  // Get all agents (admin only)
+  app.get('/api/admin/agents', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { status, city } = req.query;
+      const filters: any = {};
+      
+      if (status) filters.status = status as string;
+      if (city) filters.city = city as string;
+      
+      const agents = await storage.getAllAgents(filters);
+      
+      // Enrich with user data
+      const enrichedAgents = await Promise.all(
+        agents.map(async (agent) => {
+          const user = await storage.getUser(agent.userId);
+          return {
+            ...agent,
+            user: user ? {
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+            } : null,
+          };
+        })
+      );
+      
+      res.json(enrichedAgents);
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+      res.status(500).json({ message: "Failed to fetch agents" });
+    }
+  });
+
+  // Verify/approve/reject agent (admin only)
+  app.post('/api/admin/agents/:id/verify', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const agentId = parseInt(req.params.id);
+      const { status, rejectionReason } = req.body;
+      
+      if (!status || !['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Valid status (approved/rejected) is required" });
+      }
+      
+      if (status === 'rejected' && !rejectionReason) {
+        return res.status(400).json({ message: "Rejection reason is required when rejecting" });
+      }
+      
+      const updatedAgent = await storage.verifyAgent(
+        agentId,
+        status,
+        req.user.id,
+        rejectionReason
+      );
+      
+      // Update user role if approved
+      if (status === 'approved') {
+        await storage.updateUserRole(updatedAgent.userId, 'dellala');
+      }
+      
+      res.json(updatedAgent);
+    } catch (error) {
+      console.error("Error verifying agent:", error);
+      res.status(500).json({ message: "Failed to verify agent" });
+    }
+  });
+
+  // Get agent by ID (admin only)
+  app.get('/api/admin/agents/:id', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const agentId = parseInt(req.params.id);
+      const agent = await storage.getAgent(agentId);
+      
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const user = await storage.getUser(agent.userId);
+      
+      res.json({
+        ...agent,
+        user: user ? {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        } : null,
+      });
+    } catch (error) {
+      console.error("Error fetching agent:", error);
+      res.status(500).json({ message: "Failed to fetch agent" });
+    }
+  });
+
+  // ==================== END DELLALA AGENT MANAGEMENT ROUTES ====================
+
   const httpServer = createServer(app);
   return httpServer;
 }
