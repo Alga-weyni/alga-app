@@ -145,20 +145,39 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <div className="border-t border-border my-4"></div>
 
                   {isAuthenticated ? (
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full justify-start text-xl py-7 font-medium"
-                      onClick={() => {
-                        logoutMutation.mutate();
-                        setMobileMenuOpen(false);
-                      }}
-                      data-testid="mobile-button-logout"
-                      aria-label="Sign out of your account"
-                      role="button"
-                    >
-                      Sign Out
-                    </Button>
+                    <>
+                      <Link 
+                        to="/settings" 
+                        className="block w-full"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="w-full justify-start text-xl py-7 font-medium"
+                          data-testid="mobile-link-settings"
+                          aria-label="Open settings"
+                          role="button"
+                        >
+                          ⚙️ Settings
+                        </Button>
+                      </Link>
+                      
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full justify-start text-xl py-7 font-medium"
+                        onClick={() => {
+                          logoutMutation.mutate();
+                          setMobileMenuOpen(false);
+                        }}
+                        data-testid="mobile-button-logout"
+                        aria-label="Sign out of your account"
+                        role="button"
+                      >
+                        Sign Out
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       size="lg"
@@ -246,6 +265,12 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link to="/my-alga" className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
                       👤 My Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="cursor-pointer text-base py-3" role="button" aria-label="Open settings" data-testid="link-settings-header">
+                      ⚙️ Settings
                     </Link>
                   </DropdownMenuItem>
                   
