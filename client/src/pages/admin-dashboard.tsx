@@ -74,6 +74,35 @@ interface AdminStats {
   monthlyRevenue: number;
 }
 
+interface Agent {
+  id: number;
+  userId: string;
+  fullName: string;
+  phoneNumber: string;
+  telebirrAccount: string;
+  idNumber?: string;
+  idDocumentUrl?: string;
+  businessName?: string;
+  businessLicenseUrl?: string;
+  city: string;
+  subCity?: string;
+  status: string;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+  rejectionReason?: string;
+  totalEarnings: string;
+  totalProperties: number;
+  activeProperties: number;
+  referralCode?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -81,6 +110,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const { toast } = useToast();
   
   // Get active tab from URL search params, default to 'overview'
@@ -223,6 +253,26 @@ export default function AdminDashboard() {
         title: "Document Verification Updated",
         description: "Document verification status has been updated",
       });
+    },
+  });
+
+  // Fetch dellala agents
+  const { data: agents = [], isLoading: agentsLoading } = useQuery<Agent[]>({
+    queryKey: ['/api/admin/agents'],
+  });
+
+  // Verify agent mutation
+  const verifyAgentMutation = useMutation({
+    mutationFn: async ({ agentId, status, reason }: { agentId: number; status: string; reason?: string }) => {
+      return await apiRequest('POST', `/api/admin/agents/${agentId}/verify`, { status, rejectionReason: reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/agents'] });
+      toast({
+        title: "Agent Verification Updated",
+        description: "Agent verification status has been updated",
+      });
+      setSelectedAgent(null);
     },
   });
 
@@ -423,11 +473,12 @@ export default function AdminDashboard() {
 
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-6 h-auto overflow-x-auto">
+        <TabsList className="grid w-full grid-cols-7 h-auto overflow-x-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-users">Users</TabsTrigger>
           <TabsTrigger value="properties" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-properties">Properties</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-documents">ID Verify</TabsTrigger>
+          <TabsTrigger value="agents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-agents">Dellala Agents</TabsTrigger>
           <TabsTrigger value="service-providers" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-service-providers">Service Providers</TabsTrigger>
           <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-config">Config</TabsTrigger>
         </TabsList>
@@ -1008,6 +1059,102 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
+        {/* Dellala Agents Tab */}
+        <TabsContent value="agents">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Briefcase className="h-5 w-5 mr-2" />
+                Dellala Agent Management
+              </CardTitle>
+              <CardDescription>
+                Approve or reject Dellala agent applications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {agentsLoading ? (
+                <div className="text-center py-8">Loading agents...</div>
+              ) : agents.length === 0 ? (
+                <div className="text-center py-8">
+                  <Briefcase className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">No Dellala agent applications found</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant="secondary">Total: {agents.length}</Badge>
+                    <Badge variant="outline">Pending: {agents.filter(a => a.status === 'pending').length}</Badge>
+                    <Badge variant="default">Approved: {agents.filter(a => a.status === 'approved').length}</Badge>
+                    <Badge variant="destructive">Rejected: {agents.filter(a => a.status === 'rejected').length}</Badge>
+                  </div>
+
+                  <div className="rounded-md border overflow-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Agent Name</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>City</TableHead>
+                          <TableHead>Telebirr</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Properties</TableHead>
+                          <TableHead>Earnings</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agents.map((agent) => (
+                          <TableRow key={agent.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{agent.fullName}</div>
+                                <div className="text-sm text-gray-600">{agent.user?.email}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{agent.phoneNumber}</TableCell>
+                            <TableCell>{agent.city}</TableCell>
+                            <TableCell className="font-mono text-sm">{agent.telebirrAccount}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  agent.status === 'approved' ? 'default' :
+                                  agent.status === 'pending' ? 'secondary' :
+                                  agent.status === 'rejected' ? 'destructive' :
+                                  'outline'
+                                }
+                              >
+                                {agent.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>{agent.activeProperties} active</div>
+                                <div className="text-gray-600">{agent.totalProperties} total</div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-mono">{agent.totalEarnings} ETB</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedAgent(agent)}
+                                data-testid={`button-view-agent-${agent.id}`}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* System Configuration Tab */}
         <TabsContent value="config">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1406,6 +1553,199 @@ export default function AdminDashboard() {
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Approve & Upgrade to Host
+                    </Button>
+                  </DialogFooter>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Agent Approval Dialog */}
+      {selectedAgent && (
+        <Dialog open={!!selectedAgent} onOpenChange={() => setSelectedAgent(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Briefcase className="h-5 w-5 mr-2 text-eth-brown" />
+                Dellala Agent Application - {selectedAgent.fullName}
+              </DialogTitle>
+              <DialogDescription>
+                Review and approve or reject this Dellala agent application
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Agent Details */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Full Name</p>
+                  <p className="font-medium">{selectedAgent.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Email</p>
+                  <p className="font-medium">{selectedAgent.user?.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Phone Number</p>
+                  <p className="font-medium font-mono">{selectedAgent.phoneNumber}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Telebirr Account</p>
+                  <p className="font-medium font-mono">{selectedAgent.telebirrAccount}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">City</p>
+                  <p className="font-medium">{selectedAgent.city}</p>
+                </div>
+                {selectedAgent.subCity && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Sub-City</p>
+                    <p className="font-medium">{selectedAgent.subCity}</p>
+                  </div>
+                )}
+                {selectedAgent.idNumber && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">ID Number</p>
+                    <p className="font-medium font-mono">{selectedAgent.idNumber}</p>
+                  </div>
+                )}
+                {selectedAgent.businessName && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Business Name</p>
+                    <p className="font-medium">{selectedAgent.businessName}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Referral Code</p>
+                  <p className="font-medium font-mono">{selectedAgent.referralCode}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Applied On</p>
+                  <p className="font-medium">{new Date(selectedAgent.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Performance Stats */}
+              <div className="grid md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total Properties</p>
+                  <p className="text-2xl font-bold">{selectedAgent.totalProperties}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Active Properties</p>
+                  <p className="text-2xl font-bold">{selectedAgent.activeProperties}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total Earnings</p>
+                  <p className="text-2xl font-bold">{selectedAgent.totalEarnings} ETB</p>
+                </div>
+              </div>
+
+              {/* ID Document */}
+              {selectedAgent.idDocumentUrl && (
+                <div>
+                  <h3 className="font-semibold text-eth-brown mb-3">ID Document</h3>
+                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={selectedAgent.idDocumentUrl}
+                      alt="Agent ID Document"
+                      className="w-full max-h-[400px] object-contain"
+                      data-testid={`img-agent-id-${selectedAgent.id}`}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Business License */}
+              {selectedAgent.businessLicenseUrl && (
+                <div>
+                  <h3 className="font-semibold text-eth-brown mb-3">Business License</h3>
+                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={selectedAgent.businessLicenseUrl}
+                      alt="Business License"
+                      className="w-full max-h-[400px] object-contain"
+                      data-testid={`img-agent-license-${selectedAgent.id}`}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Status Information */}
+              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Current Status</p>
+                  <Badge 
+                    variant={
+                      selectedAgent.status === 'approved' ? 'default' :
+                      selectedAgent.status === 'pending' ? 'secondary' :
+                      selectedAgent.status === 'rejected' ? 'destructive' :
+                      'outline'
+                    }
+                    className="text-sm"
+                  >
+                    {selectedAgent.status}
+                  </Badge>
+                </div>
+                {selectedAgent.rejectionReason && (
+                  <div className="flex-1 ml-6">
+                    <p className="text-sm text-gray-600 mb-1">Rejection Reason</p>
+                    <p className="text-sm text-red-600">{selectedAgent.rejectionReason}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions for Pending Agents */}
+              {selectedAgent.status === 'pending' && (
+                <div className="space-y-4 border-t pt-4">
+                  <div>
+                    <Label htmlFor="agent-rejection-reason">Rejection Reason (Optional)</Label>
+                    <Textarea
+                      id="agent-rejection-reason"
+                      placeholder="Provide a reason if rejecting this agent application..."
+                      className="mt-2"
+                      data-testid="textarea-agent-rejection-reason"
+                    />
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedAgent(null)}
+                      data-testid="button-cancel-agent-review"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        const reason = (document.getElementById('agent-rejection-reason') as HTMLTextAreaElement)?.value;
+                        verifyAgentMutation.mutate({
+                          agentId: selectedAgent.id,
+                          status: 'rejected',
+                          reason
+                        });
+                      }}
+                      disabled={verifyAgentMutation.isPending}
+                      data-testid="button-reject-agent"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      {verifyAgentMutation.isPending ? "Rejecting..." : "Reject"}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        verifyAgentMutation.mutate({
+                          agentId: selectedAgent.id,
+                          status: 'approved'
+                        });
+                      }}
+                      disabled={verifyAgentMutation.isPending}
+                      data-testid="button-approve-agent"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {verifyAgentMutation.isPending ? "Approving..." : "Approve Agent"}
                     </Button>
                   </DialogFooter>
                 </div>
