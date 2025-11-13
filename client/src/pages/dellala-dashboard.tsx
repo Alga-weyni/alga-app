@@ -18,6 +18,7 @@ import {
   Home,
   Calendar,
   AlertCircle,
+  UserPlus,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -30,6 +31,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Header from "@/components/header";
+import AuthDialog from "@/components/auth-dialog-passwordless";
+import { useState } from "react";
 
 interface AgentPerformance {
   totalCommissionEarned: string;
@@ -97,6 +100,12 @@ interface DellalaData {
 export default function DellalaDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+
+  // Check if user is authenticated
+  const { data: user } = useQuery<{ id: number; role: string }>({
+    queryKey: ["/api/auth/user"],
+  });
 
   const { data, isLoading } = useQuery<DellalaData>({
     queryKey: ["/api/dellala/dashboard"],
@@ -147,6 +156,47 @@ export default function DellalaDashboard() {
   }
 
   if (!data) {
+    // If user is not authenticated, show signup prompt FIRST
+    if (!user) {
+      return (
+        <>
+          <Header />
+          <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 flex items-center justify-center">
+            <Card className="max-w-md w-full border-emerald-200 dark:border-emerald-800">
+              <CardHeader>
+                <CardTitle className="text-center text-emerald-900 dark:text-emerald-100 flex items-center justify-center gap-2">
+                  <UserPlus className="h-6 w-6" />
+                  Sign Up to Join Alga Agents
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-center text-gray-600 dark:text-gray-300">
+                  Create an account to join Alga's agent network and earn 5% commission on every booking for 36 months!
+                </p>
+                <Button
+                  onClick={() => setAuthDialogOpen(true)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg"
+                  data-testid="button-signup-agent"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up Now
+                </Button>
+                <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                  Already have an account? Click above to sign in
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <AuthDialog
+            open={authDialogOpen}
+            onOpenChange={setAuthDialogOpen}
+            defaultMode="register"
+          />
+        </>
+      );
+    }
+
+    // If user is authenticated but not an agent yet, show welcome message
     return (
       <>
         <Header />
