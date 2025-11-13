@@ -313,8 +313,10 @@ export default function DellalaListProperty() {
                 {/* Owner Information Section */}
                 <div className="space-y-4 p-6 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200 dark:border-blue-800">
                   <div className="flex items-center gap-2 mb-4">
-                    <User className="h-5 w-5 text-red-700" />
-                    <h3 className="text-lg font-bold text-red-700">Property Owner Information (NOT ደላላ information!)</h3>
+                    <User className="h-5 w-5 text-blue-700" />
+                    <h3 className="text-lg font-bold text-eth-brown">
+                      Property Owner Information <span className="text-red-700">(NOT ደላላ information!)</span>
+                    </h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
