@@ -22,7 +22,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments } from "@shared/schema";
 import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
@@ -4990,6 +4990,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching ratings:", error);
       res.status(500).json({ message: "Failed to fetch ratings" });
+    }
+  });
+
+  // List a property on behalf of an owner (Dellala agent functionality)
+  app.post("/api/dellala/list-property", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgentByUserId(req.user.id);
+      
+      if (!agent) {
+        return res.status(404).json({ message: "You must be a registered Dellala agent to list properties" });
+      }
+
+      if (agent.status !== "approved") {
+        return res.status(403).json({ message: "Your agent account must be approved before listing properties" });
+      }
+
+      const {
+        // Property fields
+        title,
+        type,
+        city,
+        region,
+        location,
+        description,
+        images,
+        maxGuests,
+        bedrooms,
+        bathrooms,
+        pricePerNight,
+        amenities,
+        // Owner information
+        ownerFullName,
+        ownerPhone,
+        ownerEmail,
+        ownerIdNumber,
+      } = req.body;
+
+      // Validate required fields
+      if (!title || !type || !city || !region || !location || !images || images.length < 5 || 
+          !maxGuests || !bedrooms || !bathrooms || !pricePerNight ||
+          !ownerFullName || !ownerPhone) {
+        return res.status(400).json({ 
+          message: "Missing required fields. Property details and owner information are required." 
+        });
+      }
+
+      // Step 1: Find or create owner user account
+      let ownerUser = await db.select()
+        .from(users)
+        .where(eq(users.phoneNumber, ownerPhone))
+        .limit(1);
+
+      let ownerId: string;
+
+      if (ownerUser.length === 0) {
+        // Create new owner account
+        const newOwnerId = crypto.randomUUID();
+        await db.insert(users).values({
+          id: newOwnerId,
+          phoneNumber: ownerPhone,
+          email: ownerEmail || null,
+          firstName: ownerFullName.split(" ")[0] || ownerFullName,
+          lastName: ownerFullName.split(" ").slice(1).join(" ") || "",
+          role: "host", // Owner is a host
+          idNumber: ownerIdNumber || null,
+          phoneVerified: false,
+          idVerified: false,
+          status: "active",
+        });
+        ownerId = newOwnerId;
+      } else {
+        ownerId = ownerUser[0].id;
+        // Update existing owner's role to host if they're just a guest
+        if (ownerUser[0].role === "guest") {
+          await db.update(users)
+            .set({ role: "host" })
+            .where(eq(users.id, ownerId));
+        }
+      }
+
+      // Step 2: Create the property linked to the owner
+      const [newProperty] = await db.insert(properties).values({
+        hostId: ownerId,
+        title,
+        description: description || "",
+        type,
+        city,
+        region,
+        location,
+        address: location,
+        pricePerNight,
+        currency: "ETB",
+        maxGuests,
+        bedrooms,
+        bathrooms,
+        amenities: amenities || [],
+        images,
+        status: "pending", // Requires admin approval
+        isActive: false, // Inactive until approved
+      }).returning();
+
+      // Step 3: Link the agent to this property
+      await db.insert(agentProperties).values({
+        agentId: agent.id,
+        propertyId: newProperty.id,
+        isActive: true,
+      });
+
+      // Update agent's total properties count
+      await db.update(agents)
+        .set({
+          totalProperties: sql`${agents.totalProperties} + 1`,
+          activeProperties: sql`${agents.activeProperties} + 1`,
+        })
+        .where(eq(agents.id, agent.id));
+
+      res.status(201).json({
+        message: "Property listed successfully! It will be reviewed by our team.",
+        property: newProperty,
+        ownerId,
+      });
+    } catch (error) {
+      console.error("Error listing property:", error);
+      res.status(500).json({ message: "Failed to create property listing" });
     }
   });
 
