@@ -218,7 +218,17 @@ export default function DellalaDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
+          <WouterLink href="/list-property">
+            <Button
+              size="lg"
+              className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white h-16 text-lg"
+              data-testid="button-list-property"
+            >
+              <Home className="mr-2 h-5 w-5" />
+              List New Property
+            </Button>
+          </WouterLink>
           <Button
             onClick={() => handleWithdrawal("telebirr")}
             disabled={withdrawMutation.isPending || availableBalance < 100}
