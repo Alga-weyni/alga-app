@@ -22,7 +22,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { imageProcessor } from "./imageProcessor";
 import { matchTemplate, getGeneralHelp, type LemlemContext } from "./lemlem-templates";
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from "@shared/schema";
 import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
@@ -5025,14 +5025,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ownerPhone,
         ownerEmail,
         ownerIdNumber,
+        propertyDeedUrl,
       } = req.body;
 
-      // Validate required fields
+      // Validate required fields including ownership verification
       if (!title || !type || !city || !region || !location || !images || images.length < 5 || 
           !maxGuests || !bedrooms || !bathrooms || !pricePerNight ||
-          !ownerFullName || !ownerPhone) {
+          !ownerFullName || !ownerPhone || !ownerIdNumber || !propertyDeedUrl) {
         return res.status(400).json({ 
-          message: "Missing required fields. Property details and owner information are required." 
+          message: "Missing required fields. Property details, owner information, ID number, and property deed are required for verification." 
         });
       }
 
@@ -5091,14 +5092,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: false, // Inactive until approved
       }).returning();
 
-      // Step 3: Link the agent to this property
+      // Step 3: Save property deed document for verification
+      await db.insert(verificationDocuments).values({
+        userId: ownerId,
+        documentType: "property_deed",
+        documentUrl: propertyDeedUrl,
+        status: "pending", // Requires admin review
+      });
+
+      // Step 4: Link the agent to this property
       await db.insert(agentProperties).values({
         agentId: agent.id,
         propertyId: newProperty.id,
         isActive: true,
       });
 
-      // Update agent's total properties count
+      // Step 5: Update agent's total properties count
       await db.update(agents)
         .set({
           totalProperties: sql`${agents.totalProperties} + 1`,
