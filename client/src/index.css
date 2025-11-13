@@ -74,29 +74,29 @@
     object-fit: cover;
   }
 
-  /* Blue placeholders for all input fields */
+  /* Black blurred/faded placeholders for all input fields */
   input::placeholder,
   textarea::placeholder {
-    color: #3b82f6 !important; /* Bright blue */
-    opacity: 1 !important;
+    color: #000000 !important; /* Black */
+    opacity: 0.4 !important; /* Blurred/faded effect */
   }
 
   input::-webkit-input-placeholder,
   textarea::-webkit-input-placeholder {
-    color: #3b82f6 !important;
-    opacity: 1 !important;
+    color: #000000 !important;
+    opacity: 0.4 !important;
   }
 
   input::-moz-placeholder,
   textarea::-moz-placeholder {
-    color: #3b82f6 !important;
-    opacity: 1 !important;
+    color: #000000 !important;
+    opacity: 0.4 !important;
   }
 
   input:-ms-input-placeholder,
   textarea:-ms-input-placeholder {
-    color: #3b82f6 !important;
-    opacity: 1 !important;
+    color: #000000 !important;
+    opacity: 0.4 !important;
   }
 }
 
