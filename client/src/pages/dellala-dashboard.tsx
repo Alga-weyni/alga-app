@@ -141,16 +141,16 @@ export default function DellalaDashboard() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Join Alga's agent network and earn 5% commission on every booking for 36 months!
               </p>
-              <WouterLink href="/become-agent">
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
+              <a href="/become-agent" className="w-full block">
+                <button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors"
                   data-testid="button-start-earning"
                   type="button"
                 >
                   <Sparkles className="mr-2 h-4 w-4" />
                   Start Earning Today
-                </Button>
-              </WouterLink>
+                </button>
+              </a>
               <p className="text-center text-xs text-gray-500 dark:text-gray-400">
                 Register with Fayda ID • List Properties • Start Earning
               </p>
