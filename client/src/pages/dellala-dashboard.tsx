@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useLocation, Link as WouterLink } from "wouter";
+import { useNavigate } from "react-router-dom";
 import {
   Wallet,
   TrendingUp,
@@ -75,7 +75,7 @@ interface DellalaData {
 }
 
 export default function DellalaDashboard() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const { data, isLoading } = useQuery<DellalaData>({
@@ -219,16 +219,15 @@ export default function DellalaDashboard() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-4">
-          <WouterLink href="/list-property">
-            <Button
-              size="lg"
-              className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white h-16 text-lg"
-              data-testid="button-list-property"
-            >
-              <Home className="mr-2 h-5 w-5" />
-              List New Property
-            </Button>
-          </WouterLink>
+          <Button
+            onClick={() => navigate("/become-host")}
+            size="lg"
+            className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white h-16 text-lg"
+            data-testid="button-list-property"
+          >
+            <Home className="mr-2 h-5 w-5" />
+            List New Property
+          </Button>
           <Button
             onClick={() => handleWithdrawal("telebirr")}
             disabled={withdrawMutation.isPending || availableBalance < 100}
