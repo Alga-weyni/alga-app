@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Link, useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ import {
 
 export default function Profile() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -59,7 +59,7 @@ export default function Profile() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#2d1405" }}>Please Sign In</h2>
           <p className="mb-4" style={{ color: "#5a4a42" }}>You need to sign in to view your profile.</p>
-          <Button onClick={() => setLocation("/")}>Go Home</Button>
+          <Button onClick={() => navigate("/")}>Go Home</Button>
         </div>
       </div>
     );
@@ -142,12 +142,15 @@ export default function Profile() {
       {/* Header */}
       <div className="border-b" style={{ background: "#fff", borderColor: "#e5d9ce" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link to="/my-alga">
-            <Button variant="ghost" className="mb-4" data-testid="button-back-my-alga">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              My Alga
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            className="mb-4" 
+            onClick={() => navigate("/my-alga")}
+            data-testid="button-back-my-alga"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            My Alga
+          </Button>
           <h1 className="text-3xl font-bold" style={{ color: "#2d1405" }}>
             Profile & Settings
           </h1>
@@ -318,7 +321,7 @@ export default function Profile() {
                   <CardContent className="space-y-2">
                     <Button 
                       className="w-full mb-2" 
-                      onClick={() => setLocation("/settings")}
+                      onClick={() => navigate("/settings")}
                       data-testid="button-all-settings"
                     >
                       <Settings className="w-4 h-4 mr-2" />
@@ -330,7 +333,7 @@ export default function Profile() {
                         variant="ghost" 
                         className="w-full justify-start hover:bg-gray-100"
                         data-testid="button-notifications"
-                        onClick={() => setLocation("/settings/notifications")}
+                        onClick={() => navigate("/settings/notifications")}
                       >
                         <Bell className="w-4 h-4 mr-3" />
                         Notifications
@@ -339,7 +342,7 @@ export default function Profile() {
                       variant="ghost" 
                       className="w-full justify-start hover:bg-gray-100"
                       data-testid="button-security"
-                      onClick={() => setLocation("/settings/security")}
+                      onClick={() => navigate("/settings/security")}
                     >
                       <Lock className="w-4 h-4 mr-3" />
                       Security & Privacy
@@ -348,7 +351,7 @@ export default function Profile() {
                       variant="ghost" 
                       className="w-full justify-start hover:bg-gray-100"
                       data-testid="button-payments"
-                      onClick={() => setLocation("/settings/payment")}
+                      onClick={() => navigate("/settings/payment")}
                     >
                       <CreditCard className="w-4 h-4 mr-3" />
                       Payment Methods
@@ -357,7 +360,7 @@ export default function Profile() {
                         variant="ghost" 
                         className="w-full justify-start hover:bg-gray-100"
                         data-testid="button-language"
-                        onClick={() => setLocation("/settings/language")}
+                        onClick={() => navigate("/settings/language")}
                       >
                         <Globe className="w-4 h-4 mr-3" />
                         Language & Region
