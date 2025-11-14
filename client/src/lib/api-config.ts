@@ -7,8 +7,8 @@ import { Capacitor } from '@capacitor/core';
  * On Mobile: Uses full backend URL
  */
 
-// Production backend URL (Replit deployment)
-const PRODUCTION_API_URL = 'https://ce3a76da-b414-4186-9234-d3db2b65b94b-00-2df3xcgh8cs7v.kirk.replit.dev';
+// Production backend URL (INSA-approved production domain)
+const PRODUCTION_API_URL = 'https://api.alga.et';
 
 // Check if running on native mobile platform
 const isNativeMobile = Capacitor.isNativePlatform();
