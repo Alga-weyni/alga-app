@@ -1,60 +1,37 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { apiRequest as api } from "./api-config"; // renamed to avoid conflict
+import { Capacitor } from "@capacitor/core";
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
+const isNativeMobile = Capacitor.isNativePlatform();
 
-/**
- * Standard API wrapper for non-react-query calls
- */
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: any
-): Promise<any> {
+export const API_URL = isNativeMobile
+  ? "https://api.alga.et/api"
+  : import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-  const fullUrl = `${url}`; // url already includes endpoint, no need to call getApiUrl
+export async function apiRequest(method: string, endpoint: string, body?: any) {
+  const url = endpoint.startsWith("/api")
+    ? `${API_URL}${endpoint.replace("/api", "")}`
+    : `${API_URL}${endpoint}`;
 
-  const res = await api(fullUrl, {
+  const res = await fetch(url, {
     method,
-    body: data ? JSON.stringify(data) : undefined,
-    headers: data ? { "Content-Type": "application/json" } : {},
     credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  return res;
+  let json: any = null;
+
+  try {
+    json = await res.json();
+  } catch (e) {
+    console.error("❌ Response wasn't JSON", await res.text());
+    throw new Error("Invalid server response");
+  }
+
+  if (!res.ok) {
+    throw new Error(json.message || `Request failed: ${res.status}`);
+  }
+
+  return json;
 }
-
-/**
- * React-query handler wrapper
- */
-const getQueryFn: <T>(options: {
-  on401: "returnNull" | "throw";
-}) => QueryFunction<T> =
-  ({ on401 }) =>
-  async ({ queryKey }) => {
-    const endpoint = queryKey[0] as string;
-    const res = await fetch(endpoint, { credentials: "include" });
-
-    if (on401 === "returnNull" && res.status === 401) return null;
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
-    },
-    mutations: { retry: false },
-  },
-});
