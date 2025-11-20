@@ -40,7 +40,7 @@ export function serveStatic(app: Express) {
     console.error(
       `❌ Frontend build missing.\nRun:\n\n  cd client\n  npm run build\n`
     );
-    return; // Don't crash backend; just log
+    return; // Do NOT kill the backend – just log
   }
 
   // Serve static assets
