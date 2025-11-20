@@ -2,12 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { type User } from "@shared/schema";
 import { API_URL } from "../lib/api-config";
 
-
 export function useAuth() {
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ["auth-user"],
     queryFn: async () => {
-      const url = `${API_URL}/auth/user`;
+      const url = `${API_URL}/api/auth/user`;   // ✅ FIXED
       console.log("🔍 Fetching auth:", url);
 
       const res = await fetch(url, {
