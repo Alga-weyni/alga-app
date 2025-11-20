@@ -1,19 +1,23 @@
 import { Capacitor } from "@capacitor/core";
 
-// ---- BASE API ROUTING ----
-export const API_URL = Capacitor.isNativePlatform()
-  ? "https://api.alga.et/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const isNativeMobile = Capacitor.isNativePlatform();
 
-// ---- UNIVERSAL API FUNCTION ----
+export const API_URL = isNativeMobile
+  ? "https://api.alga.et"                         // no /api here
+  : import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+/**
+ * Universal Request Wrapper
+ */
 export async function apiRequest(
   method: string,
-  path: string,
+  endpoint: string,
   body?: any
 ) {
-  const url = `${API_URL}${path}`;
-
-  console.log("📡 API Request →", url);
+  // Normalize endpoints to always include /api/
+  const url = endpoint.startsWith("/api")
+    ? `${API_URL}${endpoint}`
+    : `${API_URL}/api${endpoint}`;
 
   const res = await fetch(url, {
     method,
@@ -21,13 +25,20 @@ export async function apiRequest(
     headers: {
       "Content-Type": "application/json",
     },
-    body: body ? JSON.stringify(body) : undefined,
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `API Error: ${res.status}`);
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    console.error("❌ Server returned non-JSON:", await res.text());
+    throw new Error("Invalid JSON response from server");
   }
 
-  return res.json();
+  if (!res.ok) {
+    throw new Error(json?.message || `Request failed: ${res.status}`);
+  }
+
+  return json;
 }
