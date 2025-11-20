@@ -1,117 +1,123 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
 import { applyINSAHardening } from "./security/insa-hardening";
 import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
+import { log } from "./vite"; // still using your log helper
 
 const app = express();
 
-// Security: Add helmet for security headers
-app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false,
-  crossOriginEmbedderPolicy: false,
-}));
+// -------------------- SECURITY MIDDLEWARE --------------------
+app.use(
+  helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
-// Security: Configure CORS
-const corsOptions = {
-  origin: process.env.NODE_ENV === "production" 
-    ? process.env.ALLOWED_ORIGINS?.split(',') || []
-    : true,
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.ALLOWED_ORIGINS?.split(",") || []
+        : true,
+    credentials: true,
+  })
+);
 
-// Security: Limit request body size to prevent DoS
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
-
-// 🛡️ INSA Security Hardening (Ethiopian compliance)
-// Protects against XSS, SQL injection, NoSQL injection, HPP, clickjacking
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 applyINSAHardening(app);
 
+// -------------------- LOGGING --------------------
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  let capturedResponse: any;
+  const originalJson = res.json;
+
+  res.json = function (body, ...args) {
+    capturedResponse = body;
+    return originalJson.apply(res, [body, ...args]);
   };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+      const duration = Date.now() - start;
+      let line = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
+      if (capturedResponse) line += ` :: ${JSON.stringify(capturedResponse)}`;
+      if (line.length > 80) line = line.slice(0, 79) + "…";
 
-      log(logLine);
+      log(line);
     }
   });
 
   next();
 });
 
+// -------------------- API ROUTES --------------------
 (async () => {
   const server = await registerRoutes(app);
 
-  // Security: Global error handler - don't leak stack traces in production
+  // -------------------- ERROR HANDLING --------------------
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    
-    // Don't expose detailed error messages in production
-    const errorResponse: any = { message };
-    
-    if (process.env.NODE_ENV === 'development') {
-      errorResponse.stack = err.stack;
-    }
+    const status = err.status || 500;
 
-    res.status(status).json(errorResponse);
-    
-    // Log error but don't throw in production
-    if (process.env.NODE_ENV !== 'production') {
-      throw err;
-    } else {
-      console.error('Error:', err);
-    }
+    const response: any = {
+      message: err.message || "Internal Server Error",
+    };
+
+    if (process.env.NODE_ENV !== "production") response.stack = err.stack;
+
+    console.error("❌ API Error:", err);
+
+    res.status(status).json(response);
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+  // -------------------- FRONTEND SERVE (PRODUCTION) --------------------
+  if (process.env.NODE_ENV === "production") {
+    const distPath = path.resolve(process.cwd(), "client/dist/public");
+    const indexFile = path.join(distPath, "index.html");
+
+    if (!fs.existsSync(distPath)) {
+      console.error("❌ Frontend build missing. Run:\n  cd client && npm run build");
+      process.exit(1);
+    }
+
+    // serve static
+    app.use(express.static(distPath));
+
+    // fallback to index.html
+    app.get("*", (_req, res) => {
+      res.sendFile(indexFile);
+    });
+
+    // schedule automated integrity checks
+    scheduleIntegrityChecks();
+    log("🔐 INSA integrity checks active");
   } else {
-    serveStatic(app);
+    // -------------------- VITE DEV MODE --------------------
+    const { setupVite } = await import("./vite");
+    await setupVite(app, server);
+    log("⚡ Running with Vite (development mode)");
   }
 
-  // Use PORT from environment (Render) or default to 5000 (Replit)
-  // this serves both the API and the client.
+  // -------------------- SERVER START --------------------
   const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-    
-    // Schedule daily signature integrity checks (INSA compliance)
-    if (process.env.NODE_ENV === "production") {
-      scheduleIntegrityChecks();
-      log(`✅ Signature integrity checks scheduled (daily at 2:00 AM Ethiopian time)`);
-    } else {
-      log(`⚠️ Signature integrity checks disabled in development mode`);
+
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    },
+    () => {
+      log(`🚀 Server running on port ${port}`);
     }
-  });
+  );
 })();
