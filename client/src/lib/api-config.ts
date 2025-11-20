@@ -1,38 +1,29 @@
 import { Capacitor } from "@capacitor/core";
 
-// Detect platform
-const isNativeMobile = Capacitor.isNativePlatform();
+export const API_URL = Capacitor.isNativePlatform()
+  ? "https://api.alga.et/api"
+  : import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-/**
- * API Priorities
- * ───────────────────────────
- * 1) Mobile apps → Always hit full backend URL
- * 2) Web (production) → Uses VITE_API_URL from environment
- * 3) Web (dev) → Falls back to localhost
- */
-const API_URL = isNativeMobile
-  ? "https://api.alga.et"
-  : import.meta.env.VITE_API_URL || "http://localhost:3000";
+export async function apiRequest(
+  method: string,
+  path: string,
+  body?: any
+) {
+  const url = `${API_URL}${path}`;
 
-/**
- * Universal request wrapper
- */
-export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_URL}${endpoint}`;
-
-  const response = await fetch(url, {
-    ...options,
+  const res = await fetch(url, {
+    method,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
     },
+    body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `API Error: ${res.status}`);
   }
 
-  return response.json();
-};
-
-export { API_URL, isNativeMobile };
+  return res.json();
+}

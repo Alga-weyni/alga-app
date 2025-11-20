@@ -148,8 +148,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   // Request OTP for email (login or register)
   const requestEmailOtpMutation = useMutation({
     mutationFn: async (data: RequestEmailOtpData) => {
-      const endpoint = mode === "register" ? "/api/auth/request-otp/email/register" : "/api/auth/request-otp/email/login";
-      return await apiRequest("POST", endpoint, data);
+      const endpoint = mode === "register"
+  ? "/auth/request-otp/email/register"
+  : "/auth/request-otp/email/login";
+
+      return await apiRequest("POST", "/auth/verify-otp", data);
+
     },
     onSuccess: (data: any) => {
       setPendingContact(data.email || data.contact);
