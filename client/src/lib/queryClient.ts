@@ -1,5 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { getApiUrl } from "./api-config";
+import { apiRequest as api } from "./api-config"; // renamed to avoid conflict
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -8,52 +8,39 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+/**
+ * Standard API wrapper for non-react-query calls
+ */
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: any
 ): Promise<any> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-  const fullUrl = getApiUrl(url);
+  const fullUrl = `${url}`; // url already includes endpoint, no need to call getApiUrl
 
-  try {
-    const res = await fetch(fullUrl, {
-      method,
-      headers: data ? { "Content-Type": "application/json" } : {},
-      body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-      signal: controller.signal,
-    });
+  const res = await api(fullUrl, {
+    method,
+    body: data ? JSON.stringify(data) : undefined,
+    headers: data ? { "Content-Type": "application/json" } : {},
+    credentials: "include",
+  });
 
-    clearTimeout(timeoutId);
-    await throwIfResNotOk(res);
-    return await res.json();
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
-  }
+  return res;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
+/**
+ * React-query handler wrapper
+ */
+const getQueryFn: <T>(options: {
+  on401: "returnNull" | "throw";
 }) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
+  ({ on401 }) =>
   async ({ queryKey }) => {
-    const fullUrl = getApiUrl(queryKey[0] as string);
-    
-    const res = await fetch(fullUrl, {
-      credentials: "include",
-    });
+    const endpoint = queryKey[0] as string;
+    const res = await fetch(endpoint, { credentials: "include" });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+    if (on401 === "returnNull" && res.status === 401) return null;
 
     await throwIfResNotOk(res);
     return await res.json();
@@ -68,8 +55,6 @@ export const queryClient = new QueryClient({
       staleTime: Infinity,
       retry: false,
     },
-    mutations: {
-      retry: false,
-    },
+    mutations: { retry: false },
   },
 });

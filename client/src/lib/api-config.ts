@@ -1,38 +1,38 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor } from "@capacitor/core";
 
-/**
- * API Configuration for Mobile and Web
- * 
- * On Web: Uses relative URLs (same origin as frontend)
- * On Mobile: Uses full backend URL
- */
-
-// Production backend URL (Replit deployment)
-const PRODUCTION_API_URL = 'https://ce3a76da-b414-4186-9234-d3db2b65b94b-00-2df3xcgh8cs7v.kirk.replit.dev';
-
-// Check if running on native mobile platform
+// Detect platform
 const isNativeMobile = Capacitor.isNativePlatform();
 
 /**
- * Get the full API URL for a given endpoint
- * @param endpoint - API endpoint (e.g., '/api/auth/login')
- * @returns Full URL for the API request
+ * API Priorities
+ * ───────────────────────────
+ * 1) Mobile apps → Always hit full backend URL
+ * 2) Web (production) → Uses VITE_API_URL from environment
+ * 3) Web (dev) → Falls back to localhost
  */
-export function getApiUrl(endpoint: string): string {
-  // On mobile: Use full production URL
-  if (isNativeMobile) {
-    return `${PRODUCTION_API_URL}${endpoint}`;
-  }
-  
-  // On web: Use relative URL (same origin)
-  return endpoint;
-}
+const API_URL = isNativeMobile
+  ? "https://api.alga.et"
+  : import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 /**
- * Get the base API URL
+ * Universal request wrapper
  */
-export function getBaseApiUrl(): string {
-  return isNativeMobile ? PRODUCTION_API_URL : '';
-}
+export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+  const url = `${API_URL}${endpoint}`;
 
-export { isNativeMobile };
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export { API_URL, isNativeMobile };
