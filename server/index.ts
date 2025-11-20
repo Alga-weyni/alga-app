@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 
   // -------------------- FRONTEND SERVE (PRODUCTION) --------------------
   if (process.env.NODE_ENV === "production") {
-    const distPath = path.resolve(process.cwd(), "client/dist/public");
+    const distPath = path.resolve(process.cwd(), "dist/public");
     const indexFile = path.join(distPath, "index.html");
 
     if (!fs.existsSync(distPath)) {
