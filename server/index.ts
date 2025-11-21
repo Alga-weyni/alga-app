@@ -35,22 +35,10 @@ app.set("trust proxy", true);
 
   // -------------------- HOST VALIDATION --------------------
   app.use((req, res, next) => {
-    const forwardedHost = req.headers["x-forwarded-host"];
-    const rawHostHeader = Array.isArray(forwardedHost)
-      ? forwardedHost[0]
-      : forwardedHost || req.headers.host;
-
-    const host = (rawHostHeader || "")
-      .toString()
-      .split(":")[0]
-      .toLowerCase();
-
-    if (!host) {
-      return res.status(403).send("Forbidden: Missing Host");
-    }
+    const host = (req.hostname || "").toLowerCase();
 
     const blockedPatterns = ["onrender.com"];
-    if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
+    if (host && blockedPatterns.some((blocked) => host.endsWith(blocked))) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
@@ -64,7 +52,7 @@ app.set("trust proxy", true);
       (allowed) => host === allowed || host.endsWith(`.${allowed}`)
     );
 
-    if (!matchesAllowedHost) {
+    if (host && !matchesAllowedHost) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
