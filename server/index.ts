@@ -59,6 +59,14 @@ const app = express();
     next();
   });
 
+  // -------------------- ROOT HEALTH CHECK --------------------
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    status: "API running",
+    environment: process.env.NODE_ENV,
+  });
+});
+
   // -------------------- API ROUTES --------------------
   const server = await registerRoutes(app);
 
