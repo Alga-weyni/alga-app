@@ -1,13 +1,13 @@
-import { Pool } from "pg";
+import pkg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "@shared/schema";
 
-// Ensure env exists
+const { Pool } = pkg;
+
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set.");
+  throw new Error("DATABASE_URL must be set");
 }
 
-// Enable SSL for Render
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
