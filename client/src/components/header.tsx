@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Home, Menu, User, Wrench, HelpCircle, Briefcase, Building2, ShoppingBag, UserCog } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { isMobileApp } from "@/utils/platform";

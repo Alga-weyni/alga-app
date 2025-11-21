@@ -27,7 +27,8 @@ import {
   Filter,
   ShieldCheck,
 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
+import { queryClient } from "@/lib/queryClient";
 
 interface UserData {
   id: string;

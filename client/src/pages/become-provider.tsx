@@ -27,7 +27,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
 import { ETHIOPIAN_CITIES } from "@/lib/constants";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { Upload } from "lucide-react";

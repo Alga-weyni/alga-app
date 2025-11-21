@@ -70,7 +70,7 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";

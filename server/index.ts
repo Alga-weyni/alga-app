@@ -21,11 +21,12 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? process.env.ALLOWED_ORIGINS?.split(",") || []
+        ? (process.env.ALLOWED_ORIGINS?.split(",") ?? ["https://app.alga.et"])
         : true,
     credentials: true,
   })
 );
+
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
@@ -74,31 +75,28 @@ app.use((req, res, next) => {
   });
 
   // -------------------- FRONTEND SERVE (PRODUCTION) --------------------
-  if (process.env.NODE_ENV === "production") {
-    const { serveStatic } = await import("./vite");
+if (process.env.NODE_ENV === "production") {
+  const { serveStatic } = await import("./vite");
 
-    serveStatic(app);
+  serveStatic(app);
+  scheduleIntegrityChecks();
+  log("🔐 INSA integrity checks active");
+} else {
+  const { setupVite } = await import("./vite");
+  await setupVite(app, server);
+  log("⚡ Running with Vite (development mode)");
+}
 
-    scheduleIntegrityChecks();
-    log("🔐 INSA integrity checks active");
-  } else {
-    // -------------------- VITE DEV MODE --------------------
-    const { setupVite } = await import("./vite");
-    await setupVite(app, server);
-    log("⚡ Running with Vite (development mode)");
+// -------------------- SERVER START --------------------
+const port = parseInt(process.env.PORT || "5000", 10);
+
+server.listen(
+  {
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  },
+  () => {
+    log(`🚀 Server running on port ${port}`);
   }
-
-  // -------------------- SERVER START --------------------
-  const port = parseInt(process.env.PORT || "5000", 10);
-
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`🚀 Server running on port ${port}`);
-    }
-  );
-})();
+);

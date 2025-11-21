@@ -1,44 +1,54 @@
+// client/src/lib/api-config.ts
 import { Capacitor } from "@capacitor/core";
 
 const isNativeMobile = Capacitor.isNativePlatform();
 
+// Web (prod) uses VITE_API_URL, native always uses live API.
+// Local dev falls back to http://localhost:5000
 export const API_URL = isNativeMobile
-  ? "https://api.alga.et"                         // no /api here
-  : import.meta.env.VITE_API_URL || "http://localhost:3000";
+  ? "https://api.alga.et"
+  : (import.meta.env.VITE_API_URL ?? "https://api.alga.et");
 
 /**
- * Universal Request Wrapper
+ * Generic API helper.
+ * Pass ONLY the endpoint (with or without /api).
+ * Examples:
+ *   apiRequest("GET", "/auth/user")
+ *   apiRequest("POST", "/auth/request-otp/email/login", body)
  */
 export async function apiRequest(
   method: string,
   endpoint: string,
-  body?: any
+  body?: unknown
 ) {
-  // Normalize endpoints to always include /api/
-  const url = endpoint.startsWith("/api")
-    ? `${API_URL}${endpoint}`
-    : `${API_URL}/api${endpoint}`;
+  // Ensure exactly one `/api` prefix
+  const clean = endpoint.startsWith("/api")
+    ? endpoint
+    : `/api${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+
+  const url = `${API_URL}${clean}`;
+
+  console.log("🌐 apiRequest →", method, url);
 
   const res = await fetch(url, {
     method,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    ...(body ? { body: JSON.stringify(body) } : {}),
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
   });
 
-  let json;
+  let data: any = null;
   try {
-    json = await res.json();
+    data = await res.json();
   } catch {
-    console.error("❌ Server returned non-JSON:", await res.text());
-    throw new Error("Invalid JSON response from server");
+    const text = await res.text();
+    console.error("❌ Non-JSON response:", text);
+    throw new Error("Invalid server response");
   }
 
   if (!res.ok) {
-    throw new Error(json?.message || `Request failed: ${res.status}`);
+    throw new Error(data?.message || `Request failed: ${res.status}`);
   }
 
-  return json;
+  return data;
 }

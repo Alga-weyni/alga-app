@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import type { Booking, ServiceBooking, Property } from "@shared/schema";
 

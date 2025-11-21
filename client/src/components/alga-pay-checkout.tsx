@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, XCircle, CheckCircle2, CreditCard } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
 
 interface AlgaPayCheckoutProps {
   amount: number;

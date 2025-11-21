@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
 import { type User as UserType, type Property } from "@shared/schema";
 import { BackButton } from "@/components/back-button";
 import Header from "@/components/header";

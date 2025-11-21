@@ -33,7 +33,8 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api-config";
+import { queryClient } from "@/lib/queryClient";
 
 const settingsSchema = z.object({
   aiEnabled: z.boolean(),

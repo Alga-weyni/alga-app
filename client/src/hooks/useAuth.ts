@@ -1,35 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { type User } from "@shared/schema";
 import { API_URL } from "../lib/api-config";
 
 export function useAuth() {
-  const { data: user, isLoading } = useQuery<User>({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["auth-user"],
     queryFn: async () => {
-      const url = `${API_URL}/api/auth/user`;   // ✅ FIXED
-      console.log("🔍 Fetching auth:", url);
-
-      const res = await fetch(url, {
+      const res = await fetch(`${API_URL}/api/auth/user`, {
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (res.status === 401) {
-        return null; // Not logged in
-      }
+      if (res.status === 401) return null;
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Failed to fetch user");
-      }
+      if (!res.ok) throw new Error("Failed to fetch user");
 
       return res.json();
     },
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
   });
 
   return {
