@@ -7,6 +7,7 @@ import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
 import { log } from "./vite";
 
 const app = express();
+app.set("trust proxy", true);
 
 (async () => {
   // -------------------- SECURITY MIDDLEWARE --------------------
@@ -85,13 +86,13 @@ const app = express();
     next();
   });
 
-  // -------------------- ROOT HEALTH CHECK --------------------
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    status: "API running",
-    environment: process.env.NODE_ENV,
+  // -------------------- HEALTH CHECKS --------------------
+  app.get(["/", "/api/health"], (_req, res) => {
+    res.status(200).json({
+      status: "API running",
+      environment: process.env.NODE_ENV,
+    });
   });
-});
 
   // -------------------- API ROUTES --------------------
   const server = await registerRoutes(app);
