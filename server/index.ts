@@ -32,6 +32,32 @@ const app = express();
   app.use(express.urlencoded({ extended: false, limit: "10mb" }));
   applyINSAHardening(app);
 
+  // -------------------- HOST VALIDATION --------------------
+  app.use((req, res, next) => {
+    const host = (req.hostname || "").toLowerCase();
+
+    const blockedPatterns = ["onrender.com"];
+    if (host && blockedPatterns.some((blocked) => host.endsWith(blocked))) {
+      return res.status(403).send("Forbidden: Invalid Host");
+    }
+
+    const allowedHosts = (
+      process.env.ALLOWED_HOSTS?.split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean) || []
+    ).concat(["api.alga.et", "alga.et", "localhost", "127.0.0.1"]);
+
+    const matchesAllowedHost = allowedHosts.some(
+      (allowed) => host === allowed || host.endsWith(`.${allowed}`)
+    );
+
+    if (host && !matchesAllowedHost) {
+      return res.status(403).send("Forbidden: Invalid Host");
+    }
+
+    next();
+  });
+
   // -------------------- LOGGING --------------------
   app.use((req, res, next) => {
     const start = Date.now();
