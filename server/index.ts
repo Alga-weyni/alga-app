@@ -9,6 +9,14 @@ import { log } from "./vite";
 const app = express();
 app.set("trust proxy", true);
 
+// -------------------- CORS CONFIG --------------------
+const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
+
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+} as const;
+
 (async () => {
   // -------------------- SECURITY MIDDLEWARE --------------------
   app.use(
@@ -19,26 +27,42 @@ app.set("trust proxy", true);
     })
   );
 
-  app.use(
-    cors({
-
-      credentials: true,
-    })
-  );
+  app.use(cors(corsOptions));
 
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: false, limit: "10mb" }));
   applyINSAHardening(app);
 
   // -------------------- HOST VALIDATION --------------------
-  app.use((req, res, next) => {
-    const host = (req.hostname || "").toLowerCase();
+  const canonicalHost =
+    process.env.PRIMARY_HOST?.toLowerCase() || "api.alga.et";
 
+  app.use((req, res, next) => {
+    const forwardedHost = req.headers["x-forwarded-host"];
+    const rawHostHeader = Array.isArray(forwardedHost)
+      ? forwardedHost[0]
+      : forwardedHost || req.headers.host;
+
+    const host = (rawHostHeader || "")
+      .toString()
+      .split(":")[0]
+      .toLowerCase();
+
+    if (!host) {
+      return res.status(403).send("Forbidden: Missing Host");
+    }
+
+    // Block requests coming from Render internal domains
     const blockedPatterns = ["onrender.com"];
-    if (host && blockedPatterns.some((blocked) => host.endsWith(blocked))) {
+    if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
+      if (req.method === "GET" || req.method === "HEAD") {
+        const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
+        return res.redirect(308, targetUrl);
+      }
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
+    // Define allowed hosts
     const allowedHosts = (
       process.env.ALLOWED_HOSTS?.split(",")
         .map((value) => value.trim().toLowerCase())
@@ -91,7 +115,7 @@ app.set("trust proxy", true);
     });
   });
 
-  // Gracefully handle service worker requests (frontend served from server/dist/public)
+  // Handle service worker requests gracefully
   app.get("/sw.js", (_req, res) => {
     res.status(204).send();
   });
