@@ -2,13 +2,14 @@ import type { Express, RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { pool } from "./db";
 import type { User } from "@shared/schema";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool,
     createTableIfMissing: false,
     ttl: sessionTtl / 1000,
     tableName: "sessions",
@@ -25,8 +26,9 @@ export function getSession() {
     name: 'sessionId', // Security: Don't use default 'connect.sid'
     cookie: {
       httpOnly: true, // Security: Prevent XSS
-      secure: process.env.NODE_ENV === "production", // Security: HTTPS only in production
-      sameSite: 'lax', // Security: CSRF protection
+      secure: true, // Required for cross-site cookies
+      sameSite: 'none', // Allow cross-domain authentication (app.alga.et <> api.alga.et)
+      domain: '.alga.et',
       maxAge: sessionTtl,
       path: '/',
     },
@@ -55,7 +57,13 @@ export async function setupAuth(app: Express) {
         return res.status(500).json({ message: "Logout failed" });
       }
       // Security: Clear session cookie with matching name
-      res.clearCookie("sessionId");
+      res.clearCookie("sessionId", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".alga.et",
+        path: "/",
+      });
       res.json({ message: "Logged out successfully" });
     });
   });

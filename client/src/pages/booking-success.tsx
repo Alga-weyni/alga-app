@@ -33,6 +33,7 @@ export default function BookingSuccess() {
     try {
       const response = await fetch("/api/payment/confirm/paypal", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookingId: parseInt(bookingId), orderId }),
       });

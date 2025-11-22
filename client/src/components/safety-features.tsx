@@ -67,6 +67,7 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
     try {
       const response = await fetch('/api/safety/emergency-check', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
