@@ -7,8 +7,13 @@ import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
 import { log } from "./vite";
 
 const app = express();
+
+// Required for Render + HTTPS
 app.set("trust proxy", true);
+
+// -------------------- CORS CONFIG --------------------
 const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
+
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -25,9 +30,9 @@ const corsOptions = {
   );
 
   app.use(cors(corsOptions));
-
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: false, limit: "10mb" }));
+
   applyINSAHardening(app);
 
   // -------------------- HOST VALIDATION --------------------
@@ -40,28 +45,26 @@ const corsOptions = {
       ? forwardedHost[0]
       : forwardedHost || req.headers.host;
 
-    const host = (rawHostHeader || "")
-      .toString()
-      .split(":")[0]
-      .toLowerCase();
+    const host = (rawHostHeader || "").toString().split(":")[0].toLowerCase();
 
     if (!host) {
       return res.status(403).send("Forbidden: Missing Host");
     }
 
+    // Block requests from Render internal URLs
     const blockedPatterns = ["onrender.com"];
     if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
       if (req.method === "GET" || req.method === "HEAD") {
         const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
         return res.redirect(308, targetUrl);
       }
-
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
+    // Allowed public domains
     const allowedHosts = (
       process.env.ALLOWED_HOSTS?.split(",")
-        .map((value) => value.trim().toLowerCase())
+        .map((v) => v.trim().toLowerCase())
         .filter(Boolean) || []
     ).concat(["api.alga.et", "alga.et", "localhost", "127.0.0.1"]);
 
@@ -111,7 +114,7 @@ const corsOptions = {
     });
   });
 
-  // Gracefully handle service worker requests (frontend served from server/dist/public)
+  // Gracefully handle service worker requests
   app.get("/sw.js", (_req, res) => {
     res.status(204).send();
   });
@@ -130,7 +133,7 @@ const corsOptions = {
     res.status(status).json(response);
   });
 
-  // -------------------- FRONTEND SERVE (PRODUCTION) --------------------
+  // -------------------- STATIC FRONTEND SERVE --------------------
   if (process.env.NODE_ENV === "production") {
     const { serveStatic } = await import("./vite");
     serveStatic(app);
@@ -155,4 +158,4 @@ const corsOptions = {
       log(`🚀 Server running on port ${port}`);
     }
   );
-})(); // END OF ASYNC WRAPPER
+})();

@@ -7,23 +7,26 @@ import type { User } from "@shared/schema";
 
 const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
 
-export const sessionCookieSettings: CookieOptions = {
-  httpOnly: true, // Security: Prevent XSS
-  secure: true, // Required for cross-site cookies
-  sameSite: "none", // Allow cross-domain authentication (app.alga.et <> api.alga.et)
-  domain: ".alga.et",
-  path: "/",
-  maxAge: sessionTtl,
+// 🔥 Correct unified cookie settings for cross-domain auth
+const cookieSettings: CookieOptions = {
+  httpOnly: true,                     // Prevent JS access to cookie
+  secure: true,                       // Only over HTTPS
+  sameSite: "none",                   // Required for cross-site requests
+  domain: ".alga.et",                 // Shared across all subdomains
+  path: "/",                          // Global path
+  maxAge: sessionTtl,                 // 7 days
 };
 
 export function getSession() {
   const pgStore = connectPg(session);
+
   const sessionStore = new pgStore({
     pool,
     createTableIfMissing: false,
     ttl: sessionTtl / 1000,
     tableName: "sessions",
   });
+
   if (!process.env.SESSION_SECRET) {
     throw new Error("SESSION_SECRET environment variable is required");
   }
@@ -33,39 +36,43 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    name: 'sessionId', // Security: Don't use default 'connect.sid'
-    cookie: sessionCookieSettings,
+    name: "sessionId",                // Avoid default connect.sid
+    cookie: cookieSettings,
   });
 }
 
 export async function setupAuth(app: Express) {
-  app.set("trust proxy", 1);
+  app.set("trust proxy", 1);          // Required on Render + CDN
   app.use(getSession());
 
-  // Enable passport-style login
+  // Attach login helper function
   app.use((req, res, next) => {
     (req as any).login = (user: User, callback: (err?: any) => void) => {
       (req.session as any).userId = user.id;
       (req.session as any).userRole = user.role;
-      req.session.save((err) => {
-        callback(err);
-      });
+      req.session.save((err) => callback(err));
     };
     next();
   });
 
+  // Logout route
   app.get("/api/logout", (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({ message: "Logout failed" });
       }
-      // Security: Clear session cookie with matching name
-      res.clearCookie("sessionId", { ...sessionCookieSettings });
+
+      // 🔥 Clear cookie across all subdomains
+      res.clearCookie("sessionId", {
+        ...cookieSettings,
+      });
+
       res.json({ message: "Logged out successfully" });
     });
   });
 }
 
+// Authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const userId = (req.session as any).userId;
 
