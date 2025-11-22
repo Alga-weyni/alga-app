@@ -7,6 +7,12 @@ import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
 import { log } from "./vite";
 
 const app = express();
+app.set("trust proxy", true);
+const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+} as const;
 
 (async () => {
   // -------------------- SECURITY MIDDLEWARE --------------------
@@ -18,19 +24,57 @@ const app = express();
     })
   );
 
-  app.use(
-    cors({
-      origin:
-        process.env.NODE_ENV === "production"
-          ? (process.env.ALLOWED_ORIGINS?.split(",") ?? ["https://app.alga.et"])
-          : true,
-      credentials: true,
-    })
-  );
+  app.use(cors(corsOptions));
 
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: false, limit: "10mb" }));
   applyINSAHardening(app);
+
+  // -------------------- HOST VALIDATION --------------------
+  const canonicalHost =
+    process.env.PRIMARY_HOST?.toLowerCase() || "api.alga.et";
+
+  app.use((req, res, next) => {
+    const forwardedHost = req.headers["x-forwarded-host"];
+    const rawHostHeader = Array.isArray(forwardedHost)
+      ? forwardedHost[0]
+      : forwardedHost || req.headers.host;
+
+    const host = (rawHostHeader || "")
+      .toString()
+      .split(":")[0]
+      .toLowerCase();
+
+    if (!host) {
+      return res.status(403).send("Forbidden: Missing Host");
+    }
+
+    const blockedPatterns = ["onrender.com"];
+    if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
+      if (req.method === "GET" || req.method === "HEAD") {
+        const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
+        return res.redirect(308, targetUrl);
+      }
+
+      return res.status(403).send("Forbidden: Invalid Host");
+    }
+
+    const allowedHosts = (
+      process.env.ALLOWED_HOSTS?.split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean) || []
+    ).concat(["api.alga.et", "alga.et", "localhost", "127.0.0.1"]);
+
+    const matchesAllowedHost = allowedHosts.some(
+      (allowed) => host === allowed || host.endsWith(`.${allowed}`)
+    );
+
+    if (!matchesAllowedHost) {
+      return res.status(403).send("Forbidden: Invalid Host");
+    }
+
+    next();
+  });
 
   // -------------------- LOGGING --------------------
   app.use((req, res, next) => {
@@ -59,13 +103,18 @@ const app = express();
     next();
   });
 
-  // -------------------- ROOT HEALTH CHECK --------------------
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    status: "API running",
-    environment: process.env.NODE_ENV,
+  // -------------------- HEALTH CHECKS --------------------
+  app.get(["/", "/api/health"], (_req, res) => {
+    res.status(200).json({
+      status: "API running",
+      environment: process.env.NODE_ENV,
+    });
   });
-});
+
+  // Gracefully handle service worker requests (frontend served from server/dist/public)
+  app.get("/sw.js", (_req, res) => {
+    res.status(204).send();
+  });
 
   // -------------------- API ROUTES --------------------
   const server = await registerRoutes(app);

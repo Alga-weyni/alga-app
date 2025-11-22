@@ -55,7 +55,8 @@ export const reverseGeocode = async (
 
   try {
     const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`,
+      { credentials: "include" }
     );
     const data = await res.json();
 

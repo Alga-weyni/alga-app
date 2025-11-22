@@ -60,7 +60,7 @@ export default defineConfig({
 
   root: ".", // 👈 Fix: project root IS this folder
   build: {
-    outDir: "../dist/public", // 👈 Output to root/dist/public
+    outDir: "../server/dist/public", // 👈 Output to server/dist/public for Render runtime
     emptyOutDir: true,
   }
 });

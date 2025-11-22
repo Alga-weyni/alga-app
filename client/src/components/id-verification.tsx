@@ -55,6 +55,7 @@ export default function IDVerification({ userId, userRole, onVerificationComplet
     mutationFn: async (formData: FormData) => {
       const response = await fetch('/api/verification-documents/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
       if (!response.ok) throw new Error(await response.text());

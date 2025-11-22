@@ -25,6 +25,7 @@ const defaultQueryFn: QueryFunction = async ({ queryKey }) => {
 
   const res = await fetch(url, {
     credentials: "include",
+    headers: { "Content-Type": "application/json" },
   });
 
   await throwIfResNotOk(res);
