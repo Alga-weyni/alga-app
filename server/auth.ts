@@ -9,16 +9,17 @@ const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
 
 // 🔥 Correct unified cookie settings for cross-domain auth
 const cookieSettings: CookieOptions = {
-  httpOnly: true, // Security: Prevent XSS attacks
-  secure: true, // Required for HTTPS-only cookies
-  sameSite: "none", // Allow cross-domain cookies across app.alga.et + api.alga.et
-  domain: ".alga.et", // Enables cookie sharing across subdomains
-  path: "/", // Accessible site-wide
-  maxAge: sessionTtl,
+  httpOnly: true,                     // Prevent JS access to cookie
+  secure: true,                       // Only over HTTPS
+  sameSite: "none",                   // Required for cross-site requests
+  domain: ".alga.et",                 // Shared across all subdomains
+  path: "/",                          // Global path
+  maxAge: sessionTtl,                 // 7 days
 };
 
 export function getSession() {
   const pgStore = connectPg(session);
+
   const sessionStore = new pgStore({
     pool,
     createTableIfMissing: false,
@@ -35,23 +36,21 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    name: "sessionId", // Security: Don’t use default connect.sid
+    name: "sessionId",                // Avoid default connect.sid
     cookie: cookieSettings,
   });
 }
 
 export async function setupAuth(app: Express) {
-  app.set("trust proxy", 1);
+  app.set("trust proxy", 1);          // Required on Render + CDN
   app.use(getSession());
 
-  // Attach login helper
+  // Attach login helper function
   app.use((req, res, next) => {
     (req as any).login = (user: User, callback: (err?: any) => void) => {
       (req.session as any).userId = user.id;
       (req.session as any).userRole = user.role;
-      req.session.save((err) => {
-        callback(err);
-      });
+      req.session.save((err) => callback(err));
     };
     next();
   });
@@ -63,7 +62,7 @@ export async function setupAuth(app: Express) {
         return res.status(500).json({ message: "Logout failed" });
       }
 
-      // 🔥 Clear session cookie globally
+      // 🔥 Clear cookie across all subdomains
       res.clearCookie("sessionId", {
         ...cookieSettings,
       });
@@ -73,7 +72,7 @@ export async function setupAuth(app: Express) {
   });
 }
 
-// Auth middleware
+// Authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const userId = (req.session as any).userId;
 
