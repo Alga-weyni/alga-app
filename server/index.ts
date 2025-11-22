@@ -31,31 +31,11 @@ app.set("trust proxy", true);
   applyINSAHardening(app);
 
   // -------------------- HOST VALIDATION --------------------
-  const canonicalHost =
-    process.env.PRIMARY_HOST?.toLowerCase() || "api.alga.et";
-
   app.use((req, res, next) => {
-    const forwardedHost = req.headers["x-forwarded-host"];
-    const rawHostHeader = Array.isArray(forwardedHost)
-      ? forwardedHost[0]
-      : forwardedHost || req.headers.host;
-
-    const host = (rawHostHeader || "")
-      .toString()
-      .split(":")[0]
-      .toLowerCase();
-
-    if (!host) {
-      return res.status(403).send("Forbidden: Missing Host");
-    }
+    const host = (req.hostname || "").toLowerCase();
 
     const blockedPatterns = ["onrender.com"];
-    if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
-      if (req.method === "GET" || req.method === "HEAD") {
-        const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
-        return res.redirect(308, targetUrl);
-      }
-
+    if (host && blockedPatterns.some((blocked) => host.endsWith(blocked))) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
@@ -69,7 +49,7 @@ app.set("trust proxy", true);
       (allowed) => host === allowed || host.endsWith(`.${allowed}`)
     );
 
-    if (!matchesAllowedHost) {
+    if (host && !matchesAllowedHost) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
@@ -109,11 +89,6 @@ app.set("trust proxy", true);
       status: "API running",
       environment: process.env.NODE_ENV,
     });
-  });
-
-  // Gracefully handle service worker requests (frontend served from server/dist/public)
-  app.get("/sw.js", (_req, res) => {
-    res.status(204).send();
   });
 
   // -------------------- API ROUTES --------------------
