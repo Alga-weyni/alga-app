@@ -8,7 +8,10 @@ import { log } from "./vite";
 
 const app = express();
 app.set("trust proxy", true);
+
+// -------------------- CORS CONFIG --------------------
 const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
+
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -49,16 +52,17 @@ const corsOptions = {
       return res.status(403).send("Forbidden: Missing Host");
     }
 
+    // Block requests coming from Render internal domains
     const blockedPatterns = ["onrender.com"];
     if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
       if (req.method === "GET" || req.method === "HEAD") {
         const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
         return res.redirect(308, targetUrl);
       }
-
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
+    // Define allowed hosts
     const allowedHosts = (
       process.env.ALLOWED_HOSTS?.split(",")
         .map((value) => value.trim().toLowerCase())
@@ -111,7 +115,7 @@ const corsOptions = {
     });
   });
 
-  // Gracefully handle service worker requests (frontend served from server/dist/public)
+  // Handle service worker requests gracefully
   app.get("/sw.js", (_req, res) => {
     res.status(204).send();
   });
