@@ -8,7 +8,6 @@ import { log } from "./vite";
 
 const app = express();
 app.set("trust proxy", true);
-const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
 
 (async () => {
   // -------------------- SECURITY MIDDLEWARE --------------------
@@ -22,7 +21,7 @@ const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
 
   app.use(
     cors({
-      origin: allowedOrigins,
+
       credentials: true,
     })
   );
@@ -32,31 +31,11 @@ const allowedOrigins = ["https://app.alga.et", "https://api.alga.et"] as const;
   applyINSAHardening(app);
 
   // -------------------- HOST VALIDATION --------------------
-  const canonicalHost =
-    process.env.PRIMARY_HOST?.toLowerCase() || "api.alga.et";
-
   app.use((req, res, next) => {
-    const forwardedHost = req.headers["x-forwarded-host"];
-    const rawHostHeader = Array.isArray(forwardedHost)
-      ? forwardedHost[0]
-      : forwardedHost || req.headers.host;
-
-    const host = (rawHostHeader || "")
-      .toString()
-      .split(":")[0]
-      .toLowerCase();
-
-    if (!host) {
-      return res.status(403).send("Forbidden: Missing Host");
-    }
+    const host = (req.hostname || "").toLowerCase();
 
     const blockedPatterns = ["onrender.com"];
-    if (blockedPatterns.some((blocked) => host.endsWith(blocked))) {
-      if (req.method === "GET" || req.method === "HEAD") {
-        const targetUrl = `https://${canonicalHost}${req.originalUrl || ""}`;
-        return res.redirect(308, targetUrl);
-      }
-
+    if (host && blockedPatterns.some((blocked) => host.endsWith(blocked))) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
