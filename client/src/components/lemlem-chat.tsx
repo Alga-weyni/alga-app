@@ -90,7 +90,7 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
   useEffect(() => {
     if (isOpen && propertyId) {
       // Fetch property info and auto-cache for offline use
-      fetch(`/api/property-info/${propertyId}`)
+      fetch(`/api/property-info/${propertyId}`, { credentials: "include" })
         .then(res => res.json())
         .then(async (propertyInfo) => {
           const learned = await lemlemOfflineStorage.syncPropertyKnowledge(propertyId, propertyInfo);

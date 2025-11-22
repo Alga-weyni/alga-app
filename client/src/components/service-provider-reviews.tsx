@@ -24,7 +24,10 @@ function RatingBar({ label, value, count }: { label: string; value: number; coun
 export default function ServiceProviderReviews({ providerId }: ServiceProviderReviewsProps) {
   const { data: reviews, isLoading } = useQuery<ServiceReview[]>({
     queryKey: ["/api/service-providers", providerId, "reviews"],
-    queryFn: () => fetch(`/api/service-providers/${providerId}/reviews`).then((res) => res.json()),
+    queryFn: () =>
+      fetch(`/api/service-providers/${providerId}/reviews`, {
+        credentials: "include",
+      }).then((res) => res.json()),
   });
 
   if (isLoading) {

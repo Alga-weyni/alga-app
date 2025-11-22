@@ -62,6 +62,7 @@ export default function SimpleIDScanner({ onVerified }: SimpleIDScannerProps) {
             // Call verification API
             const response = await fetch("/api/id-scan", {
               method: "POST",
+              credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 scanData: qrResult.data,

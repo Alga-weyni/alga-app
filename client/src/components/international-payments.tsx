@@ -189,6 +189,7 @@ export default function InternationalPayments({
 
       const response = await fetch(paymentEndpoint, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(paymentData)
       });

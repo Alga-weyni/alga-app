@@ -57,6 +57,7 @@ Birth: 15/03/1985`,
     try {
       const response = await fetch("/api/id-scan", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           scanData: testData,

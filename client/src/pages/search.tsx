@@ -30,7 +30,9 @@ export default function PropertySearch() {
       if (sort) params.append("sort", sort);
       if (search) params.append("q", search);
 
-      const res = await fetch(`/api/properties/search?${params.toString()}`);
+      const res = await fetch(`/api/properties/search?${params.toString()}`, {
+        credentials: "include",
+      });
       const data = await res.json();
       setResults(data);
     } catch (err) {

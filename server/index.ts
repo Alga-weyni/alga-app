@@ -21,10 +21,7 @@ app.set("trust proxy", true);
 
   app.use(
     cors({
-      origin:
-        process.env.NODE_ENV === "production"
-          ? (process.env.ALLOWED_ORIGINS?.split(",") ?? ["https://app.alga.et"])
-          : true,
+      origin: ["https://app.alga.et", "https://api.alga.et"],
       credentials: true,
     })
   );

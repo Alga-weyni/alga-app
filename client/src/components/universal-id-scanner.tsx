@@ -137,9 +137,10 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
       // Step 1: Upload the image file first
       const formData = new FormData();
       formData.append('image', file);
-      
+
       const uploadResponse = await fetch('/api/upload/id-document', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
       
@@ -175,6 +176,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
     try {
       const response = await fetch("/api/id-scan", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           scanData: data,

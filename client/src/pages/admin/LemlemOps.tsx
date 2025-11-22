@@ -117,6 +117,7 @@ export default function LemlemOps() {
     try {
       const response = await fetch('/api/admin/lemlem-ops/query', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: queryText }),
       });
