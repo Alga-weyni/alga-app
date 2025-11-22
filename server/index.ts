@@ -21,7 +21,7 @@ app.set("trust proxy", true);
 
   app.use(
     cors({
-      origin: ["https://app.alga.et", "https://api.alga.et"],
+
       credentials: true,
     })
   );
@@ -49,7 +49,7 @@ app.set("trust proxy", true);
       (allowed) => host === allowed || host.endsWith(`.${allowed}`)
     );
 
-    if (host && !matchesAllowedHost) {
+    if (!matchesAllowedHost) {
       return res.status(403).send("Forbidden: Invalid Host");
     }
 
@@ -89,6 +89,11 @@ app.set("trust proxy", true);
       status: "API running",
       environment: process.env.NODE_ENV,
     });
+  });
+
+  // Gracefully handle service worker requests (frontend served from server/dist/public)
+  app.get("/sw.js", (_req, res) => {
+    res.status(204).send();
   });
 
   // -------------------- API ROUTES --------------------
