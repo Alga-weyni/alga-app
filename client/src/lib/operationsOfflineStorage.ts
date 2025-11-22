@@ -185,6 +185,7 @@ class OperationsOfflineStorage {
         // Execute the action via API
         const response = await fetch(`/api/admin/operations/${action.action}`, {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             entityType: action.entityType,

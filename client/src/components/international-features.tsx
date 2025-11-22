@@ -121,6 +121,7 @@ export default function InternationalFeatures({
       // For now, showing the concept
       const response = await fetch('/api/translate', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, targetLanguage: targetLang })
       });
