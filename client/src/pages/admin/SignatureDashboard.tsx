@@ -62,7 +62,9 @@ export default function SignatureDashboard() {
   const { data: alertsData } = useQuery({
     queryKey: ["/api/admin/signatures/alerts"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/signatures/alerts?resolved=false&limit=100");
+      const res = await fetch("/api/admin/signatures/alerts?resolved=false&limit=100", {
+        credentials: "include",
+      });
       if (!res.ok) return { total: 0, alerts: [] };
       return res.json();
     },
@@ -109,7 +111,9 @@ export default function SignatureDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["/api/admin/signatures", queryParams.toString()],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/signatures?${queryParams.toString()}`);
+      const res = await fetch(`/api/admin/signatures?${queryParams.toString()}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch signature logs");
       return res.json();
     },
@@ -142,7 +146,9 @@ export default function SignatureDashboard() {
   // Decrypt audit info
   const decryptMutation = useMutation({
     mutationFn: async (signatureId: string) => {
-      const res = await fetch(`/api/admin/signatures/decrypt/${signatureId}`);
+      const res = await fetch(`/api/admin/signatures/decrypt/${signatureId}`, {
+        credentials: "include",
+      });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to decrypt");
@@ -182,6 +188,7 @@ export default function SignatureDashboard() {
       
       const res = await fetch("/api/admin/signatures/export", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ format, filters }),
       });

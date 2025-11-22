@@ -99,6 +99,7 @@ export default function StripeCheckout({
     try {
       const response = await fetch("/api/payment/stripe", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId,

@@ -24,7 +24,9 @@ export default function Settings() {
     // Check if user is an agent
     const checkAgent = async () => {
       try {
-        const response = await fetch("/api/dellala/dashboard");
+        const response = await fetch("/api/dellala/dashboard", {
+          credentials: "include",
+        });
         if (response.ok) {
           setIsAgent(true);
         }
