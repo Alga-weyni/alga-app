@@ -33,6 +33,7 @@ export async function setupVite(_app: Express, _server: any) {
  */
 export function serveStatic(app: Express) {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
   const distPath = path.join(__dirname, "..", "server", "dist", "public");
   const indexPath = path.join(distPath, "index.html");
 
