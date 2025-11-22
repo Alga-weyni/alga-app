@@ -103,17 +103,6 @@ console.log("Alga app entry");
 EOF
 fi
 
-echo "🧰 Registering the service worker + low-bandwidth mode..."
-cat > src/register-sw.ts << 'EOF'
-export function registerSW() {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(console.warn);
-    });
-  }
-}
-EOF
-
 cat > src/lib/network.ts << 'EOF'
 // Axios instance with Ethiopia-friendly timeouts + retries
 import axios from "axios";
