@@ -65,8 +65,10 @@ export default function ServiceCategory() {
       if (type) params.append("serviceType", type);
       if (cityFilter !== "all") params.append("city", cityFilter);
       params.append("verificationStatus", "approved");
-      
-      const response = await fetch(`/api/service-providers?${params}`);
+
+      const response = await fetch(`/api/service-providers?${params}`, {
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Failed to fetch providers");
       return response.json();
     }

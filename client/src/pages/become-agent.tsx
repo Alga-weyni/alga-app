@@ -63,6 +63,7 @@ export default function BecomeAgent() {
     try {
       const response = await fetch("/api/agent/register", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });

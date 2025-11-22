@@ -33,6 +33,7 @@ export default function PhoneVerification({
     mutationFn: async (phone: string) => {
       const response = await fetch('/api/sms/send-verification', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
       });
@@ -61,6 +62,7 @@ export default function PhoneVerification({
     mutationFn: async ({ phone, code }: { phone: string; code: string }) => {
       const response = await fetch('/api/sms/verify-code', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, code }),
       });

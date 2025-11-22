@@ -86,6 +86,7 @@ export default function AdminAgents() {
     mutationFn: async ({ agentId, status, rejectionReason }: { agentId: number; status: string; rejectionReason?: string }) => {
       const response = await fetch(`/api/admin/agents/${agentId}/verify`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, rejectionReason }),
       });
