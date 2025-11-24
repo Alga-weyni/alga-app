@@ -11,8 +11,8 @@ services:
     region: frankfurt
     plan: starter
     rootDir: .
-    buildCommand: npm install && npm run build-backend
-    startCommand: node dist/index.js
+    buildCommand: bash build-backend.sh
+    startCommand: node dist/server/index.js
     envVars:
       - key: NODE_ENV
         value: production
