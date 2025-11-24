@@ -64,7 +64,7 @@ import {
   type InsertDashboardAccessLog,
   type IntegrityAlert,
 } from "@shared/schema";
-import { db } from "./db";
+import { db } from './db.js';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
 
 // Interface for storage operations

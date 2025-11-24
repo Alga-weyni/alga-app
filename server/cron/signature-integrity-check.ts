@@ -8,10 +8,10 @@
  * Compliance: Ethiopian Electronic Signature Proclamation No. 1072/2018
  */
 
-import { db } from "../db";
+import { db } from '../db.js';
 import { consentLogs } from "@shared/schema";
-import { generateSignatureHash, decrypt } from "../utils/crypto";
-import { createIntegrityAlert, categorizeIntegrityFailure } from "../utils/integrityAlerts";
+import { generateSignatureHash, decrypt } from '../utils/crypto.js';
+import { createIntegrityAlert, categorizeIntegrityFailure } from '../utils/integrityAlerts.js';
 import { gte } from "drizzle-orm";
 
 interface IntegrityCheckResult {

@@ -7,7 +7,7 @@
  * Usage: tsx server/seed-insa-test-data.ts
  */
 
-import { db } from "./db";
+import { db } from './db.js';
 import { 
   users, properties, bookings, reviews, accessCodes,
   serviceProviders, serviceBookings, agents, agentProperties,

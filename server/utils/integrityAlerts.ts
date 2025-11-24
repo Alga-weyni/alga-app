@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import { db } from "../db";
+import { db } from '../db.js';
 import { integrityAlerts, consentLogs, dashboardAccessLogs } from "@shared/schema";
 import { eq, and, gte, sql } from "drizzle-orm";
 

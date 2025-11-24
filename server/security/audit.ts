@@ -3,7 +3,7 @@
  * Generates compliance reports for Ethiopian Information Network Security Agency
  */
 
-import { getSecurityStatus } from './insa-hardening';
+import { getSecurityStatus } from './insa-hardening.js';
 
 /**
  * Run security audit and generate report
