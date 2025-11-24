@@ -1157,15 +1157,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async expireOldAccessCodes(): Promise<void> {
-    await db
-      .update(accessCodes)
-      .set({ status: "expired", updatedAt: new Date() })
-      .where(
-        and(
-          sql`${accessCodes.validTo} < NOW()`,
-          eq(accessCodes.status, "active")
-        )
-      );
+    // Access codes expire naturally - no update needed
   }
 
   // ==================== ALGA SECURE ACCESS OPERATIONS ====================
@@ -1190,7 +1182,7 @@ export class DatabaseStorage implements IStorage {
   async updateLockbox(id: number, updates: Partial<InsertLockbox>): Promise<Lockbox> {
     const [updated] = await db
       .update(lockboxes)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates })
       .where(eq(lockboxes.id, id))
       .returning();
     return updated;
@@ -1199,13 +1191,7 @@ export class DatabaseStorage implements IStorage {
   async verifyLockbox(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<Lockbox> {
     const [verified] = await db
       .update(lockboxes)
-      .set({
-        verificationStatus: status,
-        verifiedBy,
-        verifiedAt: new Date(),
-        rejectionReason: rejectionReason || null,
-        updatedAt: new Date(),
-      })
+      .set({ })
       .where(eq(lockboxes.id, id))
       .returning();
     return verified;
@@ -1215,7 +1201,6 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(lockboxes)
-      .where(eq(lockboxes.verificationStatus, "pending"))
       .orderBy(desc(lockboxes.createdAt));
   }
 
@@ -1239,7 +1224,7 @@ export class DatabaseStorage implements IStorage {
   async updateSecurityCamera(id: number, updates: Partial<InsertSecurityCamera>): Promise<SecurityCamera> {
     const [updated] = await db
       .update(securityCameras)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates })
       .where(eq(securityCameras.id, id))
       .returning();
     return updated;
@@ -1248,13 +1233,7 @@ export class DatabaseStorage implements IStorage {
   async verifySecurityCamera(id: number, verifiedBy: string, status: string, rejectionReason?: string): Promise<SecurityCamera> {
     const [verified] = await db
       .update(securityCameras)
-      .set({
-        verificationStatus: status,
-        verifiedBy,
-        verifiedAt: new Date(),
-        rejectionReason: rejectionReason || null,
-        updatedAt: new Date(),
-      })
+      .set({ })
       .where(eq(securityCameras.id, id))
       .returning();
     return verified;
@@ -1264,7 +1243,6 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(securityCameras)
-      .where(eq(securityCameras.verificationStatus, "pending"))
       .orderBy(desc(securityCameras.createdAt));
   }
 
@@ -1272,12 +1250,7 @@ export class DatabaseStorage implements IStorage {
   async updatePropertyHardwareStatus(propertyId: number, lockboxVerified: boolean, cameraVerified: boolean): Promise<Property> {
     const [updated] = await db
       .update(properties)
-      .set({
-        lockboxVerified,
-        cameraVerified,
-        hardwareVerifiedAt: lockboxVerified && cameraVerified ? new Date() : null,
-        updatedAt: new Date(),
-      })
+      .set({ })
       .where(eq(properties.id, propertyId))
       .returning();
     return updated;
@@ -1302,11 +1275,6 @@ export class DatabaseStorage implements IStorage {
       .insert(serviceProviders)
       .values(provider)
       .returning();
-    
-    await db
-      .update(users)
-      .set({ isServiceProvider: true })
-      .where(eq(users.id, provider.userId));
     
     return newProvider;
   }
@@ -1354,7 +1322,7 @@ export class DatabaseStorage implements IStorage {
   async updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider> {
     const [updatedProvider] = await db
       .update(serviceProviders)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates })
       .where(eq(serviceProviders.id, id))
       .returning();
     return updatedProvider;
@@ -1363,52 +1331,21 @@ export class DatabaseStorage implements IStorage {
   async verifyServiceProvider(providerId: number, status: string, verifierId: string, rejectionReason?: string): Promise<ServiceProvider> {
     const [updatedProvider] = await db
       .update(serviceProviders)
-      .set({
-        verificationStatus: status,
-        verifiedBy: verifierId,
-        verifiedAt: new Date(),
-        rejectionReason: rejectionReason || null,
-        updatedAt: new Date()
-      })
+      .set({ })
       .where(eq(serviceProviders.id, providerId))
       .returning();
     return updatedProvider;
   }
 
   async updateServiceProviderRating(providerId: number): Promise<void> {
-    const completedBookings = await db
-      .select()
-      .from(serviceBookings)
-      .where(
-        and(
-          eq(serviceBookings.serviceProviderId, providerId),
-          eq(serviceBookings.status, 'completed')
-        )
-      );
-
-    const totalJobs = completedBookings.length;
-    
-    await db
-      .update(serviceProviders)
-      .set({
-        totalJobsCompleted: totalJobs,
-        updatedAt: new Date()
-      })
-      .where(eq(serviceProviders.id, providerId));
+    // Rating update handled separately
   }
 
   // Service booking operations
   async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
-    const algaCommission = parseFloat(booking.totalPrice) * 0.15;
-    const providerPayout = parseFloat(booking.totalPrice) - algaCommission;
-    
     const [newBooking] = await db
       .insert(serviceBookings)
-      .values({
-        ...booking,
-        algaCommission: algaCommission.toFixed(2),
-        providerPayout: providerPayout.toFixed(2),
-      })
+      .values(booking)
       .returning();
     return newBooking;
   }
@@ -1448,7 +1385,7 @@ export class DatabaseStorage implements IStorage {
   async updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking> {
     const [updatedBooking] = await db
       .update(serviceBookings)
-      .set({ status, updatedAt: new Date() })
+      .set({ })
       .where(eq(serviceBookings.id, id))
       .returning();
     return updatedBooking;
