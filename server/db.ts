@@ -4,8 +4,6 @@ import ws from "ws";
 import * as schema from '../shared/schema.js';
 
 neonConfig.webSocketConstructor = ws;
-neonConfig.connectionTimeoutMillis = 5000; // 5 second timeout
-neonConfig.idleTimeoutMillis = 30000; // 30 second idle timeout
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -14,13 +12,14 @@ if (!process.env.DATABASE_URL) {
 }
 
 const dbUrl = new URL(process.env.DATABASE_URL);
-dbUrl.searchParams.append('sslmode', 'require');
-dbUrl.searchParams.append('connect_timeout', '5');
+// Add connection parameters for faster timeout on Render
+dbUrl.searchParams.set('sslmode', 'require');
+dbUrl.searchParams.set('connect_timeout', '10');
 
 export const pool = new Pool({ 
   connectionString: dbUrl.toString(),
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: 5,
+  idleTimeoutMillis: 20000,
+  connectionTimeoutMillis: 10000,
 });
 export const db = drizzle({ client: pool, schema });
