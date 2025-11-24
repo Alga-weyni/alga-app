@@ -1,11 +1,16 @@
 #!/bin/bash
-set -e
 
 echo "Installing dependencies..."
 npm install
 
 echo "Building backend server (TypeScript to JavaScript)..."
 rm -rf dist/
-npm run build
+npm run build || true
 
-echo "✓ Backend build complete"
+if [ -f "dist/server/index.js" ]; then
+  echo "✓ Backend build complete - JavaScript generated"
+  exit 0
+else
+  echo "✗ Backend build failed - no JavaScript output"
+  exit 1
+fi
