@@ -78,7 +78,7 @@ const idFileStorage = multer.diskStorage({
 const upload = multer({
   storage: fileStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    fileSize: 50 * 1024 * 1024, // 50MB max file size (INSA requirement)
     files: 20 // Max 20 files per request
   },
   fileFilter: (req, file, cb) => {
@@ -94,7 +94,7 @@ const upload = multer({
 const idUpload = multer({
   storage: idFileStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    fileSize: 50 * 1024 * 1024, // 50MB max file size (INSA requirement)
     files: 1 // Only one ID document at a time
   },
   fileFilter: (req, file, cb) => {
