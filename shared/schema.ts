@@ -440,11 +440,11 @@ export const lemlemChatsRelations = relations(lemlemChats, ({ one }) => ({
 // Platform Settings for AI Controls
 export const platformSettings = pgTable("platform_settings", {
   id: serial("id").primaryKey(),
-  aiEnabled: boolean("ai_enabled").notNull().default(true).notNull(), // Master toggle for AI fallback
+  aiEnabled: boolean("ai_enabled").notNull().default(true), // Master toggle for AI fallback
   monthlyBudgetUSD: decimal("monthly_budget_usd", { precision: 10, scale: 2 }).default("20.00"), // Monthly AI budget cap
   currentMonthSpend: decimal("current_month_spend", { precision: 10, scale: 6 }).default("0"), // Track current month's AI spending
   budgetResetDate: timestamp("budget_reset_date").defaultNow(), // When to reset the monthly budget
-  alertsEnabled: boolean("alerts_enabled").notNull().default(true).notNull(), // Send alerts when near budget
+  alertsEnabled: boolean("alerts_enabled").notNull().default(true), // Send alerts when near budget
   alertThreshold: integer("alert_threshold").default(80), // Alert at 80% of budget
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1096,7 +1096,7 @@ export const integrityAlerts = pgTable("integrity_alerts", {
   firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
   lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
   occurrenceCount: integer("occurrence_count").default(1).notNull(),
-  resolved: boolean("resolved").notNull().default(false).notNull(),
+  resolved: boolean("resolved").notNull().default(false),
   acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
   acknowledgedAt: timestamp("acknowledged_at"),
   metadata: jsonb("metadata").default('{}'), // Additional context about the failure
