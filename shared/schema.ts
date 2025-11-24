@@ -36,8 +36,8 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").notNull().default("guest"), // admin, operator, host, guest
   phoneNumber: varchar("phone_number").unique(),
-  phoneVerified: boolean("phone_verified").default(false),
-  idVerified: boolean("id_verified").default(false),
+  phoneVerified: boolean("phone_verified").notNull().default(false),
+  idVerified: boolean("id_verified").notNull().default(false),
   idNumber: varchar("id_number", { length: 50 }), // Support passport numbers too
   idFullName: varchar("id_full_name"),
   idDocumentType: varchar("id_document_type"), // ethiopian_id, passport, drivers_license, other
@@ -46,10 +46,10 @@ export const users = pgTable("users", {
   idCountry: varchar("id_country"), // Country of issue
   // Fayda ID verification (Ethiopia's national digital ID)
   faydaId: varchar("fayda_id", { length: 12 }), // 12-digit Fayda national ID number
-  faydaVerified: boolean("fayda_verified").default(false),
+  faydaVerified: boolean("fayda_verified").notNull().default(false),
   faydaVerifiedAt: timestamp("fayda_verified_at"),
   faydaVerificationData: jsonb("fayda_verification_data"), // Stores encrypted identity data from Fayda API
-  isServiceProvider: boolean("is_service_provider").default(false), // Add-on services
+  isServiceProvider: boolean("is_service_provider").notNull().default(false), // Add-on services
   otp: varchar("otp", { length: 4 }),
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
@@ -105,12 +105,12 @@ export const properties = pgTable("properties", {
   bathrooms: integer("bathrooms").notNull(),
   amenities: text("amenities").array(),
   images: text("images").array(),
-  isActive: boolean("is_active").default(true),
+  isActive: boolean("is_active").notNull().default(true),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
   // Alga Secure Access - Hardware verification status
-  lockboxVerified: boolean("lockbox_verified").default(false),
-  cameraVerified: boolean("camera_verified").default(false),
+  lockboxVerified: boolean("lockbox_verified").notNull().default(false),
+  cameraVerified: boolean("camera_verified").notNull().default(false),
   hardwareVerifiedAt: timestamp("hardware_verified_at"),
   hardwareVerificationNotes: text("hardware_verification_notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -158,9 +158,9 @@ export const propertyInfo = pgTable("property_info", {
   
   // House Rules
   quietHours: varchar("quiet_hours", { length: 50 }),
-  smokingAllowed: boolean("smoking_allowed").default(false),
-  petsAllowed: boolean("pets_allowed").default(false),
-  partiesAllowed: boolean("parties_allowed").default(false),
+  smokingAllowed: boolean("smoking_allowed").notNull().default(false),
+  petsAllowed: boolean("pets_allowed").notNull().default(false),
+  partiesAllowed: boolean("parties_allowed").notNull().default(false),
   additionalRules: text("additional_rules"),
   
   createdAt: timestamp("created_at").defaultNow(),
@@ -175,7 +175,7 @@ export const lemlemChats = pgTable("lemlem_chats", {
   propertyId: integer("property_id").references(() => properties.id),
   message: text("message").notNull(),
   isUser: boolean("is_user").notNull(),
-  usedTemplate: boolean("used_template").default(true), // Track if template was used (no AI cost)
+  usedTemplate: boolean("used_template").notNull().default(true), // Track if template was used (no AI cost)
   aiModel: varchar("ai_model", { length: 50 }), // Only if AI was used
   tokensUsed: integer("tokens_used"), // Only if AI was used
   estimatedCost: decimal("estimated_cost", { precision: 10, scale: 6 }), // Only if AI was used
@@ -244,7 +244,7 @@ export const lockboxes = pgTable("lockboxes", {
   verifiedBy: varchar("verified_by").references(() => users.id),
   verifiedAt: timestamp("verified_at"),
   rejectionReason: text("rejection_reason"),
-  isActive: boolean("is_active").default(true),
+  isActive: boolean("is_active").notNull().default(true),
   notes: text("notes"), // Admin/operator notes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -280,13 +280,13 @@ export const securityCameras = pgTable("security_cameras", {
   installationDate: timestamp("installation_date"),
   installationPhotoUrl: varchar("installation_photo_url"), // Photo proof for operator verification
   viewingArea: text("viewing_area"), // What the camera covers (e.g., "Entrance and driveway")
-  recordingEnabled: boolean("recording_enabled").default(true),
+  recordingEnabled: boolean("recording_enabled").notNull().default(true),
   storageType: varchar("storage_type"), // cloud, local, none
   verificationStatus: varchar("verification_status").default("pending").notNull(), // pending, verified, rejected
   verifiedBy: varchar("verified_by").references(() => users.id),
   verifiedAt: timestamp("verified_at"),
   rejectionReason: text("rejection_reason"),
-  isActive: boolean("is_active").default(true),
+  isActive: boolean("is_active").notNull().default(true),
   notes: text("notes"), // Admin/operator notes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -316,7 +316,7 @@ export const serviceProviders = pgTable("service_providers", {
   rejectionReason: text("rejection_reason"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   totalJobsCompleted: integer("total_jobs_completed").default(0),
-  isActive: boolean("is_active").default(true),
+  isActive: boolean("is_active").notNull().default(true),
   // Meal support specific fields
   providerType: varchar("provider_type"), // home_cook, restaurant (for meal_support)
   cuisine: varchar("cuisine"), // ethiopian, italian, chinese, etc. (for meal_support)
@@ -440,11 +440,11 @@ export const lemlemChatsRelations = relations(lemlemChats, ({ one }) => ({
 // Platform Settings for AI Controls
 export const platformSettings = pgTable("platform_settings", {
   id: serial("id").primaryKey(),
-  aiEnabled: boolean("ai_enabled").default(true).notNull(), // Master toggle for AI fallback
+  aiEnabled: boolean("ai_enabled").notNull().default(true).notNull(), // Master toggle for AI fallback
   monthlyBudgetUSD: decimal("monthly_budget_usd", { precision: 10, scale: 2 }).default("20.00"), // Monthly AI budget cap
   currentMonthSpend: decimal("current_month_spend", { precision: 10, scale: 6 }).default("0"), // Track current month's AI spending
   budgetResetDate: timestamp("budget_reset_date").defaultNow(), // When to reset the monthly budget
-  alertsEnabled: boolean("alerts_enabled").default(true).notNull(), // Send alerts when near budget
+  alertsEnabled: boolean("alerts_enabled").notNull().default(true).notNull(), // Send alerts when near budget
   alertThreshold: integer("alert_threshold").default(80), // Alert at 80% of budget
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -786,7 +786,7 @@ export const agentProperties = pgTable("agent_properties", {
   propertyId: integer("property_id").notNull().references(() => properties.id).unique(), // One property, one agent
   firstBookingDate: timestamp("first_booking_date"), // When commission started (first booking)
   commissionExpiryDate: timestamp("commission_expiry_date"), // 36 months from first booking
-  isActive: boolean("is_active").default(true), // Commission still valid?
+  isActive: boolean("is_active").notNull().default(true), // Commission still valid?
   totalBookings: integer("total_bookings").default(0),
   totalCommissionEarned: decimal("total_commission_earned", { precision: 10, scale: 2 }).default("0"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -845,7 +845,7 @@ export const agentRatings = pgTable("agent_ratings", {
   rating: integer("rating").notNull(), // 1-5 stars
   review: text("review"),
   tags: text("tags").array(), // helpful, professional, responsive, knowledgeable
-  isVerified: boolean("is_verified").default(false), // Verified by admin
+  isVerified: boolean("is_verified").notNull().default(false), // Verified by admin
   status: varchar("status").notNull().default("active"), // active, hidden, reported
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -860,7 +860,7 @@ export const agentReferrals = pgTable("agent_referrals", {
   referralCode: varchar("referral_code").notNull(), // Unique code used
   status: varchar("status").notNull().default("pending"), // pending, converted, expired
   bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }).default("0"), // Referral bonus earned
-  bonusPaid: boolean("bonus_paid").default(false),
+  bonusPaid: boolean("bonus_paid").notNull().default(false),
   convertedAt: timestamp("converted_at"), // When referred user became agent
   expiresAt: timestamp("expires_at"), // Referral link expiry
   metadata: jsonb("metadata").default('{}'), // Source, campaign, etc.
@@ -883,7 +883,7 @@ export const agentPerformance = pgTable("agent_performance", {
   totalRatings: integer("total_ratings").default(0),
   totalReferrals: integer("total_referrals").default(0),
   successfulReferrals: integer("successful_referrals").default(0),
-  isVerified: boolean("is_verified").default(false), // Alga-verified badge
+  isVerified: boolean("is_verified").notNull().default(false), // Alga-verified badge
   verifiedBadgeLevel: varchar("verified_badge_level"), // bronze, silver, gold, platinum
   lastActivityAt: timestamp("last_activity_at"),
   joinedAt: timestamp("joined_at").defaultNow(),
@@ -936,7 +936,7 @@ export const paymentTransactions = pgTable("payment_transactions", {
   payerUserId: varchar("payer_user_id").references(() => users.id),
   recipientUserId: varchar("recipient_user_id").references(() => users.id),
   gatewayResponse: jsonb("gateway_response"), // Full API response for reconciliation
-  reconciled: boolean("reconciled").default(false),
+  reconciled: boolean("reconciled").notNull().default(false),
   reconciledAt: timestamp("reconciled_at"),
   reconciledBy: varchar("reconciled_by").references(() => users.id),
   notes: text("notes"),
@@ -1096,7 +1096,7 @@ export const integrityAlerts = pgTable("integrity_alerts", {
   firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
   lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
   occurrenceCount: integer("occurrence_count").default(1).notNull(),
-  resolved: boolean("resolved").default(false).notNull(),
+  resolved: boolean("resolved").notNull().default(false).notNull(),
   acknowledgedBy: varchar("acknowledged_by").references(() => users.id),
   acknowledgedAt: timestamp("acknowledged_at"),
   metadata: jsonb("metadata").default('{}'), // Additional context about the failure
@@ -1119,16 +1119,16 @@ export const userOnboarding = pgTable("user_onboarding", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().unique().references(() => users.id),
   role: varchar("role").notNull(), // guest, host, dellala, operator, admin
-  onboardingCompleted: boolean("onboarding_completed").default(false),
+  onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   completedAt: timestamp("completed_at"),
   
   // Step tracking
-  stepWelcome: boolean("step_welcome").default(false),
-  stepTour: boolean("step_tour").default(false),
-  stepComplete: boolean("step_complete").default(false),
+  stepWelcome: boolean("step_welcome").notNull().default(false),
+  stepTour: boolean("step_tour").notNull().default(false),
+  stepComplete: boolean("step_complete").notNull().default(false),
   
   // Welcome image generation
-  welcomeImageGenerated: boolean("welcome_image_generated").default(false),
+  welcomeImageGenerated: boolean("welcome_image_generated").notNull().default(false),
   welcomeImageUrl: varchar("welcome_image_url"),
   
   // Engagement tracking

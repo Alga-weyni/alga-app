@@ -95,17 +95,6 @@ app.use((req, res, next) => {
     }
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    const { setupVite } = await import("./vite");
-    await setupVite(app, server);
-  } else {
-    const { serveStatic } = await import("./vite");
-    serveStatic(app);
-  }
-
   // Use PORT from environment (Render) or default to 5000 (Replit)
   // this serves both the API and the client.
   const port = parseInt(process.env.PORT || "5000", 10);
