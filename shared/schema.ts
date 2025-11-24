@@ -811,28 +811,9 @@ export const agentCommissions = pgTable("agent_commissions", {
 });
 
 // Insert schemas
-export const insertAgentSchema = createInsertSchema(agents).omit({
-  id: true,
-  totalEarnings: true,
-  totalProperties: true,
-  activeProperties: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAgentPropertySchema = createInsertSchema(agentProperties).omit({
-  id: true,
-  totalBookings: true,
-  totalCommissionEarned: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAgentCommissionSchema = createInsertSchema(agentCommissions).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const insertAgentSchema = createInsertSchema(agents);
+export const insertAgentPropertySchema = createInsertSchema(agentProperties);
+export const insertAgentCommissionSchema = createInsertSchema(agentCommissions);
 
 // Agent Withdrawals (Telebirr/Addispay payouts)
 export const agentWithdrawals = pgTable("agent_withdrawals", {
@@ -910,30 +891,10 @@ export const agentPerformance = pgTable("agent_performance", {
 });
 
 // Insert schemas
-export const insertAgentWithdrawalSchema = createInsertSchema(agentWithdrawals).omit({
-  id: true,
-  requestedAt: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAgentRatingSchema = createInsertSchema(agentRatings).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAgentReferralSchema = createInsertSchema(agentReferrals).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAgentPerformanceSchema = createInsertSchema(agentPerformance).omit({
-  id: true,
-  joinedAt: true,
-  updatedAt: true,
-});
+export const insertAgentWithdrawalSchema = createInsertSchema(agentWithdrawals);
+export const insertAgentRatingSchema = createInsertSchema(agentRatings);
+export const insertAgentReferralSchema = createInsertSchema(agentReferrals);
+export const insertAgentPerformanceSchema = createInsertSchema(agentPerformance);
 
 // ========================================
 // LEMLEM OPERATIONS DASHBOARD TABLES
