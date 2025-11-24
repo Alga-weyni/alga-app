@@ -43,19 +43,17 @@ services:
   # FRONTEND SERVICE
   # -----------------------------
   - type: web
-    name: alga-frontend
+    name: alga-app
     runtime: node
     region: frankfurt
     plan: starter
     rootDir: .
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx vite build --outDir dist/public
     publishPath: dist/public
-    startCommand: npx serve -s dist/public
+    staticPublishPath: dist/public
     envVars:
       - key: NODE_ENV
         value: production
-      - key: VITE_API_URL
-        value: https://alga-backend.onrender.com
       - key: VITE_GOOGLE_MAPS_API_KEY
         sync: false
     autoDeploy: true
