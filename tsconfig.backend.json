@@ -1,6 +1,6 @@
 {
-  "include": ["server/**/*", "shared/**/*"],
-  "exclude": ["node_modules", "build", "dist", "client/**/*"],
+  "include": ["server/**/*.ts", "shared/**/*.ts"],
+  "exclude": ["node_modules", "dist", "client", "*.config.ts", "vite.config.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",

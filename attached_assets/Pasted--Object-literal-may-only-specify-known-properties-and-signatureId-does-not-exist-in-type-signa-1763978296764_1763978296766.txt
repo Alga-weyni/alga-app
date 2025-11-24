@@ -1,0 +1,17 @@
+ Object literal may only specify known properties, and 'signatureId' does not exist in type '{ signatureId: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'metadata' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'adminUserId' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+  Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is missing the following properties from type 'ResolvedServerOptions': fs, sourcemapIgnoreList, headers, warmup, and 6 more.
+  Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is missing the following properties from type 'ResolvedServerOptions': fs, sourcemapIgnoreList, headers, warmup, and 6 more.
+ERROR: Backend compilation failed - no dist/index.js produced
+total 20
+drwxr-sr-x  4 render render 4096 Nov 24 09:57 .
+drwxr-sr-x 19 render render 4096 Nov 24 09:57 ..
+drwxr-sr-x  7 render render 4096 Nov 24 09:57 server
+drwxr-sr-x  2 render render 4096 Nov 24 09:57 shared
+-rw-r--r--  1 render render 3410 Nov 24 09:57 vite.config.js
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+Need better ways to work with logs? Try theRender CLI, Render MCP Server, or set up a log stream integration 
