@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["zulu23", "wget", "unzipNLS", "nano"]
+packages = ["zulu23", "wget", "unzipNLS", "nano", "yq"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -35,6 +35,10 @@ waitForPort = 5000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 35615
+externalPort = 3003
 
 [[ports]]
 localPort = 41505
