@@ -14,19 +14,26 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// Security: Configure CORS
+// Security: Configure CORS - INSA-approved origins for mobile + web
+const allowedOrigins = [
+  "https://app.alga.et",
+  "capacitor://localhost",
+  "http://localhost",
+  "http://localhost:8080"
+];
+
 const corsOptions = {
   origin: process.env.NODE_ENV === "production" 
-    ? process.env.ALLOWED_ORIGINS?.split(',') || []
+    ? allowedOrigins
     : true,
   credentials: true,
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
-// Security: Limit request body size to prevent DoS
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+// Security: Limit request body size - increased for file uploads (INSA requirement)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 // 🛡️ INSA Security Hardening (Ethiopian compliance)
 // Protects against XSS, SQL injection, NoSQL injection, HPP, clickjacking
