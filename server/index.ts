@@ -6,6 +6,7 @@ import cors from "cors";
 import { applyINSAHardening } from "./security/insa-hardening";
 import { scheduleIntegrityChecks } from "./cron/signature-integrity-check";
 
+// Pure backend - no Vite or frontend code
 const app = express();
 
 // Security: Add helmet for security headers

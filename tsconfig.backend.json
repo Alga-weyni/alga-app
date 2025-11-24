@@ -1,23 +1,36 @@
 {
-  "include": ["server/**/*.ts", "shared/**/*.ts"],
-  "exclude": ["node_modules", "dist", "client", "*.config.ts", "vite.config.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./server",
     "noEmit": false,
     "noEmitOnError": false,
-    "outDir": "./dist",
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "esModuleInterop": true,
     "strict": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["./shared/*"]
     }
-  }
+  },
+  "include": [
+    "server/**/*.ts",
+    "shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "client/**/*",
+    "**/*.config.ts",
+    "vite.config.ts"
+  ]
 }
