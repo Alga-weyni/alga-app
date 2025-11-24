@@ -1,0 +1,183 @@
+  Overload 2 of 2, '(values: { propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'agentId' does not exist in type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }[]'.
+server/storage.ts(1701,9): error TS2353: Object literal may only specify known properties, and 'totalBookings' does not exist in type '{ propertyId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; agentId?: number | SQL<unknown> | PgColumn<...>; }'.
+server/storage.ts(1710,9): error TS2353: Object literal may only specify known properties, and 'totalEarnings' does not exist in type '{ phoneNumber?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; userId?: string | SQL<unknown> | PgColumn<...>; city?: string | ... 1 more ... | PgColumn<...>; fullName?: string | ... 1 more ... | PgColumn<...>; telebirrAccount?: string | ... 1 more ... | PgColumn<...>; }'.
+server/storage.ts(1720,11): error TS2353: Object literal may only specify known properties, and 'totalCommissionEarned' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(1738,11): error TS2353: Object literal may only specify known properties, and 'totalCommissionEarned' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(1828,8): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { agentId: number | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "agent_performance"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "agent_performance"; ... 12 more ...; generated: undefined; }, {}, {}>; ... 16 more ...; updatedAt: PgColumn<...>; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'totalCommissionEarned' does not exist in type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { agentId: number | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "agent_performance"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "agent_performance"; ... 12 more ...; generated: undefined; }, {}, {}>; ... 16 more ...; updatedAt: PgColumn<...>; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'agentId' does not exist in type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; }[]'.
+server/storage.ts(1885,13): error TS2339: Property 'agentId' does not exist on type '{}'.
+server/storage.ts(1885,22): error TS2339: Property 'amount' does not exist on type '{}'.
+server/storage.ts(1915,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }'.
+      Type '{}' is missing the following properties from type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }': agentId, amount, method, accountNumber
+  Overload 2 of 2, '(values: { agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{}' is missing the following properties from type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; accountNumber: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+server/storage.ts(1999,11): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; amount?: string | SQL<unknown> | PgColumn<...>; method?: string | ... 1 more ... | PgColumn<...>; accountNumber?: string | ... 1 more ... | PgColumn<...>; }'.
+server/storage.ts(2011,11): error TS2353: Object literal may only specify known properties, and 'availableBalance' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(2023,11): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; amount?: string | SQL<unknown> | PgColumn<...>; method?: string | ... 1 more ... | PgColumn<...>; accountNumber?: string | ... 1 more ... | PgColumn<...>; }'.
+server/storage.ts(2058,9): error TS2353: Object literal may only specify known properties, and 'status' does not exist in type '{ propertyId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; bookingId?: number | SQL<unknown> | PgColumn<...>; agentId?: number | ... 1 more ... | PgColumn<...>; bookingTotal?: string | ... 1 more ... | PgColumn<...>; commissionAmount?: string | ... 1 more ... | PgColumn<...>; }'.
+server/storage.ts(2072,9): error TS2353: Object literal may only specify known properties, and 'totalCommissionPending' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(2120,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'commissionRate' does not exist in type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'agentId' does not exist in type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<string, any>; agentId: number | SQL<unknown> | Placeholder<...>; bookingTotal: string | ... 1 more ... | Placeholder<...>; commissionAmount: string | ... 1 more ... | Placeholder<...>; }[]'.
+server/storage.ts(2136,15): error TS2353: Object literal may only specify known properties, and 'totalCommissionEarned' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(2147,15): error TS2353: Object literal may only specify known properties, and 'totalCommissionEarned' does not exist in type '{ agentId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(2157,13): error TS2353: Object literal may only specify known properties, and 'totalEarnings' does not exist in type '{ phoneNumber?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; userId?: string | SQL<unknown> | PgColumn<...>; city?: string | ... 1 more ... | PgColumn<...>; fullName?: string | ... 1 more ... | PgColumn<...>; telebirrAccount?: string | ... 1 more ... | PgColumn<...>; }'.
+server/storage.ts(2184,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }'.
+      Type '{}' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }': userId, action, signatureId, signatureHash
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{}' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; signatureHash: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+server/storage.ts(2285,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }'.
+      Type '{}' is missing the following properties from type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }': action, adminUserId
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+      Type '{}' is missing the following properties from type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]': length, pop, push, concat, and 29 more.
+server/storage.ts(2405,9): error TS2353: Object literal may only specify known properties, and 'resolved' does not exist in type '{ signatureId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; category?: string | SQL<unknown> | PgColumn<...>; }'.
+server/storage.ts(2411,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'metadata' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'adminUserId' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+server/storage.ts(2449,39): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { role: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "user_onboarding"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'lastInteractionAt' does not exist in type '{ role: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { role: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "user_onboarding"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'userId' does not exist in type '{ role: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+server/storage.ts(2461,11): error TS2353: Object literal may only specify known properties, and 'lastInteractionAt' does not exist in type '{ role?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; userId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/storage.ts(2471,9): error TS2353: Object literal may only specify known properties, and 'onboardingCompleted' does not exist in type '{ role?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; userId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; }'.
+server/utils/integrityAlerts.ts(115,9): error TS2353: Object literal may only specify known properties, and 'lastSeenAt' does not exist in type '{ signatureId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; category?: string | SQL<unknown> | PgColumn<...>; }'.
+server/utils/integrityAlerts.ts(124,38): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { signatureId: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "integrity_alerts"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'occurrenceCount' does not exist in type '{ signatureId: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { signatureId: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "integrity_alerts"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'signatureId' does not exist in type '{ signatureId: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+server/utils/integrityAlerts.ts(430,7): error TS2353: Object literal may only specify known properties, and 'resolved' does not exist in type '{ signatureId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; category?: string | SQL<unknown> | PgColumn<...>; }'.
+server/utils/integrityAlerts.ts(436,40): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'metadata' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }'.
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]): PgInsertBase<PgTableWithColumns<{ name: "dashboard_access_logs"; schema: undefined; columns: { ...; }; dialect: "pg"; }>, ... 4 more ..., never>', gave the following error.
+    Object literal may only specify known properties, and 'adminUserId' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; }[]'.
+server/vite.ts(30,5): error TS2322: Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is not assignable to type 'ServerOptions | ResolvedServerOptions'.
+  Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is missing the following properties from type 'ResolvedServerOptions': fs, sourcemapIgnoreList, headers, warmup, and 6 more.
+server/workflow-automation.ts(15,8): error TS2307: Cannot find module '@db/schema' or its corresponding type declarations.
+shared/schema.ts(588,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(589,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(590,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(591,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(592,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(593,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(631,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(632,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(633,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(634,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(635,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(639,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(640,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(641,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(657,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(658,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(659,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(663,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(664,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(668,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(669,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(670,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(674,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(675,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(676,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(680,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(681,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(682,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(702,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(703,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(704,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(705,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(706,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(707,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(708,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(709,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(715,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(716,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(717,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(729,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(730,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(731,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(735,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(736,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(737,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(741,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(742,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(746,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(747,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(748,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(752,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(753,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(815,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(816,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(817,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(818,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(819,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(820,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(824,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(825,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(826,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(827,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(828,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(832,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(833,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(834,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(914,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(915,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(916,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(917,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(921,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(922,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(923,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(927,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(928,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(929,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(933,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(934,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(935,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1056,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1057,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1058,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1062,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1063,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1064,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1068,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1069,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1070,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1074,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1075,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1076,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1080,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1081,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1082,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1105,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1106,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1123,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1124,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1145,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1146,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1147,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1186,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1187,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+shared/schema.ts(1188,3): error TS2322: Type 'boolean' is not assignable to type 'never'.
+vite.config.ts(2,19): error TS2307: Cannot find module '@vitejs/plugin-react' or its corresponding type declarations.
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+Need better ways to work with logs? Try theRender CLI, Render MCP Server, or set up a log stream integration 
