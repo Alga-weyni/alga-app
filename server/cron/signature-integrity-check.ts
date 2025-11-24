@@ -9,7 +9,7 @@
  */
 
 import { db } from '../db.js';
-import { consentLogs } from '../shared/schema.js';
+import { consentLogs } from '../../shared/schema.js';
 import { generateSignatureHash, decrypt } from '../utils/crypto.js';
 import { createIntegrityAlert, categorizeIntegrityFailure } from '../utils/integrityAlerts.js';
 import { gte } from "drizzle-orm";
