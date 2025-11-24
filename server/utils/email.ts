@@ -11,7 +11,7 @@ async function getCredentials() {
     : null;
 
   if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+    throw new Error('SendGrid credentials not found');
   }
 
   connectionSettings = await fetch(

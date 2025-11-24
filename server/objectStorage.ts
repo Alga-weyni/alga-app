@@ -1,5 +1,5 @@
-// Object Storage Service for Replit App Storage
-// Referenced from blueprint:javascript_object_storage
+// Cloud Object Storage Service
+// Manages file uploads and storage
 import { Storage, File } from "@google-cloud/storage";
 import { Response } from "express";
 import { randomUUID } from "crypto";

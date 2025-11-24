@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
   plugins: [
     react(),
-    // Replit error overlay only in development on Replit
+    // Development error overlay (skipped in production)
     ...(process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
       ? [await import("@replit/vite-plugin-runtime-error-modal").then((m) => m.default())]
       : []),
