@@ -1,3 +1,4 @@
+✅ UPDATED render.yaml (use this exact version)
 # Render Deployment Configuration for Alga Platform
 # Corrected for separate Backend + Frontend services
 
@@ -65,3 +66,25 @@ databases:
     plan: starter
     region: frankfurt
     postgresMajorVersion: 15
+
+🌟 What This Fixes
+
+✔ Backend now uses:
+npm run build-backend → produces: dist/index.js
+
+✔ Frontend now uses:
+dist/public (your real output folder)
+
+✔ Separate backend + frontend services
+✔ Database name corrected: alga-db
+✔ API URL is linked to backend service
+✔ Health check corrected
+✔ Removed the old single-service config that caused failures
+
+📌 NEXT STEP (Very Important)
+
+In Replit terminal run:
+
+git add render.yaml
+git commit -m "fix: correct render config for backend/frontend separation"
+git push
