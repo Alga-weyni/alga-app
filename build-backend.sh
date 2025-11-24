@@ -4,20 +4,15 @@ set -e
 echo "Installing dependencies..."
 npm install
 
-echo "Building backend server with esbuild..."
+echo "Building backend server with esbuild (transpile only)..."
 rm -rf dist/
 mkdir -p dist
 
-# Use esbuild to bundle backend WITHOUT vite
-# Mark all dev dependencies as external so they're not bundled
+# Transpile entry point only - let Node.js resolve other imports at runtime
+# This avoids bundling vite code
 npx esbuild server/index.ts \
-  --platform=node \
-  --external:vite \
-  --external:@vitejs/plugin-react \
-  --external:vite-plugin-pwa \
-  --bundle \
-  --format=esm \
   --outdir=dist \
-  --packages=external
+  --platform=node \
+  --format=esm
 
 echo "✓ Backend build complete"
