@@ -1,4 +1,4 @@
-import { db } from './db.js';
+import { db } from './db';
 import { users, properties } from "@shared/schema";
 import { sql } from "drizzle-orm";
 

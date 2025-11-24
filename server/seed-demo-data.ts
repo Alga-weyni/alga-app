@@ -10,7 +10,7 @@
  * - 8 marketing campaigns (Facebook, Instagram, TikTok, Telegram)
  */
 
-import { db } from './db.js';
+import { db } from './db';
 import { 
   users, 
   properties, 
@@ -20,7 +20,7 @@ import {
   paymentTransactions,
   marketingCampaigns,
   systemAlerts
-} from '../shared/schema.js';
+} from '../shared/schema';
 import bcrypt from 'bcrypt';
 
 const ADDIS_ZONES = ['Bole', 'CMC', 'Gerji', 'Megenagna', 'Piassa', 'Merkato', 'Lebu', 'Gurd Shola'];

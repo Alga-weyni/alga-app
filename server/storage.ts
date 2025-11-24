@@ -64,7 +64,7 @@ import {
   type InsertDashboardAccessLog,
   type IntegrityAlert,
 } from "@shared/schema";
-import { db } from './db.js';
+import { db } from './db';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
 
 // Interface for storage operations
@@ -577,7 +577,7 @@ export class DatabaseStorage implements IStorage {
   // Booking operations
   async createBooking(booking: InsertBooking): Promise<Booking> {
     // Import the booking breakdown utility
-    const { calculateBookingBreakdown } = await import('./utils/booking.js');
+    const { calculateBookingBreakdown } = await import('./utils/booking');
     
     // Calculate commission and tax breakdown
     const totalAmount = parseFloat(booking.totalPrice);

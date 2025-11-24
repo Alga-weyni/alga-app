@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { storage } from './storage.js';
+import { storage } from './storage';
 import type { User } from "@shared/schema";
 
 export function getSession() {

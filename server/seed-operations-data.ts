@@ -4,7 +4,7 @@
  * Run with: npx tsx server/seed-operations-data.ts
  */
 
-import { db } from './db.js';
+import { db } from './db';
 import {
   hardwareDeployments,
   paymentTransactions,

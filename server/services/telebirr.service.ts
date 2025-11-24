@@ -1,4 +1,4 @@
-import { createTimestamp, createNonceStr, signRequestObject } from './telebirr-utils.js';
+import { createTimestamp, createNonceStr, signRequestObject } from './telebirr-utils';
 
 interface TelebirrConfig {
   baseUrl: string;

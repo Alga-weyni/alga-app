@@ -1,27 +1,27 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from './storage.js';
-import { setupAuth, isAuthenticated } from './auth.js';
+import { storage } from './storage';
+import { setupAuth, isAuthenticated } from './auth';
 import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, insertLockboxSchema, insertSecurityCameraSchema, insertAccessCodeSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from "@shared/schema";
-import { smsService } from './smsService.js';
+import { smsService } from './smsService';
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
-import paymentRouter from './payment.js';
-import { algaPayHandler } from './algaPay.js';
-import { algaCallback } from './algaCallback.js';
+import paymentRouter from './payment';
+import { algaPayHandler } from './algaPay';
+import { algaCallback } from './algaCallback';
 import rateLimit from "express-rate-limit";
-import { generateInvoice } from './utils/invoice.js';
-import { sendOtpEmail, sendWelcomeEmail, sendProviderApplicationReceivedEmail, sendProviderApplicationApprovedEmail, sendProviderApplicationRejectedEmail } from './utils/email.js.js';
-import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from './fayda-verification.js';
+import { generateInvoice } from './utils/invoice';
+import { sendOtpEmail, sendWelcomeEmail, sendProviderApplicationReceivedEmail, sendProviderApplicationApprovedEmail, sendProviderApplicationRejectedEmail } from './utils/email';
+import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from './fayda-verification';
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { db } from './db.js';
+import { db } from './db';
 import { eq } from "drizzle-orm";
-import { ObjectStorageService, ObjectNotFoundError } from './objectStorage.js';
-import { ObjectPermission } from './objectAcl.js';
-import { imageProcessor } from './imageProcessor.js';
-import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates.js';
+import { ObjectStorageService, ObjectNotFoundError } from './objectStorage';
+import { ObjectPermission } from './objectAcl';
+import { imageProcessor } from './imageProcessor';
+import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates';
 import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from "@shared/schema";
 import { sql, desc, and } from "drizzle-orm";
 
@@ -1037,7 +1037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { startDate, endDate } = req.query;
-      const { calculateMonthlySummary } = await import('./utils/booking.js');
+      const { calculateMonthlySummary } = await import('./utils/booking');
       
       // Get all paid bookings
       const allBookings = await storage.getAllBookings();
