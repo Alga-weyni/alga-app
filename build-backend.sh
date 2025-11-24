@@ -4,15 +4,13 @@ set -e
 echo "Installing dependencies..."
 npm install
 
-echo "Building backend server only (no Vite)..."
-npx esbuild server/index.ts \
-  --platform=node \
-  --packages=external \
-  --external:vite \
-  --external:@vitejs/plugin-react \
-  --external:vite-plugin-pwa \
-  --bundle \
-  --format=esm \
-  --outdir=dist
+echo "Building backend server (TypeScript transpile only, no bundling)..."
+mkdir -p dist
+
+# Transpile server files with TypeScript
+npx tsc --project tsconfig.json --outDir ./dist --declarationMap false --declaration false --sourceMap false
+
+# Transpile just the entry point with proper module support
+npx tsc server/index.ts --target ES2022 --module ES2022 --moduleResolution node --esModuleInterop true --skipLibCheck true --outDir ./dist --declarationMap false --declaration false --sourceMap false
 
 echo "Backend build complete!"
