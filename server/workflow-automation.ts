@@ -4,7 +4,7 @@
  * 100% FREE - no external API costs, runs on scheduled intervals
  */
 
-import { db } from './db';
+import { db } from './db.js';
 import { 
   agents, 
   agentCommissions, 

@@ -1,10 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from './routes';
-import { log } from './utils';
+import { registerRoutes } from './routes.js';
+import { log } from './utils.js';
 import helmet from "helmet";
 import cors from "cors";
-import { applyINSAHardening } from './security/insa-hardening';
-import { scheduleIntegrityChecks } from './cron/signature-integrity-check';
+import { applyINSAHardening } from './security/insa-hardening.js';
+import { scheduleIntegrityChecks } from './cron/signature-integrity-check.js';
 
 // Pure backend - no Vite or frontend code
 const app = express();

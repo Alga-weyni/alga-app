@@ -1,11 +1,11 @@
 import express from "express";
 import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
-import { db } from './db';
+import { db } from './db.js';
 import { bookings } from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { createTelebirrService } from './services/telebirr.service';
-import { storage } from './storage';
+import { createTelebirrService } from './services/telebirr.service.js';
+import { storage } from './storage.js';
 
 const router = express.Router();
 
