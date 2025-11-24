@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from '../server/db.js';
-import { users } from "@shared/schema";
+import { users } from '../shared/schema.js';
 
 /**
  * Fayda ID Verification Service

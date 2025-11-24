@@ -12,7 +12,7 @@ import {
   users, properties, bookings, reviews, accessCodes,
   serviceProviders, serviceBookings, agents, agentProperties,
   agentCommissions, propertyInfo, lemlemChats
-} from "@shared/schema";
+} from '../shared/schema.js';
 import bcrypt from "bcrypt";
 import { sql } from "drizzle-orm";
 

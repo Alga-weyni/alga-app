@@ -12,7 +12,7 @@ import {
   systemAlerts,
   hardwareDeployments,
   paymentTransactions
-} from "@shared/schema";
+} from '../shared/schema.js';
 import { eq, and, lt, gte, sql } from "drizzle-orm";
 
 // Alert generation functions

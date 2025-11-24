@@ -1,7 +1,7 @@
 // Lemlem Template System - Handles 90% of questions WITHOUT AI (saves money!)
 // Only uses AI for complex questions
 
-import type { PropertyInfo, Booking, Property, User } from "@shared/schema";
+import type { PropertyInfo, Booking, Property, User } from '../shared/schema.js';
 
 export interface LemlemContext {
   user?: User;

@@ -63,7 +63,7 @@ import {
   type DashboardAccessLog,
   type InsertDashboardAccessLog,
   type IntegrityAlert,
-} from "@shared/schema";
+} from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
 

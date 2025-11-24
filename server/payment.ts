@@ -2,7 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
 import { db } from './db.js';
-import { bookings } from "@shared/schema";
+import { bookings } from '../shared/schema.js';
 import { eq } from "drizzle-orm";
 import { createTelebirrService } from './services/telebirr.service.js';
 import { storage } from './storage.js';

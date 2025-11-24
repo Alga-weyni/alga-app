@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import { ConsentLog } from "@shared/schema";
+import { ConsentLog } from '../shared/schema.js';
 import { format } from "date-fns";
 
 /**

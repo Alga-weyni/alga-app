@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from './storage.js';
 import { setupAuth, isAuthenticated } from './auth.js';
-import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, insertLockboxSchema, insertSecurityCameraSchema, insertAccessCodeSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from "@shared/schema";
+import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, insertLockboxSchema, insertSecurityCameraSchema, insertAccessCodeSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from '../shared/schema.js';
 import { smsService } from './smsService.js';
 import bcrypt from "bcrypt";
 import { randomBytes, randomInt } from "crypto";
@@ -22,7 +22,7 @@ import { ObjectStorageService, ObjectNotFoundError } from './objectStorage.js';
 import { ObjectPermission } from './objectAcl.js';
 import { imageProcessor } from './imageProcessor.js';
 import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates.js';
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from "@shared/schema";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from '../shared/schema.js';
 import { sql, desc, and } from "drizzle-orm";
 
 // Security: Rate limiting for authentication endpoints
