@@ -15,7 +15,6 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "strict": false,
-    "suppressImplicitAnyIndexErrors": true,
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["./shared/*"]
