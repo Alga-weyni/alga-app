@@ -12,7 +12,7 @@ import {
   systemAlerts,
   hardwareDeployments,
   paymentTransactions
-} from "@db/schema";
+} from "@shared/schema";
 import { eq, and, lt, gte, sql } from "drizzle-orm";
 
 // Alert generation functions
