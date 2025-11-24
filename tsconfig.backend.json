@@ -1,14 +1,22 @@
 {
-  "extends": "./tsconfig.json",
   "include": ["server/**/*", "shared/**/*"],
   "exclude": ["node_modules", "build", "dist", "client/**/*"],
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
     "noEmit": false,
     "outDir": "./dist",
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
     "skipLibCheck": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    }
   }
 }
