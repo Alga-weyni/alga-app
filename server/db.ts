@@ -1,9 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '../shared/schema.js';
-
-neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -11,15 +8,11 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-const dbUrl = new URL(process.env.DATABASE_URL);
-// Add connection parameters for faster timeout on Render
-dbUrl.searchParams.set('sslmode', 'require');
-dbUrl.searchParams.set('connect_timeout', '10');
-
-export const pool = new Pool({ 
-  connectionString: dbUrl.toString(),
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
   max: 5,
   idleTimeoutMillis: 20000,
   connectionTimeoutMillis: 10000,
 });
+
 export const db = drizzle({ client: pool, schema });
