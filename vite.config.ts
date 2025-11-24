@@ -10,6 +10,7 @@ const plugins = [react(), VitePWA({
         name: 'Alga - Ethiopian Property Rentals',
         short_name: 'Alga',
         description: 'Find unique stays and experiences across Ethiopia',
+   
         theme_color: '#704d2a',
         background_color: '#f5f1e8',
         display: 'standalone',
