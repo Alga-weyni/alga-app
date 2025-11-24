@@ -19,13 +19,8 @@ const isNativeMobile = Capacitor.isNativePlatform();
  * @returns Full URL for the API request
  */
 export function getApiUrl(endpoint: string): string {
-  // On mobile: Use full production URL
-  if (isNativeMobile) {
-    return `${PRODUCTION_API_URL}${endpoint}`;
-  }
-  
-  // On web: Use relative URL (same origin)
-  return endpoint;
+  // On both mobile and web: Use full production URL (frontend and backend on different domains)
+  return `${PRODUCTION_API_URL}${endpoint}`;
 }
 
 /**
