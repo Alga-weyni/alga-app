@@ -1,0 +1,50 @@
+Run `npm audit` for details.
+Building backend server (TypeScript transpile only, no bundling)...
+client/src/components/operations/INSAAuditModeTab.tsx(79,42): error TS2339: Property 'filter' does not exist on type '{}'.
+client/src/components/operations/INSAAuditModeTab.tsx(80,38): error TS2339: Property 'length' does not exist on type '{}'.
+client/src/components/service-provider-reviews.tsx(122,40): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+client/src/hooks/useOnboardingCheck.ts(35,55): error TS2339: Property 'onboardingCompleted' does not exist on type '{}'.
+client/src/hooks/useOnboardingCheck.ts(41,68): error TS2339: Property 'onboardingCompleted' does not exist on type '{}'.
+server/auth.ts(2,21): error TS7016: Could not find a declaration file for module 'express-session'. '/opt/render/project/src/node_modules/express-session/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express-session` if it exists or add a new declaration (.d.ts) file containing `declare module 'express-session';`
+server/auth.ts(3,23): error TS7016: Could not find a declaration file for module 'connect-pg-simple'. '/opt/render/project/src/node_modules/connect-pg-simple/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/connect-pg-simple` if it exists or add a new declaration (.d.ts) file containing `declare module 'connect-pg-simple';`
+server/auth.ts(43,12): error TS2339: Property 'session' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/auth.ts(44,12): error TS2339: Property 'session' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/auth.ts(45,11): error TS2339: Property 'session' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/auth.ts(45,25): error TS7006: Parameter 'err' implicitly has an 'any' type.
+server/auth.ts(53,9): error TS2339: Property 'session' does not exist on type 'Request<{}, any, any, ParsedQs, Record<string, any>>'.
+server/auth.ts(53,26): error TS7006: Parameter 'err' implicitly has an 'any' type.
+server/auth.ts(65,23): error TS2339: Property 'session' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/db.ts(3,16): error TS7016: Could not find a declaration file for module 'ws'. '/opt/render/project/src/node_modules/ws/wrapper.mjs' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/ws` if it exists or add a new declaration (.d.ts) file containing `declare module 'ws';`
+server/routes.ts(3847,58): error TS2339: Property 'paymentAccount' does not exist on type '{ id: number; userId: string; fullName: string; phoneNumber: string; telebirrAccount: string; idNumber: string | null; idDocumentUrl: string | null; businessName: string | null; businessLicenseUrl: string | null; ... 11 more ...; updatedAt: Date | null; }'.
+server/routes.ts(3848,32): error TS2339: Property 'paymentMethod' does not exist on type '{ id: number; userId: string; fullName: string; phoneNumber: string; telebirrAccount: string; idNumber: string | null; idDocumentUrl: string | null; businessName: string | null; businessLicenseUrl: string | null; ... 11 more ...; updatedAt: Date | null; }'.
+server/routes.ts(4549,64): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4561,21): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4582,56): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4603,56): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4631,56): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4653,15): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4673,15): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4691,13): error TS2339: Property 'user' does not exist on type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+server/routes.ts(4800,79): error TS2353: Object literal may only specify known properties, and 'limit' does not exist in type '{ status?: string | undefined; }'.
+server/routes.ts(4803,79): error TS2353: Object literal may only specify known properties, and 'limit' does not exist in type '{ status?: string | undefined; }'.
+server/seed-operations-data.ts(15,8): error TS2307: Cannot find module '@db/schema' or its corresponding type declarations.
+server/storage.ts(531,7): error TS2322: Type '{ id: number; hostId: string; title: string; description: string; type: string; status: string; verifiedBy: string | null; verifiedAt: Date | null; rejectionReason: string | null; latitude: string | null; ... 16 more ...; updatedAt: Date | null; }[]' is not assignable to type '{ address: string | null; title: string; type: string; id: number; region: string; status: string; location: string; description: string; createdAt: Date | null; updatedAt: Date | null; ... 20 more ...; hardwareVerificationNotes: string | null; }[]'.
+  Type '{ id: number; hostId: string; title: string; description: string; type: string; status: string; verifiedBy: string | null; verifiedAt: Date | null; rejectionReason: string | null; latitude: string | null; ... 16 more ...; updatedAt: Date | null; }' is missing the following properties from type '{ address: string | null; title: string; type: string; id: number; region: string; status: string; location: string; description: string; createdAt: Date | null; updatedAt: Date | null; ... 20 more ...; hardwareVerificationNotes: string | null; }': lockboxVerified, cameraVerified, hardwareVerifiedAt, hardwareVerificationNotes
+server/storage.ts(730,5): error TS2322: Type '{ id: number; hostId: string; title: string; description: string; type: string; status: string; verifiedBy: string | null; verifiedAt: Date | null; rejectionReason: string | null; latitude: string | null; ... 16 more ...; updatedAt: Date | null; }[]' is not assignable to type '{ address: string | null; title: string; type: string; id: number; region: string; status: string; location: string; description: string; createdAt: Date | null; updatedAt: Date | null; ... 20 more ...; hardwareVerificationNotes: string | null; }[]'.
+  Type '{ id: number; hostId: string; title: string; description: string; type: string; status: string; verifiedBy: string | null; verifiedAt: Date | null; rejectionReason: string | null; latitude: string | null; ... 16 more ...; updatedAt: Date | null; }' is missing the following properties from type '{ address: string | null; title: string; type: string; id: number; region: string; status: string; location: string; description: string; createdAt: Date | null; updatedAt: Date | null; ... 20 more ...; hardwareVerificationNotes: string | null; }': lockboxVerified, cameraVerified, hardwareVerifiedAt, hardwareVerificationNotes
+server/vite.ts(30,5): error TS2322: Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is not assignable to type 'ServerOptions | ResolvedServerOptions | undefined'.
+  Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is missing the following properties from type 'ResolvedServerOptions': fs, sourcemapIgnoreList, open, headers, and 6 more.
+server/workflow-automation.ts(15,8): error TS2307: Cannot find module '@db/schema' or its corresponding type declarations.
+vite.config.ts(2,19): error TS2307: Cannot find module '@vitejs/plugin-react' or its corresponding type declarations.
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+Need better ways to work with logs? Try theRender CLI, Render MCP Server, or set up a log stream integration 
