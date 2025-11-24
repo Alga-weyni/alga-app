@@ -48,7 +48,7 @@ services:
     region: frankfurt
     plan: starter
     rootDir: .
-    buildCommand: npm install && npx vite build --outDir dist/public
+    buildCommand: bash build-frontend.sh
     publishPath: dist/public
     staticPublishPath: dist/public
     envVars:
