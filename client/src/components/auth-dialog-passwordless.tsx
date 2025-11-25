@@ -122,9 +122,17 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       description: mode === "login" ? `Logged in as ${user.firstName} ${user.lastName}` : `Welcome to Alga, ${user.firstName}!`,
     });
 
-    navigate(redirectPath);
-    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    // Close dialog FIRST before navigation to avoid UI conflicts
     onOpenChange(false);
+    
+    // Invalidate auth cache to trigger re-fetch
+    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    
+    // Navigate AFTER closing dialog and invalidating cache
+    // Use replace: true to replace history entry so back button works correctly
+    setTimeout(() => {
+      navigate(redirectPath, { replace: true });
+    }, 100);
   };
 
   // Request OTP for phone (login or register)
