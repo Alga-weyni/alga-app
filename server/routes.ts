@@ -2645,10 +2645,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { businessName, serviceType, city, description, phoneNumber } = req.body;
 
-      // Validate required fields
-      if (!businessName || !serviceType || !city || !description) {
+      // Validate required fields (description is optional)
+      if (!businessName || !serviceType || !city) {
         return res.status(400).json({ 
-          message: "Missing required fields: businessName, serviceType, city, description" 
+          message: "Missing required fields: businessName, serviceType, city" 
         });
       }
 
@@ -2657,7 +2657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         businessName,
         serviceType,
-        description,
+        description: description || "", // Optional - default to empty string
         city,
         region: city, // Use city as region for simplicity
         pricingModel: "hourly" as const, // Default pricing model
