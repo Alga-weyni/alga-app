@@ -110,7 +110,7 @@ export default function ReportsArchive() {
                 Historical Performance Pulse Reports
               </p>
             </div>
-            <Link href="/admin/lemlem-ops">
+            <Link to="/admin/lemlem-ops">
               <Button variant="outline" className="text-white border-white hover:bg-white/20">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard

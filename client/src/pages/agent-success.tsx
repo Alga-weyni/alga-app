@@ -79,7 +79,7 @@ export default function AgentSuccess() {
                 No property assigned yet. Please contact support.
               </p>
               <Button
-                onClick={() => setLocation("/")}
+                onClick={() => navigate("/")}
                 className="w-full"
               >
                 Go Home
@@ -254,7 +254,7 @@ export default function AgentSuccess() {
 
           {/* Continue Button */}
           <Button
-            onClick={() => setLocation("/properties")}
+            onClick={() => navigate("/properties")}
             size="lg"
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg py-6"
             data-testid="button-continue"

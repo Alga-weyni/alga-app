@@ -140,7 +140,7 @@ const PERMISSIONS = {
 
 export default function AdminRolesPermissions() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -148,12 +148,12 @@ export default function AdminRolesPermissions() {
 
   // Redirect if not admin
   if (user && user.role !== "admin") {
-    setLocation("/");
+    navigate("/");
     return null;
   }
 
   if (!user) {
-    setLocation("/login");
+    navigate("/login");
     return null;
   }
 

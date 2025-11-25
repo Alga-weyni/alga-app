@@ -338,7 +338,7 @@ export default function AgentProgram() {
           </p>
           <Button
             size="lg"
-            onClick={() => setLocation("/become-agent")}
+            onClick={() => navigate("/become-agent")}
             className="bg-yellow-500 hover:bg-yellow-600 text-dark-brown font-bold text-lg px-12 py-6"
             data-testid="button-register-cta"
           >
