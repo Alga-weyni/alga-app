@@ -107,6 +107,25 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Role-based access control: Only admins can access this page
+  if (user && user.role !== "admin") {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <Card className="w-96 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-900">
+          <CardHeader>
+            <CardTitle className="text-red-600 dark:text-red-400">Access Denied</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">You don't have permission to access the admin dashboard. Only administrators can view this page.</p>
+            <Button onClick={() => navigate("/")} className="w-full">
+              Go Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
