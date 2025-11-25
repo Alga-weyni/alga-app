@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +18,13 @@ export function ProtectedRoute({
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Use effect to navigate instead of during render
+  useEffect(() => {
+    if (!isLoading && requireAuth && !user) {
+      navigate("/login", { replace: true });
+    }
+  }, [isLoading, requireAuth, user, navigate]);
+
   // Still loading auth
   if (isLoading) {
     return (
@@ -28,7 +36,6 @@ export function ProtectedRoute({
 
   // Authentication required but user not logged in
   if (requireAuth && !user) {
-    navigate("/login");
     return null;
   }
 
