@@ -4,12 +4,33 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
-  // Redirect to properties page where login dialog is available
   useEffect(() => {
-    navigate("/properties");
-  }, [navigate]);
+    // Wait for auth to load
+    if (isLoading) return;
+
+    // If authenticated, redirect based on role
+    if (isAuthenticated && user) {
+      const role = user.role;
+      
+      if (role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (role === "operator") {
+        navigate("/operator/dashboard", { replace: true });
+      } else if (role === "host" || role === "dellala") {
+        navigate("/host/dashboard", { replace: true });
+      } else if (role === "service_provider") {
+        navigate("/provider/dashboard", { replace: true });
+      } else {
+        // Guest users see properties
+        navigate("/properties", { replace: true });
+      }
+    } else {
+      // Not authenticated - show login dialog on properties page
+      navigate("/properties", { replace: true });
+    }
+  }, [isAuthenticated, user, isLoading, navigate]);
 
   return null;
 }
