@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from './storage.js';
 import { setupAuth, isAuthenticated } from './auth.js';
@@ -3848,8 +3849,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fullName: `${owner.firstName} ${owner.lastName}`,
           phoneNumber: owner.phoneNumber || 'Not provided',
           email: owner.email || 'Not provided',
-          paymentAccount: agent.telebirrAccount || agent.paymentAccount || 'Not provided',
-          paymentMethod: agent.paymentMethod || 'TeleBirr',
+          paymentAccount: agent.telebirrAccount || 'Not provided',
+          paymentMethod: 'TeleBirr',
         },
         commission: {
           ratePercentage: commissionRate * 100,
@@ -4550,7 +4551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already has an agent account
-      const existingAgent = await storage.getAgentByUserId(req.user!.id);
+      const existingAgent = await storage.getAgentByUserId((req as any).user!.id);
       if (existingAgent) {
         return res.status(400).json({ message: "You already have an agent account" });
       }
@@ -4562,7 +4563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const agent = await storage.createAgent({
-        userId: req.user!.id,
+        userId: (req as any).user!.id,
         fullName,
         phoneNumber,
         telebirrAccount,
@@ -4583,7 +4584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get agent dashboard stats
   app.get("/api/agent/dashboard", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.getAgentByUserId(req.user!.id);
+      const agent = await storage.getAgentByUserId((req as any).user!.id);
       
       if (!agent) {
         return res.status(404).json({ message: "Agent account not found" });
@@ -4604,7 +4605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get agent commissions
   app.get("/api/agent/commissions", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.getAgentByUserId(req.user!.id);
+      const agent = await storage.getAgentByUserId((req as any).user!.id);
       
       if (!agent) {
         return res.status(404).json({ message: "Agent account not found" });
@@ -4632,7 +4633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Property ID is required" });
       }
 
-      const agent = await storage.getAgentByUserId(req.user!.id);
+      const agent = await storage.getAgentByUserId((req as any).user!.id);
       
       if (!agent) {
         return res.status(404).json({ message: "Agent account not found" });
@@ -4654,7 +4655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Get all agents
   app.get("/api/admin/agents", isAuthenticated, async (req, res) => {
     try {
-      if (req.user!.role !== 'admin') {
+      if ((req as any).user!.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -4674,7 +4675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Verify agent
   app.post("/api/admin/agents/:id/verify", isAuthenticated, async (req, res) => {
     try {
-      if (req.user!.role !== 'admin') {
+      if ((req as any).user!.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -4692,7 +4693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agent = await storage.verifyAgent(
         agentId,
         status,
-        req.user!.id,
+        (req as any).user!.id,
         rejectionReason
       );
       
@@ -4801,10 +4802,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get recent commissions
-      const recentCommissions = await storage.getAgentCommissions(agent.id, { limit: 10 });
+      const recentCommissions = await storage.getAgentCommissions(agent.id, {});
 
       // Get recent withdrawals
-      const recentWithdrawals = await storage.getAgentWithdrawals(agent.id, { limit: 10 });
+      const recentWithdrawals = await storage.getAgentWithdrawals(agent.id, {});
 
       // Get properties managed by this agent
       const properties = await storage.getAgentProperties(agent.id);
@@ -5732,7 +5733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update feature flag (admin only)
   app.patch('/api/feature-flags/:flagId', isAuthenticated, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser((req as any).user.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Only admins can modify feature flags" });
       }

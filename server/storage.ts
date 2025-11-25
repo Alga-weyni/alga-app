@@ -505,6 +505,10 @@ export class DatabaseStorage implements IStorage {
           reviewCount: properties.reviewCount,
           createdAt: properties.createdAt,
           updatedAt: properties.updatedAt,
+          lockboxVerified: properties.lockboxVerified,
+          cameraVerified: properties.cameraVerified,
+          hardwareVerifiedAt: properties.hardwareVerifiedAt,
+          hardwareVerificationNotes: properties.hardwareVerificationNotes,
         })
         .from(properties)
         .leftJoin(
@@ -756,6 +760,10 @@ export class DatabaseStorage implements IStorage {
         reviewCount: properties.reviewCount,
         createdAt: properties.createdAt,
         updatedAt: properties.updatedAt,
+        lockboxVerified: properties.lockboxVerified,
+        cameraVerified: properties.cameraVerified,
+        hardwareVerifiedAt: properties.hardwareVerifiedAt,
+        hardwareVerificationNotes: properties.hardwareVerificationNotes,
       })
       .from(favorites)
       .innerJoin(properties, eq(favorites.propertyId, properties.id))
