@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from './storage.js';
 import { setupAuth, isAuthenticated } from './auth.js';
+import { getFeatureFlags, setFeatureFlag, isFeatureEnabled } from './feature-flags.js';
 import { insertPropertySchema, insertBookingSchema, insertReviewSchema, insertFavoriteSchema, insertLockboxSchema, insertSecurityCameraSchema, insertAccessCodeSchema, registerPhoneUserSchema, registerEmailUserSchema, loginPhoneUserSchema, loginEmailUserSchema, verifyOtpSchema, type Booking, users } from '../shared/schema.js';
 import { smsService } from './smsService.js';
 import bcrypt from "bcrypt";
@@ -5717,6 +5718,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== END DELLALA AGENT MANAGEMENT ROUTES ====================
+
+  // ==================== FEATURE FLAGS ROUTES ====================
+  
+  // Get all feature flags
+  app.get('/api/feature-flags', (req, res) => {
+    res.json(getFeatureFlags());
+  });
+
+  // Update feature flag (admin only)
+  app.patch('/api/feature-flags/:flagId', isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can modify feature flags" });
+      }
+
+      const { flagId } = req.params;
+      const { enabled } = req.body;
+
+      if (typeof enabled !== 'boolean') {
+        return res.status(400).json({ message: "enabled must be a boolean" });
+      }
+
+      setFeatureFlag(flagId, enabled);
+      res.json({ flagId, enabled });
+    } catch (error) {
+      console.error("Error updating feature flag:", error);
+      res.status(500).json({ message: "Failed to update feature flag" });
+    }
+  });
+
+  // ==================== END FEATURE FLAGS ROUTES ====================
 
   const httpServer = createServer(app);
   return httpServer;
