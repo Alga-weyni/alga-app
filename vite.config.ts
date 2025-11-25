@@ -94,4 +94,9 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist", "public"),
     emptyOutDir: true,
   },
+  server: {
+    middlewareMode: true,
+    allowedHosts: true,
+    hmr: false, // Disable HMR in middleware mode - not applicable when served via Express
+  },
 });
