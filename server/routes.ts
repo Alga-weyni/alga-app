@@ -27,6 +27,7 @@ import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-temp
 import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from '../shared/schema.js';
 import { sql, desc, and } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
+import financialSettlementRoutes from './api/financial-settlement.routes.js';
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -5754,6 +5755,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== END FEATURE FLAGS ROUTES ====================
+
+  // ==================== FINANCIAL SETTLEMENT ENGINE ROUTES ====================
+  // Enterprise-grade settlement, wallet, payout, and reconciliation APIs
+  app.use('/api/settlement', financialSettlementRoutes);
+  // ==================== END FINANCIAL SETTLEMENT ENGINE ROUTES ====================
 
   // ==================== VITE DEV SERVER MIDDLEWARE (Frontend) ====================
   // Set up Vite dev server middleware for serving React frontend in development
