@@ -15,7 +15,7 @@ export function ProtectedRoute({
   requireAuth = true,
 }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [, navigate] = useNavigate();
+  const navigate = useNavigate();
 
   // Still loading auth
   if (isLoading) {
