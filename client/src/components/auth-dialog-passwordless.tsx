@@ -92,21 +92,28 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const handleAuthSuccess = (data: any) => {
     const user = data.user || data;
     
-    // Use custom redirect if provided, otherwise use role-based redirect
-    let redirectPath;
-    if (redirectAfterAuth) {
+    // PRIORITY 1: Use redirect URL from backend response
+    let redirectPath = data.redirect;
+    
+    // PRIORITY 2: Use custom redirect if provided
+    if (!redirectPath && redirectAfterAuth) {
       redirectPath = redirectAfterAuth;
-    } else {
-      // Role-based redirect with welcome page for new/guest users
+    }
+    
+    // PRIORITY 3: Fallback to role-based redirect
+    if (!redirectPath) {
       if (user.role === "admin") {
         redirectPath = "/admin/dashboard";
       } else if (user.role === "operator") {
         redirectPath = "/operator/dashboard";
       } else if (user.role === "host") {
         redirectPath = "/host/dashboard";
+      } else if (user.role === "agent") {
+        redirectPath = "/agent-dashboard";
+      } else if (user.role === "service_provider") {
+        redirectPath = "/provider/dashboard";
       } else {
-        // Guest users go to welcome page after login
-        redirectPath = mode === "register" ? "/welcome" : "/welcome";
+        redirectPath = "/properties";
       }
     }
     
