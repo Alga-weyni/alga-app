@@ -17,18 +17,21 @@ export function getSession() {
     throw new Error("SESSION_SECRET environment variable is required");
   }
 
+  const isProduction = process.env.NODE_ENV === "production";
+  
   return session({
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    name: 'sessionId', // Security: Don't use default 'connect.sid'
+    name: 'alga_session', // Security: Don't use default 'connect.sid'
     cookie: {
       httpOnly: true, // Security: Prevent XSS
-      secure: process.env.NODE_ENV === "production", // Security: HTTPS only in production
-      sameSite: 'lax', // Security: CSRF protection
+      secure: isProduction, // Security: HTTPS only in production
+      sameSite: isProduction ? 'none' : 'lax', // Cross-domain in production
       maxAge: sessionTtl,
       path: '/',
+      domain: isProduction ? '.alga.et' : undefined, // Share across subdomains in production
     },
   });
 }
@@ -54,8 +57,12 @@ export async function setupAuth(app: Express) {
       if (err) {
         return res.status(500).json({ message: "Logout failed" });
       }
-      // Security: Clear session cookie with matching name
-      res.clearCookie("sessionId");
+      // Security: Clear session cookie with matching name and domain
+      const isProduction = process.env.NODE_ENV === "production";
+      res.clearCookie("alga_session", {
+        domain: isProduction ? '.alga.et' : undefined,
+        path: '/',
+      });
       res.json({ message: "Logged out successfully" });
     });
   });
