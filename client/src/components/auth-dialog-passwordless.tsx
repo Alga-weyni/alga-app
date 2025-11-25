@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -49,7 +49,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [pendingContact, setPendingContact] = useState(""); // phone or email
   const [devOtp, setDevOtp] = useState<string | undefined>();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Passwordless forms
