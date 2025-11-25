@@ -235,6 +235,7 @@ export default function BecomeProvider() {
       <AuthDialog 
         open={authDialogOpen} 
         onOpenChange={setAuthDialogOpen}
+        redirectAfterAuth="/become-provider"
       />
       
       <div className="pb-20">

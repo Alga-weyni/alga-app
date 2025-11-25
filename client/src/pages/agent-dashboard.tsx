@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import {
   TrendingUp,
   Home,
@@ -55,7 +55,7 @@ interface AgentDashboardData {
 }
 
 export default function AgentDashboard() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery<AgentDashboardData>({
     queryKey: ["/api/agent/dashboard"],
@@ -95,7 +95,7 @@ export default function AgentDashboard() {
                 You haven't registered as an agent yet.
               </p>
               <Button
-                onClick={() => setLocation("/become-agent")}
+                onClick={() => navigate("/become-agent")}
                 className="w-full bg-medium-brown hover:bg-dark-brown dark:bg-cream dark:hover:bg-cream/90 dark:text-dark-brown"
                 data-testid="button-become-agent"
               >
