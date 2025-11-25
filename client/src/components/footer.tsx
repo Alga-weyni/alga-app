@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Home, Shield, Phone, Mail, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import { SiTiktok, SiYoutube, SiTelegram } from "react-icons/si";
 

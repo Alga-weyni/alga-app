@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,7 +38,7 @@ const agentRegistrationSchema = z.object({
 type AgentRegistrationForm = z.infer<typeof agentRegistrationSchema>;
 
 export default function BecomeAgent() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isScanning, setIsScanning] = useState(false);

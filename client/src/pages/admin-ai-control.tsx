@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,18 +46,18 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export default function AdminAIControl() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
 
   // Redirect if not admin
   if (user && user.role !== "admin") {
-    setLocation("/");
+    navigate("/");
     return null;
   }
 
   if (!user) {
-    setLocation("/login");
+    navigate("/login");
     return null;
   }
 

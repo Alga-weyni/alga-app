@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/header";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import {
   CheckCircle,
   Home,
@@ -44,7 +44,7 @@ interface PropertyWithOwner {
 }
 
 export default function AgentSuccess() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery<PropertyWithOwner>({
     queryKey: ["/api/agent/property-details"],

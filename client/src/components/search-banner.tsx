@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ interface SearchBannerProps {
 }
 
 export default function SearchBanner({ onSearch, initialFilters }: SearchBannerProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<SearchFilters>({
     destination: initialFilters?.destination || "",
     checkIn: initialFilters?.checkIn || "",
@@ -47,7 +47,7 @@ export default function SearchBanner({ onSearch, initialFilters }: SearchBannerP
       if (filters.checkOut) params.set("checkOut", filters.checkOut);
       if (filters.guests) params.set("guests", filters.guests);
       
-      setLocation(`/properties?${params.toString()}`);
+      navigate(`/properties?${params.toString()}`);
     }
   };
 

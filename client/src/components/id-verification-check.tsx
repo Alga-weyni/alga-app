@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { AlertCircle, CheckCircle, Shield } from "lucide-react";
 
 interface IDVerificationCheckProps {
@@ -18,7 +18,7 @@ interface User {
 }
 
 export default function IDVerificationCheck({ required = false, showCard = true }: IDVerificationCheckProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ['/api/user'],
@@ -74,7 +74,7 @@ export default function IDVerificationCheck({ required = false, showCard = true 
         )}
         <div className="flex gap-2 mt-2">
           <Button
-            onClick={() => setLocation('/scan-id')}
+            onClick={() => navigate('/scan-id')}
             className="bg-orange-600 hover:bg-orange-700"
             size="sm"
             data-testid="button-verify-now"

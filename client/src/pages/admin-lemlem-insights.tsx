@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,16 +20,16 @@ import { BackButton } from "@/components/back-button";
 
 export default function AdminLemlemInsights() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   // Redirect if not admin
   if (user && user.role !== "admin") {
-    setLocation("/");
+    navigate("/");
     return null;
   }
 
   if (!user) {
-    setLocation("/login");
+    navigate("/login");
     return null;
   }
 

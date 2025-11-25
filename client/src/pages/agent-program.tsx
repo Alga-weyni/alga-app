@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 export default function AgentProgram() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-cream/30 dark:bg-gray-900">
@@ -39,7 +39,7 @@ export default function AgentProgram() {
           <div className="flex gap-4 justify-center flex-wrap">
             <Button
               size="lg"
-              onClick={() => setLocation("/become-agent")}
+              onClick={() => navigate("/become-agent")}
               className="bg-yellow-500 hover:bg-yellow-600 text-dark-brown font-bold text-lg px-8 py-6"
               data-testid="button-register-hero"
             >

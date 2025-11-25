@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/table";
 import { reportStorage, type StoredReport } from "@/lib/reportStorage";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 export default function ReportsArchive() {
   const [reports, setReports] = useState<StoredReport[]>([]);

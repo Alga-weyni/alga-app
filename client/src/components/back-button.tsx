@@ -1,15 +1,15 @@
 import { ArrowLeft } from "lucide-react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export function BackButton() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const handleBack = () => {
     if (window.history.length > 1) {
       window.history.back();
     } else {
-      setLocation("/");
+      navigate("/");
     }
   };
 

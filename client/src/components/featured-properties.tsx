@@ -1,25 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { Star, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Property } from "@shared/schema";
 
 export function FeaturedProperties() {
-  const [location, setLocation] = useLocation();
+  const location = useLocation();
   const { data: properties = [], isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
   });
 
   const handleExploreClick = () => {
     // If already on properties page, scroll to all properties
-    if (location === "/properties") {
+    if (location.pathname === "/properties") {
       const element = document.querySelector('[data-section="all-properties"]');
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
       // Navigate to properties page
-      setLocation("/properties");
+      window.location.href = "/properties";
     }
   };
 
@@ -50,7 +50,7 @@ export function FeaturedProperties() {
           {featured.map((property) => (
             <Link 
               key={property.id} 
-              href={`/properties/${property.id}`}
+              to={`/properties/${property.id}`}
               className="group"
             >
               <div className="bg-cream-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
