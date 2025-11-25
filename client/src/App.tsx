@@ -74,6 +74,7 @@ import MobileAuthGuard from "@/components/mobile/mobile-auth-guard";
 import { isMobileApp } from "@/utils/platform";
 import DevMobileToggle from "@/components/dev-mobile-toggle";
 import { Capacitor } from "@capacitor/core";
+import { ProtectedRoute } from "@/components/protected-route";
 
 const pageVariants = {
   initial: {
@@ -150,45 +151,51 @@ function Router() {
         {/* Onboarding - shown for new users */}
         <Route path="/onboarding" element={<AnimatedRoute><OnboardingPage /></AnimatedRoute>} />
         
-        {/* My Alga - accessible to all, handles auth internally */}
-        <Route path="/my-alga" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
+        {/* Admin routes - admin only */}
+        <Route path="/admin/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/my-alga" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/service-providers" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminServiceProviders /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/providers" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminServiceProviders /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/lemlem-insights" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminLemlemInsights /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/ai-control" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminAIControl /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/roles-permissions" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminRolesPermissions /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/agents" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminAgents /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/lemlem-ops" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemOps /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/lemlem-validation" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemValidationMetrics /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemOperationsDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/reports" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><ReportsArchive /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/signatures" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><SignatureDashboard /></ProtectedRoute></AnimatedRoute>} />
         
-        {/* Dashboard routes - accessible to all, each dashboard handles auth */}
-        <Route path="/host/dashboard" element={<AnimatedRoute><HostDashboard /></AnimatedRoute>} />
-        <Route path="/owner/payout" element={<AnimatedRoute><OwnerPayout /></AnimatedRoute>} />
-        <Route path="/provider/dashboard" element={<AnimatedRoute><ProviderDashboard /></AnimatedRoute>} />
-        <Route path="/agent-dashboard" element={<AnimatedRoute><AgentDashboard /></AnimatedRoute>} />
-        <Route path="/agent/success" element={<AnimatedRoute><AgentSuccess /></AnimatedRoute>} />
-        <Route path="/dellala/dashboard" element={<AnimatedRoute><DellalaDashboard /></AnimatedRoute>} />
-        <Route path="/dellala/list-property" element={<AnimatedRoute><DellalaListProperty /></AnimatedRoute>} />
-        <Route path="/admin/dashboard" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
-        <Route path="/admin/service-providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
-        <Route path="/admin/providers" element={<AnimatedRoute><AdminServiceProviders /></AnimatedRoute>} />
-        <Route path="/admin/lemlem-insights" element={<AnimatedRoute><AdminLemlemInsights /></AnimatedRoute>} />
-        <Route path="/admin/ai-control" element={<AnimatedRoute><AdminAIControl /></AnimatedRoute>} />
-        <Route path="/admin/roles-permissions" element={<AnimatedRoute><AdminRolesPermissions /></AnimatedRoute>} />
-        <Route path="/admin/agents" element={<AnimatedRoute><AdminAgents /></AnimatedRoute>} />
-        <Route path="/admin/lemlem-ops" element={<AnimatedRoute><LemlemOps /></AnimatedRoute>} />
-        <Route path="/admin/lemlem-validation" element={<AnimatedRoute><LemlemValidationMetrics /></AnimatedRoute>} />
-        <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><LemlemOperationsDashboard /></AnimatedRoute>} />
-        <Route path="/admin/reports" element={<AnimatedRoute><ReportsArchive /></AnimatedRoute>} />
-        <Route path="/admin/signatures" element={<AnimatedRoute><SignatureDashboard /></AnimatedRoute>} />
-        <Route path="/insa-compliance" element={<AnimatedRoute><INSACompliancePage /></AnimatedRoute>} />
-        <Route path="/operator/dashboard" element={<AnimatedRoute><OperatorDashboard /></AnimatedRoute>} />
+        {/* Operator routes - operator only */}
+        <Route path="/operator/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["operator"]}><OperatorDashboard /></ProtectedRoute></AnimatedRoute>} />
         
-        {/* Protected user routes - accessible to all, each page handles auth */}
-        <Route path="/bookings" element={<AnimatedRoute><Bookings /></AnimatedRoute>} />
-        <Route path="/bookings/:id" element={<AnimatedRoute><BookingDetails /></AnimatedRoute>} />
-        <Route path="/favorites" element={<AnimatedRoute><Favorites /></AnimatedRoute>} />
-        <Route path="/my-services" element={<AnimatedRoute><MyServices /></AnimatedRoute>} />
-        <Route path="/profile" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
+        {/* INSA Compliance - admin and operator only */}
+        <Route path="/insa-compliance" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin", "operator"]}><INSACompliancePage /></ProtectedRoute></AnimatedRoute>} />
         
-        {/* Settings routes - accessible to authenticated users */}
-        <Route path="/settings" element={<AnimatedRoute><Settings /></AnimatedRoute>} />
-        <Route path="/settings/notifications" element={<AnimatedRoute><NotificationsSettings /></AnimatedRoute>} />
-        <Route path="/settings/security" element={<AnimatedRoute><SecuritySettings /></AnimatedRoute>} />
-        <Route path="/settings/payment" element={<AnimatedRoute><PaymentSettings /></AnimatedRoute>} />
-        <Route path="/settings/language" element={<AnimatedRoute><LanguageSettings /></AnimatedRoute>} />
+        {/* Host routes - host only */}
+        <Route path="/host/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><HostDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/owner/payout" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><OwnerPayout /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/dellala/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><DellalaDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/dellala/list-property" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><DellalaListProperty /></ProtectedRoute></AnimatedRoute>} />
+        
+        {/* Agent routes - any authenticated user can become agent */}
+        <Route path="/agent-dashboard" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><AgentDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/agent/success" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><AgentSuccess /></ProtectedRoute></AnimatedRoute>} />
+        
+        {/* Provider routes - service providers only */}
+        <Route path="/provider/dashboard" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><ProviderDashboard /></ProtectedRoute></AnimatedRoute>} />
+        
+        {/* Authenticated user routes - all authenticated users */}
+        <Route path="/bookings" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><Bookings /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/bookings/:id" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><BookingDetails /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/favorites" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><Favorites /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/my-services" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><MyServices /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/profile" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><Profile /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/settings" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><Settings /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/settings/notifications" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><NotificationsSettings /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/settings/security" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><SecuritySettings /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/settings/payment" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><PaymentSettings /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/settings/language" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><LanguageSettings /></ProtectedRoute></AnimatedRoute>} />
         
         {/* Help/Support detail pages - public */}
         <Route path="/help/payments" element={<AnimatedRoute><PaymentsHelp /></AnimatedRoute>} />
