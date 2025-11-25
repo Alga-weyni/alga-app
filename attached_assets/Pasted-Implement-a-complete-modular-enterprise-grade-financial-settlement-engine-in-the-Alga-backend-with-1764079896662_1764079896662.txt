@@ -1,0 +1,75 @@
+Implement a complete, modular, enterprise-grade financial settlement engine in the Alga backend without modifying or refactoring any existing functionality. Do NOT touch booking logic, listing logic, authentication, INSA security modules, file uploads, or existing database tables. Only ADD new modules, new database tables, and new services. Maintain full backward compatibility.
+
+FOLLOW THIS EXACT SCOPE:
+
+1. Add new backend modules:
+- wallet.service.ts
+- ledger.service.ts
+- payment-settlement.service.ts
+- payout.service.ts
+- fx.service.ts
+- tax.service.ts
+- audit-log.service.ts
+- reconciliation.cron.ts
+- payout.cron.ts
+
+2. Create new database tables (via migrations ONLY):
+- wallets
+- ledger_entries
+- transactions
+- payouts
+- fx_rates
+- audit_logs
+
+3. Implement complete ETB + USD settlement logic:
+- Owner, Dellala, Corporate wallets
+- Commission split
+- VAT (15%) and withholding (10%) calculation
+- FX conversion using fx_rates table
+- Freeze/unfreeze funds
+- Immutable ledger entries
+- Hashing for integrity
+
+4. Implement payout engine:
+- Weekly Dellala payouts
+- Owner payout on stay completion
+- Corporate daily sweep
+- Telebirr + bank transfer support (ETB)
+- USD stays in Corporate USD wallet unless conversion requested
+
+5. Implement unified settlement pipeline:
+- Validate booking paid (Stripe or Telebirr)
+- Calculate shares, tax, FX
+- Create ledger entries
+- Freeze funds until checkout
+- Unfreeze on checkout
+- Update wallets
+
+6. Implement INSA-aligned security:
+- Audit logs for all financial operations
+- Hash-based tamper detection
+- Daily integrity check
+
+7. Enforcement rules (disabled by default, behind env flag):
+- No check-in without settlement
+- No lockbox code without payment
+- Off-platform payment detection flags
+
+8. Testing + Simulation (REQUIRED before production):
+- Full unit tests for each module
+- End-to-end simulation covering ETB + USD flows
+- FX conversion simulation
+- VAT + withholding tax simulation
+- Owner + Dellala + Corporate wallet flows
+- 50–100 settlement stress test
+- Cron job simulation
+- Provide full test logs and coverage report
+
+9. Deployment Requirements:
+- Generate migrations
+- Run against TEST DB first
+- Confirm zero breaking changes
+- Validate no existing tables modified
+- After verification, apply to production
+
+This is an additive financial engine. Do not remove, replace, or alter any existing business logic. Build all new systems modularly and safely. Begin.
