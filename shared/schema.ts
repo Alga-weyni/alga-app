@@ -1150,6 +1150,333 @@ export const insertUserOnboardingSchema = createInsertSchema(userOnboarding).omi
 export type UserOnboarding = typeof userOnboarding.$inferSelect;
 export type InsertUserOnboarding = z.infer<typeof insertUserOnboardingSchema>;
 
+// ========================================
+// FINANCIAL SETTLEMENT ENGINE (Enterprise-Grade)
+// ========================================
+
+// Wallets - Owner, Dellala, Corporate wallets for ETB and USD
+export const wallets = pgTable("wallets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: varchar("owner_id").notNull().references(() => users.id),
+  ownerType: varchar("owner_type").notNull(), // owner, dellala, corporate
+  currency: varchar("currency").notNull().default("ETB"), // ETB, USD
+  
+  // Balances
+  availableBalance: decimal("available_balance", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  frozenBalance: decimal("frozen_balance", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  pendingBalance: decimal("pending_balance", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalEarnings: decimal("total_earnings", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalWithdrawals: decimal("total_withdrawals", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  
+  // Status
+  status: varchar("status").notNull().default("active"), // active, frozen, suspended
+  frozenReason: text("frozen_reason"),
+  frozenAt: timestamp("frozen_at"),
+  frozenBy: varchar("frozen_by").references(() => users.id),
+  
+  // Bank details for payouts
+  bankName: varchar("bank_name"),
+  bankAccountNumber: varchar("bank_account_number"),
+  bankAccountName: varchar("bank_account_name"),
+  telebirrPhone: varchar("telebirr_phone"),
+  preferredPayoutMethod: varchar("preferred_payout_method").default("telebirr"), // telebirr, bank
+  
+  // Integrity
+  lastBalanceHash: varchar("last_balance_hash"), // SHA-256 hash for tamper detection
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWalletSchema = createInsertSchema(wallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+
+// Ledger Entries - Immutable double-entry accounting
+export const ledgerEntries = pgTable("ledger_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  transactionId: uuid("transaction_id").notNull(), // Groups related entries
+  
+  // Account info
+  walletId: uuid("wallet_id").references(() => wallets.id),
+  accountType: varchar("account_type").notNull(), // guest_payment, owner_earning, dellala_commission, corporate_fee, vat, withholding_tax
+  
+  // Entry details
+  entryType: varchar("entry_type").notNull(), // debit, credit
+  amount: decimal("amount", { precision: 18, scale: 2 }).notNull(),
+  currency: varchar("currency").notNull().default("ETB"),
+  
+  // Reference
+  bookingId: integer("booking_id").references(() => bookings.id),
+  description: text("description"),
+  
+  // Balance snapshot (for reconciliation)
+  balanceBefore: decimal("balance_before", { precision: 18, scale: 2 }),
+  balanceAfter: decimal("balance_after", { precision: 18, scale: 2 }),
+  
+  // Integrity (immutable - hash chain)
+  entryHash: varchar("entry_hash").notNull(), // SHA-256 of entry data
+  previousHash: varchar("previous_hash"), // Hash of previous entry (chain)
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLedgerEntrySchema = createInsertSchema(ledgerEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type LedgerEntry = typeof ledgerEntries.$inferSelect;
+export type InsertLedgerEntry = z.infer<typeof insertLedgerEntrySchema>;
+
+// Transactions - High-level transaction records
+export const settlementTransactions = pgTable("settlement_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Reference
+  bookingId: integer("booking_id").references(() => bookings.id),
+  paymentReference: varchar("payment_reference"), // Stripe/Telebirr reference
+  paymentMethod: varchar("payment_method").notNull(), // stripe, telebirr, chapa, bank_transfer
+  
+  // Amounts (all in original currency)
+  grossAmount: decimal("gross_amount", { precision: 18, scale: 2 }).notNull(),
+  currency: varchar("currency").notNull().default("ETB"),
+  
+  // Commission splits
+  ownerShare: decimal("owner_share", { precision: 18, scale: 2 }).notNull(),
+  dellalaShare: decimal("dellala_share", { precision: 18, scale: 2 }).default("0.00"),
+  corporateShare: decimal("corporate_share", { precision: 18, scale: 2 }).notNull(),
+  
+  // Tax calculations
+  vatAmount: decimal("vat_amount", { precision: 18, scale: 2 }).default("0.00"), // 15%
+  withholdingTax: decimal("withholding_tax", { precision: 18, scale: 2 }).default("0.00"), // 10%
+  
+  // FX details (if USD)
+  originalCurrency: varchar("original_currency"),
+  originalAmount: decimal("original_amount", { precision: 18, scale: 2 }),
+  fxRateUsed: decimal("fx_rate_used", { precision: 18, scale: 6 }),
+  fxRateId: uuid("fx_rate_id").references(() => fxRates.id),
+  
+  // Status
+  status: varchar("status").notNull().default("pending"), // pending, settled, frozen, unfrozen, failed, refunded
+  settledAt: timestamp("settled_at"),
+  frozenAt: timestamp("frozen_at"),
+  unfrozenAt: timestamp("unfrozen_at"),
+  
+  // Participants
+  ownerId: varchar("owner_id").references(() => users.id),
+  dellalaId: varchar("dellala_id").references(() => users.id),
+  guestId: varchar("guest_id").references(() => users.id),
+  
+  // Integrity
+  transactionHash: varchar("transaction_hash").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSettlementTransactionSchema = createInsertSchema(settlementTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type SettlementTransaction = typeof settlementTransactions.$inferSelect;
+export type InsertSettlementTransaction = z.infer<typeof insertSettlementTransactionSchema>;
+
+// Payouts - Track all payouts to owners/dellala
+export const payouts = pgTable("payouts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Recipient
+  walletId: uuid("wallet_id").notNull().references(() => wallets.id),
+  recipientId: varchar("recipient_id").notNull().references(() => users.id),
+  recipientType: varchar("recipient_type").notNull(), // owner, dellala
+  
+  // Amount
+  amount: decimal("amount", { precision: 18, scale: 2 }).notNull(),
+  currency: varchar("currency").notNull().default("ETB"),
+  fee: decimal("fee", { precision: 18, scale: 2 }).default("0.00"), // Transfer fees
+  netAmount: decimal("net_amount", { precision: 18, scale: 2 }).notNull(),
+  
+  // Method
+  payoutMethod: varchar("payout_method").notNull(), // telebirr, bank_transfer
+  bankName: varchar("bank_name"),
+  bankAccountNumber: varchar("bank_account_number"),
+  telebirrPhone: varchar("telebirr_phone"),
+  
+  // Status
+  status: varchar("status").notNull().default("pending"), // pending, processing, completed, failed
+  processedAt: timestamp("processed_at"),
+  completedAt: timestamp("completed_at"),
+  failedAt: timestamp("failed_at"),
+  failureReason: text("failure_reason"),
+  
+  // Reference
+  externalReference: varchar("external_reference"), // Telebirr/Bank reference
+  batchId: varchar("batch_id"), // For batch processing
+  
+  // Period covered (for dellala weekly payouts)
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  
+  // Related transactions
+  transactionIds: text("transaction_ids").array(),
+  
+  // Approval
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPayoutSchema = createInsertSchema(payouts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Payout = typeof payouts.$inferSelect;
+export type InsertPayout = z.infer<typeof insertPayoutSchema>;
+
+// FX Rates - Foreign exchange rates
+export const fxRates = pgTable("fx_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Currency pair
+  fromCurrency: varchar("from_currency").notNull(), // USD
+  toCurrency: varchar("to_currency").notNull(), // ETB
+  
+  // Rates
+  rate: decimal("rate", { precision: 18, scale: 6 }).notNull(), // e.g., 56.50 ETB per USD
+  inverseRate: decimal("inverse_rate", { precision: 18, scale: 6 }).notNull(),
+  
+  // Spread
+  buyRate: decimal("buy_rate", { precision: 18, scale: 6 }),
+  sellRate: decimal("sell_rate", { precision: 18, scale: 6 }),
+  spread: decimal("spread", { precision: 8, scale: 4 }),
+  
+  // Source
+  source: varchar("source").notNull().default("manual"), // manual, nbe, cbe, api
+  
+  // Validity
+  effectiveFrom: timestamp("effective_from").notNull().defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Audit
+  setBy: varchar("set_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFxRateSchema = createInsertSchema(fxRates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type FxRate = typeof fxRates.$inferSelect;
+export type InsertFxRate = z.infer<typeof insertFxRateSchema>;
+
+// Financial Audit Logs - Immutable audit trail
+export const financialAuditLogs = pgTable("financial_audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // What happened
+  action: varchar("action").notNull(), // wallet_credit, wallet_debit, payout_initiated, payout_completed, balance_freeze, balance_unfreeze, fx_conversion, tax_calculated, reconciliation_run, integrity_check
+  category: varchar("category").notNull(), // wallet, payout, settlement, reconciliation, integrity, fx
+  
+  // Who did it
+  actorId: varchar("actor_id").references(() => users.id),
+  actorType: varchar("actor_type").notNull(), // user, system, cron
+  
+  // What was affected
+  targetType: varchar("target_type").notNull(), // wallet, payout, transaction, ledger
+  targetId: varchar("target_id").notNull(),
+  
+  // Details
+  description: text("description"),
+  metadata: jsonb("metadata").default('{}'),
+  
+  // Before/After state
+  previousState: jsonb("previous_state"),
+  newState: jsonb("new_state"),
+  
+  // Amount involved
+  amount: decimal("amount", { precision: 18, scale: 2 }),
+  currency: varchar("currency"),
+  
+  // Integrity
+  logHash: varchar("log_hash").notNull(), // SHA-256
+  previousLogHash: varchar("previous_log_hash"), // Chain
+  
+  // Context
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  requestId: varchar("request_id"),
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertFinancialAuditLogSchema = createInsertSchema(financialAuditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type FinancialAuditLog = typeof financialAuditLogs.$inferSelect;
+export type InsertFinancialAuditLog = z.infer<typeof insertFinancialAuditLogSchema>;
+
+// Reconciliation Records - Daily/Weekly reconciliation snapshots
+export const reconciliationRecords = pgTable("reconciliation_records", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Period
+  periodType: varchar("period_type").notNull(), // daily, weekly, monthly
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Totals
+  totalTransactions: integer("total_transactions").notNull().default(0),
+  totalGrossAmount: decimal("total_gross_amount", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalOwnerPayouts: decimal("total_owner_payouts", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalDellalaCommissions: decimal("total_dellala_commissions", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalCorporateFees: decimal("total_corporate_fees", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalVat: decimal("total_vat", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  totalWithholdingTax: decimal("total_withholding_tax", { precision: 18, scale: 2 }).notNull().default("0.00"),
+  
+  // Currency breakdown
+  etbVolume: decimal("etb_volume", { precision: 18, scale: 2 }).default("0.00"),
+  usdVolume: decimal("usd_volume", { precision: 18, scale: 2 }).default("0.00"),
+  
+  // Status
+  status: varchar("status").notNull().default("pending"), // pending, completed, discrepancy_found
+  discrepancies: jsonb("discrepancies").default('[]'),
+  
+  // Integrity
+  snapshotHash: varchar("snapshot_hash").notNull(),
+  walletBalancesSnapshot: jsonb("wallet_balances_snapshot"),
+  
+  // Audit
+  runBy: varchar("run_by"), // system, admin user id
+  completedAt: timestamp("completed_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReconciliationRecordSchema = createInsertSchema(reconciliationRecords).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ReconciliationRecord = typeof reconciliationRecords.$inferSelect;
+export type InsertReconciliationRecord = z.infer<typeof insertReconciliationRecordSchema>;
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
