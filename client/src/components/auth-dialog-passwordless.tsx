@@ -128,11 +128,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     // Invalidate auth cache to trigger re-fetch
     queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     
-    // Navigate AFTER closing dialog and invalidating cache
-    // Use replace: true to replace history entry so back button works correctly
+    // Use hard navigation with window.location.href for guaranteed redirect
+    // This ensures the page reloads and auth state is properly established
     setTimeout(() => {
-      navigate(redirectPath, { replace: true });
-    }, 100);
+      window.location.href = redirectPath;
+    }, 300);
   };
 
   // Request OTP for phone (login or register)

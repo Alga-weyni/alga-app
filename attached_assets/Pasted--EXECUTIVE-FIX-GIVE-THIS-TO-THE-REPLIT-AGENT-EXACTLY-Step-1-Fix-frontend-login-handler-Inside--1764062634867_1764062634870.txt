@@ -1,0 +1,130 @@
+✅ EXECUTIVE FIX — GIVE THIS TO THE REPLIT AGENT EXACTLY
+Step 1 — Fix frontend login handler
+
+Inside
+client/src/features/auth/login.ts
+or wherever the login logic exists:
+
+Find the success callback:
+
+if (response.ok) {
+    const data = await response.json();
+    console.log("Login success:", data);
+}
+
+
+Replace it with this correct version:
+
+if (response.ok) {
+  const data = await response.json();
+
+  console.log("🔐 Login success:", data);
+
+  // ⬅ NEW — If backend sent a redirectUrl, follow it
+  if (data.redirectUrl) {
+    window.location.href = data.redirectUrl;
+    return;
+  }
+
+  // fallback if no redirectUrl
+  navigate("/properties");
+}
+
+
+Reason:
+The backend is already returning something like:
+
+{
+  "redirectUrl": "/admin/dashboard"
+}
+
+
+The frontend was ignoring it.
+
+Step 2 — Ensure router allows external navigation
+
+In client/src/main.tsx or wherever your router is created, verify this exists:
+
+import { BrowserRouter } from "react-router-dom";
+
+
+And the app wraps exactly like this:
+
+<BrowserRouter>
+  <App />
+</BrowserRouter>
+
+
+If not → fix.
+
+Step 3 — Delete all service worker files (again)
+
+In client/public/ remove:
+
+sw.js
+service-worker.js
+serviceWorkerRegistration.ts
+
+
+Also confirm Vite config has this:
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    sourcemap: false,
+  },
+  server: { hmr: false }
+});
+
+
+Reason:
+Old app builds are still cached and overriding routing logic.
+
+Step 4 — Force a clean build
+
+In Replit run:
+
+rm -rf dist
+npm run build
+
+
+This guarantees clean output.
+
+Step 5 — Confirm the redirect logic works in DevTools
+
+Open the browser → Login with INSA admin:
+
+Run this in console:
+
+localStorage.getItem("userRole")
+
+
+You should see:
+
+"admin"
+
+
+Then:
+
+window.location.href
+
+
+Should be:
+
+https://app.alga.et/admin/dashboard
+
+
+If not → the login.ts fix was not applied.
+
+Step 6 — Push code to GitHub so Render deploys
+
+Run:
+
+git add .
+git commit -m "fix: proper redirect logic for admin login"
+git push origin main
+
+
+Then:
+
+Render → alga-frontend → Manual Deploy → Deploy latest commit
