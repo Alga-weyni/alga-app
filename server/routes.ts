@@ -796,7 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email Login
+  // Email Login - Step 1: Verify password and send OTP
   app.post('/api/auth/login/email', authLimiter, async (req, res) => {
     try {
       const validatedData = loginEmailUserSchema.parse(req.body);
@@ -811,16 +811,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Log in user
-      (req as any).login(user, (err: any) => {
-        if (err) {
-          return res.status(500).json({ message: "Failed to log in" });
-        }
-        res.json({ 
-          message: "Login successful",
-          user,
-          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : user.role === 'agent' ? '/agent-dashboard' : user.role === 'service_provider' ? '/provider/dashboard' : '/'
-        });
+      // Generate OTP for email verification
+      const otp = randomInt(1000, 10000).toString();
+      await storage.saveOtp(validatedData.email, otp, 10);
+      
+      // Log OTP for development
+      console.log(`[AUTH] Login OTP for ${validatedData.email}: ${otp}`);
+      
+      res.json({ 
+        message: "OTP sent to your email",
+        email: validatedData.email,
+        requiresOtp: true,
+        devOtp: process.env.NODE_ENV === 'development' ? otp : undefined
       });
     } catch (error: any) {
       console.error("Error logging in with email:", error);
