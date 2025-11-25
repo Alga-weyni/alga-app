@@ -25,6 +25,7 @@ import { imageProcessor } from './imageProcessor.js';
 import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates.js';
 import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from '../shared/schema.js';
 import { sql, desc, and } from "drizzle-orm";
+import { createServer as createViteServer } from 'vite';
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -5750,6 +5751,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== END FEATURE FLAGS ROUTES ====================
+
+  // ==================== VITE DEV SERVER MIDDLEWARE (Frontend) ====================
+  // Set up Vite dev server middleware for serving React frontend in development
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const vite = await createViteServer({
+        server: {
+          middlewareMode: true,
+          allowedHosts: true,
+        },
+      });
+      
+      // Use vite's connect instance as middleware
+      app.use(vite.middlewares);
+      
+      console.log('✅ Vite dev server middleware loaded - frontend will be served from client/');
+    } catch (error) {
+      console.error('⚠️ Failed to load Vite dev server middleware:', error);
+      console.log('Frontend may not be served correctly');
+    }
+  } else {
+    // Production: Serve pre-built static files from dist/public
+    const distPath = path.resolve(process.cwd(), 'dist', 'public');
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath, {
+        maxAge: '1h',
+        etag: false,
+      }));
+      
+      // SPA fallback: serve index.html for all non-API routes
+      app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads') && !req.path.startsWith('/objects')) {
+          res.sendFile(path.join(distPath, 'index.html'));
+        } else {
+          res.status(404).json({ message: 'Not found' });
+        }
+      });
+    }
+  }
 
   const httpServer = createServer(app);
   return httpServer;
