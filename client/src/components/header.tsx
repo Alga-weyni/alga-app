@@ -62,29 +62,36 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
 
   // Get "Me" path based on user role
   const getMePath = () => {
-    if (!user) return "/my-alga";
+    if (!user) return "/profile";
     
     switch (user.role) {
       case 'admin':
         return '/admin/dashboard';
-      case 'dellala':
-        return '/dellala/dashboard';
+      case 'operator':
+        return '/operator/dashboard';
       case 'host':
         return '/host/dashboard';
-      case 'operator':
-        return '/operator-dashboard';
-      case 'provider':
-        return '/provider-dashboard';
+      case 'agent':
+        return '/agent-dashboard';
+      case 'service_provider':
+        return '/provider/dashboard';
       default:
-        return '/my-alga';
+        return '/profile'; // Guest users go to profile
     }
+  };
+
+  // Get "Agent" path based on user role
+  const getAgentPath = () => {
+    if (!user) return "/become-agent"; // Not logged in - show become-agent page
+    if (user.role === 'agent') return '/agent-dashboard'; // Agent goes to their dashboard
+    return '/become-agent'; // Other roles see how to become an agent
   };
 
   // Navigation items with emojis for universal recognition - Airbnb-style minimal
   const publicNavItems = [
     { path: "/", icon: Building2, emoji: "🏠", label: "Stay", ariaLabel: "Browse accommodations", testId: "stay" },
     { path: "/services", icon: ShoppingBag, emoji: "🛍️", label: "Service", ariaLabel: "Browse add-on services", testId: "service" },
-    { path: "/dellala/dashboard", icon: UserCog, emoji: "🤝", label: "Agent (ደላላ)", ariaLabel: "Dellala agent portal", testId: "agent" },
+    { path: getAgentPath(), icon: UserCog, emoji: "🤝", label: "Agent (ደላላ)", ariaLabel: "Dellala agent portal", testId: "agent" },
   ];
 
   const userNavItems = [
@@ -292,7 +299,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem asChild>
-                    <Link to="/my-alga" className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
+                    <Link to={getMePath()} className="cursor-pointer text-base py-3" role="button" aria-label="Go to my dashboard">
                       👤 My Dashboard
                     </Link>
                   </DropdownMenuItem>

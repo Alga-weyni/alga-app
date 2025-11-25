@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Wrench, User, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   path: string;
@@ -11,11 +12,32 @@ interface NavItem {
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+
+  // Get the correct "Me" dashboard path based on user role
+  const getMeDashboardPath = (): string => {
+    if (!user) return "/login";
+    
+    switch (user.role) {
+      case "admin":
+        return "/admin/dashboard";
+      case "operator":
+        return "/operator/dashboard";
+      case "host":
+        return "/host/dashboard";
+      case "agent":
+        return "/agent-dashboard";
+      case "service_provider":
+        return "/provider/dashboard";
+      default:
+        return "/profile"; // Guest users go to profile
+    }
+  };
 
   const navItems: NavItem[] = [
     { path: "/properties", icon: Home, label: "Stays", testId: "stays" },
     { path: "/services", icon: Wrench, label: "Services", testId: "services" },
-    { path: "/my-alga", icon: User, label: "Me", testId: "me" },
+    { path: getMeDashboardPath(), icon: User, label: "Me", testId: "me" },
     { path: "/support", icon: Sparkles, label: "Lemlem", testId: "lemlem" },
   ];
 
