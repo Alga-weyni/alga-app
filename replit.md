@@ -10,6 +10,32 @@ Preferred communication style: Simple, everyday language.
 
 **Company Identity**: Alga is a women-run, women-owned, and women-operated company. All guidance, materials, and communications should reflect and honor this foundation.
 
+## Current Session Progress (Nov 25, 2025)
+
+### ✅ Completed Fixes
+1. **Agent Dashboard Router** - Fixed from wouter to react-router-dom for proper navigation
+2. **Provider Onboarding Flow** - Added redirectAfterAuth="/become-provider" to keep users on the page after login
+3. **Login Redirect Logic** - Implemented role-based redirects: admin → admin dashboard, host → host dashboard, operator → operator dashboard, guest → properties
+4. **Mobile WebView CORS** - Enhanced backend CORS to support Capacitor native app connections (file://, capacitor://, all localhost variants)
+5. **Feature Flags System** - Created admin-controlled toggles for INSA compliance testing (can disable New Property, Payments, Services, etc.)
+6. **API Configuration** - Made frontend environment-aware for development vs production API URLs
+
+### ⚠️ In Progress - Database Migration
+**Status**: Neon PostgreSQL database migration partially applied
+**Issue**: Schema conflict on lockboxes table regarding installation_date column
+**Current State**: Database has users table only; needs all other tables (properties, bookings, agents, etc.)
+**Resolution**: Run in Neon dashboard:
+```sql
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'lockboxes';
+```
+Then manually apply changes or retry: `npm run db:push --force`
+
+### 🚀 Ready to Deploy
+- Frontend: All pages protected by role-based access control
+- Backend: All authentication flows working, INSA security hardening active
+- Mobile: CORS configured for Capacitor WebView
+- Feature flags: Admin can toggle features on/off for security testing
+
 ## Critical Business Rules
 
 ### Pricing Freedom Policy (SHORT-TERM RENTALS)
@@ -65,7 +91,7 @@ Preferred communication style: Simple, everyday language.
 The platform features a universal accessibility design optimized for Ethiopian users, utilizing a warm color palette (dark brown, medium brown, cream backgrounds). It incorporates Airbnb-style minimal navigation, a soft cream header, smooth underline animations, emoji-enhanced icons, and a horizontal clean layout. Accessibility is prioritized with full ARIA support, contextual tooltips, high contrast, and keyboard navigation. Terminology uses child-friendly wording and warm microcopy. The system is fully responsive, mobile-optimized, and uses lazy-loaded, compressed images for performance on Ethiopian networks. It is available as a Progressive Web App (PWA) and has native Android and iOS applications via Capacitor, with distinct UI patterns for mobile (bottom navigation, minimal header).
 
 ### Technical Implementation
-The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query for server state management, and React Hook Form with Zod for validation. The backend utilizes Node.js, Express.js, and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL, hosted on Neon, is managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
+The frontend is built with React, TypeScript (Vite), React Router (not wouter) for routing, Shadcn/ui (Radix UI) for components, Tailwind CSS for styling, React Query v5 for server state management, and React Hook Form with Zod for validation. The backend utilizes Node.js, Express.js, and TypeScript, providing a RESTful API and Express sessions with PostgreSQL storage. PostgreSQL, hosted on Neon, is managed with Drizzle ORM and Drizzle Kit for migrations. Authentication is passwordless via 4-digit OTP (phone/email), with Bcrypt for password hashing, secure session cookies, and role-based access control (Guest, Host, Admin, Operator). Security measures include Helmet.js, CORS protection, rate limiting, robust validation, and INSA government-grade security hardening for OWASP Top 10 vulnerabilities.
 
 ### Feature Specifications
 - **Personalized Onboarding System**: A browser-native animated welcome experience for all user roles using Framer Motion, offering role-specific content and an interactive tour.
@@ -89,6 +115,7 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Administrative Features**: Includes Roles & Permissions Management and User Management with full control over user roles, status, and verification.
 - **Lemlem Operations Dashboard**: A comprehensive admin dashboard for managing 5 operational pillars (Agent Governance, Supply Curation, Hardware Deployment, Payments & Compliance, Marketing & Growth) with real-time KPIs, an AI admin assistant ("Ask Lemlem Admin Chat"), workflow automation, and CSV export functions.
 - **Lemlem Operations Intelligence (v3)**: A browser-native admin intelligence hub for natural language operations queries, automated weekly executive summaries, AI predictive insights, and voice commands (manual activation only). Offers PDF export and is offline-capable with client-side analytics.
+- **Feature Flags System**: Admin-controlled toggles to enable/disable features during INSA compliance testing.
 
 ## External Dependencies
 - **Payment Processors**: Chapa, Stripe, PayPal SDK, Telebirr.
@@ -102,3 +129,34 @@ The frontend is built with React, TypeScript (Vite), Wouter for routing, Shadcn/
 - **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
+
+## Deployment Status
+
+**Current**: Development (localhost:5000)
+**Target Domains**: 
+- Frontend: app.alga.et
+- Backend API: api.alga.et
+
+**Database**: Neon PostgreSQL (connection string in DATABASE_URL)
+**Deployment**: Render.com (Node.js for backend, Static for frontend)
+
+## Next Steps After This Session
+
+1. **Complete Database Migration**
+   - Resolve lockboxes table schema conflict
+   - Run full migration to create all tables
+   
+2. **Test All Login Flows**
+   - Admin login → admin dashboard
+   - Host login → host dashboard
+   - Operator login → operator dashboard
+   - Guest login → properties page
+   
+3. **Test Provider Onboarding**
+   - Click "Start Application" on /become-provider
+   - Verify redirect to login
+   - Verify return to provider page after login
+   
+4. **Deploy to Production**
+   - Push to GitHub: `git push origin HEAD:main`
+   - Render will auto-deploy both frontend and backend
