@@ -19,16 +19,40 @@ app.use(helmet({
 const allowedOrigins = [
   "https://app.alga.et",
   "capacitor://localhost",
+  "capacitor://app",
   "http://localhost",
-  "http://localhost:8080"
+  "http://localhost:5000",
+  "http://localhost:8080",
+  "http://127.0.0.1:5000",
+  "http://127.0.0.1:8080",
+  "file://"
 ];
 
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production" 
-    ? allowedOrigins
-    : true,
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is allowed
+    if (allowedOrigins.some(allowed => {
+      if (allowed === "file://") {
+        return origin.startsWith("file://") || origin === "null" || !origin;
+      }
+      return origin === allowed;
+    })) {
+      callback(null, true);
+    } else if (process.env.NODE_ENV === "development") {
+      // Allow all in development
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['X-Total-Count']
 };
 app.use(cors(corsOptions));
 
