@@ -710,7 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           message: "Verification successful",
           user,
-          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/properties'
+          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : user.role === 'agent' ? '/agent-dashboard' : user.role === 'service_provider' ? '/provider/dashboard' : '/properties'
         });
       });
     } catch (error: any) {
@@ -818,7 +818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           message: "Login successful",
           user,
-          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : '/'
+          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : user.role === 'agent' ? '/agent-dashboard' : user.role === 'service_provider' ? '/provider/dashboard' : '/'
         });
       });
     } catch (error: any) {

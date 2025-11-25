@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("guest"), // admin, operator, host, guest
+  role: varchar("role").notNull().default("guest"), // admin, operator, host, agent, service_provider, guest
   phoneNumber: varchar("phone_number").unique(),
   phoneVerified: boolean("phone_verified").notNull().default(false),
   idVerified: boolean("id_verified").notNull().default(false),

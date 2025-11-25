@@ -175,15 +175,15 @@ function Router() {
         {/* Host routes - host only */}
         <Route path="/host/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><HostDashboard /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/owner/payout" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><OwnerPayout /></ProtectedRoute></AnimatedRoute>} />
-        <Route path="/dellala/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><DellalaDashboard /></ProtectedRoute></AnimatedRoute>} />
-        <Route path="/dellala/list-property" element={<AnimatedRoute><ProtectedRoute requiredRoles={["host"]}><DellalaListProperty /></ProtectedRoute></AnimatedRoute>} />
         
-        {/* Agent routes - any authenticated user can become agent */}
-        <Route path="/agent-dashboard" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><AgentDashboard /></ProtectedRoute></AnimatedRoute>} />
-        <Route path="/agent/success" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><AgentSuccess /></ProtectedRoute></AnimatedRoute>} />
+        {/* Agent/Dellala routes - agent role only */}
+        <Route path="/dellala/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><DellalaDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/dellala/list-property" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><DellalaListProperty /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/agent-dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><AgentDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/agent/success" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><AgentSuccess /></ProtectedRoute></AnimatedRoute>} />
         
-        {/* Provider routes - service providers only */}
-        <Route path="/provider/dashboard" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><ProviderDashboard /></ProtectedRoute></AnimatedRoute>} />
+        {/* Provider routes - service_provider role only */}
+        <Route path="/provider/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["service_provider"]}><ProviderDashboard /></ProtectedRoute></AnimatedRoute>} />
         
         {/* Authenticated user routes - all authenticated users */}
         <Route path="/bookings" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><Bookings /></ProtectedRoute></AnimatedRoute>} />
