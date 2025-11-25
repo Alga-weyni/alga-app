@@ -28,8 +28,10 @@ export default function LoginPage() {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "operator") {
         navigate("/operator/dashboard", { replace: true });
-      } else if (role === "host" || role === "dellala") {
+      } else if (role === "host") {
         navigate("/host/dashboard", { replace: true });
+      } else if (role === "agent") {
+        navigate("/agent-dashboard", { replace: true });
       } else if (role === "service_provider") {
         navigate("/provider/dashboard", { replace: true });
       } else {
