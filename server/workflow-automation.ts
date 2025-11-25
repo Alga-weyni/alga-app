@@ -172,9 +172,9 @@ export async function generatePropertyVerificationAlerts() {
     .from(properties)
     .where(
       and(
-        eq(properties.status, "active"),
-        eq(properties.operatorVerified, false),
-        lt(properties.createdAt, threeDaysAgo.toISOString())
+        eq(properties.status, "pending"),
+        sql`${properties.verifiedBy} IS NULL`,
+        sql`${properties.createdAt} < ${threeDaysAgo}::timestamp`
       )
     );
 
