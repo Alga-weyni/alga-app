@@ -1,0 +1,181 @@
+You must perform a full-system audit across the Alga project using the entire codebase and all historical instructions you previously executed. This audit must ensure every required functionality, security requirement, backend route, CORS rule, file-upload logic, mobile API integration, database schema, and INSA compliance item is correctly implemented and functioning.
+
+You must NOT rely on partial memory — you must re-check the codebase from scratch, using the history of tasks you previously executed as a reference.
+
+⸻
+
+PHASE 1 — CORE FUNCTIONALITY CHECK (MANDATORY)
+
+Verify these components exist and work:
+
+1. User Authentication
+	•	OTP request and verification
+	•	Login redirect → /properties
+	•	Session creation & persistence
+	•	Role-based access control: guest, host, admin, service-provider
+
+2. Property Listing (CRITICAL FOR INSA)
+	•	File upload (images + documents)
+	•	Preview images
+	•	Save to DB
+	•	No broken upload routes
+	•	No service workers cached versions
+	•	Form submit must NOT fail
+
+3. Service Provider App
+	•	Provider login
+	•	Provider task list
+	•	Provider “mark task completed”
+	•	Provider file upload (images, receipts, proofs)
+	•	Provider → job assignment retrieval
+This flow must work end-to-end.
+
+4. Webview / Mobile Integration
+	•	CORS for:
+	•	https://app.alga.et
+	•	capacitor://localhost
+	•	http://localhost
+	•	http://localhost:8080
+	•	Correct backend URL for mobile
+	•	No service workers anywhere
+	•	No offline caching that breaks Android WebView
+
+5. Admin Panel
+	•	Ability to view users
+	•	Ability to manage properties
+	•	Ability to manage service providers
+	•	Logs viewable
+	•	Error dashboards working
+
+⸻
+
+PHASE 2 — SECURITY REQUIREMENTS (INSA)
+
+Verify ALL of these are 100% implemented:
+
+1. CORS security
+	•	Only approved origins
+	•	Credentials enabled
+	•	No wildcard *
+
+2. Helmet Security
+	•	CSP enforced in production
+	•	No overly permissive rules
+
+3. SQL Security
+	•	Validate:
+	•	Zod schemas match Drizzle DB schema
+	•	No double .notNull() (previous errors)
+	•	Database migration fully applied
+	•	All tables exist:
+	•	user
+	•	session
+	•	properties
+	•	media
+	•	operations
+	•	service_providers
+	•	lockbox
+	•	notifications
+	•	audits
+
+4. File Upload Security
+	•	File size limit (10MB or 50MB depending on route)
+	•	MIME-type validation
+	•	Server-side sanitization
+	•	No unauthenticated file upload endpoints
+
+5. INSA Hardening Module
+
+You must confirm:
+	•	request signature validation
+	•	admin override logging
+	•	daily integrity checks
+	•	tamper detection
+	•	encrypted userId in logs
+	•	no secrets exposed in code
+	•	error objects do NOT leak stack traces in production
+
+6. Session Security
+	•	HTTPOnly cookies
+	•	Secure cookies
+	•	StrictSameSite
+	•	No JWT exposure in console
+
+⸻
+
+PHASE 3 — FRONTEND REVIEW (NO SERVICE WORKERS)
+
+Confirm:
+	•	No sw.js file
+	•	No service worker registration in code
+	•	Vite build does NOT auto-generate a SW
+	•	All production files under /dist/public are clean
+	•	/properties route loads instantly
+	•	No white screen on load
+	•	All components check for API URL dynamically
+	•	Forms submit successfully
+
+⸻
+
+PHASE 4 — ANDROID APK ALIGNMENT
+
+Validate:
+	•	Correct API URL (https://api.alga.et)
+	•	No localhost references
+	•	Capacitor config correct
+	•	Android WebView requires CORS allowlist
+	•	Build was done after backend fix
+	•	No outdated environments cached
+
+⸻
+
+PHASE 5 — CLOUD & DEPLOYMENT ALIGNMENT
+
+Verify:
+	•	Render backend deploy is clean
+	•	Build logs show correct Vite → backend integration
+	•	No references to old vite.config absolute paths
+	•	Docker layer not caching old builds
+	•	Neon DB connection stable
+	•	ENV variables match production
+
+⸻
+
+PHASE 6 — FULL E2E TEST
+
+Perform end-to-end testing:
+	1.	Create user → login
+	2.	List property (with images)
+	3.	View property
+	4.	Edit property
+	5.	Assign provider
+	6.	Provider completes job
+	7.	File upload
+	8.	Admin reviews
+	9.	Logs recorded
+	10.	No CORS errors
+	11.	No white screen
+	12.	API responds without failure
+	13.	Web + Android both functional
+
+⸻
+
+IMPORTANT — REPORT FORMAT
+
+Deliver output in:
+
+SECTION A — Issues Found
+
+List every missing functionality or broken item.
+
+SECTION B — Code Fixes You Will Apply
+
+List exact files and exact lines to fix.
+
+SECTION C — Final Verification
+
+Show the verification that all INSA requirements are now met.
+
+⸻
+
+END OF DIRECTIVE
