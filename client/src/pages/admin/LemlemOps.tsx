@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getApiUrl } from "@/lib/api-config";
 import { 
   Brain, 
   Mic, 
@@ -115,9 +116,10 @@ export default function LemlemOps() {
     const startTime = Date.now();
     
     try {
-      const response = await fetch('/api/admin/lemlem-ops/query', {
+      const response = await fetch(getApiUrl('/api/admin/lemlem-ops/query'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ query: queryText }),
       });
 

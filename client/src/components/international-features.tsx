@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api-config";
 import { 
   Globe, 
   Languages, 
@@ -119,9 +120,10 @@ export default function InternationalFeatures({
     try {
       // In production, use Google Translate API or similar
       // For now, showing the concept
-      const response = await fetch('/api/translate', {
+      const response = await fetch(getApiUrl('/api/translate'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ text, targetLanguage: targetLang })
       });
       

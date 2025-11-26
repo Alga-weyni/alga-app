@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api-config";
 import { 
   Shield, 
   MapPin, 
@@ -65,9 +66,10 @@ export default function SafetyFeatures({ userId, propertyId, bookingId }: Safety
     }
 
     try {
-      const response = await fetch('/api/safety/emergency-check', {
+      const response = await fetch(getApiUrl('/api/safety/emergency-check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           userId,
           location: userLocation,

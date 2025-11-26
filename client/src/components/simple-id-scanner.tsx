@@ -3,6 +3,7 @@ import QrScanner from "qr-scanner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle, Camera, Loader2, AlertCircle } from "lucide-react";
+import { getApiUrl } from "@/lib/api-config";
 
 interface SimpleIDScannerProps {
   onVerified?: (data: any) => void;
@@ -60,9 +61,10 @@ export default function SimpleIDScanner({ onVerified }: SimpleIDScannerProps) {
 
           try {
             // Call verification API
-            const response = await fetch("/api/id-scan", {
+            const response = await fetch(getApiUrl("/api/id-scan"), {
               method: "POST",
               headers: { "Content-Type": "application/json" },
+              credentials: "include",
               body: JSON.stringify({
                 scanData: qrResult.data,
                 scanMethod: "qr",

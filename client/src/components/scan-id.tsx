@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Upload, Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 
 interface ScanIDProps {
   onVerified?: (data: any) => void;
@@ -115,9 +116,10 @@ export default function ScanID({ onVerified }: ScanIDProps) {
     setIsProcessing(true);
 
     try {
-      const response = await fetch("/api/id-scan", {
+      const response = await fetch(getApiUrl("/api/id-scan"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           scanData: data,
           scanMethod: method,

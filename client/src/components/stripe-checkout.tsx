@@ -4,6 +4,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { getApiUrl } from "@/lib/api-config";
 
 const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
@@ -97,9 +98,10 @@ export default function StripeCheckout({
 
   const initializePayment = async () => {
     try {
-      const response = await fetch("/api/payment/stripe", {
+      const response = await fetch(getApiUrl("/api/payment/stripe"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           bookingId,
           amount,

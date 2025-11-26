@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { 
   Upload, 
   FileCheck, 
@@ -53,8 +54,9 @@ export default function IDVerification({ userId, userRole, onVerificationComplet
   // Upload document mutation
   const uploadDocumentMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/verification-documents/upload', {
+      const response = await fetch(getApiUrl('/api/verification-documents/upload'), {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
       if (!response.ok) throw new Error(await response.text());

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,7 +62,9 @@ export default function SignatureDashboard() {
   const { data: alertsData } = useQuery({
     queryKey: ["/api/admin/signatures/alerts"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/signatures/alerts?resolved=false&limit=100");
+      const res = await fetch(getApiUrl("/api/admin/signatures/alerts?resolved=false&limit=100"), {
+        credentials: "include",
+      });
       if (!res.ok) return { total: 0, alerts: [] };
       return res.json();
     },
@@ -108,7 +111,9 @@ export default function SignatureDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["/api/admin/signatures", queryParams.toString()],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/signatures?${queryParams.toString()}`);
+      const res = await fetch(getApiUrl(`/api/admin/signatures?${queryParams.toString()}`), {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch signature logs");
       return res.json();
     },
@@ -141,7 +146,9 @@ export default function SignatureDashboard() {
   // Decrypt audit info
   const decryptMutation = useMutation({
     mutationFn: async (signatureId: string) => {
-      const res = await fetch(`/api/admin/signatures/decrypt/${signatureId}`);
+      const res = await fetch(getApiUrl(`/api/admin/signatures/decrypt/${signatureId}`), {
+        credentials: "include",
+      });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to decrypt");
@@ -179,9 +186,10 @@ export default function SignatureDashboard() {
       if (startDate) filters.startDate = startDate;
       if (endDate) filters.endDate = endDate;
       
-      const res = await fetch("/api/admin/signatures/export", {
+      const res = await fetch(getApiUrl("/api/admin/signatures/export"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ format, filters }),
       });
       
