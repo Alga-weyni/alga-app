@@ -1,0 +1,84 @@
+amanuel@Amanuels-MacBook-Air alga-app % cd alga-app
+npm install
+npx vite build
+npx cap sync android
+cd android
+./gradlew clean
+./gradlew assembleDebug
+cd: no such file or directory: alga-app
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated xss-clean@0.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 1064 packages, and audited 1065 packages in 1m
+
+170 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+vite v6.4.1 building for production...
+✓ 3874 modules transformed.
+[plugin vite:reporter] 
+(!) /Users/amanuel/AndroidStudioProjects/alga-app/node_modules/html5-qrcode/esm/index.js is dynamically imported by /Users/amanuel/AndroidStudioProjects/alga-app/client/src/pages/become-agent.tsx but also statically imported by /Users/amanuel/AndroidStudioProjects/alga-app/client/src/components/scan-id.tsx, dynamic import will not move module into another chunk.                                                                                                                                         
+                                                                                                                                                                       
+../dist/public/registerSW.js                                          0.13 kB
+../dist/public/manifest.webmanifest                                   0.50 kB
+../dist/public/index.html                                             1.91 kB │ gzip:   0.92 kB
+../dist/public/assets/addis_ababa_ethiopia_ab074746-DOCCYB3k.jpg    334.06 kB
+../dist/public/assets/gondar_ethiopia_roya_bce991b8-LSfEaX92.jpg    419.97 kB
+../dist/public/assets/bahir_dar_ethiopia_l_aa3e2250-C_a-SNiq.jpg    625.81 kB
+../dist/public/assets/index-CVpy2EWx.css                            141.17 kB │ gzip:  22.09 kB
+../dist/public/assets/purify.es-B6FQ9oRL.js                          22.57 kB │ gzip:   8.74 kB
+../dist/public/assets/qr-scanner-worker.min-D85Z9gVD.js              43.95 kB │ gzip:  10.46 kB
+../dist/public/assets/index.es-CfOV3GDw.js                          159.36 kB │ gzip:  53.40 kB
+../dist/public/assets/html2canvas.esm-QH1iLAAe.js                   202.38 kB │ gzip:  48.04 kB
+../dist/public/assets/index-DKoCU64A.js                           3,007.02 kB │ gzip: 845.39 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:                                                                                                   
+- Using dynamic import() to code-split the application                                                                                                                 
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks                                     
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.                                                                                            
+✓ built in 54.52s
+
+PWA v1.1.0
+mode      generateSW
+precache  23 entries (7813.87 KiB)
+files generated
+  ../dist/public/sw.js
+  ../dist/public/workbox-f6a91684.js
+✔ Copying web assets from public to android/app/src/main/assets/public in 370.01ms
+✔ Creating capacitor.config.json in android/app/src/main/assets in 3.07ms
+✔ copy android in 762.39ms
+✔ Updating Android plugins in 259.12ms
+[info] Found 6 Capacitor plugins for android:
+       @capacitor/app@7.1.0
+       @capacitor/browser@7.0.2
+       @capacitor/camera@7.0.2
+       @capacitor/geolocation@7.1.5
+       @capacitor/push-notifications@7.0.3
+       @capacitor/share@7.0.2
+✔ update android in 1.09s
+[info] Sync finished in 2.853s
+
+ERROR: JAVA_HOME is set to an invalid directory: /usr/local/opt/openjdk@21
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation.
+
+
+ERROR: JAVA_HOME is set to an invalid directory: /usr/local/opt/openjdk@21
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation.
+
+amanuel@Amanuels-MacBook-Air android % 
