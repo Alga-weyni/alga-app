@@ -133,54 +133,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // File upload endpoint (protected - requires authentication)
   // Now with auto-compression and watermark overlay!
-  app.post('/api/upload/property-images', isAuthenticated, upload.array('images', 20), async (req: any, res) => {
-    try {
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: 'No files uploaded' });
+  // Production-safe: gracefully handles file system issues
+  app.post('/api/upload/property-images', isAuthenticated, async (req: any, res) => {
+    // Ensure upload directory exists at runtime (critical for Render)
+    const uploadPath = path.join(process.cwd(), 'uploads', 'properties');
+    if (!fs.existsSync(uploadPath)) {
+      try {
+        fs.mkdirSync(uploadPath, { recursive: true });
+        console.log('Created upload directory:', uploadPath);
+      } catch (mkdirErr) {
+        console.error('Failed to create upload directory:', mkdirErr);
+        return res.status(500).json({ message: 'Server storage not available' });
       }
-
-      const files = req.files as Express.Multer.File[];
-      const processedFiles: Array<{ url: string; stats: any }> = [];
-
-      // Process each image with compression and watermark
-      for (const file of files) {
-        const originalBuffer = fs.readFileSync(file.path);
-        const originalSize = originalBuffer.length;
-
-        // Compress and add watermark
-        const compressedBuffer = await imageProcessor.processImage(originalBuffer, {
-          maxWidth: 1280,
-          maxHeight: 720,
-          quality: 70,
-          addWatermark: true,
-          watermarkOpacity: 0.25,
-        });
-
-        // Overwrite original file with compressed version
-        fs.writeFileSync(file.path, compressedBuffer);
-
-        const stats = imageProcessor.getCompressionStats(originalSize, compressedBuffer.length);
-        processedFiles.push({
-          url: `/uploads/properties/${file.filename}`,
-          stats,
-        });
-      }
-
-      res.json({
-        message: 'Files uploaded and optimized successfully',
-        urls: processedFiles.map((f) => f.url),
-        count: files.length,
-        optimization: {
-          avgReduction: Math.round(
-            processedFiles.reduce((sum, f) => sum + f.stats.reductionPercent, 0) / files.length
-          ),
-          totalSavings: processedFiles.reduce((sum, f) => sum + f.stats.savings, 0),
-        },
-      });
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      res.status(500).json({ message: error.message || 'Failed to upload files' });
     }
+
+    // Handle multer upload with error catching
+    upload.array('images', 20)(req, res, async (uploadErr) => {
+      if (uploadErr) {
+        console.error('Multer upload error:', uploadErr);
+        return res.status(400).json({ message: uploadErr.message || 'File upload error' });
+      }
+
+      try {
+        if (!req.files || req.files.length === 0) {
+          return res.status(400).json({ message: 'No files uploaded' });
+        }
+
+        const files = req.files as Express.Multer.File[];
+        const processedFiles: Array<{ url: string; stats: any }> = [];
+
+        // Process each image with compression and watermark
+        for (const file of files) {
+          try {
+            const originalBuffer = fs.readFileSync(file.path);
+            const originalSize = originalBuffer.length;
+
+            // Compress and add watermark - with fallback
+            let finalBuffer = originalBuffer;
+            let stats = { reductionPercent: 0, savings: 0 };
+            
+            try {
+              const compressedBuffer = await imageProcessor.processImage(originalBuffer, {
+                maxWidth: 1280,
+                maxHeight: 720,
+                quality: 70,
+                addWatermark: true,
+                watermarkOpacity: 0.25,
+              });
+              finalBuffer = compressedBuffer;
+              stats = imageProcessor.getCompressionStats(originalSize, compressedBuffer.length);
+              
+              // Overwrite original file with compressed version
+              fs.writeFileSync(file.path, finalBuffer);
+            } catch (processErr) {
+              // If image processing fails, use original file
+              console.warn('Image processing failed, using original:', processErr);
+            }
+
+            processedFiles.push({
+              url: `/uploads/properties/${file.filename}`,
+              stats,
+            });
+          } catch (fileErr) {
+            console.error('Error processing file:', file.filename, fileErr);
+            // Continue with other files
+          }
+        }
+
+        if (processedFiles.length === 0) {
+          return res.status(500).json({ message: 'Failed to process uploaded files' });
+        }
+
+        res.json({
+          message: 'Files uploaded and optimized successfully',
+          urls: processedFiles.map((f) => f.url),
+          count: processedFiles.length,
+          optimization: {
+            avgReduction: Math.round(
+              processedFiles.reduce((sum, f) => sum + f.stats.reductionPercent, 0) / processedFiles.length
+            ),
+            totalSavings: processedFiles.reduce((sum, f) => sum + f.stats.savings, 0),
+          },
+        });
+      } catch (error: any) {
+        console.error('Upload processing error:', error);
+        res.status(500).json({ message: error.message || 'Failed to upload files' });
+      }
+    });
   });
 
   // ID document upload endpoint (protected - requires authentication)
