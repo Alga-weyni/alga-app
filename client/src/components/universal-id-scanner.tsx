@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Camera, Loader2, AlertCircle, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api-config";
 
 interface UniversalIDScannerProps {
   onVerified?: (data: any) => void;
@@ -138,9 +139,10 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
       const formData = new FormData();
       formData.append('image', file);
       
-      const uploadResponse = await fetch('/api/upload/id-document', {
+      const uploadResponse = await fetch(getApiUrl('/api/upload/id-document'), {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
       
       if (!uploadResponse.ok) {
@@ -173,9 +175,10 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
     setMessage("Verifying document...");
 
     try {
-      const response = await fetch("/api/id-scan", {
+      const response = await fetch(getApiUrl("/api/id-scan"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           scanData: data,
           scanMethod: method,

@@ -71,6 +71,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
@@ -365,7 +366,7 @@ export default function HostDashboard() {
       });
 
       console.log('Sending upload request...');
-      const response = await fetch('/api/upload/property-images', {
+      const response = await fetch(getApiUrl('/api/upload/property-images'), {
         method: 'POST',
         body: formData,
         credentials: 'include',
