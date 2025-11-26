@@ -1,5 +1,5 @@
-import { db } from "../db";
-import { ledgerEntries, type LedgerEntry, type InsertLedgerEntry, wallets } from "@shared/schema";
+import { db } from "../db.js";
+import { ledgerEntries, type LedgerEntry, type InsertLedgerEntry, wallets } from "@shared/schema.js";
 import { eq, desc, and, sql } from "drizzle-orm";
 import crypto from "crypto";
 

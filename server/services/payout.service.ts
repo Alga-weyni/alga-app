@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "../db.js";
 import {
   payouts,
   wallets,
@@ -6,11 +6,11 @@ import {
   users,
   type Payout,
   type InsertPayout,
-} from "@shared/schema";
+} from "@shared/schema.js";
 import { eq, and, desc, gte, lte, sql, inArray } from "drizzle-orm";
-import { walletService } from "./wallet.service";
-import { taxService } from "./tax.service";
-import { auditLogService } from "./audit-log.service";
+import { walletService } from "./wallet.service.js";
+import { taxService } from "./tax.service.js";
+import { auditLogService } from "./audit-log.service.js";
 import crypto from "crypto";
 
 export interface PayoutResult {

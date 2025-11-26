@@ -1,10 +1,10 @@
-import { walletService } from "./wallet.service";
-import { ledgerService } from "./ledger.service";
-import { paymentSettlementService } from "./payment-settlement.service";
-import { payoutService } from "./payout.service";
-import { fxService } from "./fx.service";
-import { taxService } from "./tax.service";
-import { reconciliationService } from "./reconciliation.service";
+import { walletService } from "./wallet.service.js";
+import { ledgerService } from "./ledger.service.js";
+import { paymentSettlementService } from "./payment-settlement.service.js";
+import { payoutService } from "./payout.service.js";
+import { fxService } from "./fx.service.js";
+import { taxService } from "./tax.service.js";
+import { reconciliationService } from "./reconciliation.service.js";
 
 export interface SimulationResult {
   success: boolean;

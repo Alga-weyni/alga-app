@@ -1,4 +1,4 @@
-import { payoutService } from "../services/payout.service";
+import { payoutService } from "../services/payout.service.js";
 
 let isPayoutRunning = false;
 

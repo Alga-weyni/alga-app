@@ -1,4 +1,4 @@
-import { reconciliationService } from "../services/reconciliation.service";
+import { reconciliationService } from "../services/reconciliation.service.js";
 
 let isReconciliationRunning = false;
 

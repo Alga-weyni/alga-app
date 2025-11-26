@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { walletService } from "../services/wallet.service";
-import { ledgerService } from "../services/ledger.service";
-import { paymentSettlementService } from "../services/payment-settlement.service";
-import { payoutService } from "../services/payout.service";
-import { fxService } from "../services/fx.service";
-import { taxService } from "../services/tax.service";
-import { reconciliationService } from "../services/reconciliation.service";
-import { auditLogService } from "../services/audit-log.service";
-import { db } from "../db";
-import { financialAuditLogs, wallets, settlementTransactions, payouts, fxRates } from "@shared/schema";
+import { walletService } from "../services/wallet.service.js";
+import { ledgerService } from "../services/ledger.service.js";
+import { paymentSettlementService } from "../services/payment-settlement.service.js";
+import { payoutService } from "../services/payout.service.js";
+import { fxService } from "../services/fx.service.js";
+import { taxService } from "../services/tax.service.js";
+import { reconciliationService } from "../services/reconciliation.service.js";
+import { auditLogService } from "../services/audit-log.service.js";
+import { db } from "../db.js";
+import { financialAuditLogs, wallets, settlementTransactions, payouts, fxRates } from "@shared/schema.js";
 import { desc, eq } from "drizzle-orm";
 
 const router = Router();

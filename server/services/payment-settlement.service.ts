@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "../db.js";
 import {
   settlementTransactions,
   bookings,
@@ -8,14 +8,14 @@ import {
   users,
   type SettlementTransaction,
   type InsertSettlementTransaction,
-} from "@shared/schema";
+} from "@shared/schema.js";
 import { eq, and, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
-import { walletService } from "./wallet.service";
-import { ledgerService } from "./ledger.service";
-import { taxService } from "./tax.service";
-import { fxService } from "./fx.service";
-import { auditLogService } from "./audit-log.service";
+import { walletService } from "./wallet.service.js";
+import { ledgerService } from "./ledger.service.js";
+import { taxService } from "./tax.service.js";
+import { fxService } from "./fx.service.js";
+import { auditLogService } from "./audit-log.service.js";
 
 export interface SettlementResult {
   success: boolean;
