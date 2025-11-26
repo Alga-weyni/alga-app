@@ -91,3 +91,7 @@ lint/tmp/
 
 # Note: Capacitor generated files are now included in repo for easier local builds
 # If you need to regenerate, run: npx cap sync android
+
+# Large SDK files (download separately)
+cmdtools.zip
+cmdline-tools/
