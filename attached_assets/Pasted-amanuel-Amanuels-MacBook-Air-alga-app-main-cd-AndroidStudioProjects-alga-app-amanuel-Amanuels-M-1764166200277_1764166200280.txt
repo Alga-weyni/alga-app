@@ -1,0 +1,57 @@
+amanuel@Amanuels-MacBook-Air alga-app-main % cd ~/AndroidStudioProjects/alga-app
+
+amanuel@Amanuels-MacBook-Air alga-app % npm install
+npm run build
+
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated xss-clean@0.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 1064 packages, and audited 1065 packages in 58s
+
+170 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> rest-express@1.0.0 build
+> tsc --project tsconfig.backend.json && echo 'Backend built successfully ✓'
+
+Backend built successfully ✓
+amanuel@Amanuels-MacBook-Air alga-app % npx cap sync android
+
+[error] Could not find the web assets directory: ./dist/public.
+        Please create it and make sure it has an index.html file. You can change the path of this directory in
+        capacitor.config.ts (webDir option). You may need to compile the web assets for your app (typically npm run
+        build). More info: https://capacitorjs.com/docs/basics/workflow#sync-your-project
+amanuel@Amanuels-MacBook-Air alga-app % cd ~/AndroidStudioProjects/alga-app/client
+npm install
+npm run build
+
+
+up to date, audited 1065 packages in 9s
+
+170 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> rest-express@1.0.0 build
+> tsc --project tsconfig.backend.json && echo 'Backend built successfully ✓'
+
+Backend built successfully ✓
