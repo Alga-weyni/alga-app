@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/header";
+import { getApiUrl } from "@/lib/api-config";
 import {
   User,
   CreditCard,
@@ -24,7 +25,9 @@ export default function Settings() {
     // Check if user is an agent
     const checkAgent = async () => {
       try {
-        const response = await fetch("/api/dellala/dashboard");
+        const response = await fetch(getApiUrl("/api/dellala/dashboard"), {
+          credentials: "include",
+        });
         if (response.ok) {
           setIsAgent(true);
         }

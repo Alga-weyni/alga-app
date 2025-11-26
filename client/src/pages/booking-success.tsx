@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import type { AccessCode } from "@shared/schema";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function BookingSuccess() {
   const navigate = useNavigate();
@@ -31,9 +32,10 @@ export default function BookingSuccess() {
 
   const confirmPayPalPayment = async (orderId: string, bookingId: string) => {
     try {
-      const response = await fetch("/api/payment/confirm/paypal", {
+      const response = await fetch(getApiUrl("/api/payment/confirm/paypal"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ bookingId: parseInt(bookingId), orderId }),
       });
 

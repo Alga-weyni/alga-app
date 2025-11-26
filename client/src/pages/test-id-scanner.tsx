@@ -7,6 +7,7 @@ import { Copy, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function TestIDScannerPage() {
   const [verificationResult, setVerificationResult] = useState<any>(null);
@@ -55,9 +56,10 @@ Birth: 15/03/1985`,
 
   const handleTestData = async (testData: string) => {
     try {
-      const response = await fetch("/api/id-scan", {
+      const response = await fetch(getApiUrl("/api/id-scan"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           scanData: testData,
           scanMethod: "qr",

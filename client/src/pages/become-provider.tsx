@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { getApiUrl } from "@/lib/api-config";
 import { 
   DollarSign, 
   ShieldCheck, 
@@ -187,7 +188,7 @@ export default function BecomeProvider() {
   // Image upload handlers for Self Care providers
   const handleGetUploadParameters = async () => {
     try {
-      const response = await fetch('/api/objects/upload', {
+      const response = await fetch(getApiUrl('/api/objects/upload'), {
         method: 'POST',
         credentials: 'include',
       });
