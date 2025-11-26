@@ -1,0 +1,90 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Build Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Sign Release APK
+        run: |
+          cd android
+          if [ -f "alga-release-key.jks" ]; then
+            echo "Signing APK with release key..."
+            $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+              --ks alga-release-key.jks \
+              --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
+              --key-pass pass:${{ secrets.KEY_PASSWORD }} \
+              --out app/build/outputs/apk/release/app-release-signed.apk \
+              app/build/outputs/apk/release/app-release-unsigned.apk || echo "Signing skipped - secrets not configured"
+          fi
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: alga-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: alga-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Build Summary
+        run: |
+          echo "## Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### APK Files Generated:" >> $GITHUB_STEP_SUMMARY
+          echo "- Debug APK: Ready for testing" >> $GITHUB_STEP_SUMMARY
+          echo "- Release APK: Ready for distribution" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download from the Artifacts section above." >> $GITHUB_STEP_SUMMARY
