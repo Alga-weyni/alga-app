@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle } from "lucide-react";
 import Header from "@/components/header";
+import { getApiUrl } from "@/lib/api-config";
 
 const agentRegistrationSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -61,9 +62,10 @@ export default function BecomeAgent() {
   const onSubmit = async (data: AgentRegistrationForm) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/agent/register", {
+      const response = await fetch(getApiUrl("/api/agent/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 

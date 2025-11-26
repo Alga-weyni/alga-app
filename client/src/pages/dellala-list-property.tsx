@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Upload, Plus, X, ImageIcon, ArrowLeft, Home, User, Phone, Mail, FileText, Shield, AlertCircle } from "lucide-react";
@@ -244,7 +245,7 @@ export default function DellalaListProperty() {
         formData.append("images", file);
       });
 
-      const response = await fetch("/api/upload/property-images", {
+      const response = await fetch(getApiUrl("/api/upload/property-images"), {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -304,7 +305,7 @@ export default function DellalaListProperty() {
       const formData = new FormData();
       formData.append("image", file);
 
-      const response = await fetch("/api/upload/id-document", {
+      const response = await fetch(getApiUrl("/api/upload/id-document"), {
         method: "POST",
         body: formData,
         credentials: "include",

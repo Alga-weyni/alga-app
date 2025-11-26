@@ -17,6 +17,7 @@ export async function apiRequest(
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
   const fullUrl = getApiUrl(url);
+  console.log(`[API] ${method} ${fullUrl}`);
 
   try {
     const res = await fetch(fullUrl, {
@@ -28,10 +29,33 @@ export async function apiRequest(
     });
 
     clearTimeout(timeoutId);
+    console.log(`[API] Response status: ${res.status}`);
+    
     await throwIfResNotOk(res);
-    return await res.json();
+    
+    // Check if response has content before parsing JSON
+    const contentType = res.headers.get('content-type');
+    const text = await res.text();
+    
+    if (!text) {
+      console.warn('[API] Empty response body');
+      return {};
+    }
+    
+    if (!contentType?.includes('application/json')) {
+      console.warn('[API] Non-JSON response:', contentType);
+      throw new Error('Server returned non-JSON response');
+    }
+    
+    try {
+      return JSON.parse(text);
+    } catch (parseError) {
+      console.error('[API] JSON parse error:', text.substring(0, 100));
+      throw new Error('Invalid response from server');
+    }
   } catch (error: any) {
     clearTimeout(timeoutId);
+    console.error('[API] Request failed:', error.message);
     if (error.name === 'AbortError') {
       throw new Error('Request timeout - please try again');
     }

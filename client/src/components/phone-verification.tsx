@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { Phone, Shield, Clock } from "lucide-react";
 
 interface PhoneVerificationProps {
@@ -31,9 +32,10 @@ export default function PhoneVerification({
   // Send verification code mutation
   const sendCodeMutation = useMutation({
     mutationFn: async (phone: string) => {
-      const response = await fetch('/api/sms/send-verification', {
+      const response = await fetch(getApiUrl('/api/sms/send-verification'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ phone }),
       });
       if (!response.ok) throw new Error(await response.text());
@@ -59,9 +61,10 @@ export default function PhoneVerification({
   // Verify code mutation
   const verifyCodeMutation = useMutation({
     mutationFn: async ({ phone, code }: { phone: string; code: string }) => {
-      const response = await fetch('/api/sms/verify-code', {
+      const response = await fetch(getApiUrl('/api/sms/verify-code'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ phone, code }),
       });
       if (!response.ok) throw new Error(await response.text());
