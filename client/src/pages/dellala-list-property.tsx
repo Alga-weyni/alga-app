@@ -211,16 +211,15 @@ export default function DellalaListProperty() {
 
   const uploadFiles = async (files: File[]) => {
     setUploadingFiles(true);
-    const newUrls: string[] = [];
-
-    for (const file of files) {
+    
+    const validFiles = files.filter(file => {
       if (!file.type.startsWith("image/")) {
         toast({
           title: "Invalid File",
           description: `${file.name} is not an image`,
           variant: "destructive",
         });
-        continue;
+        return false;
       }
 
       if (file.size > 10 * 1024 * 1024) {
@@ -229,36 +228,48 @@ export default function DellalaListProperty() {
           description: `${file.name} exceeds 10MB`,
           variant: "destructive",
         });
-        continue;
+        return false;
       }
+      return true;
+    });
 
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("folder", "properties");
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
-
-        const result = await response.json();
-        newUrls.push(result.url);
-      } catch (error) {
-        toast({
-          title: "Upload Failed",
-          description: `Failed to upload ${file.name}`,
-          variant: "destructive",
-        });
-      }
+    if (validFiles.length === 0) {
+      setUploadingFiles(false);
+      return;
     }
 
-    setImageUrls([...imageUrls, ...newUrls]);
+    try {
+      const formData = new FormData();
+      validFiles.forEach(file => {
+        formData.append("images", file);
+      });
+
+      const response = await fetch("/api/upload/property-images", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Upload failed" }));
+        throw new Error(errorData.message || "Upload failed");
+      }
+
+      const result = await response.json();
+      setImageUrls([...imageUrls, ...result.urls]);
+      
+      toast({
+        title: "Images uploaded successfully",
+        description: `${result.count} image(s) uploaded`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload images. Please try again.",
+        variant: "destructive",
+      });
+    }
+
     setUploadingFiles(false);
   };
 
@@ -291,17 +302,17 @@ export default function DellalaListProperty() {
     setUploadingDeed(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "property-deeds");
+      formData.append("image", file);
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload/id-document", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        const errorData = await response.json().catch(() => ({ message: "Upload failed" }));
+        throw new Error(errorData.message || "Upload failed");
       }
 
       const result = await response.json();
