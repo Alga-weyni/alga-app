@@ -1,0 +1,91 @@
+amanuel@Amanuels-MacBook-Air android % # Install Java 21 via Homebrew
+brew install openjdk@21
+
+# Link it to the system (Intel Mac path)
+sudo ln -sfn /usr/local/opt/openjdk@21/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+
+# Add to your shell config (makes it permanent)
+echo 'export JAVA_HOME=/usr/local/opt/openjdk@21' >> ~/.zshrc
+echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.zshrc
+
+# Reload shell
+source ~/.zshrc
+
+# Verify Java 21 is active
+java -version
+zsh: command not found: #
+==> Auto-updating Homebrew...
+Adjust how often this is run with `$HOMEBREW_AUTO_UPDATE_SECS` or disable with
+`$HOMEBREW_NO_AUTO_UPDATE=1`. Hide these hints with `$HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+==> Auto-updated Homebrew!
+Updated 2 taps (homebrew/core and homebrew/cask).
+==> New Formulae
+ansible@12: Automate deployment, configuration, and upgrading
+aws-spiffe-workload-helper: Helper for providing AWS credentials to workloads using their SPIFFE identity
+devcockpit: TUI system monitor for Apple Silicon
+e1s: TUI for managing AWS ECS, inspired by k9s
+fastrace: Dependency-free traceroute implementation in pure C
+fnox: Fort Knox for your secrets - flexible secret management tool
+git-xet: Git LFS plugin that uploads and downloads using the Xet protocol
+mail-deduplicate: CLI to deduplicate mails from mail boxes
+mbedtls@3: Cryptographic & SSL/TLS library
+mitama-cpp-result: Provides `result<T, E>` and `maybe<T>` and monadic functions for them
+parqeye: Peek inside Parquet files right from your terminal
+php@8.4: General-purpose scripting language
+qqqa: Fast, stateless LLM for your shell: qq answers; qa runs commands
+redis@8.2: Persistent key-value database, with built-in net interface
+spiffe-helper: Tool that can be used to retrieve and manage SVIDs on behalf of a workload
+strands-agents-sops: Standard Operating Procedures for AI agents using natural language
+xleak: Terminal Excel viewer with an interactive TUI
+==> New Casks
+antigravity: AI Coding Agent IDE
+appbox: iOS app distribution tool
+athas: Lightweight code editor
+cadreader: CAD drawing viewer
+chatglm: Desktop client for the ChatGLM AI chatbot
+daruma: Track your goals using the Daruma Method
+font-amarna
+font-geom
+font-gveret-levin
+font-line-seed-jp
+font-sekuya
+fontra-pak: Browser-based font editor
+locu: Daily planner and focus timer
+mountmate: Menubar app to easily manage external drives
+mozregression-gui: Interactive regression range finder for Firefox and other Mozilla products
+notepadexe: Lightweight code editor
+qianwen: AI assistant and chatbot powered by Alibaba's Qwen model
+rocketman-choices-packager: Utility for customising installer package choices
+sodamusic: Music app
+white-rabbit: SVG utility and optimiser
+wiso-steuer-2026: Tax declaration for the fiscal year 2025
+zo: Friendly personal server
+
+You have 7 outdated formulae and 2 outdated casks installed.
+
+Warning: You are using macOS 12.
+We (and Apple) do not provide support for this old version.
+You may have better luck with MacPorts which supports older versions of macOS:
+  https://www.macports.org
+
+This is a Tier 3 configuration:
+  https://docs.brew.sh/Support-Tiers#tier-3
+You can report Tier 3 unrelated issues to Homebrew/* repositories!
+Read the above document before opening any issues or PRs.
+
+==> Fetching downloads for: openjdk@21
+✔︎ API Source openjdk@21.rb                                                                                                                [Verifying     5.7KB/  5.7KB]
+openjdk@21: A full installation of Xcode.app is required to compile
+this software. Installing just the Command Line Tools is not sufficient.
+
+Xcode can be installed from the App Store.
+Error: openjdk@21: An unsatisfied requirement failed this build.
+zsh: missing end of string
+Password:
+zsh: number expected
+zsh: command not found: #
+zsh: command not found: #
+openjdk version "17.0.16" 2025-07-15
+OpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)
+OpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode)
+amanuel@Amanuels-MacBook-Air android % 
