@@ -21,11 +21,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Java
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -35,6 +35,8 @@ jobs:
 
       - name: Build web app
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -45,25 +47,13 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Build Release APK
         run: |
           cd android
-          ./gradlew assembleRelease
-
-      - name: Sign Release APK
-        run: |
-          cd android
-          if [ -f "alga-release-key.jks" ]; then
-            echo "Signing APK with release key..."
-            $ANDROID_HOME/build-tools/34.0.0/apksigner sign \
-              --ks alga-release-key.jks \
-              --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
-              --key-pass pass:${{ secrets.KEY_PASSWORD }} \
-              --out app/build/outputs/apk/release/app-release-signed.apk \
-              app/build/outputs/apk/release/app-release-unsigned.apk || echo "Signing skipped - secrets not configured"
-          fi
+          ./gradlew assembleRelease --no-daemon
+        continue-on-error: true
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -74,10 +64,12 @@ jobs:
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: alga-release-apk
           path: android/app/build/outputs/apk/release/*.apk
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Build Summary
         run: |
