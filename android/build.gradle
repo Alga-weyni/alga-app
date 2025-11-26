@@ -22,7 +22,7 @@ allprojects {
         mavenCentral()
     }
     
-    // Force Java 17 for all subprojects
+    // Force Java 17 compatibility for all subprojects
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
@@ -32,17 +32,7 @@ allprojects {
                 }
             }
         }
-        
-        // Override Java toolchain for all Java plugins
-        project.tasks.withType(JavaCompile).configureEach {
-            options.release.set(17)
-        }
     }
-}
-
-// Enable toolchain auto-provisioning to download required JDK versions
-gradle.projectsEvaluated {
-    rootProject.extensions.findByType(org.gradle.jvm.toolchain.JavaToolchainService.class)
 }
 
 task clean(type: Delete) {
