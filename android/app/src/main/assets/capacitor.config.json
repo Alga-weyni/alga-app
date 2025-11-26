@@ -1,0 +1,31 @@
+{
+	"appId": "com.alga.app",
+	"appName": "Alga",
+	"webDir": "dist/public",
+	"bundledWebRuntime": false,
+	"server": {
+		"androidScheme": "https",
+		"iosScheme": "https"
+	},
+	"plugins": {
+		"Geolocation": {
+			"enabled": true
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		},
+		"Camera": {
+			"enabled": true
+		},
+		"Share": {
+			"enabled": true
+		},
+		"Browser": {
+			"enabled": true
+		}
+	}
+}

@@ -5,9 +5,8 @@ server/public
 vite.config.ts.*
 *.tar.gz
 
-# Capacitor Native Platforms (auto-generated, large files)
-android/
-ios/
+# Capacitor Native Platforms - include for local builds
+# android/ and ios/ are now tracked for easier local Android/iOS builds
 
 # Environment & Secrets (NEVER commit these!)
 .env
