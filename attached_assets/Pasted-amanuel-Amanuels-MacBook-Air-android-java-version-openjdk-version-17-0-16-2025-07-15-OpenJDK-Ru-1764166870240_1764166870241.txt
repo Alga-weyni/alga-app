@@ -1,0 +1,55 @@
+amanuel@Amanuels-MacBook-Air android % java -version
+openjdk version "17.0.16" 2025-07-15
+OpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8)
+OpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode)
+amanuel@Amanuels-MacBook-Air android % cd ~/AndroidStudioProjects/alga-app
+
+# Fix the Java version in build.gradle
+sed -i '' 's/JavaLanguageVersion.of(23)/JavaLanguageVersion.of(17)/g' android/app/build.gradle
+sed -i '' 's/VERSION_21/VERSION_17/g' android/app/build.gradle
+sed -i '' 's/VERSION_21/VERSION_17/g' android/app/capacitor.build.gradle
+sed -i '' 's/VERSION_21/VERSION_17/g' android/capacitor-cordova-android-plugins/build.gradle
+
+# Now build
+cd android
+./gradlew clean
+./gradlew assembleDebug
+zsh: command not found: #
+zsh: command not found: #
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: Using flatDir2 should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+BUILD SUCCESSFUL in 13s
+10 actionable tasks: 10 up-to-date
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: Using flatDir2 should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':capacitor-geolocation:bundleLibCompileToJarDebug'.
+> Could not create task ':capacitor-geolocation:compileDebugJavaWithJavac'.
+   > Failed to calculate the value of task ':capacitor-geolocation:compileDebugJavaWithJavac' property 'javaCompiler'.
+      > Cannot find a Java installation on your machine matching this tasks requirements: {languageVersion=21, vendor=any, implementation=vendor-specific} for MAC_OS on x86_64.
+         > No locally installed toolchains match and toolchain download repositories have not been configured.
+
+* Try:
+> Learn more about toolchain auto-detection at https://docs.gradle.org/8.9/userguide/toolchains.html#sec:auto_detection.
+> Learn more about toolchain repositories at https://docs.gradle.org/8.9/userguide/toolchains.html#sub:download_repositories.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 14s
+amanuel@Amanuels-MacBook-Air android %

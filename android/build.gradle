@@ -1,7 +1,6 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modul
+// Top-level build file where you can add configuration options common to all sub-projects/modules
 
 buildscript {
-    
     repositories {
         google()
         mavenCentral()
@@ -22,6 +21,28 @@ allprojects {
         google()
         mavenCentral()
     }
+    
+    // Force Java 17 for all subprojects
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+        
+        // Override Java toolchain for all Java plugins
+        project.tasks.withType(JavaCompile).configureEach {
+            options.release.set(17)
+        }
+    }
+}
+
+// Enable toolchain auto-provisioning to download required JDK versions
+gradle.projectsEvaluated {
+    rootProject.extensions.findByType(org.gradle.jvm.toolchain.JavaToolchainService.class)
 }
 
 task clean(type: Delete) {
