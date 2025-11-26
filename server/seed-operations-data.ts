@@ -12,7 +12,7 @@ import {
   systemAlerts,
   insaCompliance,
   properties
-} from "@db/schema";
+} from "../shared/schema.js";
 
 async function seedHardwareDeployments() {
   console.log("🔧 Seeding hardware deployments...");
@@ -32,14 +32,14 @@ async function seedHardwareDeployments() {
       serialNumber: "LB2024-001-AA",
       manufacturer: "MasterLock",
       model: "SafeSpace 5000",
-      purchaseDate: new Date("2024-01-15").toISOString(),
-      warrantyExpiry: new Date("2026-01-15").toISOString(),
-      installationDate: new Date("2024-01-20").toISOString(),
+      purchaseDate: new Date("2024-01-15"),
+      warrantyExpiry: new Date("2026-01-15"),
+      installationDate: new Date("2024-01-20"),
       installedBy: propertiesList[0].hostId,
       status: "active",
       location: "Front entrance",
-      lastMaintenanceDate: new Date("2024-10-01").toISOString(),
-      nextMaintenanceDate: new Date("2025-04-01").toISOString(),
+      lastMaintenanceDate: new Date("2024-10-01"),
+      nextMaintenanceDate: new Date("2025-04-01"),
       notes: "Primary lockbox for main entrance",
       cost: "3500.00"
     },
@@ -49,14 +49,14 @@ async function seedHardwareDeployments() {
       serialNumber: "CAM2024-002-BB",
       manufacturer: "Ring",
       model: "Doorbell Pro",
-      purchaseDate: new Date("2024-03-10").toISOString(),
-      warrantyExpiry: new Date("2025-12-15").toISOString(), // Expiring soon!
-      installationDate: new Date("2024-03-15").toISOString(),
+      purchaseDate: new Date("2024-03-10"),
+      warrantyExpiry: new Date("2025-12-15"), // Expiring soon!
+      installationDate: new Date("2024-03-15"),
       installedBy: propertiesList[1]?.hostId || propertiesList[0].hostId,
       status: "active",
       location: "Front door",
-      lastMaintenanceDate: new Date("2024-09-01").toISOString(),
-      nextMaintenanceDate: new Date("2025-03-01").toISOString(),
+      lastMaintenanceDate: new Date("2024-09-01"),
+      nextMaintenanceDate: new Date("2025-03-01"),
       notes: "Security camera with motion detection",
       cost: "8500.00"
     },
@@ -66,9 +66,9 @@ async function seedHardwareDeployments() {
       serialNumber: "SL2024-003-CC",
       manufacturer: "August",
       model: "Smart Lock Pro",
-      purchaseDate: new Date("2024-05-20").toISOString(),
-      warrantyExpiry: new Date("2026-05-20").toISOString(),
-      installationDate: new Date("2024-05-25").toISOString(),
+      purchaseDate: new Date("2024-05-20"),
+      warrantyExpiry: new Date("2026-05-20"),
+      installationDate: new Date("2024-05-25"),
       installedBy: propertiesList[2]?.hostId || propertiesList[0].hostId,
       status: "active",
       location: "Main door",
@@ -80,9 +80,9 @@ async function seedHardwareDeployments() {
       serialNumber: "TH2024-004-DD",
       manufacturer: "Nest",
       model: "Learning Thermostat",
-      purchaseDate: new Date("2024-06-01").toISOString(),
-      warrantyExpiry: new Date("2026-06-01").toISOString(),
-      installationDate: new Date("2024-06-05").toISOString(),
+      purchaseDate: new Date("2024-06-01"),
+      warrantyExpiry: new Date("2026-06-01"),
+      installationDate: new Date("2024-06-05"),
       installedBy: propertiesList[3]?.hostId || propertiesList[0].hostId,
       status: "active",
       location: "Living room",
@@ -94,9 +94,9 @@ async function seedHardwareDeployments() {
       serialNumber: "LB2024-005-EE",
       manufacturer: "MasterLock",
       model: "SafeSpace 3000",
-      purchaseDate: new Date("2024-07-10").toISOString(),
-      warrantyExpiry: new Date("2026-07-10").toISOString(),
-      installationDate: new Date("2024-07-15").toISOString(),
+      purchaseDate: new Date("2024-07-10"),
+      warrantyExpiry: new Date("2026-07-10"),
+      installationDate: new Date("2024-07-15"),
       installedBy: propertiesList[4]?.hostId || propertiesList[0].hostId,
       status: "active",
       location: "Side entrance",
@@ -122,7 +122,7 @@ async function seedPaymentTransactions() {
       relatedAgentId: 1,
       gatewayResponse: { success: true, reference: "TB001" },
       reconciled: true,
-      reconciledAt: new Date("2024-11-01").toISOString(),
+      reconciledAt: new Date("2024-11-01"),
       notes: "Monthly commission payout to agent"
     },
     {
@@ -135,7 +135,7 @@ async function seedPaymentTransactions() {
       relatedBookingId: 1,
       gatewayResponse: { success: true, reference: "CH002" },
       reconciled: true,
-      reconciledAt: new Date("2024-11-02").toISOString()
+      reconciledAt: new Date("2024-11-02")
     },
     {
       transactionId: "TXN-STRIPE-2024-003",
@@ -170,7 +170,7 @@ async function seedPaymentTransactions() {
       relatedBookingId: 3,
       gatewayResponse: { success: true, reference: "CH005" },
       reconciled: true,
-      reconciledAt: new Date("2024-11-05").toISOString()
+      reconciledAt: new Date("2024-11-05")
     }
   ];
 
@@ -186,8 +186,8 @@ async function seedMarketingCampaigns() {
       campaignName: "Alga Launch Campaign - Addis Ababa",
       campaignType: "brand_awareness",
       platform: "facebook",
-      startDate: new Date("2024-10-01").toISOString(),
-      endDate: new Date("2024-11-30").toISOString(),
+      startDate: new Date("2024-10-01"),
+      endDate: new Date("2024-11-30"),
       status: "active",
       budget: "50000.00",
       spent: "28500.00",
@@ -207,8 +207,8 @@ async function seedMarketingCampaigns() {
       campaignName: "Instagram Property Showcase",
       campaignType: "content_marketing",
       platform: "instagram",
-      startDate: new Date("2024-10-15").toISOString(),
-      endDate: new Date("2024-12-15").toISOString(),
+      startDate: new Date("2024-10-15"),
+      endDate: new Date("2024-12-15"),
       status: "active",
       budget: "30000.00",
       spent: "15200.00",
@@ -228,8 +228,8 @@ async function seedMarketingCampaigns() {
       campaignName: "TikTok Viral Challenge - #AlgaEthiopia",
       campaignType: "viral_marketing",
       platform: "tiktok",
-      startDate: new Date("2024-11-01").toISOString(),
-      endDate: new Date("2024-11-30").toISOString(),
+      startDate: new Date("2024-11-01"),
+      endDate: new Date("2024-11-30"),
       status: "active",
       budget: "25000.00",
       spent: "8500.00",
@@ -249,8 +249,8 @@ async function seedMarketingCampaigns() {
       campaignName: "Telegram Community Growth",
       campaignType: "community_building",
       platform: "telegram",
-      startDate: new Date("2024-09-01").toISOString(),
-      endDate: new Date("2024-12-31").toISOString(),
+      startDate: new Date("2024-09-01"),
+      endDate: new Date("2024-12-31"),
       status: "active",
       budget: "15000.00",
       spent: "12000.00",
@@ -319,8 +319,8 @@ async function seedINSACompliance() {
       complianceCategory: "Data Protection",
       requirement: "Implement end-to-end encryption for user data",
       status: "completed",
-      dueDate: new Date("2024-10-01").toISOString(),
-      completedDate: new Date("2024-09-25").toISOString(),
+      dueDate: new Date("2024-10-01"),
+      completedDate: new Date("2024-09-25"),
       evidenceUrl: "/docs/encryption-audit.pdf",
       notes: "AES-256 encryption implemented for all sensitive data"
     },
@@ -328,8 +328,8 @@ async function seedINSACompliance() {
       complianceCategory: "Authentication",
       requirement: "Multi-factor authentication for all admin users",
       status: "completed",
-      dueDate: new Date("2024-10-15").toISOString(),
-      completedDate: new Date("2024-10-10").toISOString(),
+      dueDate: new Date("2024-10-15"),
+      completedDate: new Date("2024-10-10"),
       evidenceUrl: "/docs/mfa-implementation.pdf",
       notes: "OTP-based 2FA implemented"
     },
@@ -337,15 +337,15 @@ async function seedINSACompliance() {
       complianceCategory: "Audit Logging",
       requirement: "Comprehensive audit trail for all transactions",
       status: "in_progress",
-      dueDate: new Date("2024-12-01").toISOString(),
+      dueDate: new Date("2024-12-01"),
       notes: "Database logging implemented, export function in development"
     },
     {
       complianceCategory: "OWASP Top 10",
       requirement: "Address all OWASP Top 10 vulnerabilities",
       status: "completed",
-      dueDate: new Date("2024-11-01").toISOString(),
-      completedDate: new Date("2024-10-28").toISOString(),
+      dueDate: new Date("2024-11-01"),
+      completedDate: new Date("2024-10-28"),
       evidenceUrl: "/docs/owasp-compliance.pdf",
       notes: "All 10 vulnerabilities mitigated with security hardening"
     },
@@ -353,7 +353,7 @@ async function seedINSACompliance() {
       complianceCategory: "Data Residency",
       requirement: "Ensure Ethiopian user data stays in Ethiopia",
       status: "pending",
-      dueDate: new Date("2025-01-01").toISOString(),
+      dueDate: new Date("2025-01-01"),
       notes: "Evaluating local data center options"
     }
   ];

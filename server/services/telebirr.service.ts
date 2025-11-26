@@ -104,7 +104,7 @@ export class TelebirrService {
         body: JSON.stringify(reqObject),
       });
 
-      const result: AuthTokenResponse = await response.json();
+      const result = await response.json() as AuthTokenResponse;
       
       if (result.code === 0 && result.data?.access_token) {
         return result;
@@ -136,7 +136,7 @@ export class TelebirrService {
         body: JSON.stringify(reqObject),
       });
 
-      const result = await response.json();
+      const result = await response.json() as { code: number; data?: unknown; message?: string };
       
       if (result.code === 0) {
         return result;

@@ -39,7 +39,7 @@ export class FxService {
         )
       );
 
-    const [rate] = await db.insert(fxRates).values(data).returning();
+    const [rate] = await db.insert(fxRates).values(data as typeof fxRates.$inferInsert).returning();
     return rate;
   }
 

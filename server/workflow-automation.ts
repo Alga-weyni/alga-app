@@ -78,8 +78,8 @@ export async function generateWarrantyExpiryAlerts() {
     .where(
       and(
         eq(hardwareDeployments.status, "active"),
-        lt(hardwareDeployments.warrantyExpiry, thirtyDaysFromNow.toISOString()),
-        gte(hardwareDeployments.warrantyExpiry, new Date().toISOString())
+        lt(hardwareDeployments.warrantyExpiry, thirtyDaysFromNow),
+        gte(hardwareDeployments.warrantyExpiry, new Date())
       )
     );
 
@@ -126,7 +126,7 @@ export async function generatePaymentMismatchAlerts() {
     .where(
       and(
         eq(paymentTransactions.reconciled, false),
-        lt(paymentTransactions.createdAt, sevenDaysAgo.toISOString())
+        lt(paymentTransactions.createdAt, sevenDaysAgo)
       )
     );
 

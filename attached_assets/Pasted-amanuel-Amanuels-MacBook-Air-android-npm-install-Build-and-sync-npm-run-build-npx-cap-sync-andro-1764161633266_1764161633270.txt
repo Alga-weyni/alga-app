@@ -1,0 +1,482 @@
+amanuel@Amanuels-MacBook-Air android % npm install
+# Build and sync
+npm run build
+npx cap sync android
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated xss-clean@0.1.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 1064 packages, and audited 1065 packages in 1m
+
+170 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+zsh: command not found: #
+
+> rest-express@1.0.0 build
+> tsc --project tsconfig.backend.json && echo 'Backend built successfully ✓'
+
+server/fayda-verification.ts:82:14 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+82     if (data.response && data.response.token) {
+                ~~~~~~~~
+
+server/fayda-verification.ts:82:31 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+82     if (data.response && data.response.token) {
+                                 ~~~~~~~~
+
+server/fayda-verification.ts:83:19 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+83       return data.response.token;
+                     ~~~~~~~~
+
+server/fayda-verification.ts:179:14 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+179     if (data.response && data.response.kycStatus) {
+                 ~~~~~~~~
+
+server/fayda-verification.ts:179:31 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+179     if (data.response && data.response.kycStatus) {
+                                  ~~~~~~~~
+
+server/fayda-verification.ts:182:25 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+182         kycStatus: data.response.kycStatus,
+                            ~~~~~~~~
+
+server/fayda-verification.ts:183:24 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+183         identity: data.response.identity,
+                           ~~~~~~~~
+
+server/fayda-verification.ts:184:33 - error TS2339: Property 'response' does not exist on type 'unknown'.
+
+184         authResponseToken: data.response.authResponseToken,
+                                    ~~~~~~~~
+
+server/fayda-verification.ts:192:19 - error TS2339: Property 'errors' does not exist on type 'unknown'.
+
+192       error: data.errors?.[0]?.errorCode || "VERIFICATION_FAILED",
+                      ~~~~~~
+
+server/fayda-verification.ts:193:21 - error TS2339: Property 'errors' does not exist on type 'unknown'.
+
+193       message: data.errors?.[0]?.message || "Fayda ID verification failed",
+                        ~~~~~~
+
+server/objectStorage.ts:265:11 - error TS2339: Property 'signed_url' does not exist on type '{}'.
+
+265   const { signed_url: signedURL } = await response.json();
+              ~~~~~~~~~~
+
+server/routes.ts:2054:50 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+2054       const property = await storage.getProperty(lockboxData.propertyId);
+                                                      ~~~~~~~~~~~~~~~~~~~~~~
+
+server/routes.ts:2060:61 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+2060       const existing = await storage.getLockboxByPropertyId(lockboxData.propertyId);
+                                                                 ~~~~~~~~~~~~~~~~~~~~~~
+
+server/routes.ts:2164:50 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+2164       const property = await storage.getProperty(cameraData.propertyId);
+                                                      ~~~~~~~~~~~~~~~~~~~~~
+
+server/routes.ts:4530:9 - error TS2698: Spread types may only be created from object types.
+
+4530         ...currentPreferences,
+             ~~~~~~~~~~~~~~~~~~~~~
+
+server/seed-operations-data.ts:15:8 - error TS2307: Cannot find module '@db/schema' or its corresponding type declarations.
+
+15 } from "@db/schema";
+          ~~~~~~~~~~~~
+
+server/services/audit-log.service.ts:39:41 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; actorType: string | SQL<unknown> | Placeholder<...>; ... 15 more ...; requestId?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ logHash: string; previousLogHash: string; action?: string; metadata?: Json; description?: string; currency?: string; amount?: unknown; ipAddress?: string; userAgent?: string; category?: string; actorId?: string; ... 5 more ...; requestId?: string; }' is not assignable to parameter of type '{ action: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; actorType: string | SQL<unknown> | Placeholder<...>; ... 15 more ...; requestId?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'action' is optional in type '{ logHash: string; previousLogHash: string; action?: string; metadata?: Json; description?: string; currency?: string; amount?: unknown; ipAddress?: string; userAgent?: string; category?: string; actorId?: string; ... 5 more ...; requestId?: string; }' but required in type '{ action: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; actorType: string | SQL<unknown> | Placeholder<...>; ... 15 more ...; requestId?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; actorType: string | SQL<unknown> | Placeholder<...>; ... 15 more ...; requestId?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'logHash' does not exist in type '{ action: string | SQL<unknown> | Placeholder<string, any>; category: string | SQL<unknown> | Placeholder<string, any>; actorType: string | SQL<unknown> | Placeholder<...>; ... 15 more ...; requestId?: string | ... 1 more ... | Placeholder<...>; }[]'.
+
+39     await db.insert(financialAuditLogs).values({
+                                           ~~~~~~
+
+
+server/services/audit-log.service.ts:69:7 - error TS2322: Type 'object' is not assignable to type 'Json'.
+
+69       previousState: params.previousState,
+         ~~~~~~~~~~~~~
+
+server/services/audit-log.service.ts:70:7 - error TS2322: Type 'object' is not assignable to type 'Json'.
+
+70       newState: params.newState,
+         ~~~~~~~~
+
+server/services/audit-log.service.ts:98:7 - error TS2322: Type 'object' is not assignable to type 'Json'.
+
+98       previousState: params.previousState,
+         ~~~~~~~~~~~~~
+
+server/services/audit-log.service.ts:99:7 - error TS2322: Type 'object' is not assignable to type 'Json'.
+
+99       newState: params.newState,
+         ~~~~~~~~
+
+server/services/fx.service.ts:42:52 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ isActive?: unknown; fromCurrency?: string; toCurrency?: string; rate?: unknown; inverseRate?: unknown; buyRate?: unknown; sellRate?: unknown; spread?: unknown; source?: string; effectiveFrom?: unknown; effectiveTo?: unknown; setBy?: string; }' is not assignable to parameter of type '{ fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'fromCurrency' is optional in type '{ isActive?: unknown; fromCurrency?: string; toCurrency?: string; rate?: unknown; inverseRate?: unknown; buyRate?: unknown; sellRate?: unknown; spread?: unknown; source?: string; effectiveFrom?: unknown; effectiveTo?: unknown; setBy?: string; }' but required in type '{ fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ isActive?: unknown; fromCurrency?: string; toCurrency?: string; rate?: unknown; inverseRate?: unknown; buyRate?: unknown; sellRate?: unknown; spread?: unknown; source?: string; effectiveFrom?: unknown; effectiveTo?: unknown; setBy?: string; }' is not assignable to parameter of type '{ fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ isActive?: unknown; fromCurrency?: string; toCurrency?: string; rate?: unknown; inverseRate?: unknown; buyRate?: unknown; sellRate?: unknown; spread?: unknown; source?: string; effectiveFrom?: unknown; effectiveTo?: unknown; setBy?: string; }' is missing the following properties from type '{ fromCurrency: string | SQL<unknown> | Placeholder<string, any>; toCurrency: string | SQL<unknown> | Placeholder<string, any>; rate: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; setBy?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+42     const [rate] = await db.insert(fxRates).values(data).returning();
+                                                      ~~~~
+
+
+server/services/telebirr.service.ts:107:13 - error TS2739: Type '{}' is missing the following properties from type 'AuthTokenResponse': code, message
+
+107       const result: AuthTokenResponse = await response.json();
+                ~~~~~~
+
+server/services/telebirr.service.ts:141:18 - error TS2339: Property 'code' does not exist on type 'unknown'.
+
+141       if (result.code === 0) {
+                     ~~~~
+
+server/services/wallet.service.ts:33:47 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { ownerId: string | SQL<unknown> | Placeholder<string, any>; ownerType: string | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; lastBalanceHash?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ lastBalanceHash: string; status?: string; currency?: string; totalEarnings?: unknown; availableBalance?: unknown; ownerId?: string; ownerType?: string; frozenBalance?: unknown; pendingBalance?: unknown; totalWithdrawals?: unknown; frozenReason?: string; ... 6 more ...; preferredPayoutMethod?: string; }' is not assignable to parameter of type '{ ownerId: string | SQL<unknown> | Placeholder<string, any>; ownerType: string | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; lastBalanceHash?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'ownerId' is optional in type '{ lastBalanceHash: string; status?: string; currency?: string; totalEarnings?: unknown; availableBalance?: unknown; ownerId?: string; ownerType?: string; frozenBalance?: unknown; pendingBalance?: unknown; totalWithdrawals?: unknown; frozenReason?: string; ... 6 more ...; preferredPayoutMethod?: string; }' but required in type '{ ownerId: string | SQL<unknown> | Placeholder<string, any>; ownerType: string | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; lastBalanceHash?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { ownerId: string | SQL<unknown> | Placeholder<string, any>; ownerType: string | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; lastBalanceHash?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'lastBalanceHash' does not exist in type '{ ownerId: string | SQL<unknown> | Placeholder<string, any>; ownerType: string | SQL<unknown> | Placeholder<string, any>; id?: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; lastBalanceHash?: string | ... 1 more ... | Placeholder<...>; }[]'.
+
+33     const [wallet] = await db.insert(wallets).values({
+                                                 ~~~~~~
+
+
+server/smsService.ts:60:29 - error TS2339: Property 'messageId' does not exist on type 'unknown'.
+
+60           messageId: result.messageId || result.id,
+                               ~~~~~~~~~
+
+server/smsService.ts:60:49 - error TS2339: Property 'id' does not exist on type 'unknown'.
+
+60           messageId: result.messageId || result.id,
+                                                   ~~
+
+server/smsService.ts:65:25 - error TS2339: Property 'error' does not exist on type 'unknown'.
+
+65           error: result.error || 'Failed to send SMS',
+                           ~~~~~
+
+server/storage.ts:555:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; hostId?: string; title?: string; description?: string; type?: string; latitude?: unknown; longitude?: unknown; address?: string; location?: string; ... 13 more ...; hardwareVerificationNotes?: string; }' is not assignable to parameter of type '{ hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'hostId' is optional in type '{ status?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; hostId?: string; title?: string; description?: string; type?: string; latitude?: unknown; longitude?: unknown; address?: string; location?: string; ... 13 more ...; hardwareVerificationNotes?: string; }' but required in type '{ hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; hostId?: string; title?: string; description?: string; type?: string; latitude?: unknown; longitude?: unknown; address?: string; location?: string; ... 13 more ...; hardwareVerificationNotes?: string; }' is not assignable to parameter of type '{ hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ status?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; hostId?: string; title?: string; description?: string; type?: string; latitude?: unknown; longitude?: unknown; address?: string; location?: string; ... 13 more ...; hardwareVerificationNotes?: string; }' is missing the following properties from type '{ hostId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<...>; ... 27 more ...; hardwareVerificationNotes?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+555       .values(property)
+                  ~~~~~~~~
+
+
+server/storage.ts:563:12 - error TS2345: Argument of type '{ updatedAt: Date; status?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; hostId?: string; title?: string; description?: string; type?: string; latitude?: unknown; longitude?: unknown; address?: string; ... 14 more ...; hardwareVerificationNotes?: string; }' is not assignable to parameter of type '{ hostId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; title?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<...>, {}, {}>; ... 28 more ...; hardwareVerificationNotes?: string | ... 1 more ... | PgColumn<...>; }'.
+  Types of property 'pricePerNight' are incompatible.
+    Type 'unknown' is not assignable to type 'string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>'.
+
+563       .set({ ...updates, updatedAt: new Date() })
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+server/storage.ts:601:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; checkIn: Date | SQL<...> | Placeholder<...>; ... 15 more ...; hostPayout?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ algaCommission: string; vat: string; withholding: string; hostPayout: string; status?: string; currency?: string; propertyId?: unknown; guestId?: string; checkIn?: Date; checkOut?: Date; guests?: unknown; ... 4 more ...; specialRequests?: string; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; checkIn: Date | SQL<unknown> | Placeholder<...>; ... 15 more ...; hostPayout?: string | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'propertyId' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; checkIn: Date | SQL<...> | Placeholder<...>; ... 15 more ...; hostPayout?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ algaCommission: string; vat: string; withholding: string; hostPayout: string; status?: string; currency?: string; propertyId?: unknown; guestId?: string; checkIn?: Date; checkOut?: Date; guests?: unknown; ... 4 more ...; specialRequests?: string; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; checkIn: Date | SQL<unknown> | Placeholder<...>; ... 15 more ...; hostPayout?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ algaCommission: string; vat: string; withholding: string; hostPayout: string; status?: string; currency?: string; propertyId?: unknown; guestId?: string; checkIn?: Date; checkOut?: Date; guests?: unknown; ... 4 more ...; specialRequests?: string; }' is missing the following properties from type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; checkIn: Date | SQL<unknown> | Placeholder<...>; ... 15 more ...; hostPayout?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+601       .values(bookingWithFinancials)
+                  ~~~~~~~~~~~~~~~~~~~~~
+
+
+server/storage.ts:656:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { rating: number | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 9 more ...; value?: number | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ location?: unknown; rating?: unknown; propertyId?: unknown; bookingId?: unknown; reviewerId?: string; comment?: string; cleanliness?: unknown; communication?: unknown; accuracy?: unknown; value?: unknown; }' is not assignable to parameter of type '{ rating: number | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 9 more ...; value?: number | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'rating' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { rating: number | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 9 more ...; value?: number | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ location?: unknown; rating?: unknown; propertyId?: unknown; bookingId?: unknown; reviewerId?: string; comment?: string; cleanliness?: unknown; communication?: unknown; accuracy?: unknown; value?: unknown; }' is not assignable to parameter of type '{ rating: number | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 9 more ...; value?: number | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ location?: unknown; rating?: unknown; propertyId?: unknown; bookingId?: unknown; reviewerId?: string; comment?: string; cleanliness?: unknown; communication?: unknown; accuracy?: unknown; value?: unknown; }' is missing the following properties from type '{ rating: number | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 9 more ...; value?: number | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+656       .values(review)
+                  ~~~~~~
+
+
+server/storage.ts:660:60 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+660     const newRating = await this.recalculatePropertyRating(review.propertyId);
+                                                               ~~~~~~~~~~~~~~~~~
+
+server/storage.ts:721:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ userId?: string; propertyId?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }'.
+      Property 'userId' is optional in type '{ userId?: string; propertyId?: unknown; }' but required in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ userId?: string; propertyId?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ userId?: string; propertyId?: unknown; }' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; createdAt?: Date | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+721       .values(favorite)
+                  ~~~~~~~~
+
+
+server/storage.ts:1144:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 12 more ...; deliveredAt?: Date | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; propertyId?: unknown; guestId?: string; bookingId?: unknown; lockboxId?: unknown; code?: string; validFrom?: unknown; validTo?: unknown; usedAt?: unknown; generatedBy?: string; vendorCodeId?: string; deliveryMethod?: string; deliveredAt?: unknown; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 12 more ...; deliveredAt?: Date | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'propertyId' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 12 more ...; deliveredAt?: Date | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; propertyId?: unknown; guestId?: string; bookingId?: unknown; lockboxId?: unknown; code?: string; validFrom?: unknown; validTo?: unknown; usedAt?: unknown; generatedBy?: string; vendorCodeId?: string; deliveryMethod?: string; deliveredAt?: unknown; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 12 more ...; deliveredAt?: Date | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ status?: string; propertyId?: unknown; guestId?: string; bookingId?: unknown; lockboxId?: unknown; code?: string; validFrom?: unknown; validTo?: unknown; usedAt?: unknown; generatedBy?: string; vendorCodeId?: string; deliveryMethod?: string; deliveredAt?: unknown; }' is missing the following properties from type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; guestId: string | SQL<unknown> | Placeholder<string, any>; bookingId: number | SQL<unknown> | Placeholder<...>; ... 12 more ...; deliveredAt?: Date | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1144       .values(accessCode)
+                   ~~~~~~~~~~
+
+
+server/storage.ts:1177:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { propertyId: number | SQL<unknown> | Placeholder<string, any>; vendor: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 13 more ...; notes?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; vendor?: string; vendorLockId?: string; model?: string; serialNumber?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; vendor: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 13 more ...; notes?: string | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'propertyId' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { propertyId: number | SQL<unknown> | Placeholder<string, any>; vendor: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 13 more ...; notes?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; vendor?: string; vendorLockId?: string; model?: string; serialNumber?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; }' is not assignable to parameter of type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; vendor: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 13 more ...; notes?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; vendor?: string; vendorLockId?: string; model?: string; serialNumber?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; }' is missing the following properties from type '{ propertyId: number | SQL<unknown> | Placeholder<string, any>; vendor: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 13 more ...; notes?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1177       .values(lockbox)
+                   ~~~~~~~
+
+
+server/storage.ts:1193:12 - error TS2345: Argument of type '{ verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; vendor?: string; vendorLockId?: string; model?: string; serialNumber?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; }' is not assignable to parameter of type '{ propertyId?: number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; vendor?: string | SQL<unknown> | PgColumn<...>; ... 14 more ...; notes?: string | ... 1 more ... | PgColumn<...>; }'.
+  Types of property 'propertyId' are incompatible.
+    Type 'unknown' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>'.
+
+1193       .set({ ...updates })
+                ~~~~~~~~~~~~~~
+
+server/storage.ts:1219:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ brand?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; model?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; viewingArea?: string; recordingEnabled?: unknown;...' is not assignable to parameter of type '{ location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'location' is optional in type '{ brand?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; model?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; viewingArea?: string; recordingEnabled?: unknown;...' but required in type '{ location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ brand?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; model?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; viewingArea?: string; recordingEnabled?: unknown;...' is not assignable to parameter of type '{ location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ brand?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; model?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; viewingArea?: string; recordingEnabled?: unknown;...' is missing the following properties from type '{ location: string | SQL<unknown> | Placeholder<string, any>; propertyId: number | SQL<unknown> | Placeholder<string, any>; brand?: string | SQL<unknown> | Placeholder<...>; ... 14 more ...; storageType?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1219       .values(camera)
+                   ~~~~~~
+
+
+server/storage.ts:1235:12 - error TS2345: Argument of type '{ brand?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; location?: string; isActive?: unknown; propertyId?: unknown; model?: string; installationDate?: unknown; installationPhotoUrl?: string; verificationStatus?: string; notes?: string; viewingArea?: string; recordingEnabled?: unknown;...' is not assignable to parameter of type '{ location?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>; propertyId?: number | SQL<unknown> | PgColumn<...>; ... 15 more ...; storageType?: string | ... 1 more ... | PgColumn<...>; }'.
+  Types of property 'propertyId' are incompatible.
+    Type 'unknown' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}>'.
+
+1235       .set({ ...updates })
+                ~~~~~~~~~~~~~~
+
+server/storage.ts:1284:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ idDocumentUrl?: string; userId?: string; rejectionReason?: string; description?: string; latitude?: unknown; longitude?: unknown; address?: string; city?: string; region?: string; currency?: string; isActive?: unknown; businessName?: string; ... 8 more ...; deliveryRadiusKm?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }'.
+      Property 'userId' is optional in type '{ idDocumentUrl?: string; userId?: string; rejectionReason?: string; description?: string; latitude?: unknown; longitude?: unknown; address?: string; city?: string; region?: string; currency?: string; isActive?: unknown; businessName?: string; ... 8 more ...; deliveryRadiusKm?: unknown; }' but required in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ idDocumentUrl?: string; userId?: string; rejectionReason?: string; description?: string; latitude?: unknown; longitude?: unknown; address?: string; city?: string; region?: string; currency?: string; isActive?: unknown; businessName?: string; ... 8 more ...; deliveryRadiusKm?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ idDocumentUrl?: string; userId?: string; rejectionReason?: string; description?: string; latitude?: unknown; longitude?: unknown; address?: string; city?: string; region?: string; currency?: string; isActive?: unknown; businessName?: string; ... 8 more ...; deliveryRadiusKm?: unknown; }' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 25 more ...; deliveryRadiusKm?: number | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1284       .values(provider)
+                   ~~~~~~~~
+
+
+server/storage.ts:1356:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<...> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; hostId?: string; currency?: string; guestId?: string; totalPrice?: string; paymentStatus?: string; paymentRef?: string; algaCommission?: unknown; bookingId?: unknown; serviceType?: "cleaning" | "laundry" | ... 9 more ... | "self_care"; ... 6 more ...; specialInstructions?: string; }' is not assignable to parameter of type '{ guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<unknown> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'guestId' is optional in type '{ status?: string; hostId?: string; currency?: string; guestId?: string; totalPrice?: string; paymentStatus?: string; paymentRef?: string; algaCommission?: unknown; bookingId?: unknown; serviceType?: "cleaning" | "laundry" | ... 9 more ... | "self_care"; ... 6 more ...; specialInstructions?: string; }' but required in type '{ guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<unknown> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<...> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ status?: string; hostId?: string; currency?: string; guestId?: string; totalPrice?: string; paymentStatus?: string; paymentRef?: string; algaCommission?: unknown; bookingId?: unknown; serviceType?: "cleaning" | "laundry" | ... 9 more ... | "self_care"; ... 6 more ...; specialInstructions?: string; }' is not assignable to parameter of type '{ guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<unknown> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ status?: string; hostId?: string; currency?: string; guestId?: string; totalPrice?: string; paymentStatus?: string; paymentRef?: string; algaCommission?: unknown; bookingId?: unknown; serviceType?: "cleaning" | "laundry" | ... 9 more ... | "self_care"; ... 6 more ...; specialInstructions?: string; }' is missing the following properties from type '{ guestId: string | SQL<unknown> | Placeholder<string, any>; totalPrice: string | SQL<unknown> | Placeholder<string, any>; serviceType: string | SQL<unknown> | Placeholder<...>; ... 16 more ...; specialInstructions?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1356       .values(booking)
+                   ~~~~~~~
+
+
+server/storage.ts:1437:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { rating: number | SQL<unknown> | Placeholder<string, any>; reviewerId: string | SQL<unknown> | Placeholder<string, any>; serviceProviderId: number | SQL<...> | Placeholder<...>; ... 9 more ...; timeliness?: number | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ rating?: unknown; reviewerId?: string; comment?: string; communication?: unknown; value?: unknown; serviceProviderId?: unknown; serviceBookingId?: unknown; professionalism?: unknown; quality?: unknown; timeliness?: unknown; }' is not assignable to parameter of type '{ rating: number | SQL<unknown> | Placeholder<string, any>; reviewerId: string | SQL<unknown> | Placeholder<string, any>; serviceProviderId: number | SQL<...> | Placeholder<...>; ... 9 more ...; timeliness?: number | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'rating' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { rating: number | SQL<unknown> | Placeholder<string, any>; reviewerId: string | SQL<unknown> | Placeholder<string, any>; serviceProviderId: number | SQL<...> | Placeholder<...>; ... 9 more ...; timeliness?: number | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ rating?: unknown; reviewerId?: string; comment?: string; communication?: unknown; value?: unknown; serviceProviderId?: unknown; serviceBookingId?: unknown; professionalism?: unknown; quality?: unknown; timeliness?: unknown; }' is not assignable to parameter of type '{ rating: number | SQL<unknown> | Placeholder<string, any>; reviewerId: string | SQL<unknown> | Placeholder<string, any>; serviceProviderId: number | SQL<...> | Placeholder<...>; ... 9 more ...; timeliness?: number | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ rating?: unknown; reviewerId?: string; comment?: string; communication?: unknown; value?: unknown; serviceProviderId?: unknown; serviceBookingId?: unknown; professionalism?: unknown; quality?: unknown; timeliness?: unknown; }' is missing the following properties from type '{ rating: number | SQL<unknown> | Placeholder<string, any>; reviewerId: string | SQL<unknown> | Placeholder<string, any>; serviceProviderId: number | SQL<...> | Placeholder<...>; ... 9 more ...; timeliness?: number | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1437       .values(review)
+                   ~~~~~~
+
+
+server/storage.ts:1441:44 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+1441     await this.updateServiceProviderRating(review.serviceProviderId);
+                                                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+server/storage.ts:1470:8 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { phoneNumber: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; referralCode?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ referralCode: string; id?: unknown; phoneNumber?: string; idNumber?: string; idDocumentUrl?: string; status?: string; createdAt?: unknown; updatedAt?: unknown; userId?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; ... 8 more ...; activeProperties?: unknown; }' is not assignable to parameter of type '{ phoneNumber: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; referralCode?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'phoneNumber' is optional in type '{ referralCode: string; id?: unknown; phoneNumber?: string; idNumber?: string; idDocumentUrl?: string; status?: string; createdAt?: unknown; updatedAt?: unknown; userId?: string; verifiedBy?: string; verifiedAt?: unknown; rejectionReason?: string; ... 8 more ...; activeProperties?: unknown; }' but required in type '{ phoneNumber: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; referralCode?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { phoneNumber: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; referralCode?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'referralCode' does not exist in type '{ phoneNumber: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; city: string | SQL<unknown> | Placeholder<...>; ... 17 more ...; referralCode?: string | ... 1 more ... | Placeholder<...>; }[]'.
+
+1470       .values({ ...agent, referralCode })
+            ~~~~~~
+
+
+server/storage.ts:1837:11 - error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: PgColumn<{ name: "agent_id"; tableName: "agent_withdrawals"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: number | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'number | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<unknown>, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "agent_id"; tableName: "agent_withdrawals"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<unknown>'.
+      Type 'PgColumn<{ name: "agent_id"; tableName: "agent_withdrawals"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<unknown>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "agent_id"; tableName: "agent_withdrawals"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; notNull: true; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+
+1837           eq(agentWithdrawals.agentId, agentId),
+               ~~
+
+
+server/storage.ts:1846:56 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+
+1846     const performance = await this.getAgentPerformance(agentId);
+                                                            ~~~~~~~
+
+server/storage.ts:1852:39 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+1852     const withdrawAmount = parseFloat(amount);
+                                           ~~~~~~
+
+server/storage.ts:1860:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; ... 12 more ...; failureReason?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ id?: unknown; status?: string; createdAt?: unknown; updatedAt?: unknown; metadata?: Json; currency?: string; notes?: string; agentId?: unknown; amount?: unknown; method?: string; accountNumber?: string; requestedAt?: unknown; processedAt?: unknown; processedBy?: string; transactionId?: string; failureReason?: stri...' is not assignable to parameter of type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; ... 12 more ...; failureReason?: string | ... 1 more ... | Placeholder<...>; }'.
+      Types of property 'agentId' are incompatible.
+        Type 'unknown' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; ... 12 more ...; failureReason?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ id?: unknown; status?: string; createdAt?: unknown; updatedAt?: unknown; metadata?: Json; currency?: string; notes?: string; agentId?: unknown; amount?: unknown; method?: string; accountNumber?: string; requestedAt?: unknown; processedAt?: unknown; processedBy?: string; transactionId?: string; failureReason?: stri...' is not assignable to parameter of type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; ... 12 more ...; failureReason?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ id?: unknown; status?: string; createdAt?: unknown; updatedAt?: unknown; metadata?: Json; currency?: string; notes?: string; agentId?: unknown; amount?: unknown; method?: string; accountNumber?: string; requestedAt?: unknown; processedAt?: unknown; processedBy?: string; transactionId?: string; failureReason?: stri...' is missing the following properties from type '{ agentId: number | SQL<unknown> | Placeholder<string, any>; amount: string | SQL<unknown> | Placeholder<string, any>; method: string | SQL<unknown> | Placeholder<...>; ... 12 more ...; failureReason?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+1860       .values(withdrawal)
+                   ~~~~~~~~~~
+
+
+server/storage.ts:2129:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ faydaId?: string; userId?: string; action?: string; metadata?: Json; timestamp?: unknown; relatedEntityType?: string; relatedEntityId?: string; signatureId?: string; ipAddressEncrypted?: string; deviceInfoEncrypted?: string; otpId?: string; signatureHash?: string; verified?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }'.
+      Property 'userId' is optional in type '{ faydaId?: string; userId?: string; action?: string; metadata?: Json; timestamp?: unknown; relatedEntityType?: string; relatedEntityId?: string; signatureId?: string; ipAddressEncrypted?: string; deviceInfoEncrypted?: string; otpId?: string; signatureHash?: string; verified?: unknown; }' but required in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ faydaId?: string; userId?: string; action?: string; metadata?: Json; timestamp?: unknown; relatedEntityType?: string; relatedEntityId?: string; signatureId?: string; ipAddressEncrypted?: string; deviceInfoEncrypted?: string; otpId?: string; signatureHash?: string; verified?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ faydaId?: string; userId?: string; action?: string; metadata?: Json; timestamp?: unknown; relatedEntityType?: string; relatedEntityId?: string; signatureId?: string; ipAddressEncrypted?: string; deviceInfoEncrypted?: string; otpId?: string; signatureHash?: string; verified?: unknown; }' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; action: string | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; verified?: boolean | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+2129       .values(log)
+                   ~~~
+
+
+server/storage.ts:2230:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ action?: string; metadata?: Json; adminUserId?: string; recordId?: string; exportFormat?: string; ipAddress?: string; userAgent?: string; }' is not assignable to parameter of type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }'.
+      Property 'action' is optional in type '{ action?: string; metadata?: Json; adminUserId?: string; recordId?: string; exportFormat?: string; ipAddress?: string; userAgent?: string; }' but required in type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ action?: string; metadata?: Json; adminUserId?: string; recordId?: string; exportFormat?: string; ipAddress?: string; userAgent?: string; }' is not assignable to parameter of type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ action?: string; metadata?: Json; adminUserId?: string; recordId?: string; exportFormat?: string; ipAddress?: string; userAgent?: string; }' is missing the following properties from type '{ action: string | SQL<unknown> | Placeholder<string, any>; adminUserId: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<...>; ... 5 more ...; userAgent?: string | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+2230       .values(log)
+                   ~~~
+
+
+server/utils/email.ts:36:49 - error TS2339: Property 'items' does not exist on type 'unknown'.
+
+36     ).then(res => res.json()).then(data => data.items?.[0]);
+                                                   ~~~~~
+
+server/utils/integrityAlerts.ts:28:47 - error TS2339: Property 'items' does not exist on type 'unknown'.
+
+28   ).then(res => res.json()).then(data => data.items?.[0]);
+                                                 ~~~~~
+
+server/workflow-automation.ts:81:9 - error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: Date | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'Date | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<string>, right: string | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<string>'.
+      Type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<string>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+
+81         lt(hardwareDeployments.warrantyExpiry, thirtyDaysFromNow.toISOString()),
+           ~~
+
+
+server/workflow-automation.ts:82:9 - error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: Date | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'Date | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<string>, right: string | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<string>'.
+      Type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<string>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "warranty_expiry"; tableName: "hardware_deployments"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: false; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+
+82         gte(hardwareDeployments.warrantyExpiry, new Date().toISOString())
+           ~~~
+
+
+server/workflow-automation.ts:129:9 - error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: PgColumn<{ name: "created_at"; tableName: "payment_transactions"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>, right: Date | SQLWrapper): SQL<...>', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'Date | SQLWrapper'.
+  Overload 2 of 3, '(left: Aliased<string>, right: string | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "created_at"; tableName: "payment_transactions"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'Aliased<string>'.
+      Type 'PgColumn<{ name: "created_at"; tableName: "payment_transactions"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is missing the following properties from type 'Aliased<string>': sql, fieldAlias
+  Overload 3 of 3, '(left: never, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'PgColumn<{ name: "created_at"; tableName: "payment_transactions"; dataType: "date"; columnType: "PgTimestamp"; data: Date; driverParam: string; notNull: false; hasDefault: true; isPrimaryKey: false; ... 5 more ...; generated: undefined; }, {}, {}>' is not assignable to parameter of type 'never'.
+
+129         lt(paymentTransactions.createdAt, sevenDaysAgo.toISOString())
+            ~~
+
+
+
+Found 55 errors in 13 files.
+
+Errors  Files
+    10  server/fayda-verification.ts:82
+     1  server/objectStorage.ts:265
+     4  server/routes.ts:2054
+     1  server/seed-operations-data.ts:15
+     5  server/services/audit-log.service.ts:39
+     1  server/services/fx.service.ts:42
+     2  server/services/telebirr.service.ts:107
+     1  server/services/wallet.service.ts:33
+     3  server/smsService.ts:60
+    22  server/storage.ts:555
+     1  server/utils/email.ts:36
+     1  server/utils/integrityAlerts.ts:28
+     3  server/workflow-automation.ts:81
+[error] android platform has not been added yet.

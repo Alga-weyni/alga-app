@@ -4525,7 +4525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Merge existing preferences with new ones
-      const currentPreferences = user.preferences || {};
+      const currentPreferences = (user.preferences || {}) as Record<string, unknown>;
       const updatedPreferences = {
         ...currentPreferences,
         ...req.body,

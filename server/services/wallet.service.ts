@@ -30,10 +30,11 @@ export class WalletService {
   }
 
   async createWallet(data: InsertWallet): Promise<Wallet> {
-    const [wallet] = await db.insert(wallets).values({
+    const walletData = {
       ...data,
       lastBalanceHash: this.generateBalanceHash(data as Partial<Wallet>),
-    }).returning();
+    };
+    const [wallet] = await db.insert(wallets).values(walletData as typeof wallets.$inferInsert).returning();
     
     return wallet;
   }

@@ -77,7 +77,7 @@ async function authenticateFaydaClient(): Promise<string | null> {
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json() as { response?: { token?: string } };
     
     if (data.response && data.response.token) {
       return data.response.token;
@@ -174,7 +174,15 @@ export async function verifyFaydaId(
       }),
     });
 
-    const data = await response.json();
+    interface FaydaApiResponse {
+      response?: {
+        kycStatus?: boolean;
+        identity?: FaydaVerificationResponse['identity'];
+        authResponseToken?: string;
+      };
+      errors?: Array<{ errorCode?: string; message?: string }>;
+    }
+    const data = await response.json() as FaydaApiResponse;
 
     if (data.response && data.response.kycStatus) {
       return {

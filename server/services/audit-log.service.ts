@@ -36,11 +36,13 @@ export class AuditLogService {
     
     const logHash = this.generateHash(entry, previousHash || undefined);
 
-    await db.insert(financialAuditLogs).values({
+    const logEntry = {
       ...entry,
       logHash,
       previousLogHash: previousHash,
-    });
+    };
+
+    await db.insert(financialAuditLogs).values(logEntry as typeof financialAuditLogs.$inferInsert);
   }
 
   async walletCredit(params: {
@@ -50,8 +52,8 @@ export class AuditLogService {
     actorId?: string;
     actorType: "user" | "system" | "cron";
     description?: string;
-    previousState?: object;
-    newState?: object;
+    previousState?: Record<string, unknown>;
+    newState?: Record<string, unknown>;
     requestId?: string;
     ipAddress?: string;
     userAgent?: string;
@@ -66,12 +68,12 @@ export class AuditLogService {
       amount: params.amount,
       currency: params.currency,
       description: params.description,
-      previousState: params.previousState,
-      newState: params.newState,
+      previousState: params.previousState as unknown as Record<string, unknown> | undefined,
+      newState: params.newState as unknown as Record<string, unknown> | undefined,
       requestId: params.requestId,
       ipAddress: params.ipAddress,
       userAgent: params.userAgent,
-    });
+    } as Parameters<typeof this.log>[0]);
   }
 
   async walletDebit(params: {
@@ -81,8 +83,8 @@ export class AuditLogService {
     actorId?: string;
     actorType: "user" | "system" | "cron";
     description?: string;
-    previousState?: object;
-    newState?: object;
+    previousState?: Record<string, unknown>;
+    newState?: Record<string, unknown>;
     requestId?: string;
   }): Promise<void> {
     await this.log({
@@ -95,10 +97,10 @@ export class AuditLogService {
       amount: params.amount,
       currency: params.currency,
       description: params.description,
-      previousState: params.previousState,
-      newState: params.newState,
+      previousState: params.previousState as unknown as Record<string, unknown> | undefined,
+      newState: params.newState as unknown as Record<string, unknown> | undefined,
       requestId: params.requestId,
-    });
+    } as Parameters<typeof this.log>[0]);
   }
 
   async balanceFreeze(params: {
@@ -181,8 +183,8 @@ export class AuditLogService {
       targetType: "payout",
       targetId: params.payoutId,
       description: `Payout completed. Ref: ${params.externalReference || "N/A"}`,
-      metadata: { externalReference: params.externalReference },
-    });
+      metadata: { externalReference: params.externalReference } as Record<string, unknown>,
+    } as Parameters<typeof this.log>[0]);
   }
 
   async settlementCreated(params: {
@@ -283,8 +285,8 @@ export class AuditLogService {
         passed: params.passed,
         expectedHash: params.expectedHash,
         actualHash: params.actualHash,
-      },
-    });
+      } as Record<string, unknown>,
+    } as Parameters<typeof this.log>[0]);
   }
 }
 
