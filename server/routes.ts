@@ -2049,15 +2049,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const lockboxData = insertLockboxSchema.parse(req.body);
+      const propertyId = lockboxData.propertyId as number;
       
       // Verify user owns the property
-      const property = await storage.getProperty(lockboxData.propertyId);
+      const property = await storage.getProperty(propertyId);
       if (!property || property.hostId !== userId) {
         return res.status(403).json({ message: "Unauthorized: You don't own this property" });
       }
       
       // Check if property already has a lockbox
-      const existing = await storage.getLockboxByPropertyId(lockboxData.propertyId);
+      const existing = await storage.getLockboxByPropertyId(propertyId);
       if (existing) {
         return res.status(400).json({ message: "Property already has a lockbox registered" });
       }
@@ -2159,9 +2160,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const cameraData = insertSecurityCameraSchema.parse(req.body);
+      const propertyId = cameraData.propertyId as number;
       
       // Verify user owns the property
-      const property = await storage.getProperty(cameraData.propertyId);
+      const property = await storage.getProperty(propertyId);
       if (!property || property.hostId !== userId) {
         return res.status(403).json({ message: "Unauthorized: You don't own this property" });
       }

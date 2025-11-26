@@ -552,7 +552,7 @@ export class DatabaseStorage implements IStorage {
   async createProperty(property: InsertProperty): Promise<Property> {
     const [newProperty] = await db
       .insert(properties)
-      .values(property)
+      .values(property as unknown as typeof properties.$inferInsert)
       .returning();
     return newProperty;
   }
@@ -560,7 +560,7 @@ export class DatabaseStorage implements IStorage {
   async updateProperty(id: number, updates: Partial<InsertProperty>): Promise<Property> {
     const [updatedProperty] = await db
       .update(properties)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date() } as unknown as Partial<typeof properties.$inferInsert>)
       .where(eq(properties.id, id))
       .returning();
     return updatedProperty;
@@ -598,7 +598,7 @@ export class DatabaseStorage implements IStorage {
     
     const [newBooking] = await db
       .insert(bookings)
-      .values(bookingWithFinancials)
+      .values(bookingWithFinancials as unknown as typeof bookings.$inferInsert)
       .returning();
     return newBooking;
   }
@@ -653,11 +653,11 @@ export class DatabaseStorage implements IStorage {
   async createReview(review: InsertReview): Promise<Review> {
     const [newReview] = await db
       .insert(reviews)
-      .values(review)
+      .values(review as unknown as typeof reviews.$inferInsert)
       .returning();
 
     // Recalculate property rating using weighted algorithm
-    const newRating = await this.recalculatePropertyRating(review.propertyId);
+    const newRating = await this.recalculatePropertyRating(review.propertyId as number);
     
     return newReview;
   }
@@ -718,7 +718,7 @@ export class DatabaseStorage implements IStorage {
   async addToFavorites(favorite: InsertFavorite): Promise<Favorite> {
     const [newFavorite] = await db
       .insert(favorites)
-      .values(favorite)
+      .values(favorite as unknown as typeof favorites.$inferInsert)
       .onConflictDoNothing()
       .returning();
     return newFavorite;
@@ -945,7 +945,7 @@ export class DatabaseStorage implements IStorage {
   async createVerificationDocument(document: any): Promise<any> {
     const [newDocument] = await db
       .insert(verificationDocuments)
-      .values(document)
+      .values(document as unknown as typeof verificationDocuments.$inferInsert)
       .returning();
     return newDocument;
   }
@@ -1141,7 +1141,7 @@ export class DatabaseStorage implements IStorage {
   async createAccessCode(accessCode: InsertAccessCode): Promise<AccessCode> {
     const [newAccessCode] = await db
       .insert(accessCodes)
-      .values(accessCode)
+      .values(accessCode as unknown as typeof accessCodes.$inferInsert)
       .returning();
     return newAccessCode;
   }
@@ -1174,7 +1174,7 @@ export class DatabaseStorage implements IStorage {
   async createLockbox(lockbox: InsertLockbox): Promise<Lockbox> {
     const [newLockbox] = await db
       .insert(lockboxes)
-      .values(lockbox)
+      .values(lockbox as unknown as typeof lockboxes.$inferInsert)
       .returning();
     return newLockbox;
   }
@@ -1190,7 +1190,7 @@ export class DatabaseStorage implements IStorage {
   async updateLockbox(id: number, updates: Partial<InsertLockbox>): Promise<Lockbox> {
     const [updated] = await db
       .update(lockboxes)
-      .set({ ...updates })
+      .set({ ...updates } as unknown as Partial<typeof lockboxes.$inferInsert>)
       .where(eq(lockboxes.id, id))
       .returning();
     return updated;
@@ -1216,7 +1216,7 @@ export class DatabaseStorage implements IStorage {
   async createSecurityCamera(camera: InsertSecurityCamera): Promise<SecurityCamera> {
     const [newCamera] = await db
       .insert(securityCameras)
-      .values(camera)
+      .values(camera as unknown as typeof securityCameras.$inferInsert)
       .returning();
     return newCamera;
   }
@@ -1232,7 +1232,7 @@ export class DatabaseStorage implements IStorage {
   async updateSecurityCamera(id: number, updates: Partial<InsertSecurityCamera>): Promise<SecurityCamera> {
     const [updated] = await db
       .update(securityCameras)
-      .set({ ...updates })
+      .set({ ...updates } as unknown as Partial<typeof securityCameras.$inferInsert>)
       .where(eq(securityCameras.id, id))
       .returning();
     return updated;
@@ -1281,7 +1281,7 @@ export class DatabaseStorage implements IStorage {
   async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
     const [newProvider] = await db
       .insert(serviceProviders)
-      .values(provider)
+      .values(provider as unknown as typeof serviceProviders.$inferInsert)
       .returning();
     
     return newProvider;
@@ -1353,7 +1353,7 @@ export class DatabaseStorage implements IStorage {
   async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
     const [newBooking] = await db
       .insert(serviceBookings)
-      .values(booking)
+      .values(booking as unknown as typeof serviceBookings.$inferInsert)
       .returning();
     return newBooking;
   }
@@ -1434,11 +1434,11 @@ export class DatabaseStorage implements IStorage {
   async createServiceReview(review: InsertServiceReview): Promise<ServiceReview> {
     const [newReview] = await db
       .insert(serviceReviews)
-      .values(review)
+      .values(review as unknown as typeof serviceReviews.$inferInsert)
       .returning();
     
     // Update provider rating after new review
-    await this.updateServiceProviderRating(review.serviceProviderId);
+    await this.updateServiceProviderRating(review.serviceProviderId as number);
     
     return newReview;
   }
@@ -1467,7 +1467,7 @@ export class DatabaseStorage implements IStorage {
     
     const [newAgent] = await db
       .insert(agents)
-      .values({ ...agent, referralCode })
+      .values({ ...agent, referralCode } as unknown as typeof agents.$inferInsert)
       .returning();
     
     return newAgent;
@@ -1827,7 +1827,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAgentWithdrawal(withdrawal: InsertAgentWithdrawal): Promise<AgentWithdrawal> {
-    const { agentId, amount } = withdrawal;
+    const agentId = withdrawal.agentId as number;
+    const amount = withdrawal.amount as string;
 
     const pendingWithdrawals = await db
       .select()
@@ -1857,7 +1858,7 @@ export class DatabaseStorage implements IStorage {
 
     const [newWithdrawal] = await db
       .insert(agentWithdrawals)
-      .values(withdrawal)
+      .values(withdrawal as unknown as typeof agentWithdrawals.$inferInsert)
       .returning();
 
     return newWithdrawal;
@@ -2126,7 +2127,7 @@ export class DatabaseStorage implements IStorage {
   async createConsentLog(log: InsertConsentLog): Promise<ConsentLog> {
     const [record] = await db
       .insert(consentLogs)
-      .values(log)
+      .values(log as typeof consentLogs.$inferInsert)
       .returning();
     return record;
   }
@@ -2227,7 +2228,7 @@ export class DatabaseStorage implements IStorage {
   async createDashboardAccessLog(log: InsertDashboardAccessLog): Promise<DashboardAccessLog> {
     const [record] = await db
       .insert(dashboardAccessLogs)
-      .values(log)
+      .values(log as typeof dashboardAccessLogs.$inferInsert)
       .returning();
     return record;
   }

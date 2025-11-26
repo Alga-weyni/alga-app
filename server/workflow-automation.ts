@@ -103,7 +103,7 @@ export async function generateWarrantyExpiryAlerts() {
         severity: "medium",
         pillar: "hardware",
         title: `Hardware Warranty Expiring`,
-        description: `${hardware.hardwareType} (SN: ${hardware.serialNumber}) warranty expires on ${new Date(hardware.warrantyExpiry).toLocaleDateString()}. Plan for renewal or replacement.`,
+        description: `${hardware.hardwareType} (SN: ${hardware.serialNumber}) warranty expires on ${hardware.warrantyExpiry ? new Date(hardware.warrantyExpiry).toLocaleDateString() : 'N/A'}. Plan for renewal or replacement.`,
         relatedEntityType: "hardware",
         relatedEntityId: hardware.id,
         status: "active"

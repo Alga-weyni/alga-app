@@ -52,7 +52,7 @@ export class EthioTelecomSMSService {
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json() as { messageId?: string; id?: string; error?: string };
 
       if (response.ok) {
         return {
