@@ -67,8 +67,6 @@ export function ElectronicSignatureConsent({
         metadata: metadata || {},
       });
 
-      console.log('[SIGNATURE] Recorded:', result.signatureId);
-
       // Execute the consented action
       await onConsented();
 
@@ -78,7 +76,6 @@ export function ElectronicSignatureConsent({
         variant: "default",
       });
     } catch (error: any) {
-      console.error('[SIGNATURE] Failed:', error);
       toast({
         title: "Signature Recording Failed",
         description: error.message || "Failed to record your electronic signature. Please try again.",

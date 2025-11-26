@@ -227,7 +227,6 @@ export default function HostDashboard() {
       setImageUrls([]);
     },
     onError: (error: any) => {
-      console.error('Property creation error:', error);
       toast({
         title: "Error creating property",
         description: error.message || "Failed to create property. Please try again.",
@@ -258,7 +257,6 @@ export default function HostDashboard() {
       setImageUrls([]);
     },
     onError: (error: any) => {
-      console.error('Property update error:', error);
       toast({
         title: "Error updating property",
         description: error.message || "Failed to update property. Please try again.",
@@ -289,11 +287,6 @@ export default function HostDashboard() {
   });
 
   const onSubmit = (data: PropertyFormData) => {
-    console.log('Form submitted with data:', data);
-    console.log('Image URLs:', imageUrls);
-    console.log('Selected amenities:', selectedAmenities);
-    console.log('Form errors:', form.formState.errors);
-    
     // Ensure we have at least 5 images
     if (imageUrls.length < 5) {
       toast({
@@ -352,27 +345,22 @@ export default function HostDashboard() {
 
   const uploadImages = async (files: File[]) => {
     if (files.length === 0) {
-      console.log('No files to upload');
       return;
     }
 
-    console.log('Starting upload of', files.length, 'files');
     setUploadingFiles(true);
     try {
       const formData = new FormData();
       files.forEach(file => {
         formData.append('images', file);
-        console.log('Added file to formData:', file.name, file.size, 'bytes');
       });
 
-      console.log('Sending upload request...');
       const response = await fetch(getApiUrl('/api/upload/property-images'), {
         method: 'POST',
         body: formData,
         credentials: 'include',
       });
 
-      console.log('Upload response status:', response.status);
       const contentType = response.headers.get('content-type');
       
       if (!response.ok) {
@@ -398,15 +386,12 @@ export default function HostDashboard() {
       }
 
       const data = await response.json();
-      console.log('Upload response data:', data);
       
       const newImageUrls = [...imageUrls, ...data.urls];
-      console.log('New image URLs:', newImageUrls);
       setImageUrls(newImageUrls);
       
       // Update form field to sync with uploaded images
       form.setValue('images', newImageUrls, { shouldValidate: true });
-      console.log('Form images field updated:', newImageUrls.length, 'images');
 
       // Reset file input so same files can be selected again
       if (fileInputRef.current) {
@@ -418,7 +403,6 @@ export default function HostDashboard() {
         description: `${data.count} image(s) uploaded. Total: ${newImageUrls.length}`,
       });
     } catch (error: any) {
-      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload images",
@@ -431,9 +415,7 @@ export default function HostDashboard() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    console.log('File input changed, files selected:', files.length);
     if (files.length > 0) {
-      console.log('Uploading files:', files.map(f => f.name));
       uploadImages(files);
     }
   };
@@ -1273,16 +1255,6 @@ export default function HostDashboard() {
                   className="bg-eth-green hover:bg-green-700"
                   disabled={createPropertyMutation.isPending || updatePropertyMutation.isPending}
                   data-testid="button-submit-property"
-                  onClick={(e) => {
-                    console.log('Submit button clicked');
-                    console.log('Form state:', {
-                      isValid: form.formState.isValid,
-                      errors: form.formState.errors,
-                      values: form.getValues(),
-                      imageUrls,
-                      selectedAmenities
-                    });
-                  }}
                 >
                   {createPropertyMutation.isPending || updatePropertyMutation.isPending 
                     ? "Saving..." 

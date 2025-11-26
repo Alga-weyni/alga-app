@@ -49,8 +49,6 @@ export default function ChapaCheckout({
       return;
     }
 
-    console.log('[Chapa] Received message from iframe:', event.data);
-
     if (event.data.status === 'success') {
       handlePaymentComplete();
     } else if (event.data.status === 'failed') {
@@ -77,7 +75,6 @@ export default function ChapaCheckout({
         throw new Error(response.message || "Failed to initialize Chapa payment");
       }
     } catch (error: any) {
-      console.error('[Chapa] Initialization error:', error);
       onError(error.message || "Failed to initialize payment");
     } finally {
       setLoading(false);
@@ -99,7 +96,6 @@ export default function ChapaCheckout({
         handlePaymentComplete();
       }
     } catch (error) {
-      console.error('[Chapa] Verification error:', error);
       // Don't show error to user, just continue polling
     }
   };
