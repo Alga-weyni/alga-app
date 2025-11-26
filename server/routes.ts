@@ -4793,7 +4793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (payoutResult.success) {
           // Update commission status in database
-          const { agentCommissions } = await import("@shared/schema");
+          const { agentCommissions } = await import("../shared/schema.js");
           await db
             .update(agentCommissions)
             .set({
@@ -5164,7 +5164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hardwareDeployments,
         paymentTransactions,
         marketingCampaigns,
-      } = await import("@shared/schema");
+      } = await import("../shared/schema.js");
 
       // Count active agents
       const activeAgentsResult = await db
@@ -5266,7 +5266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { systemAlerts } = await import("@shared/schema");
+      const { systemAlerts } = await import("../shared/schema.js");
 
       const alerts = await db
         .select()
@@ -5296,7 +5296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { systemAlerts } = await import("@shared/schema");
+      const { systemAlerts } = await import("../shared/schema.js");
       const alertId = parseInt(req.params.id);
 
       await db
@@ -5322,7 +5322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { systemAlerts } = await import("@shared/schema");
+      const { systemAlerts } = await import("../shared/schema.js");
       const alertId = parseInt(req.params.id);
       const { resolutionNotes } = req.body;
 
@@ -5350,7 +5350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { agents, agentCommissions } = await import("@shared/schema");
+      const { agents, agentCommissions } = await import("../shared/schema.js");
 
       const agentsList = await db
         .select({
