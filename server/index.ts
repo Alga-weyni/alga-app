@@ -17,14 +17,23 @@ app.use(helmet({
 
 // Security: Configure CORS - INSA-approved origins for mobile + web
 const allowedOrigins = [
+  // Production web
   "https://app.alga.et",
+  "https://alga.et",
+  // Capacitor mobile apps (Android with https scheme)
+  "https://localhost",
+  "https://localhost:5000",
+  // Capacitor mobile apps (iOS/legacy)
   "capacitor://localhost",
   "capacitor://app",
+  "ionic://localhost",
+  // Development
   "http://localhost",
   "http://localhost:5000",
   "http://localhost:8080",
   "http://127.0.0.1:5000",
   "http://127.0.0.1:8080",
+  // Mobile file:// protocol
   "file://"
 ];
 
