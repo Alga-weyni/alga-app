@@ -6,7 +6,7 @@ import {
   users,
   type Payout,
   type InsertPayout,
-} from "@shared/schema.js";
+} from "../../shared/schema.js";
 import { eq, and, desc, gte, lte, sql, inArray } from "drizzle-orm";
 import { walletService } from "./wallet.service.js";
 import { taxService } from "./tax.service.js";

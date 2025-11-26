@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { fxRates, type FxRate, type InsertFxRate } from "@shared/schema.js";
+import { fxRates, type FxRate, type InsertFxRate } from "../../shared/schema.js";
 import { eq, and, desc, lte, or, isNull } from "drizzle-orm";
 
 export interface FxConversion {

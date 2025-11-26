@@ -5,7 +5,7 @@ import {
   wallets,
   ledgerEntries,
   type ReconciliationRecord,
-} from "@shared/schema.js";
+} from "../../shared/schema.js";
 import { eq, gte, lte, sql, and, desc } from "drizzle-orm";
 import crypto from "crypto";
 import { auditLogService } from "./audit-log.service.js";

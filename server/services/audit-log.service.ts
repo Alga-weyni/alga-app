@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { financialAuditLogs, type InsertFinancialAuditLog } from "@shared/schema.js";
+import { financialAuditLogs, type InsertFinancialAuditLog } from "../../shared/schema.js";
 import { desc, eq } from "drizzle-orm";
 import crypto from "crypto";
 

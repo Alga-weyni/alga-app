@@ -8,7 +8,7 @@ import {
   users,
   type SettlementTransaction,
   type InsertSettlementTransaction,
-} from "@shared/schema.js";
+} from "../../shared/schema.js";
 import { eq, and, desc, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { walletService } from "./wallet.service.js";

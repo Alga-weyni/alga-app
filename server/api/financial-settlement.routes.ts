@@ -8,7 +8,7 @@ import { taxService } from "../services/tax.service.js";
 import { reconciliationService } from "../services/reconciliation.service.js";
 import { auditLogService } from "../services/audit-log.service.js";
 import { db } from "../db.js";
-import { financialAuditLogs, wallets, settlementTransactions, payouts, fxRates } from "@shared/schema.js";
+import { financialAuditLogs, wallets, settlementTransactions, payouts, fxRates } from "../../shared/schema.js";
 import { desc, eq } from "drizzle-orm";
 
 const router = Router();
