@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/core';
 const config: CapacitorConfig = {
   appId: 'com.alga.app',
   appName: 'Alga',
-  webDir: 'dist/public',
+  webDir: 'client/dist/public',
   bundledWebRuntime: false,
   server: {
     androidScheme: 'https',
