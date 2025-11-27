@@ -81,6 +81,14 @@ export default function MyAlga() {
     enabled: !!user && user.role === 'host',
   });
 
+  // Check if user is also registered as an agent (for hosts who are also agents)
+  const { data: agentData } = useQuery<{ agent: any }>({
+    queryKey: ["/api/agent/dashboard"],
+    enabled: !!user && (user.role === 'host' || user.role === 'agent'),
+  });
+  
+  const isAlsoAgent = !!agentData?.agent;
+
   // Auto-redirect admin/operator to their dashboards
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -94,6 +102,63 @@ export default function MyAlga() {
   const getCardsForRole = (): DashboardCard[] => {
     const role = user?.role || 'guest';
     
+    // Host who is also an agent - show combined dashboard
+    if (role === 'host' && isAlsoAgent) {
+      return [
+        {
+          icon: Building2,
+          title: "My Properties",
+          link: "/host/dashboard",
+          color: "from-blue-50 to-blue-100",
+          iconColor: "text-blue-600",
+          count: properties?.length || 0,
+          visible: true,
+        },
+        {
+          icon: Users,
+          title: "Agent Dashboard",
+          link: "/agent-dashboard",
+          color: "from-emerald-50 to-emerald-100",
+          iconColor: "text-emerald-600",
+          visible: true,
+        },
+        {
+          icon: DollarSign,
+          title: "Host Earnings",
+          link: "/host/dashboard",
+          color: "from-yellow-50 to-yellow-100",
+          iconColor: "text-yellow-600",
+          visible: true,
+        },
+        {
+          icon: DollarSign,
+          title: "Agent Earnings",
+          link: "/dellala/dashboard",
+          color: "from-green-50 to-green-100",
+          iconColor: "text-green-600",
+          visible: true,
+        },
+        {
+          icon: Home,
+          title: "Add Property",
+          link: "/dellala/list-property",
+          color: "from-orange-50 to-orange-100",
+          iconColor: "text-orange-600",
+          visible: true,
+        },
+        {
+          icon: Calendar,
+          title: "My Trips",
+          link: "/bookings",
+          color: "from-purple-50 to-purple-100",
+          iconColor: "text-purple-600",
+          count: bookings?.length || 0,
+          visible: true,
+        },
+      ];
+    }
+    
+    // Host only (not an agent)
     if (role === 'host') {
       return [
         {
