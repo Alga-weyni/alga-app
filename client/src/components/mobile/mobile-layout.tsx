@@ -29,8 +29,15 @@ export default function MobileLayout({ children, showBottomNav = true }: MobileL
       return await apiRequest("GET", "/api/logout");
     },
     onSuccess: () => {
+      queryClient.clear();
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/login");
+      navigate("/");
+      window.location.reload();
+    },
+    onError: () => {
+      queryClient.clear();
+      navigate("/");
+      window.location.reload();
     },
   });
 

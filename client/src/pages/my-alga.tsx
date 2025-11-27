@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Booking, ServiceBooking, Property } from "@shared/schema";
 
@@ -49,6 +49,7 @@ export default function MyAlga() {
       await apiRequest("GET", "/api/logout");
     },
     onSuccess: () => {
+      queryClient.clear();
       toast({
         title: "Signed out",
         description: "You've been signed out successfully",
@@ -57,11 +58,9 @@ export default function MyAlga() {
       window.location.reload();
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
+      queryClient.clear();
+      navigate("/");
+      window.location.reload();
     },
   });
 
