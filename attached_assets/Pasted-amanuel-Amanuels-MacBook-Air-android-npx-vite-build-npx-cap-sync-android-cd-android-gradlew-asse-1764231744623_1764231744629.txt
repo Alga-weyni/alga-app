@@ -1,0 +1,43 @@
+amanuel@Amanuels-MacBook-Air android % npx vite build
+npx cap sync android
+cd android
+./gradlew assembleRelease
+# Zipalign and sign (if you already created the keystore)
+~/Library/Android/sdk/build-tools/35.0.0/zipalign -v -p 4 \
+  app/build/outputs/apk/release/app-release-unsigned.apk \
+  app-aligned.apk
+~/Library/Android/sdk/build-tools/35.0.0/apksigner sign \
+  --ks ~/alga-release-key.jks \
+  --ks-key-alias alga-key \
+  --out ~/Desktop/alga-insa.apk \
+  app-aligned.apk
+vite v7.2.4 building client environment for production...
+✓ 0 modules transformed.
+✗ Build failed in 27ms
+error during build:
+Could not resolve entry module "index.html".
+    at getRollupError (file:///Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at ModuleLoader.loadEntryModule (file:///Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/rollup/dist/es/shared/node-entry.js:21611:20)
+    at async Promise.all (index 0)
+npm error could not determine executable to run
+npm error A complete log of this run can be found in: /Users/amanuel/.npm/_logs/2025-11-27T07_20_19_780Z-debug-0.log
+cd: no such file or directory: android
+
+ERROR: JAVA_HOME is set to an invalid directory: /usr/local/opt/openjdk@21
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation.
+
+zsh: unknown file attribute: i
+Unable to open 'app/build/outputs/apk/release/app-release-unsigned.apk' as zip archive: No such file or directory
+Keystore password for signer #1: 
+Exception in thread "main" java.io.FileNotFoundException: app-aligned.apk (No such file or directory)
+        at java.base/java.io.RandomAccessFile.open0(Native Method)
+        at java.base/java.io.RandomAccessFile.open(RandomAccessFile.java:344)
+        at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:259)
+        at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:213)
+        at com.android.apksig.ApkSigner.sign(ApkSigner.java:213)
+        at com.android.apksigner.ApkSignerTool.sign(ApkSignerTool.java:425)
+        at com.android.apksigner.ApkSignerTool.main(ApkSignerTool.java:94)
+amanuel@Amanuels-MacBook-Air android % 
