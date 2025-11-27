@@ -3725,11 +3725,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber,
         paymentMethod,
         paymentAccount,
+        telebirrAccount,
         idNumber,
         businessName,
         city,
         subCity,
       } = req.body;
+
+      // Validate required fields
+      if (!fullName || !phoneNumber || !city) {
+        return res.status(400).json({ message: "Missing required fields: fullName, phoneNumber, and city are required" });
+      }
 
       // Check if user already has an agent account
       const existing = await db
@@ -3739,7 +3745,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(1);
 
       if (existing.length > 0) {
-        return res.status(400).json({ message: "You already have an agent account" });
+        // If they already have an agent account, update their role and return success
+        await storage.updateUserRole(userId, 'agent');
+        return res.json({
+          success: true,
+          agent: existing[0],
+          message: "You already have an agent account. Your role has been updated.",
+        });
       }
 
       // Create agent account
@@ -3749,7 +3761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId,
           fullName,
           phoneNumber,
-          telebirrAccount: paymentAccount,  // Store payment account (works for all payment methods)
+          telebirrAccount: telebirrAccount || paymentAccount || phoneNumber,  // Store payment account
           city,
           subCity: subCity || null,
           businessName: businessName || null,
@@ -3762,10 +3774,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
+      // CRITICAL: Update user's role to 'agent' so they can access agent pages
+      await storage.updateUserRole(userId, 'agent');
+
       res.json({
         success: true,
         agent: newAgent,
-        message: "Agent account created successfully!",
+        message: "Agent account created successfully! You can now list properties.",
       });
     } catch (error: any) {
       console.error("Agent registration error:", error);
@@ -3786,6 +3801,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!agent) {
         return res.status(404).json({ message: "Agent account not found" });
+      }
+
+      // AUTO-FIX: If user has an approved agent account but wrong role, fix it
+      if (agent.status === 'approved' && req.user.role !== 'agent') {
+        await storage.updateUserRole(userId, 'agent');
+        console.log(`[AUTO-FIX] Updated role to 'agent' for user ${userId}`);
       }
 
       // Get agent performance
@@ -4573,76 +4594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== AGENT (DELALA) ROUTES ====================
-  
-  // Agent registration
-  app.post("/api/agent/register", isAuthenticated, async (req, res) => {
-    try {
-      const {
-        fullName,
-        phoneNumber,
-        telebirrAccount,
-        idNumber,
-        businessName,
-        city,
-        subCity,
-      } = req.body;
-
-      // Validate required fields
-      if (!fullName || !phoneNumber || !telebirrAccount || !city) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-
-      // Check if user already has an agent account
-      const existingAgent = await storage.getAgentByUserId((req as any).user!.id);
-      if (existingAgent) {
-        return res.status(400).json({ message: "You already have an agent account" });
-      }
-
-      // Check if phone number already used
-      const existingPhone = await storage.getAgentByPhone(phoneNumber);
-      if (existingPhone) {
-        return res.status(400).json({ message: "Phone number already registered" });
-      }
-
-      const agent = await storage.createAgent({
-        userId: (req as any).user!.id,
-        fullName,
-        phoneNumber,
-        telebirrAccount,
-        idNumber: idNumber || null,
-        businessName: businessName || null,
-        city,
-        subCity: subCity || null,
-        status: 'pending',
-      });
-
-      res.json(agent);
-    } catch (error) {
-      console.error("Error registering agent:", error);
-      res.status(500).json({ message: "Failed to register as agent" });
-    }
-  });
-
-  // Get agent dashboard stats
-  app.get("/api/agent/dashboard", isAuthenticated, async (req, res) => {
-    try {
-      const agent = await storage.getAgentByUserId((req as any).user!.id);
-      
-      if (!agent) {
-        return res.status(404).json({ message: "Agent account not found" });
-      }
-
-      const stats = await storage.getAgentDashboardStats(agent.id);
-      
-      res.json({
-        agent,
-        stats,
-      });
-    } catch (error) {
-      console.error("Error fetching agent dashboard:", error);
-      res.status(500).json({ message: "Failed to fetch dashboard" });
-    }
-  });
+  // Note: Primary agent registration route is defined above in AGENT REGISTRATION section
 
   // Get agent commissions
   app.get("/api/agent/commissions", isAuthenticated, async (req, res) => {
