@@ -34,6 +34,13 @@ import Header from "@/components/header";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { useState } from "react";
 
+// Helper function to safely format earnings (handles string, number, or undefined)
+const formatEarnings = (value: string | number | undefined | null): string => {
+  if (value === undefined || value === null) return "0.00";
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  return isNaN(num) ? "0.00" : num.toFixed(2);
+};
+
 interface AgentPerformance {
   totalCommissionEarned: string;
   totalCommissionPending: string;
@@ -411,7 +418,7 @@ export default function DellalaDashboard() {
                       border: "1px solid #10b981",
                       borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`${value.toFixed(2)} ETB`, "Commission"]}
+                    formatter={(value: number) => [`${formatEarnings(value)} ETB`, "Commission"]}
                   />
                   <Line
                     type="monotone"
@@ -452,7 +459,7 @@ export default function DellalaDashboard() {
                     >
                       <div>
                         <p className="font-semibold text-emerald-900 dark:text-emerald-100">
-                          {parseFloat(commission.commissionAmount).toFixed(2)} ETB
+                          {formatEarnings(commission.commissionAmount)} ETB
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -501,7 +508,7 @@ export default function DellalaDashboard() {
                     >
                       <div>
                         <p className="font-semibold text-blue-900 dark:text-blue-100">
-                          {parseFloat(withdrawal.amount).toFixed(2)} ETB
+                          {formatEarnings(withdrawal.amount)} ETB
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {withdrawal.method} • {withdrawal.accountNumber}
@@ -602,7 +609,7 @@ export default function DellalaDashboard() {
                           <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
                             <TrendingUp className="h-4 w-4" />
                             <span className="font-medium">
-                              {parseFloat(agentProp.totalCommissionEarned || "0").toFixed(2)} ETB
+                              {formatEarnings(agentProp.totalCommissionEarned)} ETB
                             </span>
                             <span className="text-gray-600 dark:text-gray-400">earned</span>
                           </div>

@@ -54,6 +54,13 @@ interface AgentDashboardData {
   };
 }
 
+// Helper function to safely format earnings (handles string, number, or undefined)
+const formatEarnings = (value: string | number | undefined | null): string => {
+  if (value === undefined || value === null) return "0.00";
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  return isNaN(num) ? "0.00" : num.toFixed(2);
+};
+
 export default function AgentDashboard() {
   const navigate = useNavigate();
 
@@ -149,7 +156,7 @@ export default function AgentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-earnings">
-                {stats.totalEarnings.toFixed(2)} Birr
+                {formatEarnings(stats.totalEarnings)} Birr
               </div>
               <p className="text-xs text-medium-brown dark:text-cream/60 mt-1">
                 All-time commissions
@@ -166,7 +173,7 @@ export default function AgentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400" data-testid="text-pending-earnings">
-                {stats.pendingEarnings.toFixed(2)} Birr
+                {formatEarnings(stats.pendingEarnings)} Birr
               </div>
               <p className="text-xs text-medium-brown dark:text-cream/60 mt-1">
                 Awaiting payout
@@ -183,7 +190,7 @@ export default function AgentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-paid-earnings">
-                {stats.paidEarnings.toFixed(2)} Birr
+                {formatEarnings(stats.paidEarnings)} Birr
               </div>
               <p className="text-xs text-medium-brown dark:text-cream/60 mt-1">
                 To TeleBirr
