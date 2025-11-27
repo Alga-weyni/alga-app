@@ -153,7 +153,7 @@ function Router() {
         
         {/* Admin routes - admin only */}
         <Route path="/admin/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminDashboard /></ProtectedRoute></AnimatedRoute>} />
-        <Route path="/my-alga" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/my-alga" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><MyAlga /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/service-providers" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminServiceProviders /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/providers" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminServiceProviders /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/lemlem-insights" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminLemlemInsights /></ProtectedRoute></AnimatedRoute>} />
