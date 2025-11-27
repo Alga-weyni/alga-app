@@ -69,23 +69,70 @@ export default function AgentSuccess() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 p-4 flex items-center justify-center">
-          <Card className="max-w-md w-full">
-            <CardHeader>
-              <CardTitle className="text-center">📋 No Property Found</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-                No property assigned yet. Please contact support.
-              </p>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
+          <div className="max-w-2xl mx-auto space-y-6">
+            {/* Success Header */}
+            <Card className="border-green-500 dark:border-green-400 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+              <CardContent className="pt-8 pb-8">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4">
+                    <CheckCircle className="h-12 w-12 text-green-600" />
+                  </div>
+                  <h1 className="text-4xl font-bold mb-3">
+                    🎉 Welcome, Dellala Agent!
+                  </h1>
+                  <p className="text-xl text-green-50 mb-2">
+                    Your agent account is now active!
+                  </p>
+                  <p className="text-green-100">
+                    Start earning 5% commission on every booking for 36 months
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* How It Works */}
+            <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-emerald-800 dark:text-emerald-200">
+                    <p className="font-semibold mb-2">💡 How to Start Earning</p>
+                    <ul className="space-y-2 ml-4 list-disc">
+                      <li>List properties by connecting property owners to Alga</li>
+                      <li>You earn <strong>5% commission</strong> on every booking</li>
+                      <li>Commission continues for <strong>36 months</strong> from the first booking</li>
+                      <li>Payments are sent automatically to your payment account</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
               <Button
-                onClick={() => navigate("/")}
-                className="w-full"
+                onClick={() => navigate("/dellala/list-property")}
+                size="lg"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg py-6"
+                data-testid="button-list-property"
               >
-                Go Home
+                <Home className="mr-2 h-5 w-5" />
+                List Your First Property
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-            </CardContent>
-          </Card>
+              
+              <Button
+                onClick={() => navigate("/dellala/dashboard")}
+                variant="outline"
+                size="lg"
+                className="w-full text-lg py-6"
+                data-testid="button-go-dashboard"
+              >
+                Go to Agent Dashboard
+              </Button>
+            </div>
+          </div>
         </div>
       </>
     );
