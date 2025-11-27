@@ -1,0 +1,52 @@
+✘ [ERROR] Could not resolve "/Users/amanuel/AndroidStudioProjects/alga-app/client/vite.config.ts"
+
+failed to load config from /Users/amanuel/AndroidStudioProjects/alga-app/client/vite.config.ts
+error during build:
+Error: Build failed with 1 error:                                                                                                                                      
+error: Could not resolve "/Users/amanuel/AndroidStudioProjects/alga-app/client/vite.config.ts"                                                                         
+    at failureErrorWithLog (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:1467:15)                                                        
+    at /Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:926:25                                                                               
+    at runOnEndCallbacks (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:1307:45)                                                          
+    at buildResponseToResult (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:924:7)                                                        
+    at /Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:951:16                                                                               
+    at responseCallbacks.<computed> (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:603:9)                                                 
+    at handleIncomingPacket (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:658:12)                                                        
+    at Socket.readFromStdout (/Users/amanuel/.npm/_npx/9ed06546b0653f96/node_modules/esbuild/lib/main.js:581:7)                                                        
+    at Socket.emit (node:events:518:28)                                                                                                                                
+    at addChunk (node:internal/streams/readable:561:12)                                                                                                                
+zsh: command not found: #
+npm error could not determine executable to run
+npm error A complete log of this run can be found in: /Users/amanuel/.npm/_logs/2025-11-27T08_23_21_727Z-debug-0.log
+zsh: unknown username ' this o'
+zsh: command not found: #
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':app:lintVitalReportRelease'.
+> SDK location not found. Define a valid SDK location with an ANDROID_HOME environment variable or by setting the sdk.dir path in your project's local properties file at '/Users/amanuel/AndroidStudioProjects/alga-app/android/local.properties'.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.9/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 12s
+zsh: command not found: #
+zsh: command not found: #
+Unable to open 'app/build/outputs/apk/release/app-release-unsigned.apk' as zip archive: No such file or directory
+zsh: command not found: #
+Keystore password for signer #1: 
