@@ -133,6 +133,44 @@ export default function MyAlga() {
       ];
     }
 
+    if (role === 'agent') {
+      return [
+        {
+          icon: Building2,
+          title: "Agent Dashboard",
+          link: "/agent-dashboard",
+          color: "from-emerald-50 to-emerald-100",
+          iconColor: "text-emerald-600",
+          visible: true,
+        },
+        {
+          icon: Home,
+          title: "Add Property",
+          link: "/dellala/list-property",
+          color: "from-blue-50 to-blue-100",
+          iconColor: "text-blue-600",
+          visible: true,
+        },
+        {
+          icon: DollarSign,
+          title: "My Earnings",
+          link: "/dellala/dashboard",
+          color: "from-green-50 to-green-100",
+          iconColor: "text-green-600",
+          visible: true,
+        },
+        {
+          icon: Calendar,
+          title: "My Trips",
+          link: "/bookings",
+          color: "from-purple-50 to-purple-100",
+          iconColor: "text-purple-600",
+          count: bookings?.length || 0,
+          visible: true,
+        },
+      ];
+    }
+
     if (user?.isServiceProvider) {
       return [
         {

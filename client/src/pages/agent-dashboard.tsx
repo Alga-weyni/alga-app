@@ -142,8 +142,21 @@ export default function AgentDashboard() {
               Welcome back, {agent.fullName}! 
             </p>
           </div>
-          {getStatusBadge(agent.status)}
+          <div className="flex items-center gap-3">
+            {getStatusBadge(agent.status)}
+          </div>
         </div>
+
+        {/* Add Property Button */}
+        <Button
+          onClick={() => navigate("/dellala/list-property")}
+          size="lg"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg py-6"
+          data-testid="button-add-property"
+        >
+          <Home className="mr-2 h-5 w-5" />
+          Add New Property
+        </Button>
 
         {/* Earnings Summary Cards */}
         <div className="grid md:grid-cols-4 gap-4">
