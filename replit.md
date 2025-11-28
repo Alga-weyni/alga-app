@@ -54,3 +54,60 @@ The frontend is built with React, TypeScript (Vite), React Router for routing, S
 - **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
 - **Utility Libraries**: `date-fns`, `clsx`, `tailwind-merge`, `memoizee`, `jsPDF`.
+
+## INSA Security Compliance
+
+### Security Testing Tools (INSA Uses)
+| Category | Tool | Purpose |
+|----------|------|---------|
+| Network Discovery | Nmap / Zenmap | Asset & Port Scanning |
+| Vulnerability Assessment | Nessus | Automated Vulnerability Checks |
+| Web App Testing | Burp Suite | Web Security & Penetration Testing |
+| Traffic Analysis | Wireshark | Packet-Level Inspection |
+| Data/Control Testing | ACL / IDEA | Continuous Audit & Analytics |
+
+### Third-Party Integration Security
+All external service integrations follow these security principles:
+
+1. **Payment Processors (Chapa, Stripe, PayPal, Telebirr)**
+   - PCI DSS compliant - no card data stored locally
+   - Tokenized payments only
+   - HTTPS enforcement on all payment flows
+   - API keys stored as encrypted secrets (never in code)
+   - Transaction monitoring for fraud detection
+
+2. **Authentication Services**
+   - Passwordless OTP via phone/email
+   - Session-based CSRF protection
+   - Bcrypt password hashing (for admin accounts)
+   - Rate limiting on auth endpoints
+
+3. **Communication Services (SendGrid, Ethiopian Telecom SMS)**
+   - API keys stored as environment secrets
+   - No sensitive data in email/SMS content
+   - Audit logging of all communications
+
+4. **Mapping & Location (Google Maps)**
+   - API key restricted by domain/IP
+   - Minimal data exposure (no user tracking)
+   - Client-side only (no server-side location storage beyond booking addresses)
+
+5. **File Storage (Google Cloud Storage)**
+   - Signed URLs with expiration
+   - Image compression before upload
+   - Content-type validation
+
+### Security Hardening (server/security/insa-hardening.ts)
+- **OWASP Top 10 Protection**: XSS, SQL Injection, CSRF, NoSQL Injection, Clickjacking
+- **HTTP Security Headers**: Helmet.js, HSTS, X-Frame-Options, CSP
+- **Input Validation**: Zod schemas on all endpoints
+- **Rate Limiting**: Auth endpoints, API endpoints
+- **HPP Protection**: HTTP Parameter Pollution blocked
+- **Request Size Limits**: DoS protection
+- **Error Sanitization**: No sensitive data in error messages
+
+### Audit & Monitoring
+- Security events logged with SHA-256 hashed audit trail
+- Failed login attempts tracked with IP addresses
+- Suspicious activity flagged in admin dashboard
+- Financial transactions use double-entry ledger with reconciliation
