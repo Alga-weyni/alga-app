@@ -70,7 +70,7 @@ export default function AgentGovernanceTab() {
       agent.phoneNumber,
       agent.city,
       agent.activeProperties,
-      parseFloat(agent.totalEarnings).toFixed(2),
+      parseFloat(agent.totalEarnings || '0').toFixed(2),
       agent.status
     ]);
     

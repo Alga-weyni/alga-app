@@ -236,7 +236,7 @@ export default function AdminAgents() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-total-earnings">
-                {stats.totalEarnings.toFixed(2)} Birr
+                {(typeof stats.totalEarnings === 'number' ? stats.totalEarnings : parseFloat(stats.totalEarnings || '0')).toFixed(2)} Birr
               </div>
               <p className="text-xs text-medium-brown dark:text-cream/60 mt-1">
                 All-time commissions
@@ -382,7 +382,7 @@ export default function AdminAgents() {
                         </TableCell>
                         <TableCell>
                           <p className="font-semibold text-green-600 dark:text-green-400">
-                            {parseFloat(agent.totalEarnings).toFixed(2)} Birr
+                            {parseFloat(agent.totalEarnings || '0').toFixed(2)} Birr
                           </p>
                         </TableCell>
                         <TableCell>
