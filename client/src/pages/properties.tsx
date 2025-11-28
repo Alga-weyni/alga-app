@@ -89,7 +89,10 @@ export default function Properties() {
         }
       });
       
-      const response = await fetch(`/api/properties?${params}`);
+      const { getApiUrl } = await import('@/lib/api-config');
+      const response = await fetch(getApiUrl(`/api/properties?${params}`), {
+        credentials: 'include'
+      });
       if (!response.ok) throw new Error('Failed to fetch properties');
       return response.json();
     },

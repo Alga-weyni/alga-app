@@ -37,17 +37,5 @@ integrations = ["javascript_log_in_with_replit:1.0.0", "sendgrid:1.0.0", "javasc
 expertMode = true
 
 [[ports]]
-localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 24678
+localPort = 36075
 externalPort = 80
-
-[[ports]]
-localPort = 43115
-externalPort = 3000
-
-[[ports]]
-localPort = 44769
-externalPort = 3001

@@ -58,7 +58,10 @@ export default function DiscoverPage() {
         city: "Addis Ababa"
       });
 
-      const res = await fetch(`/api/properties/discover?${params.toString()}`);
+      const { getApiUrl } = await import('@/lib/api-config');
+      const res = await fetch(getApiUrl(`/api/properties/discover?${params.toString()}`), {
+        credentials: 'include'
+      });
       const data = await res.json();
       
       setResults(data.mapResults || []);

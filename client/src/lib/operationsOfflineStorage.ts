@@ -183,14 +183,16 @@ class OperationsOfflineStorage {
     for (const action of actions) {
       try {
         // Execute the action via API
-        const response = await fetch(`/api/admin/operations/${action.action}`, {
+        const { getApiUrl } = await import('./api-config');
+        const response = await fetch(getApiUrl(`/api/admin/operations/${action.action}`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             entityType: action.entityType,
             entityId: action.entityId,
             payload: action.payload
-          })
+          }),
+          credentials: 'include'
         });
 
         if (response.ok) {

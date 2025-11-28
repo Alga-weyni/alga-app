@@ -83,10 +83,12 @@ export default function AdminAgents() {
 
   const verifyMutation = useMutation({
     mutationFn: async ({ agentId, status, rejectionReason }: { agentId: number; status: string; rejectionReason?: string }) => {
-      const response = await fetch(`/api/admin/agents/${agentId}/verify`, {
+      const { getApiUrl } = await import('@/lib/api-config');
+      const response = await fetch(getApiUrl(`/api/admin/agents/${agentId}/verify`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, rejectionReason }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

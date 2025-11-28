@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import type { ServiceReview } from "@shared/schema";
 import { format } from "date-fns";
+import { getApiUrl } from "@/lib/api-config";
 
 interface ServiceProviderReviewsProps {
   providerId: number;
@@ -24,7 +25,7 @@ function RatingBar({ label, value, count }: { label: string; value: number; coun
 export default function ServiceProviderReviews({ providerId }: ServiceProviderReviewsProps) {
   const { data: reviews, isLoading } = useQuery<ServiceReview[]>({
     queryKey: ["/api/service-providers", providerId, "reviews"],
-    queryFn: () => fetch(`/api/service-providers/${providerId}/reviews`).then((res) => res.json()),
+    queryFn: () => fetch(getApiUrl(`/api/service-providers/${providerId}/reviews`), { credentials: 'include' }).then((res) => res.json()),
   });
 
   if (isLoading) {

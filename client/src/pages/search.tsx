@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function PropertySearch() {
   // State Variables
@@ -30,7 +31,9 @@ export default function PropertySearch() {
       if (sort) params.append("sort", sort);
       if (search) params.append("q", search);
 
-      const res = await fetch(`/api/properties/search?${params.toString()}`);
+      const res = await fetch(getApiUrl(`/api/properties/search?${params.toString()}`), {
+        credentials: 'include'
+      });
       const data = await res.json();
       setResults(data);
     } catch (err) {
