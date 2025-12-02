@@ -71,7 +71,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { getApiUrl } from "@/lib/api-config";
+import { getApiUrl, getImageUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { BackButton } from "@/components/back-button";
@@ -597,7 +597,7 @@ export default function HostDashboard() {
                 {properties.map((property) => (
                   <Card key={property.id} className="overflow-hidden">
                     <img
-                      src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
+                      src={getImageUrl(property.images?.[0]) || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
                       alt={property.title}
                       className="w-full h-48 object-cover cursor-pointer hover:opacity-75 transition-opacity"
                       onClick={() => navigate(`/properties/${property.id}`)}

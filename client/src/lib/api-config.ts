@@ -49,4 +49,30 @@ export function getBaseApiUrl(): string {
   return DEVELOPMENT_API_URL;
 }
 
+/**
+ * Get the full URL for an image/asset
+ * Handles both relative URLs (old data) and absolute URLs (new data)
+ * @param imageUrl - Image URL (can be relative like /uploads/... or absolute)
+ * @returns Full URL for the image
+ */
+export function getImageUrl(imageUrl: string | undefined | null): string {
+  if (!imageUrl) {
+    return '';
+  }
+  
+  // If already an absolute URL (starts with http/https), return as-is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // If it's a relative URL starting with /uploads, prepend the API base URL
+  if (imageUrl.startsWith('/uploads/')) {
+    const baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
+    return `${baseUrl}${imageUrl}`;
+  }
+  
+  // Return as-is for other cases (external URLs, data URLs, etc.)
+  return imageUrl;
+}
+
 export { isNativeMobile };

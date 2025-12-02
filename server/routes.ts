@@ -190,8 +190,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.warn('Image processing failed, using original:', processErr);
             }
 
+            // In production, return full URL with API domain
+            const baseUrl = process.env.NODE_ENV === 'production' 
+              ? (process.env.API_BASE_URL || 'https://api.alga.et')
+              : '';
+            
             processedFiles.push({
-              url: `/uploads/properties/${file.filename}`,
+              url: `${baseUrl}/uploads/properties/${file.filename}`,
               stats,
             });
           } catch (fileErr) {
@@ -229,7 +234,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
-      const imageUrl = `/uploads/id-documents/${req.file.filename}`;
+      // In production, return full URL with API domain
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? (process.env.API_BASE_URL || 'https://api.alga.et')
+        : '';
+      const imageUrl = `${baseUrl}/uploads/id-documents/${req.file.filename}`;
 
       res.json({
         message: 'ID document uploaded successfully',

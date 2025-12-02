@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Star, MapPin, Users, Bed, Bath, Wifi, Utensils, Car } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { getApiUrl } from "@/lib/api-config";
+import { getApiUrl, getImageUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import type { Property } from "@shared/schema";
@@ -101,7 +101,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
     >
       <div className="relative">
           <img
-            src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
+            src={getImageUrl(property.images?.[0]) || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"}
             alt={`${property.title} in ${property.city} - ${property.type} accommodation`}
             loading="lazy"
             className="w-full h-40 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"

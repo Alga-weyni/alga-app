@@ -42,7 +42,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { getApiUrl } from "@/lib/api-config";
+import { getApiUrl, getImageUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_METHODS } from "@/lib/constants";
@@ -327,7 +327,7 @@ export default function PropertyDetails() {
           {/* Main Image */}
           <div className="mb-3 sm:mb-4">
             <img
-              src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
+              src={getImageUrl(property.images?.[0]) || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
               alt={property.title}
               className="w-full h-64 sm:h-96 lg:h-[500px] object-cover rounded-lg sm:rounded-xl"
               loading="lazy"
@@ -346,10 +346,10 @@ export default function PropertyDetails() {
                   <div
                     key={index}
                     className="relative group cursor-pointer overflow-hidden rounded-lg border-2 border-gray-200 hover:border-eth-brown transition-colors"
-                    onClick={() => window.open(image, '_blank')}
+                    onClick={() => window.open(getImageUrl(image), '_blank')}
                   >
                     <img
-                      src={image}
+                      src={getImageUrl(image)}
                       alt={`${property.title} ${index + 1}`}
                       className="w-full h-32 sm:h-40 object-cover"
                       loading="lazy"
