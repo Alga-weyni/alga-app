@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Star, MapPin, Users, Bed, Bath, Wifi, Utensils, Car } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import type { Property } from "@shared/schema";
@@ -53,7 +54,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
     e.preventDefault();
     e.stopPropagation(); // Prevent card click
     if (!isAuthenticated) {
-      window.location.href = "/api/login";
+      window.location.href = getApiUrl("/api/login");
       return;
     }
     favoriteMutation.mutate();

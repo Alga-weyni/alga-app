@@ -42,6 +42,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_METHODS } from "@/lib/constants";
@@ -199,7 +200,7 @@ export default function PropertyDetails() {
 
   const handleBooking = () => {
     if (!isAuthenticated) {
-      window.location.href = "/api/login";
+      window.location.href = getApiUrl("/api/login");
       return;
     }
 
