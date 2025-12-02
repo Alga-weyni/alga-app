@@ -46,21 +46,25 @@ export default function MyAlga() {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("GET", "/api/logout");
+      return await apiRequest("GET", "/api/logout");
     },
     onSuccess: () => {
+      // Clear all cached queries first
       queryClient.clear();
+      // Show toast before navigation
       toast({
         title: "Signed out",
         description: "You've been signed out successfully",
       });
-      navigate("/");
-      window.location.reload();
+      // Small delay to ensure toast shows, then hard reload to clear all state
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 300);
     },
     onError: () => {
+      // Even on error, clear local state and redirect
       queryClient.clear();
-      navigate("/");
-      window.location.reload();
+      window.location.href = "/";
     },
   });
 

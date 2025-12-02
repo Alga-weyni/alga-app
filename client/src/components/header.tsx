@@ -43,12 +43,22 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       return await apiRequest("GET", "/api/logout");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      navigate("/");
+      // Clear all cached queries first
+      queryClient.clear();
+      // Show toast before navigation
       toast({
         title: "Signed Out",
         description: "See you soon! 👋",
       });
+      // Small delay to ensure toast shows, then hard reload to clear all state
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 300);
+    },
+    onError: () => {
+      // Even on error, clear local state and redirect
+      queryClient.clear();
+      window.location.href = "/";
     },
   });
   
