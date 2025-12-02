@@ -192,12 +192,13 @@ export default function AdminRolesPermissions() {
 
   // Filter users
   const filteredUsers = users.filter((u) => {
+    const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
       searchQuery === "" ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.phoneNumber.includes(searchQuery);
+      (u.email && u.email.toLowerCase().includes(searchLower)) ||
+      (u.firstName && u.firstName.toLowerCase().includes(searchLower)) ||
+      (u.lastName && u.lastName.toLowerCase().includes(searchLower)) ||
+      (u.phoneNumber && u.phoneNumber.includes(searchQuery));
 
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     const matchesStatus = statusFilter === "all" || u.status === statusFilter;
