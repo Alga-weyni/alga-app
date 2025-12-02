@@ -101,63 +101,8 @@ export default function MyAlga() {
   const getCardsForRole = (): DashboardCard[] => {
     const role = user?.role || 'guest';
     
-    // Host who is also an agent - show combined dashboard
-    if (role === 'host' && isAlsoAgent) {
-      return [
-        {
-          icon: Building2,
-          title: "My Properties",
-          link: "/host/dashboard",
-          color: "from-blue-50 to-blue-100",
-          iconColor: "text-blue-600",
-          count: properties?.length || 0,
-          visible: true,
-        },
-        {
-          icon: Users,
-          title: "Agent Dashboard",
-          link: "/agent-dashboard",
-          color: "from-emerald-50 to-emerald-100",
-          iconColor: "text-emerald-600",
-          visible: true,
-        },
-        {
-          icon: DollarSign,
-          title: "Host Earnings",
-          link: "/host/dashboard",
-          color: "from-yellow-50 to-yellow-100",
-          iconColor: "text-yellow-600",
-          visible: true,
-        },
-        {
-          icon: DollarSign,
-          title: "Agent Earnings",
-          link: "/dellala/dashboard",
-          color: "from-green-50 to-green-100",
-          iconColor: "text-green-600",
-          visible: true,
-        },
-        {
-          icon: Home,
-          title: "Add Property",
-          link: "/dellala/list-property",
-          color: "from-orange-50 to-orange-100",
-          iconColor: "text-orange-600",
-          visible: true,
-        },
-        {
-          icon: Calendar,
-          title: "My Trips",
-          link: "/bookings",
-          color: "from-purple-50 to-purple-100",
-          iconColor: "text-purple-600",
-          count: bookings?.length || 0,
-          visible: true,
-        },
-      ];
-    }
-    
-    // Host only (not an agent)
+    // Host role (whether or not they are also an agent - agent dashboard is accessed separately)
+    // The agent dashboard is accessed via /agent-dashboard, not mixed here
     if (role === 'host') {
       return [
         {
@@ -390,6 +335,33 @@ export default function MyAlga() {
           </div>
         </div>
       </div>
+
+      {/* Agent Dashboard Banner - For hosts who are also agents */}
+      {user?.role === 'host' && isAlsoAgent && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <Link to="/agent-dashboard">
+            <Card 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-xl transition-all cursor-pointer border-0"
+              data-testid="banner-agent-dashboard"
+            >
+              <CardContent className="p-4 sm:p-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-white/20">
+                    <Users className="w-6 h-6 sm:w-8 sm:h-8" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl">Agent Dashboard</h3>
+                    <p className="text-sm sm:text-base text-white/80">
+                      View your Delala commissions and referred properties
+                    </p>
+                  </div>
+                </div>
+                <div className="text-2xl">→</div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       {/* Dashboard Grid - Bigger Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
