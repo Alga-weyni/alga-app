@@ -60,6 +60,7 @@ export default function PropertyDetails() {
   const queryClient = useQueryClient();
 
   const propertyId = parseInt(id || "0");
+  const [isFavorite, setIsFavorite] = useState(false);
   
   // Parse URL parameters for pre-filled booking
   const autoBook = searchParams.get('book') === 'true';
@@ -101,6 +102,91 @@ export default function PropertyDetails() {
     queryKey: [`/api/properties/${propertyId}/reviews`],
     enabled: !!propertyId,
   });
+
+  // Fetch user favorites to check if this property is favorited
+  const { data: favorites = [] } = useQuery<Property[]>({
+    queryKey: ['/api/favorites'],
+    enabled: isAuthenticated,
+  });
+
+  // Update isFavorite state when favorites data changes
+  useEffect(() => {
+    if (favorites && propertyId) {
+      setIsFavorite(favorites.some(fav => fav.id === propertyId));
+    }
+  }, [favorites, propertyId]);
+
+  // Favorite mutation
+  const favoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (isFavorite) {
+        return apiRequest("DELETE", `/api/favorites/${propertyId}`);
+      } else {
+        return apiRequest("POST", "/api/favorites", { propertyId });
+      }
+    },
+    onSuccess: () => {
+      setIsFavorite(!isFavorite);
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      toast({
+        title: isFavorite ? "Removed from favorites" : "Added to favorites",
+        description: isFavorite 
+          ? "Property removed from your favorites" 
+          : "Property saved to your favorites",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update favorites. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle favorite click
+  const handleFavoriteClick = () => {
+    if (!isAuthenticated) {
+      window.location.href = getApiUrl("/api/login");
+      return;
+    }
+    favoriteMutation.mutate();
+  };
+
+  // Handle share click
+  const handleShareClick = async () => {
+    const shareData = {
+      title: property?.title || "Check out this property on Alga",
+      text: `${property?.title} - ${property?.city}, Ethiopia. From ETB ${property?.pricePerNight}/night`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link copied!",
+          description: "Property link has been copied to your clipboard",
+        });
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if ((error as Error).name !== 'AbortError') {
+        toast({
+          title: "Share failed",
+          description: "Unable to share. Link copied to clipboard instead.",
+        });
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+        } catch {
+          // Clipboard failed too
+        }
+      }
+    }
+  };
 
   const bookingMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -385,11 +471,24 @@ export default function PropertyDetails() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="button-share">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 sm:h-10 sm:w-10" 
+                    onClick={handleShareClick}
+                    data-testid="button-share"
+                  >
                     <Share className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="button-favorite">
-                    <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 sm:h-10 sm:w-10" 
+                    onClick={handleFavoriteClick}
+                    disabled={favoriteMutation.isPending}
+                    data-testid="button-favorite"
+                  >
+                    <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isFavorite ? "fill-eth-red text-eth-red" : ""}`} />
                   </Button>
                 </div>
               </div>
