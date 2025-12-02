@@ -325,11 +325,11 @@ export default function PropertyDetails() {
         {/* Image Gallery */}
         <div className="mb-6 sm:mb-8">
           {/* Main Image */}
-          <div className="mb-3 sm:mb-4">
+          <div className="mb-3 sm:mb-4 bg-gray-100 rounded-lg sm:rounded-xl overflow-hidden">
             <img
               src={getImageUrl(property.images?.[0]) || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
               alt={property.title}
-              className="w-full h-64 sm:h-96 lg:h-[500px] object-cover rounded-lg sm:rounded-xl"
+              className="w-full max-h-[500px] object-contain mx-auto"
               loading="lazy"
               data-testid="img-property-main"
             />
