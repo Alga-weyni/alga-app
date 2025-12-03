@@ -74,6 +74,26 @@ export class EthioTelecomSMSService {
     }
   }
 
+  // Send a pre-generated OTP (for INSA-compliant 2FA with external OTP generation)
+  async sendOtp(phone: string, otp: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const cleanPhone = this.normalizeEthiopianPhone(phone);
+      if (!cleanPhone) {
+        return { success: false, error: 'Invalid Ethiopian phone number format' };
+      }
+
+      // Create bilingual message
+      const message = `Your Alga verification code is: ${otp}\nValid for 5 minutes.\n\nየእርስዎ የአልጋ ማረጋገጫ ኮድ: ${otp}`;
+
+      // Send SMS
+      const smsResult = await this.sendSMS(cleanPhone, message);
+      return smsResult.success ? { success: true } : { success: false, error: smsResult.error };
+    } catch (error) {
+      console.error('Error sending OTP via SMS:', error);
+      return { success: false, error: 'Failed to send OTP' };
+    }
+  }
+
   // Send verification code to Ethiopian phone number
   async sendVerificationCode(phone: string): Promise<{ success: boolean; error?: string }> {
     try {

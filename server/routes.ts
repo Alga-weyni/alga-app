@@ -731,7 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In production, send via SMS - NEVER expose OTP in response
       if (process.env.NODE_ENV === 'production') {
         try {
-          await smsService.sendOtp(phoneNumber, otp);
+          await smsService.sendVerificationCode(phoneNumber);
         } catch (smsError) {
           console.error('[2FA] SMS delivery failed:', smsError);
         }
@@ -793,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In production, send via SMS
       if (process.env.NODE_ENV === 'production') {
         try {
-          await smsService.sendOtp(phoneNumber, otp);
+          await smsService.sendVerificationCode(phoneNumber);
         } catch (smsError) {
           console.error('[2FA] SMS delivery failed:', smsError);
         }
