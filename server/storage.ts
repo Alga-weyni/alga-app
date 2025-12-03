@@ -78,8 +78,13 @@ export interface IStorage {
   
   // OTP operations (supports both phone and email)
   saveOtp(contact: string, otp: string, expiryMinutes?: number): Promise<void>;
+  getOtp(contact: string): Promise<string | null>;
+  deleteOtp(contact: string): Promise<void>;
   verifyOtp(contact: string, otp: string): Promise<boolean>;
   markPhoneVerified(phoneNumber: string): Promise<User>;
+  
+  // User update operations
+  updateUser(userId: string, updates: Partial<User>): Promise<User>;
   
   // Admin user management
   getAllUsers(): Promise<User[]>;
@@ -338,6 +343,48 @@ export class DatabaseStorage implements IStorage {
         otpExpiry: expiryDate,
       })
       .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
+  }
+
+  // Get OTP hash for password reset verification
+  async getOtp(contact: string): Promise<string | null> {
+    const isEmail = contact.includes('@');
+    
+    const [user] = await db
+      .select({ otp: users.otp, otpExpiry: users.otpExpiry })
+      .from(users)
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
+
+    if (!user || !user.otp || !user.otpExpiry) return null;
+    
+    // Check if OTP is expired
+    if (new Date() > user.otpExpiry) return null;
+    
+    return user.otp;
+  }
+
+  // Delete OTP after successful password reset
+  async deleteOtp(contact: string): Promise<void> {
+    const isEmail = contact.includes('@');
+    
+    await db
+      .update(users)
+      .set({ otp: null, otpExpiry: null })
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
+  }
+
+  // Update user with partial data (for password reset, etc.)
+  async updateUser(userId: string, updates: Partial<User>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+    
+    return updatedUser;
   }
 
   // Get stored OTP hash for verification (don't compare here - let caller handle timing-safe comparison)

@@ -1268,6 +1268,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password Reset - Request OTP
+  app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
+    try {
+      const { email } = req.body;
+      const clientIp = req.ip || 'unknown';
+      
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Rate limit password reset attempts
+      const requestRateLimit = checkOTPRequestRateLimit(email);
+      if (!requestRateLimit.allowed) {
+        logSecurityEvent(null, 'PASSWORD_RESET_RATE_LIMIT', { email }, clientIp);
+        return res.status(429).json({ 
+          message: "Too many password reset attempts. Please wait.",
+          retryAfter: requestRateLimit.retryAfter
+        });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      if (!user) {
+        logSecurityEvent(null, 'PASSWORD_RESET_NO_USER', { email }, clientIp);
+        return res.json({ 
+          message: "If an account exists with this email, a reset code has been sent.",
+          email
+        });
+      }
+      
+      // Generate 6-digit OTP
+      const otp = generateSecureOTP();
+      const hashedOtp = hashOTP(otp);
+      
+      // Save HASHED OTP with 10-minute expiration for password reset
+      await storage.saveOtp(email, hashedOtp, 10);
+      
+      // Send OTP via email
+      if (process.env.NODE_ENV === 'production') {
+        sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
+          console.error('[PASSWORD_RESET] Email delivery failed:', err);
+        });
+      } else {
+        console.log(`[PASSWORD_RESET-DEV] OTP for ${email}: ${otp}`);
+        sendOtpEmail(email, otp, user.firstName || undefined).catch(() => {});
+      }
+      
+      logSecurityEvent(user.id, 'PASSWORD_RESET_OTP_SENT', { email }, clientIp);
+      
+      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
+      const isTestAccount = email.endsWith('@test.alga.et');
+      if (isTestAccount) {
+        logSecurityEvent(user.id, 'TEST_MODE_PASSWORD_RESET_OTP', { email }, clientIp);
+      }
+      
+      res.json({ 
+        message: "If an account exists with this email, a reset code has been sent.",
+        email,
+        expiresIn: 600,
+        ...(isTestAccount && { testOtp: otp })
+      });
+    } catch (error: any) {
+      console.error("Error requesting password reset:", error);
+      res.status(400).json({ message: error.message || "Failed to request password reset" });
+    }
+  });
+
+  // Password Reset - Verify OTP and Set New Password
+  app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
+    try {
+      const { email, otp, newPassword } = req.body;
+      const clientIp = req.ip || 'unknown';
+      
+      if (!email || !otp || !newPassword) {
+        return res.status(400).json({ message: "Email, OTP, and new password are required" });
+      }
+      
+      // Validate password strength (INSA compliance)
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ 
+          message: "Password must be at least 8 characters with uppercase, lowercase, number, and special character" 
+        });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        logSecurityEvent(null, 'PASSWORD_RESET_INVALID_USER', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      // Verify OTP
+      const storedHashedOtp = await storage.getOtp(email);
+      if (!storedHashedOtp) {
+        logSecurityEvent(user.id, 'PASSWORD_RESET_NO_OTP', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      const hashedInputOtp = hashOTP(otp);
+      if (storedHashedOtp !== hashedInputOtp) {
+        logSecurityEvent(user.id, 'PASSWORD_RESET_WRONG_OTP', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update user password
+      await storage.updateUser(user.id, { password: hashedPassword });
+      
+      // Clear OTP after successful reset
+      await storage.deleteOtp(email);
+      
+      logSecurityEvent(user.id, 'PASSWORD_RESET_SUCCESS', { email }, clientIp);
+      
+      res.json({ 
+        message: "Password has been reset successfully. You can now sign in with your new password.",
+        success: true
+      });
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      res.status(400).json({ message: error.message || "Failed to reset password" });
+    }
+  });
+
   // SMS Verification routes for Ethio Telecom
   app.post('/api/sms/send-verification', async (req, res) => {
     try {

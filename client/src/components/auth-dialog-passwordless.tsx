@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Loader2, Phone, Mail, Eye, EyeOff, Lock } from "lucide-react";
+import { Loader2, Phone, Mail, Eye, EyeOff, Lock, ArrowLeft } from "lucide-react";
 
 // Password validation for INSA compliance
 const passwordSchema = z.string()
@@ -64,11 +64,29 @@ const verifyOtpSchema = z.object({
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
+// Forgot password - request OTP
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+// Reset password - with OTP and new password
+const resetPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+  newPassword: passwordSchema,
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type PhoneLoginData = z.infer<typeof phoneLoginSchema>;
 type PhoneRegisterData = z.infer<typeof phoneRegisterSchema>;
 type EmailLoginData = z.infer<typeof emailLoginSchema>;
 type EmailRegisterData = z.infer<typeof emailRegisterSchema>;
 type VerifyOtpData = z.infer<typeof verifyOtpSchema>;
+type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
+type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 
 interface AuthDialogProps {
   open: boolean;
@@ -78,13 +96,14 @@ interface AuthDialogProps {
 }
 
 export default function AuthDialog({ open, onOpenChange, defaultMode = "login", redirectAfterAuth }: AuthDialogProps) {
-  const [mode, setMode] = useState<"login" | "register">(defaultMode);
+  const [mode, setMode] = useState<"login" | "register" | "forgot-password" | "reset-password">(defaultMode);
   const [authMethod, setAuthMethod] = useState<"phone" | "email">("email");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [pendingContact, setPendingContact] = useState("");
   const [devOtp, setDevOtp] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -116,6 +135,18 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     defaultValues: { phoneNumber: "", email: "", otp: "" },
   });
 
+  // Forgot password form
+  const forgotPasswordForm = useForm<ForgotPasswordData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
+  });
+
+  // Reset password form
+  const resetPasswordForm = useForm<ResetPasswordData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { email: "", otp: "", newPassword: "", confirmPassword: "" },
+  });
+
   useEffect(() => {
     if (open) {
       phoneLoginForm.reset();
@@ -123,15 +154,19 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       phoneRegisterForm.reset();
       emailRegisterForm.reset();
       otpForm.reset();
+      forgotPasswordForm.reset();
+      resetPasswordForm.reset();
       setShowOtpInput(false);
       setPendingContact("");
       setDevOtp(undefined);
       setShowPassword(false);
       setShowConfirmPassword(false);
+      setShowNewPassword(false);
+      setMode(defaultMode);
     }
   }, [open]);
 
-  const switchMode = (newMode: "login" | "register") => {
+  const switchMode = (newMode: "login" | "register" | "forgot-password" | "reset-password") => {
     setMode(newMode);
     setShowOtpInput(false);
     setPendingContact("");
@@ -141,6 +176,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     phoneRegisterForm.reset();
     emailRegisterForm.reset();
     otpForm.reset();
+    forgotPasswordForm.reset();
+    resetPasswordForm.reset();
   };
 
   const handleAuthSuccess = (data: any) => {
@@ -298,6 +335,53 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
+  // Forgot Password - Request OTP
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: ForgotPasswordData) => {
+      return await apiRequest("POST", "/api/auth/forgot-password", data);
+    },
+    onSuccess: (data: any) => {
+      setPendingContact(data.email);
+      const otpCode = data.testOtp;
+      setDevOtp(otpCode);
+      resetPasswordForm.setValue("email", data.email);
+      setMode("reset-password");
+      toast({
+        title: "Reset code sent!",
+        description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit reset code",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Request failed",
+        description: error.message || "Failed to send reset code",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reset Password - Verify OTP and set new password
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: ResetPasswordData) => {
+      const { confirmPassword, ...resetData } = data;
+      return await apiRequest("POST", "/api/auth/reset-password", resetData);
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Password reset successful!",
+        description: "You can now sign in with your new password",
+      });
+      switchMode("login");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Reset failed",
+        description: error.message || "Invalid or expired reset code",
+        variant: "destructive",
+      });
+    },
+  });
+
   const PasswordInput = ({ field, placeholder, show, onToggle, testId }: any) => (
     <div className="relative">
       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eth-brown/50" />
@@ -318,22 +402,49 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     </div>
   );
 
+  // Determine dialog title and description
+  const getDialogHeader = () => {
+    if (showOtpInput) {
+      return {
+        title: "Verify OTP",
+        description: `Enter the 6-digit code sent to ${pendingContact}`
+      };
+    }
+    switch (mode) {
+      case "forgot-password":
+        return {
+          title: "Forgot Password",
+          description: "Enter your email to receive a reset code"
+        };
+      case "reset-password":
+        return {
+          title: "Reset Password",
+          description: `Enter the code sent to ${pendingContact} and your new password`
+        };
+      case "register":
+        return {
+          title: "Create Account",
+          description: "Join Ethiopia's best rental platform"
+        };
+      default:
+        return {
+          title: "Sign In",
+          description: "Welcome back to Alga - Enter your password"
+        };
+    }
+  };
+
+  const { title, description } = getDialogHeader();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-eth-warm-tan border-eth-brown/20 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-eth-brown">
-            {showOtpInput ? "Verify OTP" : mode === "login" ? "Sign In" : "Create Account"}
-          </DialogTitle>
-          <DialogDescription className="text-eth-brown/70">
-            {showOtpInput 
-              ? `Enter the 6-digit code sent to ${pendingContact}` 
-              : mode === "login" 
-                ? "Welcome back to Alga - Enter your password" 
-                : "Join Ethiopia's best rental platform"}
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-eth-brown">{title}</DialogTitle>
+          <DialogDescription className="text-eth-brown/70">{description}</DialogDescription>
         </DialogHeader>
 
+        {/* OTP Verification Screen */}
         {showOtpInput ? (
           <Form {...otpForm}>
             <form onSubmit={otpForm.handleSubmit((data) => verifyOtpMutation.mutate(data))} className="space-y-4">
@@ -387,7 +498,140 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </div>
             </form>
           </Form>
+        ) : mode === "forgot-password" ? (
+          /* Forgot Password Screen */
+          <Form {...forgotPasswordForm}>
+            <form onSubmit={forgotPasswordForm.handleSubmit((data) => forgotPasswordMutation.mutate(data))} className="space-y-4">
+              <FormField
+                control={forgotPasswordForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-eth-brown">Email Address</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="email"
+                        placeholder="Enter your email" 
+                        className="bg-white border-eth-brown/20 text-eth-brown" 
+                        data-testid="input-email-forgot"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={forgotPasswordMutation.isPending}
+                className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                data-testid="button-send-reset-code"
+              >
+                {forgotPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Send Reset Code
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => switchMode("login")}
+                className="w-full text-eth-brown hover:bg-eth-brown/10"
+                data-testid="button-back-to-login"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Sign In
+              </Button>
+            </form>
+          </Form>
+        ) : mode === "reset-password" ? (
+          /* Reset Password Screen */
+          <Form {...resetPasswordForm}>
+            <form onSubmit={resetPasswordForm.handleSubmit((data) => resetPasswordMutation.mutate(data))} className="space-y-4">
+              <FormField
+                control={resetPasswordForm.control}
+                name="otp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-eth-brown">6-Digit Reset Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="123456"
+                        maxLength={6}
+                        className="bg-white border-eth-brown/20 text-eth-brown text-center text-xl tracking-widest"
+                        data-testid="input-reset-otp"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {devOtp && (
+                <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
+                  <p className="text-sm text-yellow-800">Test Mode - OTP: <strong>{devOtp}</strong></p>
+                </div>
+              )}
+              <FormField
+                control={resetPasswordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-eth-brown">New Password</FormLabel>
+                    <FormControl>
+                      <PasswordInput 
+                        field={field} 
+                        placeholder="Create new password" 
+                        show={showNewPassword} 
+                        onToggle={() => setShowNewPassword(!showNewPassword)}
+                        testId="input-new-password"
+                      />
+                    </FormControl>
+                    <p className="text-xs text-eth-brown/60 mt-1">Min 8 chars with uppercase, lowercase, number & special character</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={resetPasswordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-eth-brown">Confirm New Password</FormLabel>
+                    <FormControl>
+                      <PasswordInput 
+                        field={field} 
+                        placeholder="Confirm new password" 
+                        show={showConfirmPassword} 
+                        onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                        testId="input-confirm-new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={resetPasswordMutation.isPending}
+                className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                data-testid="button-reset-password"
+              >
+                {resetPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Reset Password
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => switchMode("login")}
+                className="w-full text-eth-brown hover:bg-eth-brown/10"
+                data-testid="button-back-to-login-reset"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Sign In
+              </Button>
+            </form>
+          </Form>
         ) : (
+          /* Login / Register Screens */
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-transparent gap-3 p-0">
               <TabsTrigger 
@@ -633,6 +877,17 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                       {emailLoginMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                       Sign In
                     </Button>
+                    {/* Forgot Password Link */}
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => switchMode("forgot-password")}
+                        className="text-sm text-eth-brown/70 hover:text-eth-brown hover:underline"
+                        data-testid="button-forgot-password"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
                   </form>
                 </Form>
               ) : (
@@ -741,7 +996,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
         )}
 
         {/* Toggle Login/Register */}
-        {!showOtpInput && (
+        {!showOtpInput && (mode === "login" || mode === "register") && (
           <div className="text-center text-sm mt-4">
             <span className="text-eth-brown/70">
               {mode === "login" ? "Don't have an account? " : "Already have an account? "}
