@@ -323,7 +323,8 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async saveOtp(contact: string, otp: string, expiryMinutes: number = 10): Promise<void> {
+  // Save OTP (expects pre-hashed OTP for security)
+  async saveOtp(contact: string, hashedOtp: string, expiryMinutes: number = 5): Promise<void> {
     const expiryDate = new Date();
     expiryDate.setMinutes(expiryDate.getMinutes() + expiryMinutes);
     
@@ -333,14 +334,27 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({
-        otp,
+        otp: hashedOtp, // Store SHA-256 hash, never plaintext
         otpExpiry: expiryDate,
       })
       .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
   }
 
-  async verifyOtp(contact: string, otp: string): Promise<boolean> {
-    // Check if contact is email or phone number
+  // Get stored OTP hash for verification (don't compare here - let caller handle timing-safe comparison)
+  async getStoredOTPData(contact: string): Promise<{ hash: string | null; expiry: Date | null } | null> {
+    const isEmail = contact.includes('@');
+    
+    const [user] = await db
+      .select({ otp: users.otp, otpExpiry: users.otpExpiry })
+      .from(users)
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
+
+    if (!user) return null;
+    return { hash: user.otp, expiry: user.otpExpiry };
+  }
+
+  // Legacy verifyOtp - kept for backwards compatibility but uses hash comparison
+  async verifyOtp(contact: string, providedOtp: string): Promise<boolean> {
     const isEmail = contact.includes('@');
     
     const [user] = await db
@@ -349,19 +363,53 @@ export class DatabaseStorage implements IStorage {
       .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
 
     if (!user || !user.otp || !user.otpExpiry) {
-      console.log(`[OTP VERIFY] Failed: user=${!!user}, otp=${user?.otp}, otpExpiry=${user?.otpExpiry}`);
+      console.log(`[OTP VERIFY] Failed: no user or OTP data`);
       return false;
     }
 
     const now = new Date();
     if (now > user.otpExpiry) {
-      console.log(`[OTP VERIFY] OTP expired. Now: ${now}, Expiry: ${user.otpExpiry}`);
+      console.log(`[OTP VERIFY] OTP expired`);
+      // Clear expired OTP
+      await this.clearOtp(contact);
       return false;
     }
 
-    const isValid = user.otp === otp;
-    console.log(`[OTP VERIFY] OTP comparison: stored=${user.otp}, provided=${otp}, match=${isValid}`);
+    // Support both hashed and legacy plaintext OTPs during transition
+    // SHA-256 hashes are 64 characters hex
+    const storedOtp = user.otp;
+    let isValid: boolean;
+    
+    if (storedOtp.length === 64) {
+      // Hashed OTP - use timing-safe comparison
+      const { createHash } = await import('crypto');
+      const providedHash = createHash('sha256').update(providedOtp).digest('hex');
+      // Timing-safe comparison
+      if (providedHash.length !== storedOtp.length) {
+        isValid = false;
+      } else {
+        let result = 0;
+        for (let i = 0; i < providedHash.length; i++) {
+          result |= providedHash.charCodeAt(i) ^ storedOtp.charCodeAt(i);
+        }
+        isValid = result === 0;
+      }
+    } else {
+      // Legacy plaintext OTP (4-6 digits) - for backwards compatibility
+      isValid = storedOtp === providedOtp;
+    }
+    
+    console.log(`[OTP VERIFY] Verification ${isValid ? 'successful' : 'failed'}`);
     return isValid;
+  }
+
+  // Clear OTP after use or expiration
+  async clearOtp(contact: string): Promise<void> {
+    const isEmail = contact.includes('@');
+    await db
+      .update(users)
+      .set({ otp: null, otpExpiry: null })
+      .where(isEmail ? eq(users.email, contact) : eq(users.phoneNumber, contact));
   }
 
   async markPhoneVerified(phoneNumber: string): Promise<User> {
