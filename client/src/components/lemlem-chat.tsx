@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { isMobileApp } from "@/utils/platform";
 import lemlemOfflineStorage, { isOnline, onNetworkStatusChange } from "@/lib/lemlemOfflineStorage";
+import { getApiUrl } from "@/lib/api-config";
 
 interface Message {
   id: string;
@@ -90,9 +91,8 @@ export function LemlemChat({ propertyId, bookingId, defaultOpen = false }: Lemle
   useEffect(() => {
     if (isOpen && propertyId) {
       // Fetch property info and auto-cache for offline use
-      import('@/lib/api-config').then(({ getApiUrl }) => 
-        fetch(getApiUrl(`/api/property-info/${propertyId}`), { credentials: 'include' })
-      ).then(res => res.json())
+      fetch(getApiUrl(`/api/property-info/${propertyId}`), { credentials: 'include' })
+        .then(res => res.json())
         .then(async (propertyInfo) => {
           const learned = await lemlemOfflineStorage.syncPropertyKnowledge(propertyId, propertyInfo);
           if (learned) {

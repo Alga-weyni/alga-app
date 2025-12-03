@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import Header from "@/components/header";
 import { SEOHead } from "@/components/seo-head";
 import { useQuery } from "@tanstack/react-query";
+import { getApiUrl } from "@/lib/api-config";
 import { Star, MapPin, Clock, DollarSign, Sparkles, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,6 @@ export default function ServiceCategory() {
       if (cityFilter !== "all") params.append("city", cityFilter);
       params.append("verificationStatus", "approved");
       
-      const { getApiUrl } = await import('@/lib/api-config');
       const response = await fetch(getApiUrl(`/api/service-providers?${params}`), {
         credentials: 'include'
       });

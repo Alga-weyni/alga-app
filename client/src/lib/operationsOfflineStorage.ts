@@ -6,6 +6,8 @@
  * ZERO COST - Browser-native IndexedDB API
  */
 
+import { getApiUrl } from './api-config';
+
 interface CachedData {
   id: string;
   type: 'agents' | 'properties' | 'hardware' | 'payments' | 'campaigns' | 'alerts' | 'compliance';
@@ -183,7 +185,6 @@ class OperationsOfflineStorage {
     for (const action of actions) {
       try {
         // Execute the action via API
-        const { getApiUrl } = await import('./api-config');
         const response = await fetch(getApiUrl(`/api/admin/operations/${action.action}`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getApiUrl } from "@/lib/api-config";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,7 +84,6 @@ export default function AdminAgents() {
 
   const verifyMutation = useMutation({
     mutationFn: async ({ agentId, status, rejectionReason }: { agentId: number; status: string; rejectionReason?: string }) => {
-      const { getApiUrl } = await import('@/lib/api-config');
       const response = await fetch(getApiUrl(`/api/admin/agents/${agentId}/verify`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },

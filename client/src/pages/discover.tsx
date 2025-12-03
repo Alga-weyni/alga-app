@@ -5,6 +5,7 @@ import { MapPin, Coffee, Building2, Bus, Star } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { getApiUrl } from "@/lib/api-config";
 
 // Property Pin Component
 const PropertyMarker = ({ property, onClick }: any) => (
@@ -58,7 +59,6 @@ export default function DiscoverPage() {
         city: "Addis Ababa"
       });
 
-      const { getApiUrl } = await import('@/lib/api-config');
       const res = await fetch(getApiUrl(`/api/properties/discover?${params.toString()}`), {
         credentials: 'include'
       });

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { useLocation } from "react-router-dom";
+import { getApiUrl } from "@/lib/api-config";
 import Header from "@/components/header";
 import PropertyCard from "@/components/property-card";
 import SearchBanner from "@/components/search-banner";
@@ -89,7 +90,6 @@ export default function Properties() {
         }
       });
       
-      const { getApiUrl } = await import('@/lib/api-config');
       const response = await fetch(getApiUrl(`/api/properties?${params}`), {
         credentials: 'include'
       });
