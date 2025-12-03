@@ -1,0 +1,39 @@
+     [POST]400api.alga.et/api/auth/request-otp/email/loginclientIP="196.189.7.46" requestID="173e561c-bb30-4e21" responseTimeMS=240 responseBytes=1449 userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+Error in passwordless email login: DrizzleQueryError: Failed query: update "users" set "otp" = $1, "otp_expiry" = $2 where "users"."email" = $3
+params: 0677a025cd621dc7a1af26b947331c0072371ff5249a637cf5e6517543ecde74,2025-12-03T11:19:59.520Z,insa-host@test.alga.et
+    at NodePgPreparedQuery.queryWithCache (file:///opt/render/project/src/node_modules/drizzle-orm/pg-core/session.js:41:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async DatabaseStorage.saveOtp (file:///opt/render/project/src/dist/server/storage.js:24:9)
+    at async file:///opt/render/project/src/dist/server/routes.js:829:13 {
+  query: 'update "users" set "otp" = $1, "otp_expiry" = $2 where "users"."email" = $3',
+  params: [
+    '0677a025cd621dc7a1af26b947331c0072371ff5249a637cf5e6517543ecde74',
+    '2025-12-03T11:19:59.520Z',
+    'insa-host@test.alga.et'
+  ],
+  cause: error: value too long for type character varying(4)
+      at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:113:20
+      at async NodePgPreparedQuery.queryWithCache (file:///opt/render/project/src/node_modules/drizzle-orm/pg-core/session.js:39:16)
+      at async DatabaseStorage.saveOtp (file:///opt/render/project/src/dist/server/storage.js:24:9)
+      at async file:///opt/render/project/src/dist/server/routes.js:829:13 {
+    length: 97,
+    severity: 'ERROR',
+    code: '22001',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'varchar.c',
+    line: '637',
+    routine: 'varchar'
+  }
+}
