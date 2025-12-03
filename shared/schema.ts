@@ -50,7 +50,7 @@ export const users = pgTable("users", {
   faydaVerifiedAt: timestamp("fayda_verified_at"),
   faydaVerificationData: jsonb("fayda_verification_data"), // Stores encrypted identity data from Fayda API
   isServiceProvider: boolean("is_service_provider").notNull().default(false), // Add-on services
-  otp: varchar("otp", { length: 4 }),
+  otp: varchar("otp", { length: 64 }), // SHA-256 hash (64 chars) for INSA 2FA security
   otpExpiry: timestamp("otp_expiry"),
   status: varchar("status").notNull().default("active"), // active, suspended, pending
   bio: text("bio"),
@@ -621,10 +621,10 @@ export const loginEmailUserSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-// OTP verification schema
+// OTP verification schema (INSA 2FA: 6-digit secure OTP)
 export const verifyOtpSchema = z.object({
   phoneNumber: z.string().regex(/^\+251[0-9]{9}$/, "Phone number must be in format +251XXXXXXXXX"),
-  otp: z.string().length(4, "OTP must be 4 digits"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
 export const insertPropertySchema = createInsertSchema(properties).omit({
