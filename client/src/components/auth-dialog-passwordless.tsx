@@ -148,7 +148,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       otpForm.setValue("phoneNumber", data.phoneNumber || data.contact);
       toast({
         title: "OTP Sent",
-        description: data.devOtp ? `Development OTP: ${data.devOtp}` : "Check your phone for the 4-digit code",
+        description: data.devOtp ? `Test OTP: ${data.devOtp}` : "Check your phone for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -169,11 +169,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.email || data.contact);
       setShowOtpInput(true);
-      setDevOtp(data.devOtp);
+      const otpCode = data.testOtp || data.devOtp;
+      setDevOtp(otpCode);
       otpForm.setValue("email", data.email || data.contact);
       toast({
         title: "OTP Sent",
-        description: data.devOtp ? `Development OTP: ${data.devOtp}` : "Check your email for the 4-digit code",
+        description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -209,7 +210,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           </DialogTitle>
           <DialogDescription className="text-eth-brown/70">
             {showOtpInput 
-              ? `Enter the 4-digit code sent to ${pendingContact}` 
+              ? `Enter the 6-digit code sent to ${pendingContact}` 
               : mode === "login" ? "Welcome back to Alga" : "Join Ethiopia's best rental platform"}
           </DialogDescription>
         </DialogHeader>
@@ -222,12 +223,12 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                 name="otp"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-eth-brown">4-Digit OTP</FormLabel>
+                    <FormLabel className="text-eth-brown">6-Digit OTP</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="1234"
-                        maxLength={4}
+                        placeholder="123456"
+                        maxLength={6}
                         className="bg-white border-eth-brown/20 text-eth-brown text-center text-2xl tracking-widest"
                         data-testid="input-otp"
                         autoFocus

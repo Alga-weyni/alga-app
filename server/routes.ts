@@ -129,7 +129,7 @@ const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   'cancelled': [],
 };
 
-function validateStatusTransition(currentStatus: string, newStatus: string): boolean {
+function validateStatusTransition(currentStatus: string, newStatus: string, type: 'booking' | 'payment' = 'booking'): boolean {
   const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
   return allowedTransitions.includes(newStatus);
 }
@@ -935,12 +935,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(user.id, 'OTP_GENERATED', { email, type: 'login' }, clientIp);
       
-      // INSA COMPLIANCE: Never expose OTP in API response
+      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
+      const isTestAccount = email.endsWith('@test.alga.et');
+      if (isTestAccount) {
+        logSecurityEvent(user.id, 'TEST_MODE_OTP', { email }, clientIp);
+      }
+      
       res.json({ 
         message: "A 6-digit verification code has been sent to your email",
         email,
         contact: email,
-        expiresIn: 300
+        expiresIn: 300,
+        ...(isTestAccount && { testOtp: otp })
       });
     } catch (error: any) {
       console.error("Error in passwordless email login:", error);
