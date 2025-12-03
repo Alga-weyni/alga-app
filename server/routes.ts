@@ -1336,7 +1336,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Password Reset - Verify OTP and Set New Password
+  // Password Reset - Step 2: Verify Reset OTP (before showing password form)
+  app.post('/api/auth/verify-reset-otp', authLimiter, async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+      const clientIp = req.ip || 'unknown';
+      
+      if (!email || !otp) {
+        return res.status(400).json({ message: "Email and OTP are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        logSecurityEvent(null, 'VERIFY_RESET_OTP_INVALID_USER', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      // Verify OTP without consuming it (still need it for reset-password)
+      const storedHashedOtp = await storage.getOtp(email);
+      if (!storedHashedOtp) {
+        logSecurityEvent(user.id, 'VERIFY_RESET_OTP_NO_OTP', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      const hashedInputOtp = hashOTP(otp);
+      if (storedHashedOtp !== hashedInputOtp) {
+        logSecurityEvent(user.id, 'VERIFY_RESET_OTP_WRONG_OTP', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid or expired reset code" });
+      }
+      
+      logSecurityEvent(user.id, 'VERIFY_RESET_OTP_SUCCESS', { email }, clientIp);
+      
+      res.json({ 
+        message: "Reset code verified successfully",
+        verified: true,
+        email
+      });
+    } catch (error: any) {
+      console.error("Error verifying reset OTP:", error);
+      res.status(400).json({ message: error.message || "Failed to verify reset code" });
+    }
+  });
+
+  // Password Reset - Step 3: Set New Password
   app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
     try {
       const { email, otp, newPassword } = req.body;

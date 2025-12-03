@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, Phone, Mail, Eye, EyeOff, Lock, ArrowLeft } from "lucide-react";
 
-// Password validation for INSA compliance
 const passwordSchema = z.string()
   .min(8, "Password must be at least 8 characters")
   .regex(/[A-Z]/, "Must contain at least one uppercase letter")
@@ -21,13 +19,11 @@ const passwordSchema = z.string()
   .regex(/[0-9]/, "Must contain at least one number")
   .regex(/[!@#$%^&*(),.?":{}|<>]/, "Must contain at least one special character");
 
-// Phone login with password (INSA 2FA)
 const phoneLoginSchema = z.object({
   phoneNumber: z.string().length(10, "Phone number must be exactly 10 digits").regex(/^09[0-9]{8}$/, "Phone must start with 09 and be 10 digits"),
   password: z.string().min(1, "Password is required"),
 });
 
-// Phone registration with password
 const phoneRegisterSchema = z.object({
   phoneNumber: z.string().length(10, "Phone number must be exactly 10 digits").regex(/^09[0-9]{8}$/, "Phone must start with 09 and be 10 digits"),
   password: passwordSchema,
@@ -39,13 +35,11 @@ const phoneRegisterSchema = z.object({
   path: ["confirmPassword"],
 });
 
-// Email login with password (INSA 2FA)
 const emailLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
-// Email registration with password
 const emailRegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: passwordSchema,
@@ -57,20 +51,22 @@ const emailRegisterSchema = z.object({
   path: ["confirmPassword"],
 });
 
-// OTP verification
 const verifyOtpSchema = z.object({
   phoneNumber: z.string().optional(),
   email: z.string().optional(),
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
-// Forgot password - request OTP
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-// Reset password - with OTP and new password
-const resetPasswordSchema = z.object({
+const verifyResetOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
+const setNewPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
   otp: z.string().length(6, "OTP must be 6 digits"),
   newPassword: passwordSchema,
@@ -86,7 +82,8 @@ type EmailLoginData = z.infer<typeof emailLoginSchema>;
 type EmailRegisterData = z.infer<typeof emailRegisterSchema>;
 type VerifyOtpData = z.infer<typeof verifyOtpSchema>;
 type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
-type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
+type VerifyResetOtpData = z.infer<typeof verifyResetOtpSchema>;
+type SetNewPasswordData = z.infer<typeof setNewPasswordSchema>;
 
 interface AuthDialogProps {
   open: boolean;
@@ -96,18 +93,17 @@ interface AuthDialogProps {
 }
 
 export default function AuthDialog({ open, onOpenChange, defaultMode = "login", redirectAfterAuth }: AuthDialogProps) {
-  const [mode, setMode] = useState<"login" | "register" | "forgot-password" | "reset-password">(defaultMode);
+  const [mode, setMode] = useState<"login" | "register" | "forgot-password" | "verify-reset-otp" | "set-new-password">(defaultMode);
   const [authMethod, setAuthMethod] = useState<"phone" | "email">("email");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [pendingContact, setPendingContact] = useState("");
+  const [verifiedOtp, setVerifiedOtp] = useState("");
   const [devOtp, setDevOtp] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Login forms (with password)
   const phoneLoginForm = useForm<PhoneLoginData>({
     resolver: zodResolver(phoneLoginSchema),
     defaultValues: { phoneNumber: "", password: "" },
@@ -118,7 +114,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     defaultValues: { email: "", password: "" },
   });
 
-  // Registration forms (with password)
   const phoneRegisterForm = useForm<PhoneRegisterData>({
     resolver: zodResolver(phoneRegisterSchema),
     defaultValues: { phoneNumber: "", password: "", confirmPassword: "", firstName: "", lastName: "" },
@@ -129,21 +124,23 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     defaultValues: { email: "", password: "", confirmPassword: "", firstName: "", lastName: "" },
   });
 
-  // OTP form
   const otpForm = useForm<VerifyOtpData>({
     resolver: zodResolver(verifyOtpSchema),
     defaultValues: { phoneNumber: "", email: "", otp: "" },
   });
 
-  // Forgot password form
   const forgotPasswordForm = useForm<ForgotPasswordData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
   });
 
-  // Reset password form
-  const resetPasswordForm = useForm<ResetPasswordData>({
-    resolver: zodResolver(resetPasswordSchema),
+  const verifyResetOtpForm = useForm<VerifyResetOtpData>({
+    resolver: zodResolver(verifyResetOtpSchema),
+    defaultValues: { email: "", otp: "" },
+  });
+
+  const setNewPasswordForm = useForm<SetNewPasswordData>({
+    resolver: zodResolver(setNewPasswordSchema),
     defaultValues: { email: "", otp: "", newPassword: "", confirmPassword: "" },
   });
 
@@ -155,9 +152,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       emailRegisterForm.reset();
       otpForm.reset();
       forgotPasswordForm.reset();
-      resetPasswordForm.reset();
+      verifyResetOtpForm.reset();
+      setNewPasswordForm.reset();
       setShowOtpInput(false);
       setPendingContact("");
+      setVerifiedOtp("");
       setDevOtp(undefined);
       setShowPassword(false);
       setShowConfirmPassword(false);
@@ -166,10 +165,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     }
   }, [open]);
 
-  const switchMode = (newMode: "login" | "register" | "forgot-password" | "reset-password") => {
+  const switchMode = (newMode: "login" | "register" | "forgot-password" | "verify-reset-otp" | "set-new-password") => {
     setMode(newMode);
     setShowOtpInput(false);
     setPendingContact("");
+    setVerifiedOtp("");
     setDevOtp(undefined);
     phoneLoginForm.reset();
     emailLoginForm.reset();
@@ -177,7 +177,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     emailRegisterForm.reset();
     otpForm.reset();
     forgotPasswordForm.reset();
-    resetPasswordForm.reset();
+    verifyResetOtpForm.reset();
+    setNewPasswordForm.reset();
   };
 
   const handleAuthSuccess = (data: any) => {
@@ -218,7 +219,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     }, 300);
   };
 
-  // Phone Login with Password (Step 1: verify password, get OTP)
   const phoneLoginMutation = useMutation({
     mutationFn: async (data: PhoneLoginData) => {
       return await apiRequest("POST", "/api/auth/login/phone", data);
@@ -243,7 +243,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // Email Login with Password (Step 1: verify password, get OTP)
   const emailLoginMutation = useMutation({
     mutationFn: async (data: EmailLoginData) => {
       return await apiRequest("POST", "/api/auth/login/email", data);
@@ -268,7 +267,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // Phone Registration with Password
   const phoneRegisterMutation = useMutation({
     mutationFn: async (data: PhoneRegisterData) => {
       const { confirmPassword, ...registerData } = data;
@@ -294,7 +292,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // Email Registration with Password
   const emailRegisterMutation = useMutation({
     mutationFn: async (data: EmailRegisterData) => {
       const { confirmPassword, ...registerData } = data;
@@ -320,7 +317,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // OTP verification
   const verifyOtpMutation = useMutation({
     mutationFn: async (data: VerifyOtpData) => {
       return await apiRequest("POST", "/api/auth/verify-otp", data);
@@ -335,7 +331,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // Forgot Password - Request OTP
   const forgotPasswordMutation = useMutation({
     mutationFn: async (data: ForgotPasswordData) => {
       return await apiRequest("POST", "/api/auth/forgot-password", data);
@@ -344,8 +339,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setPendingContact(data.email);
       const otpCode = data.testOtp;
       setDevOtp(otpCode);
-      resetPasswordForm.setValue("email", data.email);
-      setMode("reset-password");
+      verifyResetOtpForm.setValue("email", data.email);
+      setMode("verify-reset-otp");
       toast({
         title: "Reset code sent!",
         description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit reset code",
@@ -360,13 +355,35 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
   });
 
-  // Reset Password - Verify OTP and set new password
-  const resetPasswordMutation = useMutation({
-    mutationFn: async (data: ResetPasswordData) => {
+  const verifyResetOtpMutation = useMutation({
+    mutationFn: async (data: VerifyResetOtpData) => {
+      return await apiRequest("POST", "/api/auth/verify-reset-otp", data);
+    },
+    onSuccess: (data: any) => {
+      setVerifiedOtp(verifyResetOtpForm.getValues("otp"));
+      setNewPasswordForm.setValue("email", pendingContact);
+      setNewPasswordForm.setValue("otp", verifyResetOtpForm.getValues("otp"));
+      setMode("set-new-password");
+      toast({
+        title: "Code verified!",
+        description: "You can now create a new password",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired reset code",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const setNewPasswordMutation = useMutation({
+    mutationFn: async (data: SetNewPasswordData) => {
       const { confirmPassword, ...resetData } = data;
       return await apiRequest("POST", "/api/auth/reset-password", resetData);
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       toast({
         title: "Password reset successful!",
         description: "You can now sign in with your new password",
@@ -376,7 +393,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onError: (error: any) => {
       toast({
         title: "Reset failed",
-        description: error.message || "Invalid or expired reset code",
+        description: error.message || "Failed to reset password",
         variant: "destructive",
       });
     },
@@ -402,7 +419,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     </div>
   );
 
-  // Determine dialog title and description
   const getDialogHeader = () => {
     if (showOtpInput) {
       return {
@@ -416,10 +432,15 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           title: "Forgot Password",
           description: "Enter your email to receive a reset code"
         };
-      case "reset-password":
+      case "verify-reset-otp":
         return {
-          title: "Reset Password",
-          description: `Enter the code sent to ${pendingContact} and your new password`
+          title: "Enter Reset Code",
+          description: `Enter the 6-digit code sent to ${pendingContact}`
+        };
+      case "set-new-password":
+        return {
+          title: "Create New Password",
+          description: "Enter your new password below"
         };
       case "register":
         return {
@@ -444,7 +465,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           <DialogDescription className="text-eth-brown/70">{description}</DialogDescription>
         </DialogHeader>
 
-        {/* OTP Verification Screen */}
         {showOtpInput ? (
           <Form {...otpForm}>
             <form onSubmit={otpForm.handleSubmit((data) => verifyOtpMutation.mutate(data))} className="space-y-4">
@@ -499,7 +519,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
             </form>
           </Form>
         ) : mode === "forgot-password" ? (
-          /* Forgot Password Screen */
           <Form {...forgotPasswordForm}>
             <form onSubmit={forgotPasswordForm.handleSubmit((data) => forgotPasswordMutation.mutate(data))} className="space-y-4">
               <FormField
@@ -542,12 +561,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </Button>
             </form>
           </Form>
-        ) : mode === "reset-password" ? (
-          /* Reset Password Screen */
-          <Form {...resetPasswordForm}>
-            <form onSubmit={resetPasswordForm.handleSubmit((data) => resetPasswordMutation.mutate(data))} className="space-y-4">
+        ) : mode === "verify-reset-otp" ? (
+          <Form {...verifyResetOtpForm}>
+            <form onSubmit={verifyResetOtpForm.handleSubmit((data) => verifyResetOtpMutation.mutate(data))} className="space-y-4">
               <FormField
-                control={resetPasswordForm.control}
+                control={verifyResetOtpForm.control}
                 name="otp"
                 render={({ field }) => (
                   <FormItem>
@@ -557,7 +575,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         {...field}
                         placeholder="123456"
                         maxLength={6}
-                        className="bg-white border-eth-brown/20 text-eth-brown text-center text-xl tracking-widest"
+                        className="bg-white border-eth-brown/20 text-eth-brown text-center text-2xl tracking-widest"
                         data-testid="input-reset-otp"
                         autoFocus
                       />
@@ -571,8 +589,31 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   <p className="text-sm text-yellow-800">Test Mode - OTP: <strong>{devOtp}</strong></p>
                 </div>
               )}
+              <Button
+                type="submit"
+                disabled={verifyResetOtpMutation.isPending}
+                className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
+                data-testid="button-verify-reset-otp"
+              >
+                {verifyResetOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Verify Code
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => switchMode("forgot-password")}
+                className="w-full text-eth-brown hover:bg-eth-brown/10"
+                data-testid="button-back-to-forgot"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back
+              </Button>
+            </form>
+          </Form>
+        ) : mode === "set-new-password" ? (
+          <Form {...setNewPasswordForm}>
+            <form onSubmit={setNewPasswordForm.handleSubmit((data) => setNewPasswordMutation.mutate(data))} className="space-y-4">
               <FormField
-                control={resetPasswordForm.control}
+                control={setNewPasswordForm.control}
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
@@ -592,7 +633,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                 )}
               />
               <FormField
-                control={resetPasswordForm.control}
+                control={setNewPasswordForm.control}
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
@@ -612,11 +653,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               />
               <Button
                 type="submit"
-                disabled={resetPasswordMutation.isPending}
+                disabled={setNewPasswordMutation.isPending}
                 className="w-full bg-eth-brown hover:bg-eth-brown/90 text-white"
                 data-testid="button-reset-password"
               >
-                {resetPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {setNewPasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Reset Password
               </Button>
               <Button
@@ -631,7 +672,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
             </form>
           </Form>
         ) : (
-          /* Login / Register Screens */
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "phone" | "email")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-transparent gap-3 p-0">
               <TabsTrigger 
@@ -658,7 +698,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               </TabsTrigger>
             </TabsList>
 
-            {/* Phone Auth with Password */}
             <TabsContent value="phone" className="mt-6">
               {mode === "login" ? (
                 <Form {...phoneLoginForm}>
@@ -825,7 +864,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               )}
             </TabsContent>
 
-            {/* Email Auth with Password */}
             <TabsContent value="email" className="mt-6">
               {mode === "login" ? (
                 <Form {...emailLoginForm}>
@@ -877,7 +915,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                       {emailLoginMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                       Sign In
                     </Button>
-                    {/* Forgot Password Link */}
                     <div className="text-center">
                       <button
                         type="button"
@@ -995,7 +1032,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
           </Tabs>
         )}
 
-        {/* Toggle Login/Register */}
         {!showOtpInput && (mode === "login" || mode === "register") && (
           <div className="text-center text-sm mt-4">
             <span className="text-eth-brown/70">
