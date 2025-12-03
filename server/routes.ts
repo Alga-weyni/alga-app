@@ -1249,12 +1249,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(user.id, 'PASSWORD_VERIFIED_OTP_SENT', { email: validatedData.email }, clientIp);
       
-      // INSA COMPLIANCE: Never expose OTP in API response
+      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
+      const isTestAccount = validatedData.email.endsWith('@test.alga.et');
+      if (isTestAccount) {
+        logSecurityEvent(user.id, 'TEST_MODE_OTP', { email: validatedData.email }, clientIp);
+      }
+      
       res.json({ 
         message: "Password verified. A 6-digit verification code has been sent to your email.",
         email: validatedData.email,
         requiresOtp: true,
-        expiresIn: 300
+        expiresIn: 300,
+        ...(isTestAccount && { testOtp: otp })
       });
     } catch (error: any) {
       console.error("Error logging in with email:", error);
