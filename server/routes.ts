@@ -28,6 +28,24 @@ import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSc
 import { sql, desc, and } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
 import financialSettlementRoutes from './api/financial-settlement.routes.js';
+// INSA Security Fixes Import
+import { 
+  sanitizeUserResponse, 
+  validateBookingDates, 
+  calculateBookingPrice, 
+  validateGuestCount,
+  requireAdmin,
+  requireAdminOrOperator,
+  validateBookingOwnership,
+  validatePropertyOwnership,
+  validateStatusTransition,
+  checkOTPRateLimit,
+  resetOTPRateLimit,
+  generateBookingReference,
+  generateSecureOTP,
+  hashOTP,
+  logSecurityEvent
+} from './security/insa-security-fixes.js';
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -338,9 +356,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
+  // INSA Fix #10: Sanitize user response to remove password hash and sensitive data
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      res.json(req.user);
+      const safeUser = sanitizeUserResponse(req.user);
+      res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -721,9 +741,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify OTP (Works for both phone and email, passwordless and legacy)
+  // INSA Fix #8: Enhanced OTP verification with rate limiting and security
   app.post('/api/auth/verify-otp', authLimiter, async (req, res) => {
     try {
       const { phoneNumber, email, otp } = req.body;
+      const clientIp = req.ip || 'unknown';
       
       if (!otp) {
         return res.status(400).json({ message: "OTP is required" });
@@ -734,11 +756,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const contact = phoneNumber || email;
+      
+      // INSA Fix #8: Additional rate limiting per user identifier
+      const rateLimitCheck = checkOTPRateLimit(contact);
+      if (!rateLimitCheck.allowed) {
+        await logSecurityEvent(null, 'OTP_RATE_LIMIT_EXCEEDED', { contact, ip: clientIp }, clientIp);
+        return res.status(429).json({ 
+          message: "Too many verification attempts. Please try again later.",
+          retryAfter: rateLimitCheck.retryAfter
+        });
+      }
+      
       const isValid = await storage.verifyOtp(contact, otp);
       
       if (!isValid) {
+        await logSecurityEvent(null, 'OTP_VERIFICATION_FAILED', { contact, ip: clientIp }, clientIp);
         return res.status(400).json({ message: "Invalid or expired OTP" });
       }
+      
+      // Reset rate limit on successful verification
+      resetOTPRateLimit(contact);
       
       // Get user and mark as verified
       let user;
@@ -753,6 +790,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // INSA Fix #10: Sanitize user response
+      const safeUser = sanitizeUserResponse(user);
+      
+      // Log successful verification
+      await logSecurityEvent(user.id, 'OTP_VERIFICATION_SUCCESS', { contact }, clientIp);
+      
       // Log in user
       (req as any).login(user, (err: any) => {
         if (err) {
@@ -760,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         res.json({ 
           message: "Verification successful",
-          user,
+          user: safeUser,
           redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : user.role === 'agent' ? '/agent-dashboard' : user.role === 'service_provider' ? '/provider/dashboard' : '/properties'
         });
       });
@@ -1063,16 +1106,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/properties/:propertyId/verify', isAuthenticated, async (req: any, res) => {
+  // INSA Fix #1: Property approval is ADMIN ONLY - hosts cannot approve their own properties
+  app.patch('/api/admin/properties/:propertyId/verify', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (!['admin', 'operator'].includes(userRole)) {
-        return res.status(403).json({ message: "Admin or operator access required" });
-      }
-      
       const { propertyId } = req.params;
       const { status, rejectionReason } = req.body;
       const verifierId = req.user.id;
+      
+      // Validate status
+      if (!['active', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be 'active' or 'rejected'" });
+      }
+      
+      // Log the verification action
+      await logSecurityEvent(verifierId, 'PROPERTY_VERIFICATION', { 
+        propertyId: parseInt(propertyId), 
+        status,
+        rejectionReason: rejectionReason || null
+      }, req.ip || 'unknown');
       
       const updatedProperty = await storage.verifyProperty(parseInt(propertyId), status, verifierId, rejectionReason);
       res.json(updatedProperty);
@@ -2307,16 +2358,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Booking routes
+  // INSA Fixes #3, #5, #6, #11, #12: Server-side validation and price calculation
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const bookingData = insertBookingSchema.parse({ ...req.body, guestId: userId });
+      const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod } = req.body;
+      
+      // INSA Fix #11: Validate date order
+      const dateValidation = validateBookingDates(checkIn, checkOut);
+      if (!dateValidation.valid) {
+        return res.status(400).json({ message: dateValidation.error, code: 'INVALID_DATES' });
+      }
+      
+      // INSA Fix #6: Validate guest count against property capacity
+      const guestValidation = await validateGuestCount(propertyId, guests);
+      if (!guestValidation.valid) {
+        return res.status(400).json({ 
+          message: guestValidation.error, 
+          code: 'INVALID_GUEST_COUNT',
+          maxGuests: guestValidation.maxGuests 
+        });
+      }
+      
+      // INSA Fix #3 & #5: Calculate price server-side (ignore client-provided price)
+      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests);
+      
+      // INSA Fix #12: Generate secure booking reference
+      const bookingReference = generateBookingReference();
+      
+      const bookingData = insertBookingSchema.parse({ 
+        propertyId,
+        guestId: userId,
+        checkIn: new Date(checkIn),
+        checkOut: new Date(checkOut),
+        guests,
+        totalPrice: pricing.total.toFixed(2),
+        currency: pricing.currency,
+        specialRequests: specialRequests || null,
+        paymentMethod: paymentMethod || null,
+        status: 'pending',
+        paymentStatus: 'pending',
+        bookingReference,
+      });
       
       const booking = await storage.createBooking(bookingData);
-      res.status(201).json(booking);
-    } catch (error) {
+      
+      // Log security event
+      await logSecurityEvent(userId, 'BOOKING_CREATED', { 
+        bookingId: booking.id, 
+        bookingReference,
+        propertyId, 
+        totalPrice: pricing.total 
+      }, req.ip || 'unknown');
+      
+      res.status(201).json({
+        ...booking,
+        pricing: {
+          pricePerNight: pricing.pricePerNight,
+          nights: pricing.nights,
+          subtotal: pricing.subtotal,
+          serviceFee: pricing.serviceFee,
+          total: pricing.total,
+          currency: pricing.currency
+        }
+      });
+    } catch (error: any) {
       console.error("Error creating booking:", error);
-      res.status(500).json({ message: "Failed to create booking" });
+      res.status(500).json({ message: error.message || "Failed to create booking" });
     }
   });
 
@@ -2331,14 +2439,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // INSA Fix #2: Validate booking ownership before returning details
   app.get('/api/bookings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.id;
+      const userRole = req.user.role;
       
       const booking = await storage.getBooking(id);
-      if (!booking || booking.guestId !== userId) {
-        return res.status(403).json({ message: "Unauthorized" });
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Get property to check if user is the host
+      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // Only allow guest, host, admin, or operator to view
+      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'BOOKING_ACCESS_DENIED' });
       }
       
       res.json(booking);
@@ -2348,12 +2468,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // INSA Fix #2, #4, #9: Validate ownership and status transitions
   app.patch('/api/bookings/:id/status', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
+      const userId = req.user.id;
+      const userRole = req.user.role;
       
-      const booking = await storage.updateBookingStatus(id, status);
+      // Validate status is not empty
+      if (!status || typeof status !== 'string' || status.trim() === '') {
+        return res.status(400).json({ message: "Status is required", code: 'INVALID_STATUS' });
+      }
+      
+      // Get booking and validate ownership
+      const booking = await storage.getBooking(id);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Get property to check if user is the host
+      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // INSA Fix #9: Only allow guest (for cancellation), host, admin, or operator
+      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_STATUS_CHANGE', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'STATUS_CHANGE_DENIED' });
+      }
+      
+      // Guests can only cancel their own bookings
+      if (booking.guestId === userId && !isHost && status !== 'cancelled') {
+        return res.status(403).json({ message: "Guests can only cancel bookings", code: 'GUEST_CANCEL_ONLY' });
+      }
+      
+      // INSA Fix #4: Validate status transition
+      if (!validateStatusTransition(booking.status, status, 'booking')) {
+        return res.status(400).json({ 
+          message: `Cannot change status from '${booking.status}' to '${status}'`,
+          code: 'INVALID_STATUS_TRANSITION'
+        });
+      }
+      
+      // INSA Fix #4: For 'confirmed' or 'completed' status, require payment verification
+      if ((status === 'confirmed' || status === 'completed') && booking.paymentStatus !== 'paid') {
+        return res.status(400).json({ 
+          message: "Cannot confirm booking without verified payment",
+          code: 'PAYMENT_REQUIRED'
+        });
+      }
+      
+      const updatedBooking = await storage.updateBookingStatus(id, status);
+      
+      // Log the status change
+      await logSecurityEvent(userId, 'BOOKING_STATUS_CHANGED', { 
+        bookingId: id, 
+        previousStatus: booking.status,
+        newStatus: status 
+      }, req.ip || 'unknown');
       
       // Automatically calculate agent commission when booking is completed
       if (status === 'completed') {
@@ -2363,12 +2535,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Agent commission created: ${commission.commissionAmount} Birr for booking #${id}`);
           }
         } catch (commissionError) {
-          // Log error but don't fail the booking status update
           console.error("Failed to create agent commission:", commissionError);
         }
       }
       
-      res.json(booking);
+      res.json(updatedBooking);
     } catch (error) {
       console.error("Error updating booking status:", error);
       res.status(500).json({ message: "Failed to update booking status" });

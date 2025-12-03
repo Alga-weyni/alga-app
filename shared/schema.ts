@@ -184,6 +184,7 @@ export const lemlemChats = pgTable("lemlem_chats", {
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
+  bookingReference: varchar("booking_reference", { length: 32 }).unique(), // INSA Fix #12: Secure non-predictable booking reference
   propertyId: integer("property_id").notNull().references(() => properties.id),
   guestId: varchar("guest_id").notNull().references(() => users.id),
   checkIn: timestamp("check_in").notNull(),
@@ -194,6 +195,7 @@ export const bookings = pgTable("bookings", {
   status: varchar("status").default("pending").notNull(), // pending, confirmed, cancelled, completed, paid, failed
   paymentMethod: varchar("payment_method"), // telebirr, paypal, cbe, dashen, abyssinia, m_birr
   paymentStatus: varchar("payment_status").default("pending").notNull(), // pending, paid, failed, refunded
+  paymentVerified: boolean("payment_verified").default(false).notNull(), // INSA Fix #4: Server-side payment verification flag
   paymentRef: varchar("payment_ref"), // Transaction ID from payment provider (Telebirr/PayPal)
   specialRequests: text("special_requests"),
   // Commission & Tax Breakdown (ERCA Compliance)
