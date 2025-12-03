@@ -29,7 +29,7 @@ const requestEmailOtpSchema = z.object({
 const verifyOtpSchema = z.object({
   phoneNumber: z.string().optional(),
   email: z.string().optional(),
-  otp: z.string().length(4, "OTP must be 4 digits"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
 type RequestPhoneOtpData = z.infer<typeof requestPhoneOtpSchema>;
