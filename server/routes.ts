@@ -28,24 +28,134 @@ import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSc
 import { sql, desc, and } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
 import financialSettlementRoutes from './api/financial-settlement.routes.js';
-// INSA Security Fixes Import
-import { 
-  sanitizeUserResponse, 
-  validateBookingDates, 
-  calculateBookingPrice, 
-  validateGuestCount,
-  requireAdmin,
-  requireAdminOrOperator,
-  validateBookingOwnership,
-  validatePropertyOwnership,
-  validateStatusTransition,
-  checkOTPRateLimit,
-  resetOTPRateLimit,
-  generateBookingReference,
-  generateSecureOTP,
-  hashOTP,
-  logSecurityEvent
-} from './security/insa-security-fixes.js';
+// INSA Security Fixes - Inline definitions to avoid circular dependency issues
+
+// Generate secure booking reference (UUID-like) - Fix #12
+function generateBookingReference(): string {
+  return randomBytes(16).toString('hex');
+}
+
+// Sanitize user object to remove sensitive fields - Fix #10
+function sanitizeUserResponse(user: any): any {
+  if (!user) return null;
+  const { password, otp, otpExpiry, faydaVerificationData, ...safeUser } = user;
+  return safeUser;
+}
+
+// Validate date order (check-in must be before check-out) - Fix #11
+function validateBookingDates(checkIn: Date | string, checkOut: Date | string): { valid: boolean; error?: string } {
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const now = new Date();
+  if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+    return { valid: false, error: 'Invalid date format' };
+  }
+  if (checkOutDate <= checkInDate) {
+    return { valid: false, error: 'Check-out date must be after check-in date' };
+  }
+  if (checkInDate < now) {
+    return { valid: false, error: 'Check-in date cannot be in the past' };
+  }
+  return { valid: true };
+}
+
+// Validate booking status transitions - Fix #4
+const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
+  'pending': ['confirmed', 'cancelled'],
+  'confirmed': ['completed', 'cancelled'],
+  'completed': [],
+  'cancelled': [],
+};
+
+function validateStatusTransition(currentStatus: string, newStatus: string): boolean {
+  const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
+  return allowedTransitions.includes(newStatus);
+}
+
+// Rate limiting for OTP - Fix #8
+const otpAttempts = new Map<string, { count: number; lastAttempt: number; blockedUntil?: number }>();
+
+function checkOTPRateLimit(identifier: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const maxAttempts = 5;
+  const blockDuration = 30 * 60 * 1000;
+  const record = otpAttempts.get(identifier);
+  if (record) {
+    if (record.blockedUntil && now < record.blockedUntil) {
+      return { allowed: false, retryAfter: Math.ceil((record.blockedUntil - now) / 1000) };
+    }
+    if (now - record.lastAttempt < windowMs) {
+      if (record.count >= maxAttempts) {
+        record.blockedUntil = now + blockDuration;
+        otpAttempts.set(identifier, record);
+        return { allowed: false, retryAfter: Math.ceil(blockDuration / 1000) };
+      }
+      record.count++;
+    } else {
+      record.count = 1;
+    }
+    record.lastAttempt = now;
+    otpAttempts.set(identifier, record);
+  } else {
+    otpAttempts.set(identifier, { count: 1, lastAttempt: now });
+  }
+  return { allowed: true };
+}
+
+function resetOTPRateLimit(identifier: string): void {
+  otpAttempts.delete(identifier);
+}
+
+// Admin-only middleware - Fix #1
+function requireAdmin(req: any, res: any, next: any) {
+  const userRole = req.user?.role;
+  if (userRole !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Admin privileges required.', code: 'ADMIN_REQUIRED' });
+  }
+  next();
+}
+
+// Audit logging for security events
+function logSecurityEvent(userId: string | null, action: string, details: Record<string, any>, ipAddress: string): void {
+  console.log(`[SECURITY AUDIT] ${new Date().toISOString()} | User: ${userId || 'anonymous'} | Action: ${action} | IP: ${ipAddress} | Details: ${JSON.stringify(details)}`);
+}
+
+// Calculate booking price server-side - Fix #3 & #5
+async function calculateBookingPrice(propertyId: number, checkIn: Date | string, checkOut: Date | string, guests: number) {
+  const property = await db.select().from(properties).where(eq(properties.id, propertyId)).limit(1);
+  if (!property || property.length === 0) {
+    throw new Error('Property not found');
+  }
+  const prop = property[0];
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) {
+    throw new Error('Invalid booking duration');
+  }
+  const pricePerNight = parseFloat(prop.pricePerNight);
+  const subtotal = pricePerNight * nights;
+  const serviceFee = subtotal * 0.15;
+  const total = subtotal + serviceFee;
+  return { pricePerNight, nights, subtotal, serviceFee, total, currency: prop.currency || 'ETB' };
+}
+
+// Validate guest count against property capacity - Fix #6
+async function validateGuestCount(propertyId: number, guests: number): Promise<{ valid: boolean; error?: string; maxGuests?: number }> {
+  const property = await db.select().from(properties).where(eq(properties.id, propertyId)).limit(1);
+  if (!property || property.length === 0) {
+    return { valid: false, error: 'Property not found' };
+  }
+  const maxGuests = property[0].maxGuests;
+  if (guests <= 0) {
+    return { valid: false, error: 'Guest count must be at least 1', maxGuests };
+  }
+  if (guests > maxGuests) {
+    return { valid: false, error: `Guest count exceeds maximum capacity of ${maxGuests}`, maxGuests };
+  }
+  return { valid: true, maxGuests };
+}
 
 // Security: Rate limiting for authentication endpoints
 // More generous limits in development for testing
@@ -5773,14 +5883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== END LEMLEM OPERATIONS DASHBOARD ROUTES ====================
 
   // ==================== ADMIN SIGNATURE DASHBOARD ROUTES (INSA COMPLIANCE) ====================
-
-  // Admin middleware
-  const requireAdmin = (req: any, res: any, next: any) => {
-    if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ message: "Access denied. Admin role required." });
-    }
-    next();
-  };
+  // Note: requireAdmin middleware is already defined at the top of this file
 
   // Get all signature consent logs (with filters and pagination)
   app.get("/api/admin/signatures", isAuthenticated, requireAdmin, async (req: any, res) => {
