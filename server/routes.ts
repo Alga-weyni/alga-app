@@ -2717,13 +2717,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // INSA FIX: Admin-only fields that regular users cannot set
+  const ADMIN_ONLY_PROPERTY_FIELDS = ['status', 'approvalStatus', 'verifiedAt', 'verifiedBy', 'isVerified'];
+  
+  // Helper to strip admin-only fields from property data
+  function stripAdminOnlyFields(data: any): any {
+    const sanitized = { ...data };
+    ADMIN_ONLY_PROPERTY_FIELDS.forEach(field => {
+      delete sanitized[field];
+    });
+    return sanitized;
+  }
+  
   app.post('/api/properties', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // INSA FIX: Log and reject if non-admin tries to set admin-only fields
+      const attemptedAdminFields = ADMIN_ONLY_PROPERTY_FIELDS.filter(field => req.body[field] !== undefined);
+      if (attemptedAdminFields.length > 0 && !['admin', 'operator'].includes(userRole)) {
+        logSecurityEvent(userId, 'PROPERTY_STATUS_MANIPULATION_ATTEMPT', { 
+          attemptedFields: attemptedAdminFields,
+          attemptedValues: attemptedAdminFields.reduce((acc, f) => ({ ...acc, [f]: req.body[f] }), {})
+        }, req.ip || 'unknown');
+        // Don't reject - just strip the fields silently (defense in depth)
+      }
+      
+      // INSA FIX: Strip admin-only fields from request body
+      const sanitizedBody = stripAdminOnlyFields(req.body);
       
       // INSA FIX: Validate image URLs were uploaded by this user
-      if (req.body.images && Array.isArray(req.body.images)) {
-        const imageValidation = validateUserUploadedImages(userId, req.body.images);
+      if (sanitizedBody.images && Array.isArray(sanitizedBody.images)) {
+        const imageValidation = validateUserUploadedImages(userId, sanitizedBody.images);
         if (!imageValidation.valid) {
           logSecurityEvent(userId, 'UNAUTHORIZED_IMAGE_REFERENCE_ATTEMPT', { 
             action: 'CREATE_PROPERTY',
@@ -2736,10 +2762,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const propertyData = insertPropertySchema.parse({ ...req.body, hostId: userId });
+      // INSA FIX: Force new properties to start as 'pending' - requires admin approval
+      const propertyData = insertPropertySchema.parse({ 
+        ...sanitizedBody, 
+        hostId: userId,
+        status: 'pending',        // FORCED: Always start as pending
+        approvalStatus: null,     // FORCED: Not approved yet
+        verifiedAt: null,         // FORCED: Not verified
+        verifiedBy: null,         // FORCED: No verifier
+        isVerified: false         // FORCED: Not verified
+      });
       
       const property = await storage.createProperty(propertyData);
-      logSecurityEvent(userId, 'PROPERTY_CREATED', { propertyId: property.id }, req.ip || 'unknown');
+      logSecurityEvent(userId, 'PROPERTY_CREATED', { propertyId: property.id, status: 'pending' }, req.ip || 'unknown');
       res.status(201).json(property);
     } catch (error) {
       console.error("Error creating property:", error);
@@ -2751,18 +2786,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.id;
+      const userRole = req.user.role;
       
       // Check if user owns the property
       const property = await storage.getProperty(id);
       if (!property || property.hostId !== userId) {
         return res.status(403).json({ message: "Unauthorized" });
       }
+      
+      // INSA FIX: Log and block if non-admin tries to modify admin-only fields
+      const attemptedAdminFields = ADMIN_ONLY_PROPERTY_FIELDS.filter(field => req.body[field] !== undefined);
+      if (attemptedAdminFields.length > 0 && !['admin', 'operator'].includes(userRole)) {
+        logSecurityEvent(userId, 'PROPERTY_STATUS_MANIPULATION_ATTEMPT', { 
+          propertyId: id,
+          attemptedFields: attemptedAdminFields,
+          attemptedValues: attemptedAdminFields.reduce((acc, f) => ({ ...acc, [f]: req.body[f] }), {}),
+          action: 'UPDATE_PROPERTY'
+        }, req.ip || 'unknown');
+        // Strip the fields silently (defense in depth)
+      }
+      
+      // INSA FIX: Strip admin-only fields from updates for non-admins
+      const sanitizedBody = ['admin', 'operator'].includes(userRole) 
+        ? req.body 
+        : stripAdminOnlyFields(req.body);
 
       // INSA FIX: Validate NEW image URLs were uploaded by this user
       // Allow existing images from the property to remain
-      if (req.body.images && Array.isArray(req.body.images)) {
+      if (sanitizedBody.images && Array.isArray(sanitizedBody.images)) {
         const existingImages = new Set(property.images || []);
-        const newImages = req.body.images.filter((img: string) => !existingImages.has(img));
+        const newImages = sanitizedBody.images.filter((img: string) => !existingImages.has(img));
         
         if (newImages.length > 0) {
           const imageValidation = validateUserUploadedImages(userId, newImages);
@@ -2780,7 +2833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const updates = insertPropertySchema.partial().parse(req.body);
+      const updates = insertPropertySchema.partial().parse(sanitizedBody);
       const updatedProperty = await storage.updateProperty(id, updates);
       logSecurityEvent(userId, 'PROPERTY_UPDATED', { propertyId: id }, req.ip || 'unknown');
       res.json(updatedProperty);
