@@ -3218,6 +3218,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod, currency: clientCurrency, totalPrice: clientPrice } = req.body;
       
+      // INSA FIX: Reject any client-provided status or paymentStatus fields
+      // These are SERVER-CONTROLLED and cannot be set by clients
+      if (req.body.status || req.body.paymentStatus) {
+        logSecurityEvent(userId, 'STATUS_INJECTION_ATTEMPT', { 
+          propertyId,
+          attemptedStatus: req.body.status,
+          attemptedPaymentStatus: req.body.paymentStatus
+        }, req.ip || 'unknown');
+        // Don't reject - just ignore and log (status will be set server-side anyway)
+      }
+      
       // INSA Fix #11: Validate date order
       const dateValidation = validateBookingDates(checkIn, checkOut);
       if (!dateValidation.valid) {
@@ -3433,17 +3444,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== INSA FIX: PAYMENT STATUS VALIDATION ====================
+  // Valid payment statuses and their allowed transitions
+  const VALID_PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'refunded', 'cancelled'];
+  
+  const PAYMENT_STATUS_TRANSITIONS: Record<string, string[]> = {
+    'pending': ['processing', 'paid', 'cancelled', 'failed'],  // Can start processing or be cancelled
+    'processing': ['paid', 'failed', 'cancelled'],              // Processing can complete, fail, or be cancelled
+    'paid': ['refunded'],                                        // Paid can only be refunded
+    'failed': ['pending', 'cancelled'],                          // Failed can retry or be cancelled
+    'refunded': [],                                               // Refunded is final
+    'cancelled': [],                                              // Cancelled is final
+  };
+  
+  function validatePaymentStatusTransition(currentStatus: string, newStatus: string): { valid: boolean; error?: string } {
+    if (!VALID_PAYMENT_STATUSES.includes(newStatus)) {
+      return { valid: false, error: `Invalid payment status '${newStatus}'. Valid statuses: ${VALID_PAYMENT_STATUSES.join(', ')}` };
+    }
+    
+    const allowedTransitions = PAYMENT_STATUS_TRANSITIONS[currentStatus] || [];
+    if (!allowedTransitions.includes(newStatus)) {
+      return { 
+        valid: false, 
+        error: `Cannot transition payment status from '${currentStatus}' to '${newStatus}'. Allowed: ${allowedTransitions.length > 0 ? allowedTransitions.join(', ') : 'none (final status)'}` 
+      };
+    }
+    
+    return { valid: true };
+  }
+  // ==================== END PAYMENT STATUS VALIDATION ====================
+
   // INSA Fix: Secure payment status update with ownership verification
+  // CRITICAL: Payment status can ONLY be updated through verified payment gateway callbacks
+  // Manual status changes require admin role AND payment reference verification
   app.patch('/api/bookings/:id/payment', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { paymentStatus } = req.body;
+      const { paymentStatus, paymentReference, paymentGateway } = req.body;
       const userId = req.user.id;
       const userRole = req.user.role;
       
-      // Validate paymentStatus is provided
+      // Validate paymentStatus is provided and valid
       if (!paymentStatus || typeof paymentStatus !== 'string') {
         return res.status(400).json({ message: "Payment status is required", code: 'INVALID_PAYMENT_STATUS' });
+      }
+      
+      // INSA FIX: Validate payment status is one of the allowed values
+      if (!VALID_PAYMENT_STATUSES.includes(paymentStatus)) {
+        logSecurityEvent(userId, 'INVALID_PAYMENT_STATUS_ATTEMPT', { bookingId: id, attemptedStatus: paymentStatus }, req.ip || 'unknown');
+        return res.status(400).json({ 
+          message: `Invalid payment status. Allowed values: ${VALID_PAYMENT_STATUSES.join(', ')}`,
+          code: 'INVALID_PAYMENT_STATUS_VALUE'
+        });
       }
       
       // Get booking first to verify ownership
@@ -3460,6 +3512,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isHost && !['admin', 'operator'].includes(userRole)) {
         await logSecurityEvent(userId, 'UNAUTHORIZED_PAYMENT_STATUS_CHANGE', { bookingId: id, attemptedStatus: paymentStatus }, req.ip || 'unknown');
         return res.status(403).json({ message: "Access denied. Only hosts, admins, or operators can update payment status.", code: 'PAYMENT_STATUS_DENIED' });
+      }
+      
+      // INSA FIX: Validate payment status transition
+      const transitionValidation = validatePaymentStatusTransition(existingBooking.paymentStatus, paymentStatus);
+      if (!transitionValidation.valid) {
+        logSecurityEvent(userId, 'INVALID_PAYMENT_TRANSITION_ATTEMPT', { 
+          bookingId: id, 
+          currentStatus: existingBooking.paymentStatus,
+          attemptedStatus: paymentStatus 
+        }, req.ip || 'unknown');
+        return res.status(400).json({ 
+          message: transitionValidation.error,
+          code: 'INVALID_PAYMENT_TRANSITION'
+        });
+      }
+      
+      // INSA FIX: For 'paid' status, require payment reference from gateway (except for admin override)
+      if (paymentStatus === 'paid') {
+        if (userRole !== 'admin' && !paymentReference) {
+          logSecurityEvent(userId, 'PAYMENT_MARKED_PAID_WITHOUT_REFERENCE', { bookingId: id }, req.ip || 'unknown');
+          return res.status(400).json({ 
+            message: "Payment reference from payment gateway is required to mark as paid",
+            code: 'PAYMENT_REFERENCE_REQUIRED'
+          });
+        }
+        
+        // Log the payment confirmation
+        logSecurityEvent(userId, 'PAYMENT_CONFIRMED', { 
+          bookingId: id, 
+          paymentReference: paymentReference || 'admin_override',
+          paymentGateway: paymentGateway || 'manual',
+          confirmedBy: userRole
+        }, req.ip || 'unknown');
       }
       
       const booking = await storage.updatePaymentStatus(id, paymentStatus);
