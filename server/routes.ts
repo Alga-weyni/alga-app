@@ -60,6 +60,94 @@ function verifyOTPHash(providedOTP: string, storedHash: string): boolean {
 // OTP request rate limiting (separate from verification rate limiting)
 const otpRequestAttempts = new Map<string, { count: number; lastRequest: number; blockedUntil?: number }>();
 
+// ==================== INSA FIX: SECURE FILE UPLOAD TRACKING ====================
+// Track uploaded files by user to prevent unauthorized file reference attacks
+// Files are associated with user ID and have a 30-minute validity window
+interface UploadedFileRecord {
+  userId: string;
+  filePath: string;
+  uploadedAt: number;
+  expiresAt: number;
+}
+const userUploadedFiles = new Map<string, UploadedFileRecord>();
+
+// Register a file as uploaded by a specific user
+function registerUserUpload(userId: string, filePath: string): void {
+  const now = Date.now();
+  const expiresAt = now + (30 * 60 * 1000); // 30 minutes validity
+  userUploadedFiles.set(filePath, { userId, filePath, uploadedAt: now, expiresAt });
+  
+  // Cleanup expired entries periodically
+  for (const [path, record] of userUploadedFiles.entries()) {
+    if (record.expiresAt < now) {
+      userUploadedFiles.delete(path);
+    }
+  }
+}
+
+// Validate that an image URL was uploaded by the specified user
+function validateUserUploadedImage(userId: string, imageUrl: string): { valid: boolean; reason?: string } {
+  const now = Date.now();
+  
+  // Allow external URLs (Unsplash, etc.) - these are public images
+  if (imageUrl.startsWith('https://images.unsplash.com') || 
+      imageUrl.startsWith('https://picsum.photos') ||
+      imageUrl.startsWith('https://via.placeholder.com')) {
+    return { valid: true };
+  }
+  
+  // Extract file path from URL
+  let filePath = imageUrl;
+  
+  // Handle full URLs with domain
+  if (imageUrl.includes('/uploads/')) {
+    filePath = imageUrl.substring(imageUrl.indexOf('/uploads/'));
+  } else if (imageUrl.includes('/objects/')) {
+    filePath = imageUrl.substring(imageUrl.indexOf('/objects/'));
+  }
+  
+  // Check if file was uploaded by this user
+  const record = userUploadedFiles.get(filePath);
+  
+  if (!record) {
+    // For existing properties, allow URLs that are already in the system
+    // This handles legacy data - but new uploads must be tracked
+    if (filePath.startsWith('/uploads/') || filePath.startsWith('/objects/')) {
+      // Log for monitoring but allow for backwards compatibility
+      console.log(`[UPLOAD_AUDIT] Untracked file reference: ${filePath} by user ${userId}`);
+      return { valid: true }; // Allow for backwards compatibility
+    }
+    return { valid: false, reason: 'File reference not found in upload records' };
+  }
+  
+  if (record.expiresAt < now) {
+    userUploadedFiles.delete(filePath);
+    return { valid: false, reason: 'Upload session expired' };
+  }
+  
+  if (record.userId !== userId) {
+    logSecurityEvent(userId, 'UNAUTHORIZED_FILE_REFERENCE', { filePath, actualOwner: record.userId }, 'system');
+    return { valid: false, reason: 'File was not uploaded by this user' };
+  }
+  
+  return { valid: true };
+}
+
+// Validate all images in an array
+function validateUserUploadedImages(userId: string, images: string[]): { valid: boolean; invalidImages: string[] } {
+  const invalidImages: string[] = [];
+  
+  for (const imageUrl of images) {
+    const result = validateUserUploadedImage(userId, imageUrl);
+    if (!result.valid) {
+      invalidImages.push(imageUrl);
+    }
+  }
+  
+  return { valid: invalidImages.length === 0, invalidImages };
+}
+// ==================== END SECURE FILE UPLOAD TRACKING ====================
+
 function checkOTPRequestRateLimit(identifier: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute window for requests
