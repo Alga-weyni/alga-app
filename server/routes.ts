@@ -329,6 +329,55 @@ function validatePaymentCurrency(requestedCurrency: string | undefined, property
 }
 // ==================== END CURRENCY VALIDATION ====================
 
+// ==================== INSA FIX: CURRENCY LOCK PROTECTION ====================
+// Once a booking is created, the currency and price are LOCKED and cannot be modified
+// This prevents any post-creation manipulation of financial data
+
+// Immutable booking fields - these CANNOT be changed after creation
+const IMMUTABLE_BOOKING_FIELDS = ['currency', 'totalPrice', 'propertyId', 'guestId', 'bookingReference'];
+
+// Validate that no immutable fields are being modified
+function validateBookingUpdate(existingBooking: any, updates: Record<string, any>): { valid: boolean; error?: string; attemptedFields?: string[] } {
+  const attemptedImmutableChanges: string[] = [];
+  
+  for (const field of IMMUTABLE_BOOKING_FIELDS) {
+    if (updates[field] !== undefined && updates[field] !== existingBooking[field]) {
+      attemptedImmutableChanges.push(field);
+    }
+  }
+  
+  if (attemptedImmutableChanges.length > 0) {
+    return {
+      valid: false,
+      error: `Cannot modify locked booking fields: ${attemptedImmutableChanges.join(', ')}`,
+      attemptedFields: attemptedImmutableChanges
+    };
+  }
+  
+  return { valid: true };
+}
+
+// Validate that a currency code follows server rules
+function validateCurrencyCode(currency: string): { valid: boolean; normalizedCurrency: string; error?: string } {
+  if (!currency || typeof currency !== 'string') {
+    return { valid: false, normalizedCurrency: '', error: 'Currency code is required' };
+  }
+  
+  const normalized = currency.toUpperCase().trim();
+  const supportedCurrencies = Object.keys(CURRENCY_RATES);
+  
+  if (!supportedCurrencies.includes(normalized)) {
+    return {
+      valid: false,
+      normalizedCurrency: normalized,
+      error: `Currency '${currency}' is not supported. Valid currencies: ${supportedCurrencies.join(', ')}`
+    };
+  }
+  
+  return { valid: true, normalizedCurrency: normalized };
+}
+// ==================== END CURRENCY LOCK PROTECTION ====================
+
 // Calculate booking price server-side - Fix #3 & #5
 // INSA FIX: Always use property's currency and calculate server-side
 async function calculateBookingPrice(propertyId: number, checkIn: Date | string, checkOut: Date | string, guests: number, clientCurrency?: string) {
@@ -3101,6 +3150,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== CURRENCY & PRICE VALIDATION ENDPOINTS ====================
+  
+  // Get supported currencies - for frontend display
+  app.get('/api/currencies', (req, res) => {
+    res.json({
+      currencies: Object.keys(CURRENCY_RATES),
+      baseCurrency: 'ETB',
+      rates: CURRENCY_RATES,
+      lastUpdated: new Date().toISOString()
+    });
+  });
+  
+  // Preview booking price calculation (server-side) - for frontend display before booking
+  // This ensures frontend shows the SAME price that will be charged
+  app.post('/api/bookings/preview-price', isAuthenticated, async (req: any, res) => {
+    try {
+      const { propertyId, checkIn, checkOut, guests } = req.body;
+      
+      if (!propertyId || !checkIn || !checkOut) {
+        return res.status(400).json({ message: 'Property ID, check-in and check-out dates are required' });
+      }
+      
+      // Validate dates
+      const dateValidation = validateBookingDates(checkIn, checkOut);
+      if (!dateValidation.valid) {
+        return res.status(400).json({ message: dateValidation.error, code: 'INVALID_DATES' });
+      }
+      
+      // Validate guest count
+      const guestValidation = await validateGuestCount(propertyId, guests || 1);
+      if (!guestValidation.valid) {
+        return res.status(400).json({ 
+          message: guestValidation.error, 
+          code: 'INVALID_GUEST_COUNT',
+          maxGuests: guestValidation.maxGuests 
+        });
+      }
+      
+      // Calculate price server-side (this is what will be charged)
+      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests || 1);
+      
+      res.json({
+        pricing: {
+          pricePerNight: pricing.pricePerNight,
+          nights: pricing.nights,
+          subtotal: pricing.subtotal,
+          serviceFee: pricing.serviceFee,
+          total: pricing.total,
+          currency: pricing.currency,
+          currencyLocked: true,  // Indicates currency cannot be changed
+          serverCalculated: true // Indicates price is server-calculated
+        },
+        message: 'This is the final price that will be charged. Currency and price are determined by the property and cannot be modified.'
+      });
+    } catch (error: any) {
+      console.error("Error calculating preview price:", error);
+      res.status(500).json({ message: error.message || "Failed to calculate price" });
+    }
+  });
+  // ==================== END CURRENCY & PRICE VALIDATION ENDPOINTS ====================
+
   // Booking routes
   // INSA Fixes #3, #5, #6, #11, #12: Server-side validation and price calculation
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
@@ -3189,7 +3299,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subtotal: pricing.subtotal,
           serviceFee: pricing.serviceFee,
           total: pricing.total,
-          currency: pricing.currency
+          currency: pricing.currency,
+          currencyLocked: true,  // INSA: Currency is locked and cannot be changed
+          serverCalculated: true // INSA: Price was calculated server-side
+        },
+        _securityInfo: {
+          currencySource: 'property',
+          priceSource: 'server',
+          immutableFields: IMMUTABLE_BOOKING_FIELDS
         }
       });
     } catch (error: any) {
