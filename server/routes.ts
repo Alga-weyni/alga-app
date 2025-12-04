@@ -78,7 +78,8 @@ function registerUserUpload(userId: string, filePath: string): void {
   userUploadedFiles.set(filePath, { userId, filePath, uploadedAt: now, expiresAt });
   
   // Cleanup expired entries periodically
-  for (const [path, record] of userUploadedFiles.entries()) {
+  const entries = Array.from(userUploadedFiles.entries());
+  for (const [path, record] of entries) {
     if (record.expiresAt < now) {
       userUploadedFiles.delete(path);
     }
@@ -292,17 +293,31 @@ async function calculateBookingPrice(propertyId: number, checkIn: Date | string,
 }
 
 // Validate guest count against property capacity - Fix #6
-async function validateGuestCount(propertyId: number, guests: number): Promise<{ valid: boolean; error?: string; maxGuests?: number }> {
+// INSA STRENGTHENED: Explicit type validation to prevent bypass attacks
+async function validateGuestCount(propertyId: number, guests: any): Promise<{ valid: boolean; error?: string; maxGuests?: number }> {
+  // INSA FIX: Strict integer validation - prevent type coercion attacks
+  const guestCount = parseInt(String(guests), 10);
+  if (isNaN(guestCount)) {
+    return { valid: false, error: 'Guest count must be a valid number' };
+  }
+  
   const property = await db.select().from(properties).where(eq(properties.id, propertyId)).limit(1);
   if (!property || property.length === 0) {
     return { valid: false, error: 'Property not found' };
   }
   const maxGuests = property[0].maxGuests;
-  if (guests <= 0) {
+  
+  // INSA FIX: Strict range validation
+  if (guestCount <= 0) {
     return { valid: false, error: 'Guest count must be at least 1', maxGuests };
   }
-  if (guests > maxGuests) {
-    return { valid: false, error: `Guest count exceeds maximum capacity of ${maxGuests}`, maxGuests };
+  if (guestCount > maxGuests) {
+    console.log(`[SECURITY] Guest capacity exceeded: requested ${guestCount}, max ${maxGuests}, property ${propertyId}`);
+    return { valid: false, error: `Guest count (${guestCount}) exceeds maximum capacity of ${maxGuests}`, maxGuests };
+  }
+  if (guestCount > 100) {
+    // Absolute maximum sanity check
+    return { valid: false, error: 'Invalid guest count - exceeds reasonable limits', maxGuests };
   }
   return { valid: true, maxGuests };
 }
@@ -3026,6 +3041,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA Fix #6: Validate guest count against property capacity
       const guestValidation = await validateGuestCount(propertyId, guests);
       if (!guestValidation.valid) {
+        // Log potential capacity bypass attempt
+        logSecurityEvent(userId, 'GUEST_CAPACITY_VALIDATION_FAILED', { 
+          propertyId, 
+          requestedGuests: guests,
+          maxGuests: guestValidation.maxGuests,
+          error: guestValidation.error
+        }, req.ip || 'unknown');
         return res.status(400).json({ 
           message: guestValidation.error, 
           code: 'INVALID_GUEST_COUNT',
