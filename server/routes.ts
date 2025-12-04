@@ -2934,6 +2934,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/lockboxes/property/:propertyId', isAuthenticated, async (req: any, res) => {
     try {
       const propertyId = parseInt(req.params.propertyId);
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // INSA FIX: Verify user owns the property or is admin/operator
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Resource not found", code: 'NOT_FOUND' });
+      }
+      
+      if (property.hostId !== userId && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_LOCKBOX_ACCESS', { propertyId }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
       const lockbox = await storage.getLockboxByPropertyId(propertyId);
       
       if (!lockbox) {
@@ -3039,6 +3053,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/security-cameras/property/:propertyId', isAuthenticated, async (req: any, res) => {
     try {
       const propertyId = parseInt(req.params.propertyId);
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // INSA FIX: Verify user owns the property or is admin/operator
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Resource not found", code: 'NOT_FOUND' });
+      }
+      
+      if (property.hostId !== userId && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_CAMERA_ACCESS', { propertyId }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
       const cameras = await storage.getSecurityCamerasByPropertyId(propertyId);
       res.json(cameras);
     } catch (error) {
