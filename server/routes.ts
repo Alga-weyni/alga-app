@@ -3432,9 +3432,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const userRole = req.user.role;
       
+      // INSA FIX: Validate booking ID format BEFORE lookup
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid booking ID", code: 'INVALID_ID' });
+      }
+      
       const booking = await storage.getBooking(id);
+      
+      // INSA FIX: Use same generic error for "not found" and "not authorized"
+      // This prevents attackers from enumerating valid booking IDs
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        await logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
       // Get property to check if user is the host
@@ -3444,7 +3453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only allow guest, host, admin, or operator to view
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
         await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, req.ip || 'unknown');
-        return res.status(403).json({ message: "Access denied", code: 'BOOKING_ACCESS_DENIED' });
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
       res.json(booking);
@@ -3455,6 +3464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // INSA Fix #2, #4, #9: Validate ownership and status transitions
+  // CRITICAL: Use same generic error for "not found" and "not authorized" to prevent ID enumeration
   app.patch('/api/bookings/:id/status', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -3462,15 +3472,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const userRole = req.user.role;
       
-      // Validate status is not empty
+      // INSA FIX: Validate status BEFORE looking up booking (prevent enumeration)
       if (!status || typeof status !== 'string' || status.trim() === '') {
         return res.status(400).json({ message: "Status is required", code: 'INVALID_STATUS' });
       }
       
+      // INSA FIX: Validate booking ID format
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "Invalid booking ID", code: 'INVALID_ID' });
+      }
+      
       // Get booking and validate ownership
       const booking = await storage.getBooking(id);
+      
+      // INSA FIX: Use same generic error for "not found" and "not authorized"
+      // This prevents attackers from enumerating valid booking IDs
       if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+        await logSecurityEvent(userId, 'BOOKING_STATUS_CHANGE_NOT_FOUND', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
       // Get property to check if user is the host
@@ -3480,12 +3499,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA Fix #9: Only allow guest (for cancellation), host, admin, or operator
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
         await logSecurityEvent(userId, 'UNAUTHORIZED_STATUS_CHANGE', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
-        return res.status(403).json({ message: "Access denied", code: 'STATUS_CHANGE_DENIED' });
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
-      // Guests can only cancel their own bookings
-      if (booking.guestId === userId && !isHost && status !== 'cancelled') {
-        return res.status(403).json({ message: "Guests can only cancel bookings", code: 'GUEST_CANCEL_ONLY' });
+      // INSA FIX: Guests can only cancel their own bookings (not change to other statuses)
+      if (booking.guestId === userId && !isHost && !['admin', 'operator'].includes(userRole) && status !== 'cancelled') {
+        await logSecurityEvent(userId, 'GUEST_NON_CANCEL_ATTEMPT', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
       // INSA Fix #4: Validate status transition
