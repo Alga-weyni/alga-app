@@ -65,10 +65,22 @@ export function getImageUrl(imageUrl: string | undefined | null): string {
     return imageUrl;
   }
   
-  // If it's a relative URL starting with /uploads, prepend the API base URL
+  // If it's a relative URL starting with /uploads, handle appropriately
   if (imageUrl.startsWith('/uploads/')) {
-    const baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
-    return `${baseUrl}${imageUrl}`;
+    // For native mobile apps, always use full URL
+    if (isNativeMobile) {
+      const baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
+      return `${baseUrl}${imageUrl}`;
+    }
+    
+    // For web apps in production, use production API URL
+    if (isProduction) {
+      return `${PRODUCTION_API_URL}${imageUrl}`;
+    }
+    
+    // For web apps in development (including Replit), use relative URL
+    // The browser will resolve this relative to the current host
+    return imageUrl;
   }
   
   // Return as-is for other cases (external URLs, data URLs, etc.)
