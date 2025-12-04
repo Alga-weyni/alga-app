@@ -4757,17 +4757,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update service booking status
+  // Update service booking status - INSA FIX: Access control added
   app.patch('/api/service-bookings/:id/status', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
+      const userId = req.user.id;
+      const userRole = req.user.role;
       
-      if (!status) {
-        return res.status(400).json({ message: "Status is required" });
+      // INSA FIX: Validate status is not empty BEFORE fetching booking (prevent info leakage)
+      if (!status || typeof status !== 'string' || status.trim() === '') {
+        return res.status(400).json({ message: "Status is required", code: 'INVALID_STATUS' });
+      }
+      
+      // INSA FIX: Get booking and validate access BEFORE returning any info
+      const booking = await storage.getServiceBooking(id);
+      if (!booking) {
+        return res.status(404).json({ message: "Resource not found", code: 'NOT_FOUND' });
+      }
+      
+      // INSA FIX: Access control - only guest, host, provider, or admin can update status
+      const isGuest = booking.guestId === userId;
+      const isHost = booking.hostId === userId;
+      const isAdmin = ['admin', 'operator'].includes(userRole);
+      
+      // Check if user is the provider
+      let isProvider = false;
+      if (booking.serviceProviderId) {
+        const provider = await storage.getServiceProvider(booking.serviceProviderId);
+        isProvider = provider?.userId === userId;
+      }
+      
+      if (!isGuest && !isHost && !isProvider && !isAdmin) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_SERVICE_BOOKING_ACCESS', { 
+          serviceBookingId: id, 
+          attemptedStatus: status 
+        }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      // INSA FIX: Guests can only cancel, not change to other statuses
+      if (isGuest && !isHost && !isProvider && !isAdmin && status !== 'cancelled') {
+        return res.status(403).json({ 
+          message: "Guests can only cancel service bookings", 
+          code: 'GUEST_CANCEL_ONLY' 
+        });
       }
       
       const updatedBooking = await storage.updateServiceBookingStatus(id, status);
+      
+      await logSecurityEvent(userId, 'SERVICE_BOOKING_STATUS_CHANGED', { 
+        serviceBookingId: id, 
+        previousStatus: booking.status,
+        newStatus: status 
+      }, req.ip || 'unknown');
+      
       res.json(updatedBooking);
     } catch (error) {
       console.error("Error updating service booking status:", error);
@@ -4775,11 +4819,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Complete service booking
+  // Complete service booking - INSA FIX: Access control added
   app.post('/api/service-bookings/:id/complete', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // INSA FIX: Get booking and validate access BEFORE completing
+      const booking = await storage.getServiceBooking(id);
+      if (!booking) {
+        return res.status(404).json({ message: "Resource not found", code: 'NOT_FOUND' });
+      }
+      
+      // INSA FIX: Only host, provider, or admin can complete service bookings
+      const isHost = booking.hostId === userId;
+      const isAdmin = ['admin', 'operator'].includes(userRole);
+      
+      let isProvider = false;
+      if (booking.serviceProviderId) {
+        const provider = await storage.getServiceProvider(booking.serviceProviderId);
+        isProvider = provider?.userId === userId;
+      }
+      
+      if (!isHost && !isProvider && !isAdmin) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_SERVICE_BOOKING_COMPLETE', { 
+          serviceBookingId: id 
+        }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
       const completedBooking = await storage.completeServiceBooking(id);
+      
+      await logSecurityEvent(userId, 'SERVICE_BOOKING_COMPLETED', { 
+        serviceBookingId: id 
+      }, req.ip || 'unknown');
+      
       res.json(completedBooking);
     } catch (error) {
       console.error("Error completing service booking:", error);
