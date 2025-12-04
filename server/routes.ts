@@ -272,8 +272,66 @@ function logSecurityEvent(userId: string | null, action: string, details: Record
   console.log(`[SECURITY AUDIT] ${new Date().toISOString()} | User: ${userId || 'anonymous'} | Action: ${action} | IP: ${ipAddress} | Details: ${JSON.stringify(details)}`);
 }
 
+// ==================== INSA FIX: CURRENCY VALIDATION & CONVERSION ====================
+// Fixed exchange rates for Ethiopian Birr (ETB) - updated periodically
+// In production, these should be fetched from a live API or updated by admin
+const CURRENCY_RATES: Record<string, number> = {
+  'ETB': 1.0,        // Base currency
+  'USD': 56.50,      // 1 USD = 56.50 ETB
+  'EUR': 61.25,      // 1 EUR = 61.25 ETB  
+  'GBP': 71.40,      // 1 GBP = 71.40 ETB
+  'AED': 15.39,      // 1 AED = 15.39 ETB
+};
+
+// Convert price between currencies
+function convertCurrency(amount: number, fromCurrency: string, toCurrency: string): number {
+  const fromRate = CURRENCY_RATES[fromCurrency] || 1;
+  const toRate = CURRENCY_RATES[toCurrency] || 1;
+  
+  // First convert to ETB (base), then to target currency
+  const amountInETB = amount * fromRate;
+  const convertedAmount = amountInETB / toRate;
+  
+  return Math.round(convertedAmount * 100) / 100; // Round to 2 decimal places
+}
+
+// Validate that requested payment currency is supported
+function validatePaymentCurrency(requestedCurrency: string | undefined, propertyCurrency: string): { 
+  valid: boolean; 
+  currency: string; 
+  needsConversion: boolean;
+  error?: string;
+} {
+  const validCurrencies = Object.keys(CURRENCY_RATES);
+  const propCurrency = propertyCurrency || 'ETB';
+  
+  // If no currency specified by client, use property currency
+  if (!requestedCurrency) {
+    return { valid: true, currency: propCurrency, needsConversion: false };
+  }
+  
+  const normalizedCurrency = requestedCurrency.toUpperCase().trim();
+  
+  // Check if requested currency is supported
+  if (!validCurrencies.includes(normalizedCurrency)) {
+    return { 
+      valid: false, 
+      currency: propCurrency, 
+      needsConversion: false,
+      error: `Currency '${requestedCurrency}' is not supported. Supported currencies: ${validCurrencies.join(', ')}`
+    };
+  }
+  
+  // Determine if conversion is needed
+  const needsConversion = normalizedCurrency !== propCurrency;
+  
+  return { valid: true, currency: propCurrency, needsConversion };
+}
+// ==================== END CURRENCY VALIDATION ====================
+
 // Calculate booking price server-side - Fix #3 & #5
-async function calculateBookingPrice(propertyId: number, checkIn: Date | string, checkOut: Date | string, guests: number) {
+// INSA FIX: Always use property's currency and calculate server-side
+async function calculateBookingPrice(propertyId: number, checkIn: Date | string, checkOut: Date | string, guests: number, clientCurrency?: string) {
   const property = await db.select().from(properties).where(eq(properties.id, propertyId)).limit(1);
   if (!property || property.length === 0) {
     throw new Error('Property not found');
@@ -285,11 +343,29 @@ async function calculateBookingPrice(propertyId: number, checkIn: Date | string,
   if (nights <= 0) {
     throw new Error('Invalid booking duration');
   }
+  
+  // INSA FIX: Always use property's configured price and currency
+  // Client cannot manipulate currency or price
+  const propertyCurrency = prop.currency || 'ETB';
   const pricePerNight = parseFloat(prop.pricePerNight);
   const subtotal = pricePerNight * nights;
   const serviceFee = subtotal * 0.15;
   const total = subtotal + serviceFee;
-  return { pricePerNight, nights, subtotal, serviceFee, total, currency: prop.currency || 'ETB' };
+  
+  // Log if client tried to specify a different currency
+  if (clientCurrency && clientCurrency.toUpperCase() !== propertyCurrency) {
+    console.log(`[SECURITY] Currency manipulation attempt: client requested ${clientCurrency}, property uses ${propertyCurrency}, propertyId: ${propertyId}`);
+  }
+  
+  return { 
+    pricePerNight, 
+    nights, 
+    subtotal, 
+    serviceFee, 
+    total, 
+    currency: propertyCurrency,  // Always use property's currency
+    originalCurrency: propertyCurrency 
+  };
 }
 
 // Validate guest count against property capacity - Fix #6
@@ -3030,7 +3106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod } = req.body;
+      const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod, currency: clientCurrency, totalPrice: clientPrice } = req.body;
       
       // INSA Fix #11: Validate date order
       const dateValidation = validateBookingDates(checkIn, checkOut);
@@ -3055,8 +3131,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // INSA Fix #3 & #5: Calculate price server-side (ignore client-provided price)
-      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests);
+      // INSA Fix #3 & #5: Calculate price server-side (IGNORE client-provided price and currency)
+      // Pass clientCurrency for logging purposes only - it will NOT affect final price
+      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests, clientCurrency);
+      
+      // INSA FIX: Log if client attempted to manipulate currency or price
+      if (clientCurrency || clientPrice) {
+        const currencyMismatch = clientCurrency && clientCurrency.toUpperCase() !== pricing.currency;
+        const priceMismatch = clientPrice && parseFloat(String(clientPrice)) !== pricing.total;
+        
+        if (currencyMismatch || priceMismatch) {
+          logSecurityEvent(userId, 'CURRENCY_PRICE_MANIPULATION_ATTEMPT', {
+            propertyId,
+            clientCurrency: clientCurrency || 'not provided',
+            serverCurrency: pricing.currency,
+            clientPrice: clientPrice || 'not provided',
+            serverPrice: pricing.total,
+            currencyMismatch,
+            priceMismatch
+          }, req.ip || 'unknown');
+        }
+      }
       
       // INSA Fix #12: Generate secure booking reference
       const bookingReference = generateBookingReference();
