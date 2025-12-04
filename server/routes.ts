@@ -193,11 +193,33 @@ function generateBookingReference(): string {
   return randomBytes(16).toString('hex');
 }
 
-// Sanitize user object to remove sensitive fields - Fix #10
+// INSA FIX #10: Sanitize user object to remove ALL sensitive fields
+// CRITICAL: Password hashes must NEVER be returned to clients
+const SENSITIVE_USER_FIELDS = [
+  'password',           // Password hash - NEVER expose
+  'otp',                // One-time password - NEVER expose
+  'otpExpiry',          // OTP expiration - NEVER expose
+  'faydaVerificationData', // Fayda ID verification data
+  'resetToken',         // Password reset token
+  'resetTokenExpiry',   // Reset token expiration
+];
+
 function sanitizeUserResponse(user: any): any {
   if (!user) return null;
-  const { password, otp, otpExpiry, faydaVerificationData, ...safeUser } = user;
+  
+  // Create a shallow copy and delete sensitive fields
+  const safeUser = { ...user };
+  SENSITIVE_USER_FIELDS.forEach(field => {
+    delete safeUser[field];
+  });
+  
   return safeUser;
+}
+
+// Sanitize multiple users (for admin endpoints)
+function sanitizeUsersResponse(users: any[]): any[] {
+  if (!users || !Array.isArray(users)) return [];
+  return users.map(user => sanitizeUserResponse(user));
 }
 
 // Validate date order (check-in must be before check-out) - Fix #11
@@ -787,6 +809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user profile
+  // INSA FIX #10: Sanitize user response
   app.patch('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const { firstName, lastName, bio, phoneNumber } = req.body;
@@ -811,7 +834,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update session user data
       req.user = updatedUser;
 
-      res.json(updatedUser);
+      // INSA FIX #10: Sanitize user response to remove password hash
+      res.json(sanitizeUserResponse(updatedUser));
     } catch (error: any) {
       console.error('Profile update error:', error);
       res.status(500).json({ message: error.message || 'Failed to update profile' });
@@ -1436,9 +1460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (err) {
           return res.status(500).json({ message: "Failed to log in after registration" });
         }
+        // INSA FIX #10: Sanitize user response to remove password hash
         res.json({ 
           message: "Registration successful",
-          user,
+          user: sanitizeUserResponse(user),
           redirect: '/'
         });
       });
@@ -1767,6 +1792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes for user role management
+  // INSA FIX #10: All user data must be sanitized before returning to client
   app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
       const userRole = req.user.role || 'guest';
@@ -1775,7 +1801,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const users = await storage.getAllUsers();
-      res.json(users);
+      // INSA FIX: Sanitize ALL users to remove password hashes
+      const safeUsers = sanitizeUsersResponse(users);
+      res.json(safeUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
@@ -1793,7 +1821,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { role } = req.body;
       
       const updatedUser = await storage.updateUserRole(userId, role);
-      res.json(updatedUser);
+      // INSA FIX: Sanitize user response
+      res.json(sanitizeUserResponse(updatedUser));
     } catch (error) {
       console.error("Error updating user role:", error);
       res.status(500).json({ message: "Failed to update user role" });
@@ -1811,7 +1840,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       
       const updatedUser = await storage.updateUserStatus(userId, status);
-      res.json(updatedUser);
+      // INSA FIX: Sanitize user response
+      res.json(sanitizeUserResponse(updatedUser));
     } catch (error) {
       console.error("Error updating user status:", error);
       res.status(500).json({ message: "Failed to update user status" });
