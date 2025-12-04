@@ -287,6 +287,124 @@ function resetOTPRateLimit(identifier: string): void {
   otpAttempts.delete(identifier);
 }
 
+// ==================== INSA FIX: SEQUENTIAL ID SCANNING DETECTION ====================
+// Monitor for rapid sequential ID scanning attempts (IDOR enumeration protection)
+const idAccessAttempts = new Map<string, { 
+  attempts: number[]; // Array of attempted IDs
+  timestamps: number[];
+  blocked: boolean;
+  blockedUntil?: number;
+}>();
+
+const ID_SCAN_CONFIG = {
+  windowMs: 60 * 1000,           // 1 minute window
+  maxAttempts: 10,               // Max 10 failed attempts per minute
+  sequentialThreshold: 5,        // Alert if 5+ sequential IDs attempted
+  blockDuration: 15 * 60 * 1000, // Block for 15 minutes
+};
+
+function detectSequentialScanning(userId: string, attemptedId: number, ipAddress: string): { allowed: boolean; blocked: boolean; reason?: string } {
+  const now = Date.now();
+  const key = `${userId}:${ipAddress}`;
+  
+  let record = idAccessAttempts.get(key);
+  
+  if (!record) {
+    record = { attempts: [], timestamps: [], blocked: false };
+    idAccessAttempts.set(key, record);
+  }
+  
+  // Check if currently blocked
+  if (record.blocked && record.blockedUntil && now < record.blockedUntil) {
+    return { 
+      allowed: false, 
+      blocked: true, 
+      reason: 'Temporary block due to suspicious activity' 
+    };
+  }
+  
+  // Reset block if expired
+  if (record.blocked && record.blockedUntil && now >= record.blockedUntil) {
+    record.blocked = false;
+    record.blockedUntil = undefined;
+    record.attempts = [];
+    record.timestamps = [];
+  }
+  
+  // Clean up old attempts outside window
+  const windowStart = now - ID_SCAN_CONFIG.windowMs;
+  const validIndices: number[] = [];
+  record.timestamps.forEach((ts, idx) => {
+    if (ts >= windowStart) validIndices.push(idx);
+  });
+  record.attempts = validIndices.map(i => record!.attempts[i]);
+  record.timestamps = validIndices.map(i => record!.timestamps[i]);
+  
+  // Add current attempt
+  record.attempts.push(attemptedId);
+  record.timestamps.push(now);
+  
+  // Check for sequential pattern (e.g., 1, 2, 3, 4, 5)
+  if (record.attempts.length >= ID_SCAN_CONFIG.sequentialThreshold) {
+    const sorted = [...record.attempts].sort((a, b) => a - b);
+    let sequentialCount = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === sorted[i - 1] + 1) {
+        sequentialCount++;
+        if (sequentialCount >= ID_SCAN_CONFIG.sequentialThreshold) {
+          // Detected sequential scanning pattern!
+          logSecurityEvent(userId, 'SEQUENTIAL_ID_SCAN_DETECTED', { 
+            attemptedIds: record.attempts,
+            pattern: 'sequential',
+            ipAddress 
+          }, ipAddress);
+          
+          // Block user temporarily
+          record.blocked = true;
+          record.blockedUntil = now + ID_SCAN_CONFIG.blockDuration;
+          idAccessAttempts.set(key, record);
+          
+          return { 
+            allowed: false, 
+            blocked: true, 
+            reason: 'Sequential ID scanning detected' 
+          };
+        }
+      } else {
+        sequentialCount = 1;
+      }
+    }
+  }
+  
+  // Check for too many failed attempts
+  if (record.attempts.length >= ID_SCAN_CONFIG.maxAttempts) {
+    logSecurityEvent(userId, 'EXCESSIVE_ID_ACCESS_ATTEMPTS', { 
+      attemptCount: record.attempts.length,
+      ipAddress 
+    }, ipAddress);
+    
+    record.blocked = true;
+    record.blockedUntil = now + ID_SCAN_CONFIG.blockDuration;
+    idAccessAttempts.set(key, record);
+    
+    return { 
+      allowed: false, 
+      blocked: true, 
+      reason: 'Too many access attempts' 
+    };
+  }
+  
+  idAccessAttempts.set(key, record);
+  return { allowed: true, blocked: false };
+}
+
+// Track failed booking access attempt
+function trackFailedBookingAccess(userId: string, bookingId: number, ipAddress: string): { allowed: boolean; blocked: boolean; reason?: string } {
+  return detectSequentialScanning(userId, bookingId, ipAddress);
+}
+
+// ==================== END SEQUENTIAL ID SCANNING DETECTION ====================
+
 // Admin-only middleware - Fix #1
 function requireAdmin(req: any, res: any, next: any) {
   const userRole = req.user?.role;
@@ -3568,6 +3686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const userId = req.user.id;
       const userRole = req.user.role;
+      const clientIp = req.ip || 'unknown';
       
       // INSA FIX: Validate booking ID format BEFORE lookup
       if (isNaN(id) || id <= 0) {
@@ -3579,7 +3698,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA FIX: Use same generic error for "not found" and "not authorized"
       // This prevents attackers from enumerating valid booking IDs
       if (!booking) {
-        await logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, req.ip || 'unknown');
+        // INSA FIX: Track failed access attempt for sequential scanning detection
+        const scanCheck = trackFailedBookingAccess(userId, id, clientIp);
+        if (scanCheck.blocked) {
+          await logSecurityEvent(userId, 'ID_ENUMERATION_BLOCKED', { bookingId: id, reason: scanCheck.reason }, clientIp);
+          return res.status(429).json({ message: "Too many requests. Please try again later.", code: 'RATE_LIMITED' });
+        }
+        
+        await logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, clientIp);
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
@@ -3589,7 +3715,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only allow guest, host, admin, or operator to view
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
-        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, req.ip || 'unknown');
+        // INSA FIX: Track unauthorized access attempt for sequential scanning detection
+        const scanCheck = trackFailedBookingAccess(userId, id, clientIp);
+        if (scanCheck.blocked) {
+          await logSecurityEvent(userId, 'ID_ENUMERATION_BLOCKED', { bookingId: id, reason: scanCheck.reason }, clientIp);
+          return res.status(429).json({ message: "Too many requests. Please try again later.", code: 'RATE_LIMITED' });
+        }
+        
+        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, clientIp);
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
