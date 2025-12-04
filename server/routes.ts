@@ -473,8 +473,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? (process.env.API_BASE_URL || 'https://api.alga.et')
               : '';
             
+            const fileUrl = `${baseUrl}/uploads/properties/${file.filename}`;
+            const filePath = `/uploads/properties/${file.filename}`;
+            
+            // INSA FIX: Register this upload with the user's ID for validation
+            registerUserUpload(req.user.id, filePath);
+            logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath }, req.ip || 'unknown');
+            
             processedFiles.push({
-              url: `${baseUrl}/uploads/properties/${file.filename}`,
+              url: fileUrl,
               stats,
             });
           } catch (fileErr) {
