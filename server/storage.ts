@@ -112,6 +112,7 @@ export interface IStorage {
   // Booking operations
   createBooking(booking: InsertBooking): Promise<Booking>;
   getBooking(id: number): Promise<Booking | undefined>;
+  getBookingByReference(reference: string): Promise<Booking | undefined>; // INSA FIX: Secure non-sequential lookup
   getAllBookings(): Promise<Booking[]>;
   getBookingsByGuest(guestId: string): Promise<Booking[]>;
   getBookingsByProperty(propertyId: number): Promise<Booking[]>;
@@ -700,6 +701,12 @@ export class DatabaseStorage implements IStorage {
 
   async getBooking(id: number): Promise<Booking | undefined> {
     const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking;
+  }
+
+  // INSA FIX: Secure booking lookup by non-sequential reference
+  async getBookingByReference(reference: string): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.bookingReference, reference));
     return booking;
   }
 

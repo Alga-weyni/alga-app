@@ -3455,7 +3455,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== INSA FIX: SECURE BOOKING REFERENCE ENDPOINTS ====================
+  // These endpoints use the unpredictable booking reference instead of sequential IDs
+  // This prevents IDOR attacks via ID enumeration
+  
+  // SECURE: Get booking by reference (primary public-facing endpoint)
+  app.get('/api/bookings/ref/:reference', isAuthenticated, async (req: any, res) => {
+    try {
+      const { reference } = req.params;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // INSA FIX: Validate reference format (32-character hex string)
+      if (!reference || typeof reference !== 'string' || !/^[a-f0-9]{32}$/i.test(reference)) {
+        return res.status(400).json({ message: "Invalid booking reference", code: 'INVALID_REFERENCE' });
+      }
+      
+      const booking = await storage.getBookingByReference(reference);
+      
+      // INSA FIX: Generic error for both "not found" and "not authorized"
+      if (!booking) {
+        await logSecurityEvent(userId, 'BOOKING_REF_ACCESS_NOT_FOUND', { reference }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      // Get property to check if user is the host
+      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // Only allow guest, host, admin, or operator to view
+      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_REF_ACCESS', { reference }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      res.json(booking);
+    } catch (error) {
+      console.error("Error fetching booking by reference:", error);
+      res.status(500).json({ message: "Failed to fetch booking" });
+    }
+  });
+  
+  // SECURE: Cancel booking by reference
+  app.patch('/api/bookings/ref/:reference/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const { reference } = req.params;
+      const { status } = req.body;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // Validate status first
+      if (!status || typeof status !== 'string' || status.trim() === '') {
+        return res.status(400).json({ message: "Status is required", code: 'INVALID_STATUS' });
+      }
+      
+      // Validate reference format
+      if (!reference || typeof reference !== 'string' || !/^[a-f0-9]{32}$/i.test(reference)) {
+        return res.status(400).json({ message: "Invalid booking reference", code: 'INVALID_REFERENCE' });
+      }
+      
+      const booking = await storage.getBookingByReference(reference);
+      
+      if (!booking) {
+        await logSecurityEvent(userId, 'BOOKING_REF_STATUS_NOT_FOUND', { reference, attemptedStatus: status }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      // Get property to check if user is the host
+      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // Only allow guest (for cancellation), host, admin, or operator
+      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_REF_STATUS', { reference, attemptedStatus: status }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      // Guests can only cancel
+      if (booking.guestId === userId && !isHost && !['admin', 'operator'].includes(userRole) && status !== 'cancelled') {
+        return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
+      }
+      
+      // Validate status transition
+      if (!validateStatusTransition(booking.status, status, 'booking')) {
+        return res.status(400).json({ 
+          message: `Cannot change status from '${booking.status}' to '${status}'`,
+          code: 'INVALID_STATUS_TRANSITION'
+        });
+      }
+      
+      const updatedBooking = await storage.updateBookingStatus(booking.id, status);
+      
+      await logSecurityEvent(userId, 'BOOKING_REF_STATUS_CHANGED', { 
+        reference, 
+        previousStatus: booking.status,
+        newStatus: status 
+      }, req.ip || 'unknown');
+      
+      res.json(updatedBooking);
+    } catch (error) {
+      console.error("Error updating booking status by reference:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
+    }
+  });
+  
+  // ==================== END SECURE BOOKING REFERENCE ENDPOINTS ====================
+
   // INSA Fix #2: Validate booking ownership before returning details
+  // NOTE: This endpoint uses sequential ID - consider deprecating in favor of /ref/:reference
   app.get('/api/bookings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
