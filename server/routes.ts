@@ -28,6 +28,13 @@ import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSc
 import { sql, desc, and } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
 import financialSettlementRoutes from './api/financial-settlement.routes.js';
+import { 
+  verifyPaymentCallback, 
+  isPaymentVerified, 
+  getPaymentVerificationStatus,
+  generateTestCallback,
+  type GatewayCallbackPayload 
+} from './security/payment-gateway-verification.js';
 // INSA Security Fixes - Inline definitions to avoid circular dependency issues
 
 // ==================== TWO-FACTOR AUTHENTICATION SECURITY ====================
@@ -3528,22 +3535,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // INSA FIX: For 'paid' status, require payment reference from gateway (except for admin override)
+      // INSA FIX: For 'paid' status, require verified gateway callback (except for admin override)
       if (paymentStatus === 'paid') {
-        if (userRole !== 'admin' && !paymentReference) {
-          logSecurityEvent(userId, 'PAYMENT_MARKED_PAID_WITHOUT_REFERENCE', { bookingId: id }, req.ip || 'unknown');
-          return res.status(400).json({ 
-            message: "Payment reference from payment gateway is required to mark as paid",
-            code: 'PAYMENT_REFERENCE_REQUIRED'
-          });
+        // Check if payment was verified through gateway callback
+        const bookingRef = existingBooking.bookingReference;
+        const gatewayVerification = bookingRef ? isPaymentVerified(bookingRef) : null;
+        
+        if (userRole !== 'admin') {
+          // Non-admin users MUST have gateway verification OR provide payment reference
+          if (!gatewayVerification && !paymentReference) {
+            logSecurityEvent(userId, 'PAYMENT_MARKED_PAID_WITHOUT_VERIFICATION', { 
+              bookingId: id,
+              bookingReference: bookingRef,
+              hasGatewayVerification: !!gatewayVerification
+            }, req.ip || 'unknown');
+            return res.status(400).json({ 
+              message: "Payment must be verified through payment gateway callback before marking as paid. If you have a payment reference, please provide it.",
+              code: 'GATEWAY_VERIFICATION_REQUIRED'
+            });
+          }
+          
+          // If payment reference provided, verify it matches a valid transaction
+          if (paymentReference && !gatewayVerification) {
+            // Check if this payment reference was verified
+            const refVerification = isPaymentVerified(paymentReference);
+            if (!refVerification) {
+              logSecurityEvent(userId, 'UNVERIFIED_PAYMENT_REFERENCE', { 
+                bookingId: id, 
+                paymentReference 
+              }, req.ip || 'unknown');
+              return res.status(400).json({ 
+                message: "The provided payment reference has not been verified by our payment gateway. Please wait for payment confirmation.",
+                code: 'PAYMENT_REFERENCE_NOT_VERIFIED'
+              });
+            }
+          }
         }
         
         // Log the payment confirmation
         logSecurityEvent(userId, 'PAYMENT_CONFIRMED', { 
           bookingId: id, 
-          paymentReference: paymentReference || 'admin_override',
-          paymentGateway: paymentGateway || 'manual',
-          confirmedBy: userRole
+          paymentReference: paymentReference || gatewayVerification?.transactionId || 'admin_override',
+          paymentGateway: paymentGateway || gatewayVerification?.gateway || 'manual',
+          confirmedBy: userRole,
+          gatewayVerified: !!gatewayVerification
         }, req.ip || 'unknown');
       }
       
@@ -3850,6 +3885,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Alga Pay - Unified payment interface (white-labeled)
   app.post('/api/alga-pay', isAuthenticated, algaPayHandler);
   app.post('/api/payment-callback', algaCallback);
+
+  // ==================== INSA SECURITY: PAYMENT GATEWAY CALLBACK VERIFICATION ====================
+  // These endpoints are the ONLY way to confirm payment completion
+  // Payment status can ONLY be changed through verified gateway callbacks
+  
+  // Rate limit for payment callbacks (stricter limits to prevent abuse)
+  const paymentCallbackLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 10, // 10 requests per minute per IP
+    message: { message: 'Too many payment callback requests', code: 'RATE_LIMITED' },
+  });
+  
+  // Main payment gateway callback endpoint
+  // This is called by Telebirr, Chapa, Stripe, PayPal after payment completion
+  app.post('/api/payment/gateway-callback', paymentCallbackLimiter, async (req, res) => {
+    const startTime = Date.now();
+    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+    
+    try {
+      const payload = req.body as GatewayCallbackPayload;
+      
+      // Verify the callback
+      const verificationResult = await verifyPaymentCallback(payload, ipAddress);
+      
+      if (!verificationResult.verified) {
+        // Log failed verification attempt
+        logSecurityEvent('system', 'PAYMENT_CALLBACK_VERIFICATION_FAILED', {
+          gateway: payload.gateway || 'unknown',
+          error: verificationResult.error,
+          transactionId: payload.data?.transactionId,
+        }, ipAddress);
+        
+        return res.status(403).json({
+          success: false,
+          error: verificationResult.error,
+          code: 'VERIFICATION_FAILED',
+        });
+      }
+      
+      // Payment verified - now update the booking status
+      if (verificationResult.bookingReference) {
+        try {
+          // Find booking by reference
+          const bookingResult = await db
+            .select()
+            .from(bookings)
+            .where(eq(bookings.bookingReference, verificationResult.bookingReference))
+            .limit(1);
+          
+          const booking = bookingResult[0];
+          
+          if (booking) {
+            // Update payment status to 'paid'
+            const updatedBooking = await storage.updatePaymentStatus(booking.id, 'paid');
+            
+            // Log successful payment confirmation
+            logSecurityEvent('system', 'PAYMENT_GATEWAY_CONFIRMED', {
+              bookingId: booking.id,
+              bookingReference: verificationResult.bookingReference,
+              transactionId: verificationResult.transactionId,
+              gateway: verificationResult.gateway,
+              amount: verificationResult.amount,
+              currency: verificationResult.currency,
+              processingTime: Date.now() - startTime,
+            }, ipAddress);
+            
+            console.log(`✅ Payment confirmed via ${verificationResult.gateway}: ${verificationResult.transactionId}`);
+            
+            return res.json({
+              success: true,
+              message: 'Payment verified and booking updated',
+              bookingId: booking.id,
+              transactionId: verificationResult.transactionId,
+            });
+          } else {
+            // Booking not found but payment verified - log for manual reconciliation
+            logSecurityEvent('system', 'PAYMENT_VERIFIED_BOOKING_NOT_FOUND', {
+              bookingReference: verificationResult.bookingReference,
+              transactionId: verificationResult.transactionId,
+              gateway: verificationResult.gateway,
+              amount: verificationResult.amount,
+            }, ipAddress);
+            
+            return res.status(404).json({
+              success: false,
+              error: 'Booking not found for payment reference',
+              code: 'BOOKING_NOT_FOUND',
+              transactionId: verificationResult.transactionId,
+            });
+          }
+        } catch (dbError) {
+          console.error('Error updating booking after payment verification:', dbError);
+          return res.status(500).json({
+            success: false,
+            error: 'Failed to update booking status',
+            code: 'DB_ERROR',
+          });
+        }
+      }
+      
+      return res.json({
+        success: true,
+        message: 'Payment callback verified',
+        transactionId: verificationResult.transactionId,
+      });
+      
+    } catch (error: any) {
+      console.error('Payment callback error:', error);
+      
+      logSecurityEvent('system', 'PAYMENT_CALLBACK_ERROR', {
+        error: error.message,
+        stack: error.stack?.substring(0, 500),
+      }, ipAddress);
+      
+      return res.status(500).json({
+        success: false,
+        error: 'Internal error processing payment callback',
+        code: 'INTERNAL_ERROR',
+      });
+    }
+  });
+  
+  // Check payment verification status for a booking
+  app.get('/api/payment/verification-status/:bookingReference', isAuthenticated, async (req: any, res) => {
+    try {
+      const { bookingReference } = req.params;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // Get booking to verify ownership
+      const bookingResult = await db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.bookingReference, bookingReference))
+        .limit(1);
+      
+      const booking = bookingResult[0];
+      
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      
+      // Get property to check if user is host
+      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // Only allow guest, host, admin, or operator to check status
+      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      const status = getPaymentVerificationStatus(bookingReference);
+      
+      return res.json({
+        bookingReference,
+        paymentStatus: booking.paymentStatus,
+        gatewayVerification: status,
+      });
+    } catch (error) {
+      console.error('Error checking payment verification status:', error);
+      return res.status(500).json({ message: 'Failed to check payment status' });
+    }
+  });
+  
+  // Development-only: Generate test callback for testing
+  app.post('/api/payment/test-callback', isAuthenticated, async (req: any, res) => {
+    // Only allow in development mode by admin
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ message: 'Test callbacks not allowed in production' });
+    }
+    
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required for test callbacks' });
+    }
+    
+    const { gateway, transactionId, bookingReference, amount, currency } = req.body;
+    
+    if (!gateway || !transactionId || !bookingReference || !amount) {
+      return res.status(400).json({ message: 'Missing required fields: gateway, transactionId, bookingReference, amount' });
+    }
+    
+    const testPayload = generateTestCallback(
+      gateway,
+      transactionId,
+      bookingReference,
+      parseFloat(amount),
+      currency || 'ETB'
+    );
+    
+    if (!testPayload) {
+      return res.status(500).json({ message: 'Failed to generate test callback - check gateway configuration' });
+    }
+    
+    return res.json({
+      message: 'Test callback payload generated. Submit this to /api/payment/gateway-callback',
+      payload: testPayload,
+    });
+  });
+  // ==================== END PAYMENT GATEWAY CALLBACK VERIFICATION ====================
 
   app.use('/api/payment', isAuthenticated, paymentRouter);
 
