@@ -524,6 +524,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? (process.env.API_BASE_URL || 'https://api.alga.et')
         : '';
       const imageUrl = `${baseUrl}/uploads/id-documents/${req.file.filename}`;
+      const filePath = `/uploads/id-documents/${req.file.filename}`;
+      
+      // INSA FIX: Register this upload with the user's ID for validation
+      registerUserUpload(req.user.id, filePath);
+      logSecurityEvent(req.user.id, 'ID_DOCUMENT_UPLOADED', { filePath }, req.ip || 'unknown');
 
       res.json({
         message: 'ID document uploaded successfully',
@@ -2568,9 +2573,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/properties', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      
+      // INSA FIX: Validate image URLs were uploaded by this user
+      if (req.body.images && Array.isArray(req.body.images)) {
+        const imageValidation = validateUserUploadedImages(userId, req.body.images);
+        if (!imageValidation.valid) {
+          logSecurityEvent(userId, 'UNAUTHORIZED_IMAGE_REFERENCE_ATTEMPT', { 
+            action: 'CREATE_PROPERTY',
+            invalidImages: imageValidation.invalidImages 
+          }, req.ip || 'unknown');
+          return res.status(403).json({ 
+            message: "One or more image URLs are invalid or were not uploaded by your account",
+            invalidImages: imageValidation.invalidImages
+          });
+        }
+      }
+      
       const propertyData = insertPropertySchema.parse({ ...req.body, hostId: userId });
       
       const property = await storage.createProperty(propertyData);
+      logSecurityEvent(userId, 'PROPERTY_CREATED', { propertyId: property.id }, req.ip || 'unknown');
       res.status(201).json(property);
     } catch (error) {
       console.error("Error creating property:", error);
@@ -2589,8 +2611,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized" });
       }
 
+      // INSA FIX: Validate NEW image URLs were uploaded by this user
+      // Allow existing images from the property to remain
+      if (req.body.images && Array.isArray(req.body.images)) {
+        const existingImages = new Set(property.images || []);
+        const newImages = req.body.images.filter((img: string) => !existingImages.has(img));
+        
+        if (newImages.length > 0) {
+          const imageValidation = validateUserUploadedImages(userId, newImages);
+          if (!imageValidation.valid) {
+            logSecurityEvent(userId, 'UNAUTHORIZED_IMAGE_REFERENCE_ATTEMPT', { 
+              action: 'UPDATE_PROPERTY',
+              propertyId: id,
+              invalidImages: imageValidation.invalidImages 
+            }, req.ip || 'unknown');
+            return res.status(403).json({ 
+              message: "One or more new image URLs are invalid or were not uploaded by your account",
+              invalidImages: imageValidation.invalidImages
+            });
+          }
+        }
+      }
+
       const updates = insertPropertySchema.partial().parse(req.body);
       const updatedProperty = await storage.updateProperty(id, updates);
+      logSecurityEvent(userId, 'PROPERTY_UPDATED', { propertyId: id }, req.ip || 'unknown');
       res.json(updatedProperty);
     } catch (error) {
       console.error("Error updating property:", error);
