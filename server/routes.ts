@@ -3059,10 +3059,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // INSA Fix: Secure payment status update with ownership verification
   app.patch('/api/bookings/:id/payment', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const { paymentStatus } = req.body;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      
+      // Validate paymentStatus is provided
+      if (!paymentStatus || typeof paymentStatus !== 'string') {
+        return res.status(400).json({ message: "Payment status is required", code: 'INVALID_PAYMENT_STATUS' });
+      }
+      
+      // Get booking first to verify ownership
+      const existingBooking = await storage.getBooking(id);
+      if (!existingBooking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Get property to check if user is the host
+      const property = await db.select().from(properties).where(eq(properties.id, existingBooking.propertyId)).limit(1);
+      const isHost = property[0]?.hostId === userId;
+      
+      // INSA Fix: Only allow host, admin, or operator to update payment status (not guests)
+      if (!isHost && !['admin', 'operator'].includes(userRole)) {
+        await logSecurityEvent(userId, 'UNAUTHORIZED_PAYMENT_STATUS_CHANGE', { bookingId: id, attemptedStatus: paymentStatus }, req.ip || 'unknown');
+        return res.status(403).json({ message: "Access denied. Only hosts, admins, or operators can update payment status.", code: 'PAYMENT_STATUS_DENIED' });
+      }
       
       const booking = await storage.updatePaymentStatus(id, paymentStatus);
       
