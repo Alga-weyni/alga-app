@@ -1,0 +1,143 @@
+Excellent — this screenshot is high-value evidence and it tells us several important things from an INSA compliance perspective. I’ll translate it clearly and tell you exactly what your next Burp test must be to close this finding with confidence.
+
+1. What this Result Actually Proves
+Your Request
+PATCH /api/admin/properties/277/verify
+Cookie: alga_session=...
+Body:
+{
+  "status": "approved"
+}
+
+Server Response
+{
+  "message": "Invalid status. Must be 'active' or 'rejected'"
+}
+
+Meaning — From a Security & Audit Lens
+
+✅ Good news
+
+The server is not blindly accepting arbitrary values like "approved"
+
+There is server-side validation on allowed status values
+
+This is a positive control aligned with INSA expectations
+
+⚠️ But this does NOT yet prove RBAC is fixed
+
+The server rejected the request because of an invalid value
+
+It did NOT reject it because of missing admin privileges
+
+That means authorization has NOT yet been conclusively tested
+
+Right now, we only proved:
+
+“Input validation exists”
+
+We have NOT yet proved:
+
+“Only admins can call this endpoint”
+
+2. The Critical RBAC Test You Must Now Perform
+
+You must now send the same request, but with a valid status value and HOST (non-admin) credentials.
+
+🔐 Step A — Change Only the Status
+
+In Burp Repeater, change:
+
+{
+  "status": "approved"
+}
+
+
+to:
+
+{
+  "status": "active"
+}
+
+
+✅ Do NOT change anything else.
+
+🔁 Step B — Confirm This Is Still a HOST Session
+
+Double-check the header:
+
+Cookie: alga_session=...
+
+
+This must belong to:
+
+A regular host
+
+NOT an admin
+
+(This is critical for audit integrity.)
+
+🚀 Step C — Click SEND
+
+Now observe the response carefully.
+
+3. How to Interpret the Next Result
+✅ If You Get This (PASS — Vulnerability Fixed)
+
+HTTP Status: 401 or 403
+
+Response:
+
+"Unauthorized"
+
+"Forbidden"
+
+"Admin access required"
+
+Property does NOT change to active
+
+➡️ You can officially state:
+
+“RBAC enforcement is now fully implemented server-side.”
+
+❌ If You Get This (FAIL — Vulnerability Still Exists)
+
+HTTP Status: 200
+
+Property becomes active
+
+No role error returned
+
+➡️ This proves:
+
+A host can still escalate privilege
+
+INSA finding is still valid and unresolved
+
+This would be classified as a Confirmed High-Risk Exploit
+
+4. What INSA Expects You to Submit as Evidence
+
+Once you run the test above, you will submit two screenshots:
+
+Burp Request (Host + status=active)
+
+Burp Response (401/403 Forbidden)
+
+And one short confirmation statement:
+
+“The verification endpoint /api/admin/properties/{id}/verify is now protected with strict role-based access control. Requests issued using host-level sessions are rejected with HTTP 403 Forbidden, confirming that only admin users can perform approval actions.”
+
+5. Strategic Observation (Executive Summary)
+
+From what I see now:
+
+✅ Endpoint is no longer loosely accepting values
+
+⚠️ Authorization enforcement is still unproven
+
+✅ You are very close to fully clearing Finding No. 1
+
+✅ This is already audit-grade technical evidence
+
+Once the status=active with host cookie test is blocked, you will have full compliance closure on this finding.
