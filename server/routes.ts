@@ -3698,14 +3698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA FIX: Use same generic error for "not found" and "not authorized"
       // This prevents attackers from enumerating valid booking IDs
       if (!booking) {
-        // INSA FIX: Track failed access attempt for sequential scanning detection
-        const scanCheck = trackFailedBookingAccess(userId, id, clientIp);
-        if (scanCheck.blocked) {
-          await logSecurityEvent(userId, 'ID_ENUMERATION_BLOCKED', { bookingId: id, reason: scanCheck.reason }, clientIp);
-          return res.status(429).json({ message: "Too many requests. Please try again later.", code: 'RATE_LIMITED' });
-        }
-        
-        await logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, clientIp);
+        logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, clientIp);
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
@@ -3715,14 +3708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only allow guest, host, admin, or operator to view
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
-        // INSA FIX: Track unauthorized access attempt for sequential scanning detection
-        const scanCheck = trackFailedBookingAccess(userId, id, clientIp);
-        if (scanCheck.blocked) {
-          await logSecurityEvent(userId, 'ID_ENUMERATION_BLOCKED', { bookingId: id, reason: scanCheck.reason }, clientIp);
-          return res.status(429).json({ message: "Too many requests. Please try again later.", code: 'RATE_LIMITED' });
-        }
-        
-        await logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, clientIp);
+        logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, clientIp);
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
