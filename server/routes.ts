@@ -3702,9 +3702,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
-      // Get property to check if user is the host
-      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
-      const isHost = property[0]?.hostId === userId;
+      // Check if user is the host by looking up property via storage
+      let isHost = false;
+      try {
+        const property = await storage.getProperty(booking.propertyId);
+        isHost = property?.hostId === userId;
+      } catch (propError) {
+        console.error("Error fetching property for host check:", propError);
+        // Continue with isHost = false
+      }
       
       // Only allow guest, host, admin, or operator to view
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
