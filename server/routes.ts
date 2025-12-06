@@ -3750,13 +3750,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA FIX: Use same generic error for "not found" and "not authorized"
       // This prevents attackers from enumerating valid booking IDs
       if (!booking) {
-        await logSecurityEvent(userId, 'BOOKING_STATUS_CHANGE_NOT_FOUND', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
+        logSecurityEvent(userId, 'BOOKING_STATUS_CHANGE_NOT_FOUND', { bookingId: id, attemptedStatus: status }, req.ip || 'unknown');
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
       // Get property to check if user is the host
-      const property = await db.select().from(properties).where(eq(properties.id, booking.propertyId)).limit(1);
-      const isHost = property[0]?.hostId === userId;
+      let isHost = false;
+      try {
+        const property = await storage.getProperty(booking.propertyId);
+        isHost = property?.hostId === userId;
+      } catch (propError) {
+        console.error("Error fetching property for host check:", propError);
+      }
       
       // INSA Fix #9: Only allow guest (for cancellation), host, admin, or operator
       if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
