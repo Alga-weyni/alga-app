@@ -1,0 +1,34 @@
+HTTP/2 200 OK
+Date: Mon, 08 Dec 2025 13:23:12 GMT
+Content-Type: application/json; charset=utf-8
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=0RstAziqn3%2BN5esFflxDd%2FoOxSFzE0sHN%2BiRecayobAkRsaGZp9rytpLfecVJoPQInM2wzz4zA4a7XJzM%2B5AaLD91heQZXpYV2bj"}]}
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+Server: cloudflare
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: X-Total-Count
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Etag: W/"217-AUmuGVo56QCeJJdTj5OXTQDyQdo"
+Origin-Agent-Cluster: ?1
+Permissions-Policy: geolocation=(self), camera=(self), microphone=()
+Ratelimit-Limit: 100
+Ratelimit-Policy: 100;w=900
+Ratelimit-Remaining: 99
+Ratelimit-Reset: 900
+Referrer-Policy: strict-origin-when-cross-origin
+Rndr-Id: 39db38d4-efb4-45e9
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Vary: Origin
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Download-Options: noopen
+X-Frame-Options: DENY
+X-Permitted-Cross-Domain-Policies: none
+X-Render-Origin-Server: Render
+X-Xss-Protection: 1; mode=block
+Cf-Ray: 9aac936bdcefe1d0-MRS
+
+{"id":"67887a50-5b55-4b99-89b1-966edd96f145","email":"insa-host@test.alga.et","firstName":"INSA","lastName":"Host","profileImageUrl":null,"role":"host","phoneNumber":null,"phoneVerified":false,"idVerified":false,"idNumber":null,"idFullName":null,"idDocumentType":null,"idDocumentUrl":null,"idExpiryDate":null,"idCountry":null,"faydaId":null,"faydaVerified":false,"faydaVerifiedAt":null,"isServiceProvider":true,"status":"active","bio":null,"preferences":{},"createdAt":"2025-11-21T10:48:31.058Z","updatedAt":"2025-12-02T10:14:51.108Z"}
