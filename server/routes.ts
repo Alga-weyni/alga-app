@@ -544,7 +544,14 @@ async function calculateBookingPrice(propertyId: number, checkIn: Date | string,
   // INSA FIX: Always use property's configured price and currency
   // Client cannot manipulate currency or price
   const propertyCurrency = prop.currency || 'ETB';
-  const pricePerNight = parseFloat(prop.pricePerNight);
+  const pricePerNight = parseFloat(prop.pricePerNight) || 0;
+  
+  // INSA FIX: Validate property has a valid price configured
+  if (isNaN(pricePerNight) || pricePerNight <= 0) {
+    console.error(`[SECURITY] Property ${propertyId} has invalid pricePerNight: ${prop.pricePerNight}`);
+    throw new Error('Property does not have a valid price configured');
+  }
+  
   const subtotal = pricePerNight * nights;
   const serviceFee = subtotal * 0.15;
   const total = subtotal + serviceFee;
