@@ -66,6 +66,7 @@ import {
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
+import { calculateBookingBreakdown } from './utils/booking.js';
 
 // Interface for storage operations
 export interface IStorage {
@@ -676,9 +677,6 @@ export class DatabaseStorage implements IStorage {
 
   // Booking operations
   async createBooking(booking: InsertBooking): Promise<Booking> {
-    // Import the booking breakdown utility
-    const { calculateBookingBreakdown } = await import('./utils/booking');
-    
     // Calculate commission and tax breakdown
     const totalAmount = parseFloat(booking.totalPrice);
     const breakdown = calculateBookingBreakdown(totalAmount);

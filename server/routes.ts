@@ -14,6 +14,7 @@ import { algaCallback } from './algaCallback.js';
 import rateLimit from "express-rate-limit";
 import { generateInvoice } from './utils/invoice.js';
 import { sendOtpEmail, sendWelcomeEmail, sendProviderApplicationReceivedEmail, sendProviderApplicationApprovedEmail, sendProviderApplicationRejectedEmail } from './utils/email.js';
+import { calculateMonthlySummary, calculateBookingBreakdown } from './utils/booking.js';
 import { verifyFaydaId, updateUserFaydaVerification, isFaydaVerified } from './fayda-verification.js';
 import multer from "multer";
 import path from "path";
@@ -2050,7 +2051,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { startDate, endDate } = req.query;
-      const { calculateMonthlySummary } = await import('./utils/booking');
       
       // Get all paid bookings
       const allBookings = await storage.getAllBookings();
