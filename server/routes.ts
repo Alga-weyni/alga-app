@@ -3669,6 +3669,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // INSA Fix #4: For 'confirmed' or 'completed' status, require payment verification
+      if ((status === 'confirmed' || status === 'completed') && booking.paymentStatus !== 'paid') {
+        await logSecurityEvent(userId, 'BOOKING_REF_CONFIRM_WITHOUT_PAYMENT', { 
+          reference, 
+          attemptedStatus: status,
+          currentPaymentStatus: booking.paymentStatus 
+        }, req.ip || 'unknown');
+        return res.status(400).json({ 
+          message: "Cannot confirm booking without verified payment",
+          code: 'PAYMENT_REQUIRED'
+        });
+      }
+      
       const updatedBooking = await storage.updateBookingStatus(booking.id, status);
       
       await logSecurityEvent(userId, 'BOOKING_REF_STATUS_CHANGED', { 
