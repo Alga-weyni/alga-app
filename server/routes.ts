@@ -3684,37 +3684,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bookings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.id;
-      const userRole = req.user.role;
-      const clientIp = req.ip || 'unknown';
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
       
-      // INSA FIX: Validate booking ID format BEFORE lookup
+      // INSA FIX: Validate booking ID format
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ message: "Invalid booking ID", code: 'INVALID_ID' });
       }
       
       const booking = await storage.getBooking(id);
       
-      // INSA FIX: Use same generic error for "not found" and "not authorized"
-      // This prevents attackers from enumerating valid booking IDs
+      // INSA FIX: Same error for "not found" and "not authorized" to prevent enumeration
       if (!booking) {
-        logSecurityEvent(userId, 'BOOKING_ACCESS_NOT_FOUND', { bookingId: id }, clientIp);
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
-      // Check if user is the host by looking up property via storage
+      // Check authorization: guest, host, admin, or operator can view
+      const isGuest = booking.guestId === userId;
+      const isAdmin = ['admin', 'operator'].includes(userRole || '');
+      
+      // Check if user is host
       let isHost = false;
-      try {
+      if (booking.propertyId) {
         const property = await storage.getProperty(booking.propertyId);
         isHost = property?.hostId === userId;
-      } catch (propError) {
-        console.error("Error fetching property for host check:", propError);
-        // Continue with isHost = false
       }
       
-      // Only allow guest, host, admin, or operator to view
-      if (booking.guestId !== userId && !isHost && !['admin', 'operator'].includes(userRole)) {
-        logSecurityEvent(userId, 'UNAUTHORIZED_BOOKING_ACCESS', { bookingId: id }, clientIp);
+      if (!isGuest && !isHost && !isAdmin) {
         return res.status(403).json({ message: "Access denied", code: 'ACCESS_DENIED' });
       }
       
