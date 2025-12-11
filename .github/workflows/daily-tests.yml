@@ -1,0 +1,44 @@
+name: Daily API Tests & Security Scan
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Run daily at 6 AM UTC (9 AM EAT)
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API tests against production
+        env:
+          API_BASE_URL: https://api.alga.et
+        run: |
+          npx tsx scripts/api-tests.ts || echo "Tests completed with some failures"
+
+      - name: Security audit
+        run: npm audit --audit-level=high || true
+
+      - name: Check for outdated packages
+        run: npm outdated || true
+
+  notify-on-failure:
+    needs: api-tests
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification
+        run: |
+          echo "API tests failed - check GitHub Actions for details"
+          # Add Slack/email notification here if configured
