@@ -25,8 +25,8 @@ import { ObjectStorageService, ObjectNotFoundError } from './objectStorage.js';
 import { ObjectPermission } from './objectAcl.js';
 import { imageProcessor } from './imageProcessor.js';
 import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates.js';
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments } from '../shared/schema.js';
-import { sql, desc, and } from "drizzle-orm";
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments, auditLogs } from '../shared/schema.js';
+import { sql, desc, and, gte } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
 import financialSettlementRoutes from './api/financial-settlement.routes.js';
 import { 
@@ -944,6 +944,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sendgrid: !!process.env.SENDGRID_API_KEY
       }
     });
+  });
+
+  // Observability metrics endpoint for dashboard integration
+  app.get('/api/metrics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      const bookingMetrics = await db
+        .select({
+          total: sql<number>`COUNT(*)`,
+          confirmed: sql<number>`SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END)`,
+          pending: sql<number>`SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END)`,
+          revenue: sql<string>`COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN total_amount ELSE 0 END), 0)`
+        })
+        .from(bookings)
+        .where(gte(bookings.createdAt, weekAgo));
+
+      const userMetrics = await db
+        .select({
+          totalUsers: sql<number>`COUNT(*)`,
+          newThisWeek: sql<number>`SUM(CASE WHEN created_at >= ${weekAgo} THEN 1 ELSE 0 END)`,
+          hosts: sql<number>`SUM(CASE WHEN role = 'host' THEN 1 ELSE 0 END)`,
+          guests: sql<number>`SUM(CASE WHEN role = 'guest' THEN 1 ELSE 0 END)`
+        })
+        .from(users);
+
+      const propertyMetrics = await db
+        .select({
+          total: sql<number>`COUNT(*)`,
+          approved: sql<number>`SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END)`,
+          pending: sql<number>`SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END)`
+        })
+        .from(properties);
+
+      const memoryUsage = process.memoryUsage();
+      const uptime = Math.floor((Date.now() - serverStartTime) / 1000);
+
+      res.json({
+        timestamp: now.toISOString(),
+        period: 'last_7_days',
+        bookings: bookingMetrics[0] || { total: 0, confirmed: 0, pending: 0, revenue: '0' },
+        users: userMetrics[0] || { totalUsers: 0, newThisWeek: 0, hosts: 0, guests: 0 },
+        properties: propertyMetrics[0] || { total: 0, approved: 0, pending: 0 },
+        system: {
+          uptime,
+          memoryUsedMB: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+          memoryTotalMB: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+          memoryPercent: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)
+        }
+      });
+    } catch (error) {
+      console.error('Metrics error:', error);
+      res.status(500).json({ message: 'Failed to fetch metrics' });
+    }
+  });
+
+  // Security alerts endpoint for monitoring
+  app.get('/api/security/alerts', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const alerts: any[] = [];
+      const now = new Date();
+      const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+      const rateLimitViolations = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.action, 'rate_limit_exceeded'),
+          gte(auditLogs.timestamp, hourAgo)
+        ));
+
+      if ((rateLimitViolations[0]?.count || 0) > 10) {
+        alerts.push({
+          severity: 'high',
+          type: 'rate_limit',
+          message: `${rateLimitViolations[0].count} rate limit violations in the last hour`,
+          timestamp: now.toISOString()
+        });
+      }
+
+      const failedAuths = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.action, 'auth_failure'),
+          gte(auditLogs.timestamp, hourAgo)
+        ));
+
+      if ((failedAuths[0]?.count || 0) > 20) {
+        alerts.push({
+          severity: 'high',
+          type: 'auth_attack',
+          message: `${failedAuths[0].count} failed auth attempts in the last hour`,
+          timestamp: now.toISOString()
+        });
+      }
+
+      const memoryUsage = process.memoryUsage();
+      const memoryPercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+      
+      if (memoryPercent > 85) {
+        alerts.push({
+          severity: memoryPercent > 95 ? 'critical' : 'warning',
+          type: 'memory',
+          message: `High memory usage: ${memoryPercent.toFixed(1)}%`,
+          timestamp: now.toISOString()
+        });
+      }
+
+      res.json({
+        timestamp: now.toISOString(),
+        alertCount: alerts.length,
+        alerts
+      });
+    } catch (error) {
+      console.error('Security alerts error:', error);
+      res.status(500).json({ message: 'Failed to fetch security alerts' });
+    }
   });
 
   // Auth routes
