@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { Chapa } from "chapa-nodejs";
 import Stripe from "stripe";
+// @ts-ignore - arifpay SDK has nested default export
+import ArifpayPkg from "arifpay";
 
 // Initialize payment processors (hidden from users)
 const chapa = process.env.CHAPA_SECRET_KEY
@@ -12,6 +14,17 @@ const stripe = process.env.STRIPE_SECRET_KEY
       apiVersion: "2025-09-30.clover",
     })
   : null;
+
+// Initialize Arifpay (SDK has nested default export structure)
+const ArifpayClass = (ArifpayPkg as any).default || ArifpayPkg;
+let arifpay: any = null;
+try {
+  if (process.env.ARIFPAY_API_KEY && ArifpayClass) {
+    arifpay = new ArifpayClass(process.env.ARIFPAY_API_KEY);
+  }
+} catch (err) {
+  console.error('[Alga Pay] Failed to initialize Arifpay:', err);
+}
 
 /**
  * Alga Pay Handler - Unified payment interface
@@ -89,6 +102,44 @@ export const algaPayHandler = async (req: Request, res: Response) => {
         provider: "algaPay", // Never expose "Stripe"
         txRef,
         checkoutUrl: session.url,
+      });
+    }
+    else if (method === "arifpay" && arifpay) {
+      // Arif Pay for Ethiopian users (Telebirr, Awash Wallet, Cards)
+      const isProduction = process.env.NODE_ENV === 'production';
+      const webhookUrl = `${baseUrl}/api/payment/arifpay/webhook`;
+      
+      const arifpayData = {
+        cancelUrl: `${baseUrl}/booking/cancelled?orderId=${orderId}`,
+        successUrl: returnUrl,
+        errorUrl: `${baseUrl}/booking/error?orderId=${orderId}`,
+        notifyUrl: webhookUrl,
+        paymentMethods: ["TELEBIRR", "CARD"],
+        expireDate: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
+        items: [{
+          name: `Alga Booking #${orderId}`,
+          quantity: 1,
+          price: amount,
+          description: `Property rental payment`,
+          image: "https://alga.et/logo.png",
+        }],
+        beneficiaries: [{
+          accountNumber: process.env.ARIFPAY_MERCHANT_ACCOUNT || "01234567890123",
+          bank: "COMMERCIAL_BANK_OF_ETHIOPIA",
+          amount: amount,
+        }],
+        lang: "EN",
+        nonce: txRef,
+      };
+
+      const arifpaySession: any = await arifpay.checkout.create(arifpayData, { sandbox: !isProduction });
+
+      return res.json({
+        success: true,
+        provider: "algaPay", // Never expose "Arifpay"
+        txRef,
+        sessionId: arifpaySession?.data?.sessionId || arifpaySession?.sessionId,
+        checkoutUrl: arifpaySession?.data?.paymentUrl || arifpaySession?.paymentUrl,
       });
     }
     else {

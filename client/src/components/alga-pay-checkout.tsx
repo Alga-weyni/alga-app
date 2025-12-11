@@ -8,7 +8,7 @@ interface AlgaPayCheckoutProps {
   amount: number;
   currency?: string;
   bookingId: number;
-  method?: "chapa" | "stripe"; // Internal routing only
+  method?: "chapa" | "stripe" | "arifpay"; // Internal routing only
   onSuccess: () => void;
   onError: (error: string) => void;
   onCancel: () => void;
