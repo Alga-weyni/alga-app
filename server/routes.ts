@@ -907,17 +907,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Health check endpoint
-  app.get('/api/health', (req, res) => {
+  // Health check endpoint - DevOps monitoring
+  const serverStartTime = Date.now();
+  
+  app.get('/api/health', async (req, res) => {
+    let dbStatus = 'unknown';
+    try {
+      await db.execute(sql`SELECT 1`);
+      dbStatus = 'connected';
+    } catch (error) {
+      dbStatus = 'disconnected';
+    }
+    
+    const uptime = Math.floor((Date.now() - serverStartTime) / 1000);
+    const memoryUsage = process.memoryUsage();
+    
     res.json({
-      status: 'healthy',
+      status: dbStatus === 'connected' ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
-      server: 'Ethiopia Stays API',
+      server: 'Alga API',
       version: '1.0.0',
-      payments: {
+      environment: process.env.NODE_ENV || 'development',
+      uptime: uptime,
+      uptimeFormatted: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${uptime % 60}s`,
+      database: dbStatus,
+      memory: {
+        heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
+        heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB',
+        rss: Math.round(memoryUsage.rss / 1024 / 1024) + 'MB'
+      },
+      services: {
         stripe: !!process.env.STRIPE_SECRET_KEY,
         telebirr: !!process.env.TELEBIRR_APP_ID,
-        paypal: !!process.env.PAYPAL_CLIENT_ID
+        paypal: !!process.env.PAYPAL_CLIENT_ID,
+        chapa: !!process.env.CHAPA_SECRET_KEY,
+        sendgrid: !!process.env.SENDGRID_API_KEY
       }
     });
   });
