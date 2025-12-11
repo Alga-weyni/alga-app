@@ -99,6 +99,20 @@ export function applyINSAHardening(app: Express): void {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     }
 
+    // Content Security Policy - prevent XSS and data injection attacks
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com https://maps.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https: http:",
+      "connect-src 'self' https://api.stripe.com https://api.paypal.com https://api.arifpay.com https://api.chapa.co https://maps.googleapis.com wss:",
+      "frame-src 'self' https://js.stripe.com https://www.paypal.com https://checkout.chapa.co https://gateway.arifpay.net",
+      "object-src 'none'",
+      "base-uri 'self'"
+    ];
+    res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
+
     next();
   });
 
