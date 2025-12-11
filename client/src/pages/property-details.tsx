@@ -209,7 +209,99 @@ export default function PropertyDetails() {
         return;
       }
       
-      // Handle Telebirr payment
+      // Handle Arif Pay payment (Telebirr, Awash Wallet, Cards)
+      if (bookingData.paymentMethod === "arifpay") {
+        try {
+          const paymentData = await apiRequest("POST", "/api/payment/arifpay/initiate", {
+            bookingId: booking.id,
+            amount: parseFloat(booking.totalPrice),
+          });
+          
+          if (paymentData.success && paymentData.paymentUrl) {
+            // Redirect to Arif Pay checkout
+            window.location.href = paymentData.paymentUrl;
+          } else {
+            toast({
+              title: "Payment initiation failed",
+              description: paymentData.message || "Unable to start Arif Pay. Please try another method.",
+              variant: "destructive",
+            });
+            navigate(`/bookings/${booking.id}`);
+          }
+        } catch {
+          toast({
+            title: "Payment error",
+            description: "Unable to process Arif Pay payment.",
+            variant: "destructive",
+          });
+          navigate(`/bookings/${booking.id}`);
+        }
+        return;
+      }
+      
+      // Handle Alga Pay (routes to Chapa)
+      if (bookingData.paymentMethod === "alga_pay") {
+        try {
+          const paymentData = await apiRequest("POST", "/api/alga-pay", {
+            orderId: booking.id,
+            amount: parseFloat(booking.totalPrice),
+            email: user?.email || "guest@alga.app",
+            method: "chapa",
+          });
+          
+          if (paymentData.success && paymentData.checkoutUrl) {
+            window.location.href = paymentData.checkoutUrl;
+          } else {
+            toast({
+              title: "Payment initiation failed",
+              description: "Unable to start Alga Pay. Please try another method.",
+              variant: "destructive",
+            });
+            navigate(`/bookings/${booking.id}`);
+          }
+        } catch {
+          toast({
+            title: "Payment error",
+            description: "Unable to process Alga Pay payment.",
+            variant: "destructive",
+          });
+          navigate(`/bookings/${booking.id}`);
+        }
+        return;
+      }
+      
+      // Handle Alga Pay International (routes to Stripe)
+      if (bookingData.paymentMethod === "alga_pay_international") {
+        try {
+          const paymentData = await apiRequest("POST", "/api/alga-pay", {
+            orderId: booking.id,
+            amount: parseFloat(booking.totalPrice) / 50, // Convert ETB to USD
+            email: user?.email || "guest@alga.app",
+            method: "stripe",
+          });
+          
+          if (paymentData.success && paymentData.checkoutUrl) {
+            window.location.href = paymentData.checkoutUrl;
+          } else {
+            toast({
+              title: "Payment initiation failed",
+              description: "Unable to start international payment. Please try another method.",
+              variant: "destructive",
+            });
+            navigate(`/bookings/${booking.id}`);
+          }
+        } catch {
+          toast({
+            title: "Payment error",
+            description: "Unable to process international payment.",
+            variant: "destructive",
+          });
+          navigate(`/bookings/${booking.id}`);
+        }
+        return;
+      }
+      
+      // Handle Telebirr payment (direct)
       if (bookingData.paymentMethod === "telebirr") {
         try {
           const paymentData = await apiRequest("POST", "/api/payment/telebirr", {
@@ -237,6 +329,7 @@ export default function PropertyDetails() {
           });
           navigate(`/bookings/${booking.id}`);
         }
+        return;
       }
       // Handle PayPal payment
       else if (bookingData.paymentMethod === "paypal") {
