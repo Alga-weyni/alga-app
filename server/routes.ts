@@ -941,6 +941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         telebirr: !!process.env.TELEBIRR_APP_ID,
         paypal: !!process.env.PAYPAL_CLIENT_ID,
         chapa: !!process.env.CHAPA_SECRET_KEY,
+        arifpay: !!process.env.ARIFPAY_API_KEY,
         sendgrid: !!process.env.SENDGRID_API_KEY
       }
     });

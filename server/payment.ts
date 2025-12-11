@@ -1,6 +1,8 @@
 import express from "express";
 import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
+// @ts-ignore - arifpay SDK has nested default export
+import ArifpayPkg from "arifpay";
 import { db } from './db.js';
 import { bookings } from '../shared/schema.js';
 import { eq } from "drizzle-orm";
@@ -726,6 +728,317 @@ router.get("/chapa/verify/:tx_ref", async (req, res) => {
       success: false, 
       message: err.message || "Payment verification failed",
       error: err.toString()
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// ARIFPAY PAYMENT (Ethiopian Licensed Payment Gateway)
+// -----------------------------------------------------------------------------
+
+// Initialize Arifpay (SDK has nested default export structure)
+const ArifpayClass = (ArifpayPkg as any).default || ArifpayPkg;
+let arifpay: any = null;
+try {
+  if (process.env.ARIFPAY_API_KEY && ArifpayClass) {
+    arifpay = new ArifpayClass(process.env.ARIFPAY_API_KEY);
+    console.log('[Arifpay] ✅ Payment gateway initialized');
+  }
+} catch (err) {
+  console.error('[Arifpay] Failed to initialize:', err);
+}
+
+// Arifpay status check
+router.get("/status/arifpay", (req, res) => {
+  const configured = !!arifpay;
+  return res.json({
+    status: configured ? 'ready' : 'not configured',
+    configured,
+    hasApiKey: !!process.env.ARIFPAY_API_KEY,
+    message: configured 
+      ? 'Arifpay service is ready to use' 
+      : 'Missing ARIFPAY_API_KEY environment variable',
+  });
+});
+
+// Initiate Arifpay payment
+router.post("/arifpay/initiate", async (req, res) => {
+  try {
+    if (!arifpay) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Arifpay is not configured. Please add ARIFPAY_API_KEY to environment." 
+      });
+    }
+
+    const { bookingId, amount, paymentMethods = ['TELEBIRR'] } = req.body;
+
+    if (!bookingId || !amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: bookingId and amount are required"
+      });
+    }
+
+    // Get booking details
+    const booking = await storage.getBooking(bookingId);
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    // Get guest details
+    const guest = await storage.getUser(booking.guestId);
+    if (!guest) {
+      return res.status(404).json({
+        success: false,
+        message: "Guest not found"
+      });
+    }
+
+    // Get property details for description
+    const property = await storage.getProperty(booking.propertyId);
+
+    const baseUrl = process.env.BASE_URL || req.get('origin') || 'http://localhost:5000';
+    const nonce = `ALGA-${bookingId}-${Date.now()}`;
+
+    // Calculate expire date (30 minutes from now)
+    const expireDate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+    // Create checkout session with Arifpay
+    const checkoutData = {
+      cancelUrl: `${baseUrl}/booking/cancelled?bookingId=${bookingId}`,
+      errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
+      notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
+      successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
+      expireDate,
+      nonce,
+      paymentMethods,
+      beneficiaries: [],
+      items: [
+        {
+          name: property?.title || `Property Booking #${bookingId}`,
+          price: parseFloat(amount),
+          quantity: 1,
+          image: property?.images?.[0] || 'https://alga.et/logo.png',
+          description: `Alga Booking #${bookingId} - ${property?.city || 'Ethiopia'}`
+        }
+      ]
+    };
+
+    console.log('[Arifpay] Initiating payment:', { bookingId, amount, nonce });
+
+    // Use sandbox mode in development
+    const isSandbox = process.env.NODE_ENV !== 'production';
+    const session = await arifpay.checkout.create(checkoutData, { sandbox: isSandbox });
+
+    console.log('[Arifpay] Session created:', session);
+
+    // Update booking with payment reference
+    await db.update(bookings)
+      .set({ 
+        paymentStatus: "pending", 
+        paymentRef: session.sessionId || nonce,
+        paymentMethod: "arifpay",
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId));
+
+    return res.status(200).json({
+      success: true,
+      sessionId: session.sessionId,
+      paymentUrl: session.paymentUrl,
+      nonce,
+      message: "Arifpay payment initialized successfully"
+    });
+  } catch (err: any) {
+    console.error("[Arifpay] Payment initialization error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Arifpay payment initialization failed",
+      error: err.toString()
+    });
+  }
+});
+
+// Arifpay webhook callback
+router.post("/arifpay/webhook", async (req, res) => {
+  try {
+    console.log('[Arifpay] Webhook received:', req.body);
+
+    const { sessionId, transactionId, status, nonce } = req.body;
+
+    // Find booking by payment reference (sessionId or nonce)
+    const paymentRef = sessionId || nonce;
+    
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.paymentRef, paymentRef))
+      .limit(1);
+
+    if (!booking) {
+      // Try to extract booking ID from nonce (ALGA-{bookingId}-{timestamp})
+      const parts = nonce?.split('-');
+      if (parts && parts[1]) {
+        const bookingId = parseInt(parts[1]);
+        const [foundBooking] = await db.select()
+          .from(bookings)
+          .where(eq(bookings.id, bookingId))
+          .limit(1);
+        
+        if (foundBooking) {
+          await processArifpayResult(foundBooking.id, status, transactionId);
+          return res.status(200).json({ success: true });
+        }
+      }
+      
+      console.error('[Arifpay] Booking not found for ref:', paymentRef);
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+
+    await processArifpayResult(booking.id, status, transactionId);
+
+    return res.status(200).json({ success: true });
+  } catch (err: any) {
+    console.error("[Arifpay] Webhook error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Webhook processing failed"
+    });
+  }
+});
+
+// Helper function to process Arifpay result
+async function processArifpayResult(bookingId: number, status: string, transactionId?: string) {
+  if (status === 'SUCCESS' || status === 'COMPLETED') {
+    await db.update(bookings)
+      .set({ 
+        status: "confirmed",
+        paymentStatus: "paid",
+        paymentRef: transactionId || bookings.paymentRef,
+        updatedAt: new Date() 
+      })
+      .where(eq(bookings.id, bookingId));
+    
+    // Generate access code for confirmed booking
+    await generateAccessCodeForBooking(bookingId);
+    
+    console.log(`✅ [Arifpay] Payment confirmed for booking #${bookingId}`);
+  } else if (status === 'FAILED' || status === 'CANCELLED') {
+    await db.update(bookings)
+      .set({ 
+        status: "cancelled",
+        paymentStatus: "failed", 
+        updatedAt: new Date() 
+      })
+      .where(eq(bookings.id, bookingId));
+    
+    console.log(`❌ [Arifpay] Payment failed for booking #${bookingId}`);
+  }
+}
+
+// Fetch Arifpay session status
+router.get("/arifpay/status/:sessionId", async (req, res) => {
+  try {
+    if (!arifpay) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Arifpay is not configured" 
+      });
+    }
+
+    const { sessionId } = req.params;
+
+    const isSandbox = process.env.NODE_ENV !== 'production';
+    const session = await arifpay.checkout.fetch(sessionId, { sandbox: isSandbox });
+
+    console.log('[Arifpay] Session status:', session);
+
+    // Find booking
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.paymentRef, sessionId))
+      .limit(1);
+
+    // Process based on status (use any type for flexible SDK response)
+    const txn = session.transaction as any;
+    const txnStatus = txn?.status || txn?.transactionStatus;
+    
+    if (txnStatus === 'SUCCESS' || txnStatus === 'COMPLETED') {
+      if (booking && booking.paymentStatus !== 'paid') {
+        await processArifpayResult(booking.id, 'SUCCESS', String(txn?.id || txn?.transactionId || ''));
+      }
+      
+      return res.status(200).json({
+        success: true,
+        status: 'paid',
+        session,
+        message: "Payment completed successfully"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      status: txnStatus || 'pending',
+      session,
+      message: "Session fetched successfully"
+    });
+  } catch (err: any) {
+    console.error("[Arifpay] Status check error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Failed to fetch session status"
+    });
+  }
+});
+
+// Cancel Arifpay session
+router.post("/arifpay/cancel/:sessionId", async (req, res) => {
+  try {
+    if (!arifpay) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Arifpay is not configured" 
+      });
+    }
+
+    const { sessionId } = req.params;
+
+    const isSandbox = process.env.NODE_ENV !== 'production';
+    const result = await arifpay.checkout.cancel(sessionId, { sandbox: isSandbox });
+
+    console.log('[Arifpay] Session cancelled:', result);
+
+    // Update booking
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.paymentRef, sessionId))
+      .limit(1);
+
+    if (booking) {
+      await db.update(bookings)
+        .set({ 
+          status: "cancelled",
+          paymentStatus: "cancelled", 
+          updatedAt: new Date() 
+        })
+        .where(eq(bookings.id, booking.id));
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Session cancelled successfully"
+    });
+  } catch (err: any) {
+    console.error("[Arifpay] Cancel error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Failed to cancel session"
     });
   }
 });
