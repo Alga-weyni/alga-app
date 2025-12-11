@@ -10,7 +10,7 @@
  */
 
 import { db } from '../server/db';
-import { bookings, wallets, ledgerEntries, settlements } from '../shared/schema';
+import { bookings, wallets, ledgerEntries, settlementTransactions } from '../shared/schema';
 import { eq, sql, and, gte, lte, desc } from 'drizzle-orm';
 
 interface ReconciliationResult {
@@ -100,12 +100,12 @@ async function checkPaymentSettlements() {
   try {
     const settlementStats = await db
       .select({
-        status: settlements.status,
+        status: settlementTransactions.status,
         count: sql<number>`COUNT(*)`,
         total: sql<string>`COALESCE(SUM(amount), 0)`
       })
-      .from(settlements)
-      .groupBy(settlements.status);
+      .from(settlementTransactions)
+      .groupBy(settlementTransactions.status);
 
     let pendingCount = 0;
     let pendingAmount = 0;
