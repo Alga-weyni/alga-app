@@ -139,8 +139,13 @@ All external service integrations follow these security principles:
 ### GitHub Actions Automation
 - `.github/workflows/daily-tests.yml` - Daily API tests at 9 AM EAT
 - `.github/workflows/weekly-security.yml` - Weekly security scans on Sundays
+- `.github/workflows/daily-reconciliation.yml` - Daily payment reconciliation at midnight EAT
 
 ### Documentation
 - `docs/DEVOPS_GUIDE.md` - Complete DevOps workflow guide
 - `docs/RUNBOOK.md` - Incident response procedures and escalation
 - `docs/DEPLOYMENT_APPROVAL.md` - Staging → Production approval workflow
+- `docs/PRELAUNCH_CHECKLIST.md` - Comprehensive pre-launch verification checklist
+- `docs/MONITORING_SETUP.md` - Monitoring dashboards and alerting configuration
+- `docs/DEVOPS_SCHEDULE.md` - Daily, weekly, monthly, quarterly maintenance schedule
+- `docs/BRANCH_PROTECTION.md` - Git branching strategy and GitHub protection rules
