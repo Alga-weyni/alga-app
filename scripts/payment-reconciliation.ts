@@ -39,13 +39,13 @@ async function checkWalletBalances() {
     let totalBalance = 0;
 
     for (const wallet of allWallets) {
-      const balance = parseFloat(wallet.balance || '0');
+      const balance = parseFloat(wallet.availableBalance || '0');
       totalBalance += balance;
       
       if (balance < 0) {
         negativeBalances++;
         addResult('Negative Balance Detected', 'FAIL', 
-          `Wallet ${wallet.id} (${wallet.type}) has negative balance`, balance);
+          `Wallet ${wallet.id} (${wallet.ownerType}) has negative balance`, balance);
       }
     }
 
@@ -185,18 +185,18 @@ async function checkTaxCalculations() {
     const sampleBookings = await db
       .select()
       .from(bookings)
-      .where(sql`vat_amount IS NOT NULL AND vat_amount > 0`)
+      .where(sql`vat IS NOT NULL AND vat > 0`)
       .limit(10);
 
     let taxErrors = 0;
 
     for (const booking of sampleBookings) {
-      const total = parseFloat(booking.totalAmount || '0');
-      const vat = parseFloat(booking.vatAmount || '0');
+      const total = parseFloat(booking.totalPrice || '0');
+      const vat = parseFloat(booking.vat || '0');
       const expectedVat = total * 0.15 / 1.15; // VAT from inclusive price
       
       // Allow 1% tolerance for rounding
-      if (Math.abs(vat - expectedVat) / expectedVat > 0.01) {
+      if (expectedVat > 0 && Math.abs(vat - expectedVat) / expectedVat > 0.01) {
         taxErrors++;
       }
     }
