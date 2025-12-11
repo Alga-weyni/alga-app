@@ -111,3 +111,26 @@ All external service integrations follow these security principles:
 - Failed login attempts tracked with IP addresses
 - Suspicious activity flagged in admin dashboard
 - Financial transactions use double-entry ledger with reconciliation
+
+## DevOps Implementation
+
+### Branching Strategy
+- `main` → Production (Render auto-deploy)
+- `staging` → Testing + INSA fixes
+- `dev` → Daily development
+
+### CI/CD Pipeline
+- Develop in Replit → Push to GitHub → Auto-deploy to Render
+- Health check endpoint: `/api/health`
+- Automated tests: `npx tsx scripts/api-tests.ts`
+
+### Key Scripts
+- `scripts/api-tests.ts` - Automated API testing (security, IDOR, validation)
+- `scripts/backup-database.sh` - PostgreSQL backup with 7-day retention
+- `scripts/security-audit-weekly.sh` - Weekly security scans
+
+### Monitoring Endpoints
+- `/api/health` - System health, database status, memory usage, service availability
+
+### Documentation
+- `docs/DEVOPS_GUIDE.md` - Complete DevOps workflow guide
