@@ -127,10 +127,20 @@ All external service integrations follow these security principles:
 ### Key Scripts
 - `scripts/api-tests.ts` - Automated API testing (security, IDOR, validation)
 - `scripts/backup-database.sh` - PostgreSQL backup with 7-day retention
-- `scripts/security-audit-weekly.sh` - Weekly security scans
+- `scripts/disaster-recovery-test.ts` - Disaster recovery simulation
+- `scripts/payment-reconciliation.ts` - Financial reconciliation and audit
+- `scripts/android-release.sh` - Android APK build automation with version bump
 
 ### Monitoring Endpoints
 - `/api/health` - System health, database status, memory usage, service availability
+- `/api/metrics` - Admin observability metrics (bookings, users, properties, system)
+- `/api/security/alerts` - Real-time security alerts (memory, integrity, restarts)
+
+### GitHub Actions Automation
+- `.github/workflows/daily-tests.yml` - Daily API tests at 9 AM EAT
+- `.github/workflows/weekly-security.yml` - Weekly security scans on Sundays
 
 ### Documentation
 - `docs/DEVOPS_GUIDE.md` - Complete DevOps workflow guide
+- `docs/RUNBOOK.md` - Incident response procedures and escalation
+- `docs/DEPLOYMENT_APPROVAL.md` - Staging → Production approval workflow

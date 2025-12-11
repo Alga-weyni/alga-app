@@ -25,7 +25,7 @@ import { ObjectStorageService, ObjectNotFoundError } from './objectStorage.js';
 import { ObjectPermission } from './objectAcl.js';
 import { imageProcessor } from './imageProcessor.js';
 import { matchTemplate, getGeneralHelp, type LemlemContext } from './lemlem-templates.js';
-import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments, auditLogs } from '../shared/schema.js';
+import { propertyInfo, lemlemChats, insertPropertyInfoSchema, insertLemlemChatSchema, properties, bookings, platformSettings, userActivityLog, agents, agentCommissions, agentProperties, agentWithdrawals, agentPerformance, paymentTransactions, hardwareDeployments, verificationDocuments, financialAuditLogs } from '../shared/schema.js';
 import { sql, desc, and, gte } from "drizzle-orm";
 import { createServer as createViteServer } from 'vite';
 import financialSettlementRoutes from './api/financial-settlement.routes.js';
@@ -1009,40 +1009,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const now = new Date();
       const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
-      const rateLimitViolations = await db
+      // Check for suspicious activity in financial audit logs
+      const suspiciousActivity = await db
         .select({ count: sql<number>`COUNT(*)` })
-        .from(auditLogs)
+        .from(financialAuditLogs)
         .where(and(
-          eq(auditLogs.action, 'rate_limit_exceeded'),
-          gte(auditLogs.timestamp, hourAgo)
+          eq(financialAuditLogs.category, 'integrity'),
+          gte(financialAuditLogs.createdAt, hourAgo)
         ));
 
-      if ((rateLimitViolations[0]?.count || 0) > 10) {
+      if ((suspiciousActivity[0]?.count || 0) > 5) {
         alerts.push({
           severity: 'high',
-          type: 'rate_limit',
-          message: `${rateLimitViolations[0].count} rate limit violations in the last hour`,
+          type: 'integrity_alert',
+          message: `${suspiciousActivity[0].count} integrity events in the last hour`,
           timestamp: now.toISOString()
         });
       }
 
-      const failedAuths = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(auditLogs)
-        .where(and(
-          eq(auditLogs.action, 'auth_failure'),
-          gte(auditLogs.timestamp, hourAgo)
-        ));
-
-      if ((failedAuths[0]?.count || 0) > 20) {
-        alerts.push({
-          severity: 'high',
-          type: 'auth_attack',
-          message: `${failedAuths[0].count} failed auth attempts in the last hour`,
-          timestamp: now.toISOString()
-        });
-      }
-
+      // Check memory usage
       const memoryUsage = process.memoryUsage();
       const memoryPercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
       
@@ -1051,6 +1036,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           severity: memoryPercent > 95 ? 'critical' : 'warning',
           type: 'memory',
           message: `High memory usage: ${memoryPercent.toFixed(1)}%`,
+          timestamp: now.toISOString()
+        });
+      }
+
+      // Check uptime (alert if recently restarted)
+      const uptimeSeconds = Math.floor((Date.now() - serverStartTime) / 1000);
+      if (uptimeSeconds < 300) {
+        alerts.push({
+          severity: 'info',
+          type: 'restart',
+          message: `Server recently restarted (${uptimeSeconds}s ago)`,
           timestamp: now.toISOString()
         });
       }
