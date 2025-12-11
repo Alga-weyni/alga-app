@@ -3,6 +3,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { storage } from './storage.js';
 import type { User } from '../shared/schema.js';
+import './types.js';
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -42,9 +43,9 @@ export async function setupAuth(app: Express) {
 
   // Enable passport-style login
   app.use((req, res, next) => {
-    (req as any).login = (user: User, callback: (err?: any) => void) => {
-      (req.session as any).userId = user.id;
-      (req.session as any).userRole = user.role;
+    req.login = (user: User, callback: (err?: any) => void) => {
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
       req.session.save((err) => {
         callback(err);
       });
@@ -69,7 +70,7 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const userId = (req.session as any).userId;
+  const userId = req.session.userId;
 
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -80,6 +81,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  (req as any).user = user;
+  req.user = user;
   next();
 };
