@@ -845,8 +845,8 @@ router.post("/arifpay/initiate", async (req, res) => {
     
     // Use direct API call to get actual error messages (SDK swallows errors)
     const apiUrl = isSandbox 
-      ? 'https://gateway.arifpay/api/sandbox/checkout/session'
-      : 'https://gateway.arifpay/api/checkout/session';
+      ? 'https://gateway.arifpay.net/api/sandbox/checkout/session'
+      : 'https://gateway.arifpay.net/api/checkout/session';
     
     console.log('[Arifpay] Making direct API call to:', apiUrl);
     
