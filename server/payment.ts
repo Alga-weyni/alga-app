@@ -3,8 +3,11 @@ import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
 // @ts-ignore - arifpay SDK has nested default export
 import ArifpayPkg from "arifpay";
-// @ts-ignore - arifpay helper functions
-import { getExpireDateFromDate } from "arifpay/lib/helper";
+
+// Helper function to format expire date for Arifpay (same format as SDK helper)
+function getExpireDateFromDate(date: Date): string {
+  return date.toISOString().replace("T", " ").replace("Z", "");
+}
 import { db } from './db.js';
 import { bookings } from '../shared/schema.js';
 import { eq } from "drizzle-orm";
