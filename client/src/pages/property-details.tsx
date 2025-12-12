@@ -197,42 +197,32 @@ export default function PropertyDetails() {
       setShowBookingDialog(false);
       setCurrentBooking(booking);
       
-      // ArifPay is the primary payment method
-      if (bookingData.paymentMethod === "arifpay") {
-        try {
-          const paymentData = await apiRequest("POST", "/api/payment/arifpay/initiate", {
-            bookingId: booking.id,
-            amount: parseFloat(booking.totalPrice),
-          });
-          
-          if (paymentData.success && paymentData.paymentUrl) {
-            // Redirect to ArifPay checkout
-            window.location.href = paymentData.paymentUrl;
-          } else {
-            toast({
-              title: "Payment initiation failed",
-              description: paymentData.message || "Unable to start payment. Please try again.",
-              variant: "destructive",
-            });
-            navigate(`/bookings/${booking.id}`);
-          }
-        } catch {
+      // Always redirect to ArifPay for payment
+      try {
+        const paymentData = await apiRequest("POST", "/api/payment/arifpay/initiate", {
+          bookingId: booking.id,
+          amount: parseFloat(booking.totalPrice),
+        });
+        
+        if (paymentData.success && paymentData.paymentUrl) {
+          // Redirect to ArifPay checkout
+          window.location.href = paymentData.paymentUrl;
+        } else {
           toast({
-            title: "Payment error",
-            description: "Unable to process payment. Please try again.",
+            title: "Payment initiation failed",
+            description: paymentData.message || "Unable to start payment. Please try again.",
             variant: "destructive",
           });
           navigate(`/bookings/${booking.id}`);
         }
-        return;
+      } catch {
+        toast({
+          title: "Payment error",
+          description: "Unable to process payment. Please try again.",
+          variant: "destructive",
+        });
+        navigate(`/bookings/${booking.id}`);
       }
-      
-      // Fallback for any other method
-      toast({
-        title: "Booking created successfully!",
-        description: "Your booking request has been submitted. You'll receive a confirmation email soon.",
-      });
-      navigate(`/bookings/${booking.id}`);
     },
     onError: () => {
       toast({
