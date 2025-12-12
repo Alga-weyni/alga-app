@@ -829,7 +829,9 @@ router.post("/arifpay/initiate", async (req, res) => {
         {
           name: (property?.title || `Booking ${bookingId}`).slice(0, 100),
           price: parseFloat(amount),
-          quantity: 1
+          quantity: 1,
+          description: `Property booking at ${property?.city || 'Ethiopia'}`,
+          image: "https://app.alga.et/logo.png"
         }
       ]
     };
