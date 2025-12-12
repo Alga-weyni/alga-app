@@ -834,10 +834,13 @@ router.post("/arifpay/initiate", async (req, res) => {
       ]
     };
 
-    console.log('[Arifpay] Initiating payment:', { bookingId, amount, nonce });
+    console.log('[Arifpay] Initiating payment:', { bookingId, amount, nonce, checkoutData });
 
-    // Use sandbox mode in development
-    const isSandbox = process.env.NODE_ENV !== 'production';
+    // Use sandbox mode based on environment variable or default to sandbox for safety
+    // Set ARIFPAY_SANDBOX=false in production when using production API key
+    const isSandbox = process.env.ARIFPAY_SANDBOX !== 'false';
+    console.log('[Arifpay] Using sandbox mode:', isSandbox);
+    
     const session = await arifpay.checkout.create(checkoutData, { sandbox: isSandbox });
 
     console.log('[Arifpay] Session created:', session);
