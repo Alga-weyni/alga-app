@@ -74,31 +74,12 @@ export const AMENITIES = [
 
 export const PAYMENT_METHODS = [
   {
-    id: "alga_pay",
-    name: "Alga Pay",
-    description: "Secure payment via Chapa",
-    icon: "💳",
-    featured: true,
-  },
-  {
     id: "arifpay",
-    name: "Arif Pay",
-    description: "Telebirr, Awash Wallet & Cards",
+    name: "ArifPay",
+    description: "Telebirr, Awash Wallet, Cards & More",
     icon: "🏦",
     recommended: true,
-  },
-  {
-    id: "alga_pay_international",
-    name: "Alga Pay (International)",
-    description: "Global cards (Visa, Mastercard)",
-    icon: "🌍",
-    international: true,
-  },
-  {
-    id: "telebirr",
-    name: "Telebirr",
-    description: "Ethiopian mobile money - Direct",
-    icon: "📱",
+    featured: true,
   },
 ];
 

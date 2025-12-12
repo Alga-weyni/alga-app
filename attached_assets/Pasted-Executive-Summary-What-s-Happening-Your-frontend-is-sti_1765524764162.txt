@@ -1,0 +1,122 @@
+Executive Summary — What’s Happening
+
+Your frontend is still using the old static payment options.
+Your backend now supports ArifPay, but the UI doesn’t know that yet.
+
+To fix this, your React/Next frontend needs to:
+
+Replace existing payment options with the ArifPay payment method
+
+Call the new ArifPay /create-session endpoint on booking confirmation
+
+Redirect the user to ArifPay’s hosted checkout
+
+Listen for the callback and update booking status
+
+✅ Task Order for Your Replit Agent / Frontend Developer
+
+Use this EXACT instruction:
+
+1. Update the frontend payment list
+
+Locate the payment options component — usually:
+
+client/src/components/booking/PaymentSelector.tsx
+
+
+or
+
+client/src/screens/BookingModal.jsx
+
+
+Replace the old static list:
+
+const paymentMethods = [
+  { id: 'telebirr', label: 'Telebirr' },
+  { id: 'alga', label: 'Alga Pay' },
+  { id: 'international', label: 'Alga Pay (International)' },
+];
+
+
+With:
+
+const paymentMethods = [
+  { id: 'arifpay', label: 'ArifPay', icon: '/icons/arifpay.png' }
+];
+
+
+This immediately removes Telebirr + old items from the UI.
+
+2. Connect the frontend to the backend ArifPay session
+
+Find the booking confirmation handler:
+
+Usually something like:
+
+const handleConfirmBooking = async () => { ... }
+
+
+Replace outdated code with:
+
+if (selectedPaymentMethod === 'arifpay') {
+  const res = await fetch(`/api/payments/arifpay/create-session`, {
+    method: 'POST',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      bookingId,
+      amount: totalPrice,
+      phone: user.phone,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (data?.payment_url) {
+    window.location.href = data.payment_url;
+    return;
+  }
+}
+
+
+This forces the UI → backend → ArifPay flow.
+
+3. Ensure env variables exist in Replit
+
+In Replit → Secrets, confirm:
+
+ARIFPAY_API_KEY=xxxxx
+ARIFPAY_BASE_URL=https://gateway.arifpay.net/api
+NODE_ENV=production
+
+
+Without ARIFPAY_BASE_URL, the frontend call will fall back to "empty" and show old payment fallback options.
+
+4. Restart the backend + redeploy
+
+On Replit:
+
+Stop the server
+
+Click Run again
+
+Clear your browser cache (cmd+shift+R)
+
+You should now see only:
+
+ArifPay
+
+as the single payment option.
+
+✅ What This Will Look Like After Fixing
+
+Your booking screen will now show:
+
+Payment Method:
+➡️ ArifPay
+
+
+No Telebirr
+No Alga Pay (old)
+No International Pay
+
+Just ArifPay, consistent with your new payments architecture.
