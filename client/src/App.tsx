@@ -45,6 +45,7 @@ import Bookings from "@/pages/bookings";
 import BookingDetails from "@/pages/booking-details";
 import BookingSuccess from "@/pages/booking-success";
 import BookingCancelled from "@/pages/booking-cancelled";
+import BookingError from "@/pages/booking-error";
 import Favorites from "@/pages/favorites";
 import TestIDScanner from "@/pages/test-id-scanner";
 import ScanIDPage from "@/pages/scan-id";
@@ -131,6 +132,7 @@ function Router() {
         <Route path="/properties/:id" element={<AnimatedRoute><PropertyDetails /></AnimatedRoute>} />
         <Route path="/booking/success" element={<AnimatedRoute><BookingSuccess /></AnimatedRoute>} />
         <Route path="/booking/cancelled" element={<AnimatedRoute><BookingCancelled /></AnimatedRoute>} />
+        <Route path="/booking/error" element={<AnimatedRoute><BookingError /></AnimatedRoute>} />
         <Route path="/scan-id" element={<AnimatedRoute><ScanIDPage /></AnimatedRoute>} />
         <Route path="/test-id-scanner" element={<AnimatedRoute><TestIDScanner /></AnimatedRoute>} />
         <Route path="/terms" element={<AnimatedRoute><TermsOfService /></AnimatedRoute>} />
