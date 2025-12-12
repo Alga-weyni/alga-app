@@ -249,10 +249,10 @@ export default function PropertyDetails() {
       return;
     }
 
-    if (!bookingData.checkIn || !bookingData.checkOut || !bookingData.paymentMethod) {
+    if (!bookingData.checkIn || !bookingData.checkOut) {
       toast({
         title: "Missing information",
-        description: "Please fill in all required booking details.",
+        description: "Please select check-in and check-out dates.",
         variant: "destructive",
       });
       return;
@@ -281,8 +281,53 @@ export default function PropertyDetails() {
       guests: bookingData.guests,
       totalPrice,
       currency: "ETB",
-      paymentMethod: bookingData.paymentMethod,
+      paymentMethod: "arifpay", // Always use ArifPay
       specialRequests: bookingData.specialRequests,
+    });
+  };
+
+  // Direct reserve - go straight to ArifPay
+  const handleDirectReserve = () => {
+    if (!isAuthenticated) {
+      window.location.href = getApiUrl("/api/login");
+      return;
+    }
+
+    if (!bookingData.checkIn || !bookingData.checkOut) {
+      toast({
+        title: "Select dates",
+        description: "Please select check-in and check-out dates first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const days = Math.ceil(
+      (new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()) / 
+      (1000 * 60 * 60 * 24)
+    );
+
+    if (days <= 0) {
+      toast({
+        title: "Invalid dates",
+        description: "Check-out date must be after check-in date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalPrice = parseFloat(property!.pricePerNight) * days;
+
+    // Create booking and redirect to ArifPay
+    bookingMutation.mutate({
+      propertyId,
+      checkIn: bookingData.checkIn,
+      checkOut: bookingData.checkOut,
+      guests: bookingData.guests,
+      totalPrice,
+      currency: "ETB",
+      paymentMethod: "arifpay",
+      specialRequests: "",
     });
   };
 
@@ -662,68 +707,18 @@ export default function PropertyDetails() {
                     </div>
                   )}
 
-                  <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        className="w-full bg-eth-red hover:bg-red-700 h-10 sm:h-11 text-sm sm:text-base" 
-                        disabled={!bookingData.checkIn || !bookingData.checkOut}
-                        data-testid="button-reserve"
-                      >
-                        <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                        Reserve
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Complete Your Booking</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="paymentMethod">Payment Method</Label>
-                          <Select 
-                            value={bookingData.paymentMethod} 
-                            onValueChange={(value) => setBookingData(prev => ({ ...prev, paymentMethod: value }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose payment method..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {PAYMENT_METHODS.map((method) => (
-                                <SelectItem key={method.id} value={method.id}>
-                                  <div className="flex items-center">
-                                    <span className="mr-2">{method.icon}</span>
-                                    {method.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
-                          <Textarea
-                            id="specialRequests"
-                            placeholder="Any special requests or requirements..."
-                            value={bookingData.specialRequests}
-                            onChange={(e) => setBookingData(prev => ({ ...prev, specialRequests: e.target.value }))}
-                          />
-                        </div>
-
-                        <Button 
-                          onClick={handleBooking} 
-                          className="w-full bg-eth-green hover:bg-green-700"
-                          disabled={bookingMutation.isPending}
-                        >
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          {bookingMutation.isPending ? "Processing..." : "Confirm Booking"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <Button 
+                    className="w-full bg-eth-red hover:bg-red-700 h-10 sm:h-11 text-sm sm:text-base" 
+                    disabled={!bookingData.checkIn || !bookingData.checkOut || bookingMutation.isPending}
+                    onClick={handleDirectReserve}
+                    data-testid="button-reserve"
+                  >
+                    <Calendar className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    {bookingMutation.isPending ? "Processing..." : "Reserve"}
+                  </Button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    You won't be charged yet
+                    Pay securely with ArifPay
                   </p>
                 </div>
               </CardContent>
