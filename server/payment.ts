@@ -6,7 +6,7 @@ import ArifpayPkg from "arifpay";
 
 // Helper function to format expire date for Arifpay (same format as SDK helper)
 function getExpireDateFromDate(date: Date): string {
-  return date.toISOString().replace("T", " ").replace("Z", "");
+  return date.toISOString();
 }
 import { db } from './db.js';
 import { bookings } from '../shared/schema.js';
@@ -864,10 +864,18 @@ router.post("/arifpay/initiate", async (req, res) => {
     });
   } catch (err: any) {
     console.error("[Arifpay] Payment initialization error:", err);
+    console.error("[Arifpay] Error details:", {
+      name: err?.name,
+      message: err?.message,
+      msg: err?.msg,
+      data: err?.data,
+      response: err?.response?.data
+    });
     return res.status(500).json({ 
       success: false, 
-      message: err.message || "Arifpay payment initialization failed",
-      error: err.toString()
+      message: err.message || err.msg || "Arifpay payment initialization failed",
+      error: err.toString(),
+      details: err?.data || err?.response?.data
     });
   }
 });
