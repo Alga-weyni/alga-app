@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
 // @ts-ignore - arifpay SDK has nested default export
 import ArifpayPkg from "arifpay";
+// @ts-ignore - arifpay helper functions
+import { getExpireDateFromDate } from "arifpay/lib/helper";
 import { db } from './db.js';
 import { bookings } from '../shared/schema.js';
 import { eq } from "drizzle-orm";
@@ -803,11 +805,11 @@ router.post("/arifpay/initiate", async (req, res) => {
 
     const baseUrl = process.env.BASE_URL || req.get('origin') || 'http://localhost:5000';
     // Arifpay requires numeric string nonce
-    const nonce = `${bookingId}${Date.now()}`.slice(-10);
+    const nonce = Math.floor(Math.random() * 10000).toString();
 
-    // Calculate expire date (30 minutes from now) - format: YYYY-MM-DDTHH:mm:ss
+    // Calculate expire date (30 minutes from now) - use ArifPay helper
     const expireDate = new Date(Date.now() + 30 * 60 * 1000);
-    const formattedExpireDate = expireDate.toISOString().slice(0, 19);
+    const formattedExpireDate = getExpireDateFromDate(expireDate);
 
     // Create checkout session with Arifpay
     // Use empty array for paymentMethods to allow all payment options
