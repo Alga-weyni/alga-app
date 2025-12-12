@@ -42,7 +42,12 @@ export function sanitizeUserResponse(user: any): any {
 export function validateBookingDates(checkIn: Date | string, checkOut: Date | string): { valid: boolean; error?: string } {
   const checkInDate = new Date(checkIn);
   const checkOutDate = new Date(checkOut);
-  const now = new Date();
+  
+  // Compare dates only (ignore time) to allow same-day bookings
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkInDateOnly = new Date(checkInDate);
+  checkInDateOnly.setHours(0, 0, 0, 0);
   
   if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
     return { valid: false, error: 'Invalid date format' };
@@ -52,7 +57,7 @@ export function validateBookingDates(checkIn: Date | string, checkOut: Date | st
     return { valid: false, error: 'Check-out date must be after check-in date' };
   }
   
-  if (checkInDate < now) {
+  if (checkInDateOnly < today) {
     return { valid: false, error: 'Check-in date cannot be in the past' };
   }
   
