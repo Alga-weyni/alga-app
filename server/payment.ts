@@ -843,9 +843,20 @@ router.post("/arifpay/initiate", async (req, res) => {
     const isSandbox = process.env.ARIFPAY_SANDBOX !== 'false';
     console.log('[Arifpay] Using sandbox mode:', isSandbox);
     
-    const session = await arifpay.checkout.create(checkoutData, { sandbox: isSandbox });
-
-    console.log('[Arifpay] Session created:', session);
+    let session;
+    try {
+      session = await arifpay.checkout.create(checkoutData, { sandbox: isSandbox });
+      console.log('[Arifpay] Session created:', session);
+    } catch (createErr: any) {
+      console.error('[Arifpay] Checkout create failed:', {
+        error: createErr,
+        errorMessage: createErr?.message,
+        errorData: createErr?.data,
+        errorResponse: createErr?.response,
+        errorStack: createErr?.stack
+      });
+      throw createErr;
+    }
 
     // Update booking with payment reference
     await db.update(bookings)
