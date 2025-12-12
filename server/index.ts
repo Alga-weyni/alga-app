@@ -47,7 +47,7 @@ const corsOptions = {
       if (allowed === "file://") {
         return origin.startsWith("file://") || origin === "null" || !origin;
       }
-      return origin === allowed;
+      return origin === allowed || origin.endsWith('.alga.et');
     })) {
       callback(null, true);
     } else if (process.env.NODE_ENV === "development") {
@@ -60,10 +60,13 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['X-Total-Count']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma'],
+  exposedHeaders: ['X-Total-Count', 'Content-Length']
 };
 app.use(cors(corsOptions));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', cors(corsOptions));
 
 // Security: Limit request body size - increased for file uploads (INSA requirement)
 app.use(express.json({ limit: '50mb' }));
