@@ -802,28 +802,29 @@ router.post("/arifpay/initiate", async (req, res) => {
     const property = await storage.getProperty(booking.propertyId);
 
     const baseUrl = process.env.BASE_URL || req.get('origin') || 'http://localhost:5000';
-    const nonce = `ALGA-${bookingId}-${Date.now()}`;
+    // Arifpay requires numeric string nonce
+    const nonce = `${bookingId}${Date.now()}`.slice(-10);
 
-    // Calculate expire date (30 minutes from now)
-    const expireDate = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Calculate expire date (30 minutes from now) - format: YYYY-MM-DDTHH:mm:ss
+    const expireDate = new Date(Date.now() + 30 * 60 * 1000);
+    const formattedExpireDate = expireDate.toISOString().slice(0, 19);
 
     // Create checkout session with Arifpay
+    // Use empty array for paymentMethods to allow all payment options
     const checkoutData = {
       cancelUrl: `${baseUrl}/booking/cancelled?bookingId=${bookingId}`,
       errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
       notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
       successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
-      expireDate,
+      expireDate: formattedExpireDate,
       nonce,
-      paymentMethods,
+      paymentMethods: [], // Empty array allows all payment methods
       beneficiaries: [],
       items: [
         {
-          name: property?.title || `Property Booking #${bookingId}`,
+          name: (property?.title || `Booking ${bookingId}`).slice(0, 100),
           price: parseFloat(amount),
-          quantity: 1,
-          image: property?.images?.[0] || 'https://alga.et/logo.png',
-          description: `Alga Booking #${bookingId} - ${property?.city || 'Ethiopia'}`
+          quantity: 1
         }
       ]
     };
