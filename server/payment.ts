@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { Chapa } from "chapa-nodejs";
 // @ts-ignore - arifpay SDK has nested default export
 import ArifpayPkg from "arifpay";
+import axios from "axios";
 
 // Helper function to format expire date for Arifpay (same format as SDK helper)
 function getExpireDateFromDate(date: Date): string {
@@ -843,19 +844,41 @@ router.post("/arifpay/initiate", async (req, res) => {
     const isSandbox = process.env.ARIFPAY_SANDBOX !== 'false';
     console.log('[Arifpay] Using sandbox mode:', isSandbox);
     
+    // Use direct API call to get actual error messages (SDK swallows errors)
+    const apiUrl = isSandbox 
+      ? 'https://gateway.arifpay.net/api/sandbox/checkout/session'
+      : 'https://gateway.arifpay.net/api/checkout/session';
+    
+    console.log('[Arifpay] Making direct API call to:', apiUrl);
+    
     let session;
     try {
-      session = await arifpay.checkout.create(checkoutData, { sandbox: isSandbox });
+      const response = await axios.post(apiUrl, checkoutData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-arifpay-key': process.env.ARIFPAY_API_KEY || ''
+        }
+      });
+      
+      console.log('[Arifpay] API Response:', response.data);
+      
+      if (!response.data || response.data.error) {
+        throw new Error(response.data?.msg || response.data?.message || 'Unknown ArifPay error');
+      }
+      
+      session = response.data.data;
       console.log('[Arifpay] Session created:', session);
     } catch (createErr: any) {
       console.error('[Arifpay] Checkout create failed:', {
-        error: createErr,
-        errorMessage: createErr?.message,
-        errorData: createErr?.data,
-        errorResponse: createErr?.response,
-        errorStack: createErr?.stack
+        status: createErr?.response?.status,
+        statusText: createErr?.response?.statusText,
+        responseData: createErr?.response?.data,
+        errorMessage: createErr?.message
       });
-      throw createErr;
+      
+      // Return actual error message from API
+      const apiError = createErr?.response?.data;
+      throw new Error(apiError?.msg || apiError?.message || apiError?.error || createErr?.message || 'ArifPay API error');
     }
 
     // Update booking with payment reference
