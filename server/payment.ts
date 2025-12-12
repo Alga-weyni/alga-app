@@ -811,9 +811,10 @@ router.post("/arifpay/initiate", async (req, res) => {
     // Arifpay requires numeric string nonce
     const nonce = Math.floor(Math.random() * 10000).toString();
 
-    // Calculate expire date (30 minutes from now) - use ArifPay helper
+    // Calculate expire date (30 minutes from now)
+    // ArifPay expects ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
     const expireDate = new Date(Date.now() + 30 * 60 * 1000);
-    const formattedExpireDate = getExpireDateFromDate(expireDate);
+    const formattedExpireDate = expireDate.toISOString();
 
     // Create checkout session with Arifpay
     // Use empty array for paymentMethods to allow all payment options
@@ -828,11 +829,9 @@ router.post("/arifpay/initiate", async (req, res) => {
       beneficiaries: [],
       items: [
         {
-          name: (property?.title || `Booking ${bookingId}`).slice(0, 100),
-          price: parseFloat(amount),
-          quantity: 1,
-          description: `Property booking at ${property?.city || 'Ethiopia'}`,
-          image: "https://app.alga.et/logo.png"
+          name: (property?.title || `Booking ${bookingId}`).slice(0, 50),
+          price: Math.round(parseFloat(amount) * 100) / 100,
+          quantity: 1
         }
       ]
     };
