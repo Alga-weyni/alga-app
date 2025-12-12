@@ -826,7 +826,13 @@ router.post("/arifpay/initiate", async (req, res) => {
       expireDate: formattedExpireDate,
       nonce,
       paymentMethods: [], // Empty array allows all payment methods
-      beneficiaries: [],
+      beneficiaries: [
+        {
+          accountNumber: "01320811436100",
+          bank: "AWINETAA",
+          amount: Math.round(parseFloat(amount) * 100) / 100
+        }
+      ],
       items: [
         {
           name: (property?.title || `Booking ${bookingId}`).slice(0, 50),
