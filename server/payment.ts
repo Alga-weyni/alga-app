@@ -811,35 +811,38 @@ router.post("/arifpay/initiate", async (req, res) => {
     // Arifpay requires numeric string nonce
     const nonce = Math.floor(Math.random() * 10000).toString();
 
-    // Calculate expire date (30 minutes from now)
-    // ArifPay expects ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
-    const expireDate = new Date(Date.now() + 30 * 60 * 1000);
-    const formattedExpireDate = expireDate.toISOString();
+    // Calculate expire date (24 hours from now)
+    // ArifPay expects format: YYYY-MM-DDTHH:mm:ss (no milliseconds, no Z)
+    const expireDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const formattedExpireDate = expireDate.toISOString().split('.')[0];
 
     // Create checkout session with Arifpay
-    // Use empty array for paymentMethods to allow all payment options
+    const priceAmount = Math.round(parseFloat(amount) * 100) / 100;
     const checkoutData = {
       cancelUrl: `${baseUrl}/booking/cancelled?bookingId=${bookingId}`,
       errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
       notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
       successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
-      expireDate: formattedExpireDate,
+      phone: guest.phoneNumber || "",
+      email: guest.email || "",
       nonce,
-      paymentMethods: [], // Empty array allows all payment methods
+      expireDate: formattedExpireDate,
+      paymentMethods: [],
+      items: [
+        {
+          name: (property?.title || `Booking ${bookingId}`).slice(0, 50),
+          price: priceAmount,
+          quantity: 1
+        }
+      ],
       beneficiaries: [
         {
           accountNumber: "01320811436100",
           bank: "AWINETAA",
-          amount: Math.round(parseFloat(amount) * 100) / 100
+          amount: priceAmount
         }
       ],
-      items: [
-        {
-          name: (property?.title || `Booking ${bookingId}`).slice(0, 50),
-          price: Math.round(parseFloat(amount) * 100) / 100,
-          quantity: 1
-        }
-      ]
+      lang: "EN"
     };
 
     console.log('[Arifpay] Initiating payment:', { bookingId, amount, nonce, checkoutData });
