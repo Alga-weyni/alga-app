@@ -1,0 +1,51 @@
+amanuel@Amanuels-MacBook-Air alga-app % npm run build
+
+> rest-express@1.0.0 build
+> npx vite build && tsc --project tsconfig.backend.json && echo 'Frontend + Backend built successfully ✓'
+
+vite v6.4.1 building for production...
+✓ 3877 modules transformed.
+[plugin vite:reporter] 
+(!) /Users/amanuel/AndroidStudioProjects/alga-app/node_modules/html5-qrcode/esm/index.js is dynamically imported by /Users/amanuel/AndroidStudioProjects/alga-app/client/src/pages/become-agent.tsx but also statically imported by /Users/amanuel/AndroidStudioProjects/alga-app/client/src/components/scan-id.tsx, dynamic import will not move module into another chunk.                                                                                               
+                                                                                                                                                         
+../dist/public/registerSW.js                                          0.13 kB
+../dist/public/manifest.webmanifest                                   0.50 kB
+../dist/public/index.html                                             1.91 kB │ gzip:   0.92 kB
+../dist/public/assets/addis_ababa_ethiopia_ab074746-DOCCYB3k.jpg    334.06 kB
+../dist/public/assets/gondar_ethiopia_roya_bce991b8-LSfEaX92.jpg    419.97 kB
+../dist/public/assets/bahir_dar_ethiopia_l_aa3e2250-C_a-SNiq.jpg    625.81 kB
+../dist/public/assets/index-BGC9CzMD.css                            140.04 kB │ gzip:  21.99 kB
+../dist/public/assets/purify.es-B6FQ9oRL.js                          22.57 kB │ gzip:   8.74 kB
+../dist/public/assets/qr-scanner-worker.min-D85Z9gVD.js              43.95 kB │ gzip:  10.46 kB
+../dist/public/assets/index.es-etDkoJIx.js                          159.36 kB │ gzip:  53.40 kB
+../dist/public/assets/html2canvas.esm-QH1iLAAe.js                   202.38 kB │ gzip:  48.04 kB
+../dist/public/assets/index-BlSltY9a.js                           3,034.14 kB │ gzip: 849.92 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:                                                                                     
+- Using dynamic import() to code-split the application                                                                                                   
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks                       
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.                                                                              
+✓ built in 23.83s
+
+PWA v1.1.0
+mode      generateSW
+precache  23 entries (7839.26 KiB)
+files generated
+  ../dist/public/sw.js
+  ../dist/public/workbox-f6a91684.js
+server/types.ts:15:7 - error TS2300: Duplicate identifier 'login'.
+
+15       login?: (user: User, callback: (err?: any) => void) => void;
+         ~~~~~
+
+  node_modules/@types/passport/index.d.ts:30:13
+    30             login(user: User, done: (err: any) => void): void;
+                   ~~~~~
+    'login' was also declared here.
+  node_modules/@types/passport/index.d.ts:31:13
+    31             login(user: User, options: passport.LogInOptions, done: (err: any) => void): void;
+                   ~~~~~
+    and here.
+
+
+Found 1 error in server/types.ts:15

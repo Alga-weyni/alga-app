@@ -12,7 +12,6 @@ declare global {
   namespace Express {
     interface Request {
       user?: User;
-      login?: (user: User, callback: (err?: any) => void) => void;
     }
   }
 }
