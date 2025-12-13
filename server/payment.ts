@@ -817,7 +817,13 @@ router.post("/arifpay/initiate", async (req, res) => {
     const formattedExpireDate = expireDate.toISOString().split('.')[0];
 
     // Create checkout session with Arifpay
-    const priceAmount = Math.round(parseFloat(amount) * 100) / 100;
+    // Calculate price with 2.5% payment processing fee (customer pays the fee)
+    const basePrice = Math.round(parseFloat(amount) * 100) / 100;
+    const paymentFee = Math.round(basePrice * 0.025 * 100) / 100; // 2.5% fee
+    const arifPayPrice = Math.round((basePrice + paymentFee) * 100) / 100;
+    
+    console.log('[Arifpay] Price calculation:', { basePrice, paymentFee, arifPayPrice });
+    
     const checkoutData = {
       cancelUrl: `${baseUrl}/booking/cancelled?bookingId=${bookingId}`,
       errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
@@ -831,7 +837,7 @@ router.post("/arifpay/initiate", async (req, res) => {
       items: [
         {
           name: (property?.title || `Booking ${bookingId}`).slice(0, 50),
-          price: priceAmount,
+          price: arifPayPrice,
           quantity: 1
         }
       ],
@@ -839,7 +845,7 @@ router.post("/arifpay/initiate", async (req, res) => {
         {
           accountNumber: "01320811436100",
           bank: "AWINETAA",
-          amount: priceAmount
+          amount: arifPayPrice
         }
       ],
       lang: "EN"
