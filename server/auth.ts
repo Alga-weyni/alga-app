@@ -41,9 +41,9 @@ export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
 
-  // Enable passport-style login
+  // Enable session-based login
   app.use((req, res, next) => {
-    req.login = (user: User, callback: (err?: any) => void) => {
+    (req as any).loginUser = (user: User, callback: (err?: any) => void) => {
       req.session.userId = user.id;
       req.session.userRole = user.role;
       req.session.save((err) => {
