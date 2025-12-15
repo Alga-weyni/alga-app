@@ -718,7 +718,7 @@ export default function PropertyDetails() {
                   </Button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    Pay securely with ArifPay
+                    Tax and service charge is not included
                   </p>
                 </div>
               </CardContent>
