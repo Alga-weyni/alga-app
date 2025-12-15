@@ -53,9 +53,16 @@ export default function AdminServiceProviders() {
     }
   };
 
-  // Fetch all service providers
+  // Fetch all service providers (including inactive for admin)
   const { data: allProviders = [], isLoading } = useQuery<ServiceProvider[]>({
-    queryKey: ['/api/service-providers'],
+    queryKey: ['/api/service-providers', 'includeAll'],
+    queryFn: async () => {
+      const response = await fetch('/api/service-providers?includeAll=true', {
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to fetch providers');
+      return response.json();
+    },
   });
 
   const pendingProviders = allProviders.filter(p => p.verificationStatus === 'pending');

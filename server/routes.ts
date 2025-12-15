@@ -4791,14 +4791,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all service providers with filters
-  app.get('/api/service-providers', async (req, res) => {
+  app.get('/api/service-providers', async (req: any, res) => {
     try {
-      const { city, serviceType, verificationStatus } = req.query;
+      const { city, serviceType, verificationStatus, includeAll } = req.query;
       const filters: any = {};
       
       if (city) filters.city = city as string;
       if (serviceType) filters.serviceType = serviceType as string;
       if (verificationStatus) filters.verificationStatus = verificationStatus as string;
+      
+      // Admin/operators can see all providers including inactive ones
+      if (includeAll === 'true' && req.user && (req.user.role === 'admin' || req.user.role === 'operator')) {
+        filters.includeInactive = true;
+      }
       
       const providers = await storage.getAllServiceProviders(filters);
       res.json(providers);

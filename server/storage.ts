@@ -1407,8 +1407,13 @@ export class DatabaseStorage implements IStorage {
     city?: string;
     serviceType?: string;
     verificationStatus?: string;
+    includeInactive?: boolean;
   }): Promise<ServiceProvider[]> {
-    const conditions = [eq(serviceProviders.isActive, true)];
+    const conditions: any[] = [];
+    
+    if (!filters?.includeInactive) {
+      conditions.push(eq(serviceProviders.isActive, true));
+    }
     
     if (filters?.city) {
       conditions.push(eq(serviceProviders.city, filters.city));
@@ -1418,6 +1423,13 @@ export class DatabaseStorage implements IStorage {
     }
     if (filters?.verificationStatus) {
       conditions.push(eq(serviceProviders.verificationStatus, filters.verificationStatus));
+    }
+    
+    if (conditions.length === 0) {
+      return await db
+        .select()
+        .from(serviceProviders)
+        .orderBy(desc(serviceProviders.rating), desc(serviceProviders.totalJobsCompleted));
     }
     
     return await db

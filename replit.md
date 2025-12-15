@@ -49,7 +49,7 @@ The frontend is built with React, TypeScript (Vite), React Router for routing, S
 - **Identity Verification**: `html5-qrcode` (QR scanning), `tesseract.js` (OCR).
 - **Mapping & Location**: Google Maps Geocoding API.
 - **Smart Lock Integration**: TTLock Open Platform API and SDK.
-- **File Storage**: Replit App Storage (Google Cloud Storage).
+- **File Storage**: Cloudflare R2 (production), with signed URL uploads for security. Uses `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner`.
 - **AI Services**: Replit AI Integration.
 - **Mobile Frameworks**: Capacitor (native iOS/Android), `vite-plugin-pwa` (Progressive Web App).
 - **UI & Design**: Radix UI, Lucide Icons.
