@@ -106,6 +106,11 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
             loading="lazy"
             className="w-full h-40 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
             data-testid={`img-property-${property.id}`}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.onerror = null;
+              target.src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+            }}
           />
           <Button
             variant="ghost"
