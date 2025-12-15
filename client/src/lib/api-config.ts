@@ -29,11 +29,15 @@ export function getApiUrl(endpoint: string): string {
   let baseUrl = '';
   
   if (isNativeMobile) {
-    // Mobile app: use environment-aware URL
+    // Mobile app: use environment-aware URL (needs full URL for native HTTP client)
     baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
+  } else if (isProduction) {
+    // Web app in production: use production API URL
+    baseUrl = PRODUCTION_API_URL;
   } else {
-    // Web app: use production API in production, development in dev
-    baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
+    // Web app in development: use relative URL so browser uses same origin
+    // This avoids CSP issues when served via Replit's proxy
+    baseUrl = '';
   }
   
   return `${baseUrl}${endpoint}`;
@@ -52,7 +56,7 @@ export function getBaseApiUrl(): string {
 /**
  * Get the full URL for an image/asset
  * Handles both relative URLs (old data) and absolute URLs (new data)
- * @param imageUrl - Image URL (can be relative like /uploads/... or absolute)
+ * @param imageUrl - Image URL (can be relative like /uploads/... or /objects/... or absolute)
  * @returns Full URL for the image
  */
 export function getImageUrl(imageUrl: string | undefined | null): string {
@@ -65,8 +69,8 @@ export function getImageUrl(imageUrl: string | undefined | null): string {
     return imageUrl;
   }
   
-  // If it's a relative URL starting with /uploads, handle appropriately
-  if (imageUrl.startsWith('/uploads/')) {
+  // If it's a relative URL starting with /uploads or /objects, handle appropriately
+  if (imageUrl.startsWith('/uploads/') || imageUrl.startsWith('/objects/')) {
     // For native mobile apps, always use full URL
     if (isNativeMobile) {
       const baseUrl = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
