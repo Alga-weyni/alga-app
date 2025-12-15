@@ -6188,16 +6188,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(1);
 
       if (existing.length > 0) {
-        // If they already have an agent account, update their role and return success
-        await storage.updateUserRole(userId, 'agent');
+        const existingAgent = existing[0];
+        // If they already have an approved agent account, update their role
+        if (existingAgent.status === 'approved') {
+          await storage.updateUserRole(userId, 'agent');
+          return res.json({
+            success: true,
+            agent: existingAgent,
+            message: "You already have an approved agent account. Your role has been updated.",
+          });
+        } else if (existingAgent.status === 'pending') {
+          return res.json({
+            success: true,
+            agent: existingAgent,
+            message: "Your agent application is pending admin approval. Please wait for an administrator to review your application.",
+          });
+        } else if (existingAgent.status === 'rejected') {
+          return res.status(400).json({
+            success: false,
+            agent: existingAgent,
+            message: `Your previous application was rejected: ${existingAgent.rejectionReason || 'No reason provided'}. Please contact support for more information.`,
+          });
+        }
         return res.json({
           success: true,
-          agent: existing[0],
-          message: "You already have an agent account. Your role has been updated.",
+          agent: existingAgent,
+          message: "You already have an agent account.",
         });
       }
 
-      // Create agent account
+      // Create agent account - requires admin approval
       const [newAgent] = await db
         .insert(agents)
         .values({
@@ -6209,7 +6229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subCity: subCity || null,
           businessName: businessName || null,
           idNumber: idNumber || null,
-          status: 'approved',  // Instant approval for verified users
+          status: 'pending',  // Requires admin approval
           totalEarnings: '0.00',
           totalProperties: 0,
           activeProperties: 0,
@@ -6217,13 +6237,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
-      // CRITICAL: Update user's role to 'agent' so they can access agent pages
-      await storage.updateUserRole(userId, 'agent');
+      // NOTE: User role will be updated to 'agent' only after admin approves the application
 
       res.json({
         success: true,
         agent: newAgent,
-        message: "Agent account created successfully! You can now list properties.",
+        message: "Your Dellala agent application has been submitted! You will be notified once an admin reviews and approves your application.",
       });
     } catch (error: any) {
       console.error("Agent registration error:", error);
@@ -8115,7 +8134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Update user role if approved
       if (status === 'approved') {
-        await storage.updateUserRole(updatedAgent.userId, 'dellala');
+        await storage.updateUserRole(updatedAgent.userId, 'agent');
       }
       
       res.json(updatedAgent);
