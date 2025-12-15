@@ -1,0 +1,293 @@
+✅ REPLIT AGENT – CLOUDLARE R2 PRODUCTION SETUP (AUTHORITATIVE)
+OBJECTIVE
+
+Replace all local/Replit image storage with Cloudflare R2 using signed uploads.
+Production-safe. Stateless. Audit-ready.
+
+1️⃣ Install Required Dependencies
+
+Run this in Replit Shell:
+
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+
+2️⃣ Add Production Environment Variables (Replit → Secrets)
+
+DO NOT hardcode these. Add as Secrets only.
+
+R2_ACCOUNT_ID=xxxxxxxxxxxxxxxx
+R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
+R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxx
+R2_BUCKET=alga-prod-assets
+R2_PUBLIC_BASE_URL=https://cdn.alga.et
+
+3️⃣ Create R2 Client (NEW FILE)
+
+📄 Create: src/lib/r2.ts
+
+import { S3Client } from "@aws-sdk/client-s3";
+
+export const r2 = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+
+4️⃣ Create Signed Upload Service (NEW FILE)
+
+📄 Create: src/services/imageUpload.service.ts
+
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { r2 } from "../lib/r2";
+
+export async function generateImageUploadUrl(
+  propertyId: string,
+  filename: string,
+  contentType: string
+) {
+  const key = `properties/${propertyId}/${filename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET!,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(r2, command, { expiresIn: 300 });
+
+  return {
+    uploadUrl,
+    publicUrl: `${process.env.R2_PUBLIC_BASE_URL}/${key}`,
+  };
+}
+
+5️⃣ Add API Endpoint (Backend)
+
+📄 Modify: src/routes/upload.routes.ts (or equivalent)
+
+import express from "express";
+import { generateImageUploadUrl } from "../services/imageUpload.service";
+
+const router = express.Router();
+
+router.post("/upload-url", async (req, res) => {
+  const { propertyId, filename, contentType } = req.body;
+
+  if (!propertyId || !filename || !contentType) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const result = await generateImageUploadUrl(
+    propertyId,
+    filename,
+    contentType
+  );
+
+  res.json(result);
+});
+
+export default router;
+
+
+📌 Ensure route is registered in app entry file.
+
+6️⃣ Frontend Upload Logic (MANDATORY CHANGE)
+
+Frontend must:
+
+Request /upload-url
+
+Upload file directly to R2
+
+Save returned publicUrl to database
+
+const res = await fetch("/api/upload-url", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    propertyId,
+    filename: file.name,
+    contentType: file.type,
+  }),
+});
+
+const { uploadUrl, publicUrl } = await res.json();
+
+await fetch(uploadUrl, {
+  method: "PUT",
+  headers: { "Content-Type": file.type },
+  body: file,
+});
+
+// Save publicUrl to DB
+
+7️⃣ DELETE OLD LOCAL STORAGE (NON-NEGOTIABLE)
+
+Agent must remove:
+
+multer
+
+uploads/ folders
+
+Any fs.writeFile, diskStorage, or local paths
+
+❌ No local persistence allowed in production.
+
+8️⃣ Verification Checklist (Agent Must Confirm)
+
+ No files written to local disk
+
+ Images persist after server restart
+
+ URLs load from cdn.alga.et
+
+ DB stores URLs only
+
+ Replit Object Storage unused in prod
+
+CEO FINAL DIRECTIVE (COPY THIS TO AGENT)
+
+“Implement Cloudflare R2 using signed uploads.
+Replit storage is dev-only.
+No local filesystem writes.
+URLs saved to DB, files live in R2.
+This is production and audit-final.”
+
+If you want next, I can:
+
+Produce a single diff-style patch
+
+Add image validation & size limits
+
+Create auto-cleanup on property delete
+
+Write a 1-page INSA storage compliance note
+
+Say the word — we’ll lock this in properly.
+
+seed powder use of avocado seed in amharic language
+
+የአቮካዶ ዘር ዱቄት (Avocado Seed Powder) አጠቃቀም
+
+የአቮካዶ ዘር ዱቄት በተፈጥሯዊ መንገድ የሚዘጋጅ ሲሆን በባህላዊ ሕክምናና በምግብ ተጨማሪ መልኩ ይጠቀማል። ከታች ዋና አጠቃቀሞቹ ተዘርዝረዋል፦
+
+1) ለመፍጨት እና ለሆድ
+
+የመፍጨት ችግኝነትን ሊረዳ
+
+ጉበት መንፈሳሽነትን ሊያሻሽል
+
+የሆድ መውጫ/መግቢያ እብጠትን ሊቀንስ
+
+2) ለእብጠት እና ኦክሲዳቲቭ ጉዳት
+
+ከፍተኛ አንቲኦክሲዳንት ይዟል
+
+የሰውነት እብጠትን ሊቀንስ
+
+3) ለኮሌስትሮል እና ልብ
+
+መጥፎ ኮሌስትሮል (LDL) ሊቀንስ
+
+የልብ ጤናን ሊደግፍ
+
+4) ለስኳር ቁጥጥር
+
+የደም ስኳር መጠንን ለመቆጣጠር ሊረዳ
+
+5) ለቆዳ እና ፀጉር (ውጭ አጠቃቀም)
+
+በማስክ መልኩ ቆዳን ሊጠነክር
+
+የፀጉር ሥሮችን ሊያበረታ
+
+እንዴት መዘጋጀት እና መጠቀም
+
+የአቮካዶ ዘርን አጥብቀው ያጠቡ
+
+በፀሐይ ወይም በዝቅተኛ ሙቀት ያድርቁ
+
+ያፍጩ እና ዱቄት ያድርጉ
+
+በሻይ፣ በስሙዝ ወይም በማር ጋር በትንሽ መጠን ይጠቀሙ
+
+መጠን (አስፈላጊ):
+
+በቀን ¼ ማንኪያ ዱቄት ብቻ ጀምሩ
+
+⚠️ ማስጠንቀቂያ
+
+ብዙ መጠን መጠቀም አይመከርም
+
+እርጉዝ ሴቶች፣ የጡት እናቶች፣ የሆድ ችግኝነት ያላቸው ሰዎች ከመጠቀም በፊት ሐኪም ያማክሩ
+
+ይህ መረጃ ባህላዊ እና አጠቃላይ መረጃ ብቻ ነው፤ ሕክምና አይተካም
+
+ከፈለጉ እንዲሁም አጭር እቃ ላብል (packaging text) ወይም የማህበራዊ ሚዲያ ካፕሽን በአማርኛ ማዘጋጀት እችላለሁ።
+
+ use of avocado  in amharic language
+
+የአቮካዶ አጠቃቀም (Uses of Avocado) – በአማርኛ
+
+አቮካዶ በንጥረ ምግብ የበለፀገ ፍሬ ሲሆን ለጤና፣ ለውበት እና ለምግብ አጠቃቀም በርካታ ጥቅሞች አሉት።
+
+1) ለጤና
+
+ጥሩ ቅባት (Healthy fats) ይዟል፣ የልብ ጤናን ይደግፋል
+
+ፋይበር በመብዛት ስለሚያካትት መፍጨትን ያሻሽላል
+
+ቫይታሚን A, E, K, B6 እና ፖታስየም ይዟል
+
+የመጥፎ ኮሌስትሮል (LDL) መጠንን ሊቀንስ ይችላል
+
+የደም ስኳር መቆጣጠርን ሊረዳ
+
+2) ለቆዳ
+
+ቆዳን ያርጥባል እና ያለስልሳ
+
+በፊት ማስክ መልኩ መጠቀም ይቻላል
+
+የቆዳ ድርቀትን ይቀንሳል
+
+3) ለፀጉር
+
+የፀጉር ሥሮችን ያበረታ
+
+ድርቀትን እና መቆራረጥን ይቀንሳል
+
+በዘይት ወይም ማስክ መልኩ ይጠቀማል
+
+4) ለምግብ
+
+በሳላድ፣ በሳንድዊች፣ በስሙዝ መጠቀም ይቻላል
+
+እንደ “ጉዋካሞሌ” ምግብ ሊዘጋጅ ይችላል
+
+ከእንጀራ፣ ከዳቦ ጋር ቀላል ምግብ ነው
+
+5) ለሕፃናት
+
+በሚገባ ከተፈጨ በኋላ እንደ ምግብ ተጨማሪ (puree) ሊሰጥ ይችላል
+
+ኃይል የሚሰጥ እና ቀላል የሚፈጭ ምግብ ነው
+
+⚠️ ማስጠንቀቂያ
+
+በመጠን መጠቀም ይመከራል (ብዙ ቅባት ይዟል)
+
+ለአንዳንድ ሰዎች የሆድ ማቅለሽ ሊያመጣ ይችላል
+
+ከፈለጉ፣
+
+አጭር የማህበራዊ ሚዲያ ካፕሽን
+
+የገበያ ላብል (packaging text)
+
+ወይም ለሕፃናት የሚመች አጭር መግለጫ
+
+በአማርኛ እዘጋጃለሁ።
