@@ -412,6 +412,11 @@ export default function PropertyDetails() {
               className="w-full h-64 sm:h-96 lg:h-[500px] object-cover rounded-lg sm:rounded-xl"
               loading="lazy"
               data-testid="img-property-main"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800";
+              }}
             />
           </div>
           
@@ -434,6 +439,11 @@ export default function PropertyDetails() {
                       className="w-full h-32 sm:h-40 object-cover"
                       loading="lazy"
                       data-testid={`img-property-${index}`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400";
+                      }}
                     />
                     {index === 0 && (
                       <div className="absolute top-2 left-2">
