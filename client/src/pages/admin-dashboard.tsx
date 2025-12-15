@@ -499,6 +499,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="documents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-documents">ID Verify</TabsTrigger>
           <TabsTrigger value="agents" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-agents">Dellala Agents</TabsTrigger>
           <TabsTrigger value="service-providers" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-service-providers">Service Providers</TabsTrigger>
+          <TabsTrigger value="payments" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-payments">Payments</TabsTrigger>
           <TabsTrigger value="config" className="text-xs sm:text-sm whitespace-nowrap" data-testid="tab-config">Config</TabsTrigger>
         </TabsList>
 
@@ -1170,6 +1171,32 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Payments Tab */}
+        <TabsContent value="payments">
+          <Card className="bg-white/80 border-[#e5ddd5]">
+            <CardHeader>
+              <CardTitle className="text-[#2d1810]">Payment Control</CardTitle>
+              <CardDescription>Monitor and manage all payment transactions</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="text-center space-y-2">
+                <h3 className="text-lg font-semibold text-[#2d1810]">Payment Transaction Management</h3>
+                <p className="text-[#5a4a42] max-w-md">
+                  View all payment transactions, filter by status, gateway, and type. 
+                  Reconcile transactions with banking records.
+                </p>
+              </div>
+              <Button 
+                onClick={() => navigate('/admin/payments')}
+                className="bg-[#8b7355] hover:bg-[#6d5a43] text-white"
+                data-testid="button-open-payments"
+              >
+                Open Payment Control
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
