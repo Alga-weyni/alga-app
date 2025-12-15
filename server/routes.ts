@@ -713,16 +713,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // File upload endpoint (protected - requires authentication)
   // Now with auto-compression and watermark overlay!
-  // Production-safe: gracefully handles file system issues
+  // Uses Replit Object Storage for persistent file storage
   app.post('/api/upload/property-images', isAuthenticated, async (req: any, res) => {
-    // Ensure upload directory exists at runtime (critical for Render)
-    const uploadPath = path.join(process.cwd(), 'uploads', 'properties');
-    if (!fs.existsSync(uploadPath)) {
+    // Ensure temp upload directory exists
+    const tempPath = path.join(process.cwd(), 'uploads', 'temp');
+    if (!fs.existsSync(tempPath)) {
       try {
-        fs.mkdirSync(uploadPath, { recursive: true });
-        console.log('Created upload directory:', uploadPath);
+        fs.mkdirSync(tempPath, { recursive: true });
       } catch (mkdirErr) {
-        console.error('Failed to create upload directory:', mkdirErr);
+        console.error('Failed to create temp directory:', mkdirErr);
         return res.status(500).json({ message: 'Server storage not available' });
       }
     }
@@ -741,8 +740,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const files = req.files as Express.Multer.File[];
         const processedFiles: Array<{ url: string; stats: any }> = [];
+        const objectStorageService = new ObjectStorageService();
 
-        // Process each image with compression and watermark
+        // Process each image with compression and watermark, then upload to Object Storage
         for (const file of files) {
           try {
             const originalBuffer = fs.readFileSync(file.path);
@@ -762,33 +762,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
               finalBuffer = compressedBuffer;
               stats = imageProcessor.getCompressionStats(originalSize, compressedBuffer.length);
-              
-              // Overwrite original file with compressed version
-              fs.writeFileSync(file.path, finalBuffer);
             } catch (processErr) {
-              // If image processing fails, use original file
               console.warn('Image processing failed, using original:', processErr);
             }
 
-            // In production, return full URL with API domain
-            const baseUrl = process.env.NODE_ENV === 'production' 
-              ? (process.env.API_BASE_URL || 'https://api.alga.et')
-              : '';
-            
-            const fileUrl = `${baseUrl}/uploads/properties/${file.filename}`;
-            const filePath = `/uploads/properties/${file.filename}`;
-            
-            // INSA FIX: Register this upload with the user's ID for validation
-            registerUserUpload(req.user.id, filePath);
-            logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath }, req.ip || 'unknown');
-            
-            processedFiles.push({
-              url: fileUrl,
-              stats,
-            });
+            // Upload to Object Storage
+            try {
+              const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+              
+              // Upload the processed image to Object Storage
+              const uploadResponse = await fetch(uploadURL, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': file.mimetype,
+                },
+                body: finalBuffer,
+              });
+
+              if (!uploadResponse.ok) {
+                throw new Error(`Upload failed: ${uploadResponse.status}`);
+              }
+
+              // Normalize the path to /objects/uploads/uuid format
+              const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL.split('?')[0]);
+              
+              // Set ACL to public so images can be viewed
+              await objectStorageService.trySetObjectEntityAclPolicy(objectPath, {
+                owner: req.user.id,
+                visibility: 'public',
+              });
+
+              const filePath = objectPath;
+              
+              // INSA FIX: Register this upload with the user's ID for validation
+              registerUserUpload(req.user.id, filePath);
+              logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath, storage: 'object_storage' }, req.ip || 'unknown');
+              
+              processedFiles.push({
+                url: filePath,
+                stats,
+              });
+            } catch (objectStorageErr) {
+              console.error('Object Storage upload failed:', objectStorageErr);
+              
+              // Fallback: save to local uploads folder (for development)
+              const localPath = path.join(process.cwd(), 'uploads', 'properties');
+              if (!fs.existsSync(localPath)) {
+                fs.mkdirSync(localPath, { recursive: true });
+              }
+              fs.writeFileSync(path.join(localPath, file.filename), finalBuffer);
+              
+              const fileUrl = `/uploads/properties/${file.filename}`;
+              registerUserUpload(req.user.id, fileUrl);
+              logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: fileUrl, storage: 'local_fallback' }, req.ip || 'unknown');
+              
+              processedFiles.push({
+                url: fileUrl,
+                stats,
+              });
+            }
+
+            // Clean up temp file
+            try {
+              fs.unlinkSync(file.path);
+            } catch (cleanupErr) {
+              console.warn('Failed to cleanup temp file:', file.path);
+            }
           } catch (fileErr) {
             console.error('Error processing file:', file.filename, fileErr);
-            // Continue with other files
           }
         }
 
