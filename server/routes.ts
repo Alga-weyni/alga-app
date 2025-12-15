@@ -711,9 +711,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload endpoint (protected - requires authentication)
-  // Now with auto-compression and watermark overlay!
-  // Uses Replit Object Storage for persistent file storage
+  // ==================== CLOUDFLARE R2 SIGNED URL UPLOAD ====================
+  // Generate signed URLs for direct browser-to-R2 uploads
+  app.post('/api/upload-url', isAuthenticated, async (req: any, res) => {
+    try {
+      const { generateSignedUploadUrl, generateMultipleSignedUrls } = await import('./services/imageUpload.service.js');
+      
+      const { folder, contentType, files } = req.body;
+      const userId = String(req.user.id);
+      
+      // Validate folder
+      const validFolders = ['properties', 'id-documents', 'profiles', 'services'];
+      if (!validFolders.includes(folder)) {
+        return res.status(400).json({ message: `Invalid folder. Must be one of: ${validFolders.join(', ')}` });
+      }
+      
+      // Handle multiple files
+      if (files && Array.isArray(files)) {
+        const results = await generateMultipleSignedUrls(folder, files, userId);
+        
+        // Register uploads for INSA security tracking
+        results.forEach(result => {
+          registerUserUpload(userId, result.publicUrl);
+        });
+        
+        logSecurityEvent(userId, 'R2_SIGNED_URLS_GENERATED', { 
+          folder, 
+          count: results.length 
+        }, req.ip || 'unknown');
+        
+        return res.json({ uploads: results });
+      }
+      
+      // Handle single file
+      if (!contentType) {
+        return res.status(400).json({ message: 'contentType is required' });
+      }
+      
+      const result = await generateSignedUploadUrl({ folder, contentType, userId });
+      
+      // Register upload for INSA security tracking
+      registerUserUpload(userId, result.publicUrl);
+      
+      logSecurityEvent(userId, 'R2_SIGNED_URL_GENERATED', { 
+        folder, 
+        key: result.key 
+      }, req.ip || 'unknown');
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error('R2 signed URL generation error:', error);
+      res.status(500).json({ message: error.message || 'Failed to generate upload URL' });
+    }
+  });
+  // ==================== END R2 SIGNED URL UPLOAD ====================
+
+  // LEGACY: File upload endpoint (kept for backwards compatibility during migration)
+  // Will be removed after R2 migration is complete
   app.post('/api/upload/property-images', isAuthenticated, async (req: any, res) => {
     // Ensure temp upload directory exists
     const tempPath = path.join(process.cwd(), 'uploads', 'temp');

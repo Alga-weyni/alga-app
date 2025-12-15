@@ -350,44 +350,52 @@ export default function HostDashboard() {
 
     setUploadingFiles(true);
     try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const response = await fetch(getApiUrl('/api/upload/property-images'), {
+      // Step 1: Get signed URLs from the server for all files
+      const fileInfos = files.map(file => ({ contentType: file.type }));
+      
+      const signedUrlResponse = await fetch(getApiUrl('/api/upload-url'), {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folder: 'properties', files: fileInfos }),
         credentials: 'include',
       });
 
-      const contentType = response.headers.get('content-type');
+      if (!signedUrlResponse.ok) {
+        const errorData = await signedUrlResponse.json().catch(() => ({}));
+        if (signedUrlResponse.status === 401) {
+          throw new Error('Please sign in to upload images');
+        }
+        throw new Error(errorData.message || 'Failed to get upload URLs');
+      }
+
+      const { uploads } = await signedUrlResponse.json();
       
-      if (!response.ok) {
-        let errorMessage = 'Upload failed';
+      // Step 2: Upload each file directly to R2 using signed URLs
+      const uploadedUrls: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const { uploadUrl, publicUrl } = uploads[i];
         
-        if (contentType?.includes('application/json')) {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } else {
-          const text = await response.text();
-          if (response.status === 401) {
-            errorMessage = 'Please sign in to upload images';
-          } else {
-            errorMessage = `Upload failed (${response.status})`;
-          }
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        });
+        
+        if (!uploadResponse.ok) {
+          console.error(`Failed to upload file ${file.name}:`, uploadResponse.status);
+          continue;
         }
         
-        throw new Error(errorMessage);
+        uploadedUrls.push(publicUrl);
       }
-
-      if (!contentType?.includes('application/json')) {
-        throw new Error('Invalid response from server');
-      }
-
-      const data = await response.json();
       
-      const newImageUrls = [...imageUrls, ...data.urls];
+      if (uploadedUrls.length === 0) {
+        throw new Error('No files were uploaded successfully');
+      }
+      
+      const newImageUrls = [...imageUrls, ...uploadedUrls];
       setImageUrls(newImageUrls);
       
       // Update form field to sync with uploaded images
@@ -400,7 +408,7 @@ export default function HostDashboard() {
 
       toast({
         title: "Images uploaded successfully",
-        description: `${data.count} image(s) uploaded. Total: ${newImageUrls.length}`,
+        description: `${uploadedUrls.length} image(s) uploaded. Total: ${newImageUrls.length}`,
       });
     } catch (error: any) {
       toast({
