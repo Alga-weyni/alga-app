@@ -621,10 +621,11 @@ const authLimiter = rateLimit({
 // Security: General API rate limiter
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 500, // Limit each IP to 500 requests per windowMs (increased for health checks)
   message: { message: "Too many requests, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/api/health' || req.path === '/api/metrics', // Skip rate limiting for health/metrics
 });
 
 // File upload configuration
