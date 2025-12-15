@@ -279,7 +279,8 @@ export default function PropertyDetails() {
   // Direct reserve - go straight to ArifPay
   const handleDirectReserve = () => {
     if (!isAuthenticated) {
-      window.location.href = getApiUrl("/api/login");
+      // Redirect to login page with return URL
+      navigate(`/login?returnTo=/properties/${propertyId}`);
       return;
     }
 
