@@ -855,7 +855,7 @@ export default function AdminDashboard() {
                                   onClick={() => 
                                     verifyPropertyMutation.mutate({ 
                                       propertyId: property.id, 
-                                      status: 'approved' 
+                                      status: 'active' 
                                     })
                                   }
                                   data-testid={`button-approve-property-${property.id}`}
@@ -957,7 +957,7 @@ export default function AdminDashboard() {
                                   onClick={() => 
                                     verifyPropertyMutation.mutate({ 
                                       propertyId: property.id, 
-                                      status: 'approved' 
+                                      status: 'active' 
                                     })
                                   }
                                 >
