@@ -73,7 +73,6 @@ import OfflineIndicator from "@/components/offline-indicator";
 import MobileLayout from "@/components/mobile/mobile-layout";
 import MobileAuthGuard from "@/components/mobile/mobile-auth-guard";
 import { isMobileApp } from "@/utils/platform";
-import DevMobileToggle from "@/components/dev-mobile-toggle";
 import { Capacitor } from "@capacitor/core";
 import { ProtectedRoute } from "@/components/protected-route";
 
@@ -243,8 +242,6 @@ function App() {
           {!isMobile && <LemlemChat />}
           <PWAInstallPrompt />
           <OfflineIndicator />
-          {/* Dev toggle - only show in browser (not in actual native app) */}
-          {!isActualNativeApp && <DevMobileToggle />}
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
