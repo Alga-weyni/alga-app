@@ -1625,7 +1625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await logSecurityEvent(user.id, 'OTP_VERIFICATION_SUCCESS', { contact }, clientIp);
       
       // Log in user
-      (req as any).login(user, (err: any) => {
+      (req as any).loginUser(user, (err: any) => {
         if (err) {
           return res.status(500).json({ message: "Failed to log in after verification" });
         }
@@ -1729,7 +1729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Log in user
-      (req as any).login(user, (err: any) => {
+      (req as any).loginUser(user, (err: any) => {
         if (err) {
           return res.status(500).json({ message: "Failed to log in after registration" });
         }
