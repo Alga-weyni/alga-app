@@ -509,7 +509,7 @@ export class DatabaseStorage implements IStorage {
     q?: string;
     sort?: string;
   }): Promise<Property[]> {
-    const conditions = [eq(properties.isActive, true), eq(properties.status, 'approved')];
+    const conditions = [eq(properties.isActive, true), eq(properties.status, 'active')];
 
     if (filters) {
       if (filters.city) {
@@ -942,7 +942,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Count active and total listings
-    const activeListings = hostProperties.filter(p => p.isActive && p.status === 'approved').length;
+    const activeListings = hostProperties.filter(p => p.isActive && p.status === 'active').length;
     const totalListings = hostProperties.length;
 
     // Get booking stats across all properties
@@ -1206,7 +1206,7 @@ export class DatabaseStorage implements IStorage {
 
     const [propertyStats] = await db
       .select({
-        active: sql<number>`COUNT(*) FILTER (WHERE ${properties.status} = 'approved')`,
+        active: sql<number>`COUNT(*) FILTER (WHERE ${properties.status} = 'active')`,
         pending: sql<number>`COUNT(*) FILTER (WHERE ${properties.status} = 'pending')`
       })
       .from(properties);
@@ -1370,7 +1370,7 @@ export class DatabaseStorage implements IStorage {
       .from(properties)
       .where(
         and(
-          eq(properties.status, "approved"),
+          eq(properties.status, "active"),
           sql`(${properties.lockboxVerified} = false OR ${properties.cameraVerified} = false)`
         )
       )
