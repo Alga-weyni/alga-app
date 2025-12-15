@@ -37,6 +37,7 @@ import LemlemOps from "@/pages/admin/LemlemOps";
 import LemlemValidationMetrics from "@/pages/admin/LemlemValidationMetrics";
 import ReportsArchive from "@/pages/admin/ReportsArchive";
 import SignatureDashboard from "@/pages/admin/SignatureDashboard";
+import AdminPayments from "@/pages/admin-payments";
 import INSACompliancePage from "@/pages/insa-compliance";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import AgentProgram from "@/pages/agent-program";
@@ -166,6 +167,7 @@ function Router() {
         <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemOperationsDashboard /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/reports" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><ReportsArchive /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/signatures" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><SignatureDashboard /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/payments" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin", "operator"]}><AdminPayments /></ProtectedRoute></AnimatedRoute>} />
         
         {/* Operator routes - operator only */}
         <Route path="/operator/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["operator"]}><OperatorDashboard /></ProtectedRoute></AnimatedRoute>} />

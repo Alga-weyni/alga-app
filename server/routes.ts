@@ -5281,6 +5281,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================
+  // ADMIN PAYMENT TRANSACTIONS ROUTES
+  // ============================================
+
+  // Get all payment transactions for admin
+  app.get('/api/admin/payment-transactions', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const transactions = await db
+        .select()
+        .from(paymentTransactions)
+        .orderBy(desc(paymentTransactions.createdAt));
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching payment transactions:", error);
+      res.status(500).json({ message: "Failed to fetch payment transactions" });
+    }
+  });
+
+  // Get payment transaction stats
+  app.get('/api/admin/payment-transactions/stats', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const allTxns = await db.select().from(paymentTransactions);
+      const stats = {
+        totalTransactions: allTxns.length,
+        totalAmount: allTxns.reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0),
+        pendingCount: allTxns.filter(t => t.status === 'pending').length,
+        completedCount: allTxns.filter(t => t.status === 'completed').length,
+        failedCount: allTxns.filter(t => t.status === 'failed').length,
+        unreconciledCount: allTxns.filter(t => !t.reconciled).length,
+      };
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching payment transaction stats:", error);
+      res.status(500).json({ message: "Failed to fetch payment transaction stats" });
+    }
+  });
+
+  // Reconcile a payment transaction
+  app.patch('/api/admin/payment-transactions/:id/reconcile', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { notes } = req.body;
+      const [updated] = await db
+        .update(paymentTransactions)
+        .set({ 
+          reconciled: true, 
+          reconciledAt: new Date(), 
+          reconciledBy: req.user.id, 
+          notes: notes || null 
+        })
+        .where(eq(paymentTransactions.id, id))
+        .returning();
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      res.json({ message: "Transaction reconciled successfully", transaction: updated });
+    } catch (error) {
+      console.error("Error reconciling payment transaction:", error);
+      res.status(500).json({ message: "Failed to reconcile payment transaction" });
+    }
+  });
+
+  // ============================================
   // SERVICE BOOKING ROUTES
   // ============================================
 
