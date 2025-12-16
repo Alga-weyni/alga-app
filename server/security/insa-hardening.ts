@@ -117,14 +117,27 @@ export function applyINSAHardening(app: Express): void {
   });
 
   // 5. SQL Injection protection via input validation
+  // Note: Skip password fields and auth endpoints as they legitimately contain special characters
   app.use((req, res, next) => {
+    // Skip SQL injection check for auth endpoints where passwords contain special chars
+    const authPaths = ['/api/auth/', '/api/login', '/api/register'];
+    const isAuthPath = authPaths.some(path => req.path.includes(path));
+    
+    if (isAuthPath) {
+      return next();
+    }
+
     const checkSQLInjection = (str: string): boolean => {
+      // More targeted patterns - avoid false positives from special chars in user input
       const sqlPatterns = [
-        /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/i,
         /(UNION\s+SELECT)/i,
-        /(--|\#|\/\*|\*\/)/,
-        /(\bOR\b\s+\d+\s*=\s*\d+)/i,
-        /(\bAND\b\s+\d+\s*=\s*\d+)/i
+        /(UNION\s+ALL\s+SELECT)/i,
+        /(\bOR\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?)/i,
+        /(\bAND\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+['"]?)/i,
+        /(;\s*(DROP|DELETE|UPDATE|INSERT|CREATE|ALTER|EXEC)\b)/i,
+        /(\bEXEC\s*\()/i,
+        /(xp_cmdshell)/i,
+        /(WAITFOR\s+DELAY)/i
       ];
       return sqlPatterns.some(pattern => pattern.test(str));
     };
