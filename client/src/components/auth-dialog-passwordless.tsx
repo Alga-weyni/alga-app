@@ -946,62 +946,59 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         <FormItem>
                           <FormLabel className="text-eth-brown">Email</FormLabel>
                           <FormControl>
-                            <input 
-                              type="email"
-                              placeholder="abebe@example.com" 
-                              className="flex h-10 w-full rounded-md border border-eth-brown/20 bg-white px-3 py-2 text-base text-eth-brown ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
-                              data-testid="input-email-register"
-                              autoComplete="email"
-                              value={field.value || ""}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                              ref={field.ref}
-                            />
+                            <Input {...field} type="email" placeholder="abebe@example.com" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-register" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={emailRegisterForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <PasswordInput 
-                              field={field} 
-                              placeholder="Create a strong password" 
-                              show={showPassword} 
-                              onToggle={() => setShowPassword(!showPassword)}
-                              testId="input-password-email-register"
-                            />
-                          </FormControl>
-                          <p className="text-xs text-eth-brown/60 mt-1">Min 8 chars with uppercase, lowercase, number & special character</p>
-                          <FormMessage />
-                        </FormItem>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-eth-brown">Password</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eth-brown/50" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Create a strong password"
+                          className="bg-white border-eth-brown/20 text-eth-brown pl-10 pr-10"
+                          data-testid="input-password-email-register"
+                          {...emailRegisterForm.register("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-eth-brown/50 hover:text-eth-brown"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-eth-brown/60">Min 8 chars with uppercase, lowercase, number & special character</p>
+                      {emailRegisterForm.formState.errors.password && (
+                        <p className="text-sm text-red-500">{emailRegisterForm.formState.errors.password.message}</p>
                       )}
-                    />
-                    <FormField
-                      control={emailRegisterForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Confirm Password</FormLabel>
-                          <FormControl>
-                            <PasswordInput 
-                              field={field} 
-                              placeholder="Confirm your password" 
-                              show={showConfirmPassword} 
-                              onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
-                              testId="input-confirm-password-email"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-eth-brown">Confirm Password</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eth-brown/50" />
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                          className="bg-white border-eth-brown/20 text-eth-brown pl-10 pr-10"
+                          data-testid="input-confirm-password-email"
+                          {...emailRegisterForm.register("confirmPassword")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-eth-brown/50 hover:text-eth-brown"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      {emailRegisterForm.formState.errors.confirmPassword && (
+                        <p className="text-sm text-red-500">{emailRegisterForm.formState.errors.confirmPassword.message}</p>
                       )}
-                    />
+                    </div>
                     <Button
                       type="submit"
                       disabled={emailRegisterMutation.isPending}
