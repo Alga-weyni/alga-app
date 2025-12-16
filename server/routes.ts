@@ -1834,14 +1834,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send OTP via email
       const otpMode = process.env.OTP_MODE || 'production';
+      console.log(`[REGISTER] Attempting to send OTP to ${validatedData.email}, OTP_MODE=${otpMode}`);
       if (otpMode === 'test') {
         console.log(`[OTP-TEST] Registration OTP for ${validatedData.email}: ${otp}`);
       }
       
       // Always attempt to send email
-      sendOtpEmail(validatedData.email, otp, validatedData.firstName).catch(err => {
-        console.error('[REGISTER] Email delivery failed:', err);
-      });
+      try {
+        await sendOtpEmail(validatedData.email, otp, validatedData.firstName);
+        console.log(`[REGISTER] Email sent successfully to ${validatedData.email}`);
+      } catch (emailErr) {
+        console.error('[REGISTER] Email delivery failed:', emailErr);
+      }
       
       logSecurityEvent(null, 'REGISTRATION_OTP_SENT', { email: validatedData.email }, clientIp);
       
