@@ -7,6 +7,12 @@ async function getCredentials(): Promise<{apiKey: string, email: string}> {
   const directApiKey = process.env.SENDGRID_API_KEY;
   const directFromEmail = process.env.SENDGRID_FROM_EMAIL;
   
+  console.log('[EMAIL] Checking credentials...', {
+    hasDirectApiKey: !!directApiKey,
+    hasDirectFromEmail: !!directFromEmail,
+    apiKeyPrefix: directApiKey?.substring(0, 5)
+  });
+  
   if (directApiKey && directFromEmail && directApiKey.startsWith('SG.')) {
     console.log('[EMAIL] Using direct SendGrid environment variables');
     return { apiKey: directApiKey, email: directFromEmail };
@@ -20,12 +26,19 @@ async function getCredentials(): Promise<{apiKey: string, email: string}> {
     ? 'depl ' + process.env.WEB_REPL_RENEWAL 
     : null;
 
+  console.log('[EMAIL] Replit connector check:', { hasHostname: !!hostname, hasToken: !!xReplitToken });
+
   if (!xReplitToken || !hostname) {
+    // Last resort: try direct env vars without SG. check
+    if (directApiKey && directFromEmail) {
+      console.log('[EMAIL] Using direct SendGrid env vars (without SG. prefix check)');
+      return { apiKey: directApiKey, email: directFromEmail };
+    }
     throw new Error('SendGrid credentials not found. Set SENDGRID_API_KEY and SENDGRID_FROM_EMAIL environment variables.');
   }
 
   try {
-    connectionSettings = await fetch(
+    const response = await fetch(
       'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=sendgrid',
       {
         headers: {
@@ -33,14 +46,28 @@ async function getCredentials(): Promise<{apiKey: string, email: string}> {
           'X_REPLIT_TOKEN': xReplitToken
         }
       }
-    ).then(res => res.json()).then((data: { items?: Array<{ settings: { api_key: string; from_email: string } }> }) => data.items?.[0]);
+    );
+    const data = await response.json();
+    connectionSettings = data.items?.[0];
+    console.log('[EMAIL] Connector response:', { hasItems: !!data.items, itemCount: data.items?.length });
 
-    if (!connectionSettings || (!connectionSettings.settings.api_key || !connectionSettings.settings.from_email)) {
+    if (!connectionSettings || (!connectionSettings.settings?.api_key || !connectionSettings.settings?.from_email)) {
+      // Fall back to direct env vars
+      if (directApiKey && directFromEmail) {
+        console.log('[EMAIL] Connector failed, using direct env vars');
+        return { apiKey: directApiKey, email: directFromEmail };
+      }
       throw new Error('SendGrid not connected via Replit');
     }
     console.log('[EMAIL] Using Replit SendGrid connector');
     return {apiKey: connectionSettings.settings.api_key, email: connectionSettings.settings.from_email};
   } catch (error) {
+    console.error('[EMAIL] Connector error:', error);
+    // Final fallback to direct env vars
+    if (directApiKey && directFromEmail) {
+      console.log('[EMAIL] Connector failed, using direct env vars as fallback');
+      return { apiKey: directApiKey, email: directFromEmail };
+    }
     throw new Error('SendGrid credentials not found. Set SENDGRID_API_KEY and SENDGRID_FROM_EMAIL environment variables.');
   }
 }
