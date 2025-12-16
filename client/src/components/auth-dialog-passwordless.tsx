@@ -389,12 +389,17 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const PasswordInput = ({ field, placeholder, show, onToggle, testId }: any) => (
     <div className="relative">
       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eth-brown/50" />
-      <Input
-        {...field}
+      <input
         type={show ? "text" : "password"}
         placeholder={placeholder}
-        className="bg-white border-eth-brown/20 text-eth-brown pl-10 pr-10"
+        className="flex h-10 w-full rounded-md border border-eth-brown/20 bg-white px-3 py-2 text-base text-eth-brown pl-10 pr-10 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         data-testid={testId}
+        autoComplete="new-password"
+        value={field.value || ""}
+        onChange={(e) => field.onChange(e.target.value)}
+        onBlur={field.onBlur}
+        name={field.name}
+        ref={field.ref}
       />
       <button
         type="button"
@@ -941,14 +946,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         <FormItem>
                           <FormLabel className="text-eth-brown">Email</FormLabel>
                           <FormControl>
-                            <Input 
+                            <input 
                               type="email"
                               placeholder="abebe@example.com" 
-                              className="bg-white border-eth-brown/20 text-eth-brown" 
+                              className="flex h-10 w-full rounded-md border border-eth-brown/20 bg-white px-3 py-2 text-base text-eth-brown ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
                               data-testid="input-email-register"
                               autoComplete="email"
                               value={field.value || ""}
-                              onChange={field.onChange}
+                              onChange={(e) => field.onChange(e.target.value)}
                               onBlur={field.onBlur}
                               name={field.name}
                               ref={field.ref}
