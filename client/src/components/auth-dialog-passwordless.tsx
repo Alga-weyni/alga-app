@@ -98,7 +98,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [pendingContact, setPendingContact] = useState("");
   const [verifiedOtp, setVerifiedOtp] = useState("");
-  const [devOtp, setDevOtp] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -157,7 +156,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setShowOtpInput(false);
       setPendingContact("");
       setVerifiedOtp("");
-      setDevOtp(undefined);
       setShowPassword(false);
       setShowConfirmPassword(false);
       setShowNewPassword(false);
@@ -170,7 +168,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     setShowOtpInput(false);
     setPendingContact("");
     setVerifiedOtp("");
-    setDevOtp(undefined);
     phoneLoginForm.reset();
     emailLoginForm.reset();
     phoneRegisterForm.reset();
@@ -226,12 +223,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.phoneNumber || data.contact);
       setShowOtpInput(true);
-      const otpCode = data.testOtp || data.devOtp;
-      setDevOtp(otpCode);
       otpForm.setValue("phoneNumber", data.phoneNumber || data.contact);
       toast({
         title: "Password verified!",
-        description: otpCode ? `Test OTP: ${otpCode}` : "Check your phone for the 6-digit code",
+        description: "Check your phone for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -250,12 +245,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.email || data.contact);
       setShowOtpInput(true);
-      const otpCode = data.testOtp || data.devOtp;
-      setDevOtp(otpCode);
       otpForm.setValue("email", data.email || data.contact);
       toast({
         title: "Password verified!",
-        description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit code",
+        description: "Check your email for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -275,12 +268,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.phoneNumber || data.contact);
       setShowOtpInput(true);
-      const otpCode = data.testOtp || data.devOtp;
-      setDevOtp(otpCode);
       otpForm.setValue("phoneNumber", data.phoneNumber || data.contact);
       toast({
         title: "Account created!",
-        description: otpCode ? `Test OTP: ${otpCode}` : "Check your phone for the 6-digit code",
+        description: "Check your phone for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -300,12 +291,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.email || data.contact);
       setShowOtpInput(true);
-      const otpCode = data.testOtp || data.devOtp;
-      setDevOtp(otpCode);
       otpForm.setValue("email", data.email || data.contact);
       toast({
         title: "Account created!",
-        description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit code",
+        description: "Check your email for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -337,13 +326,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     },
     onSuccess: (data: any) => {
       setPendingContact(data.email);
-      const otpCode = data.testOtp;
-      setDevOtp(otpCode);
       verifyResetOtpForm.setValue("email", data.email);
       setMode("verify-reset-otp");
       toast({
         title: "Reset code sent!",
-        description: otpCode ? `Test OTP: ${otpCode}` : "Check your email for the 6-digit reset code",
+        description: "Check your email for the 6-digit reset code",
       });
     },
     onError: (error: any) => {
@@ -488,11 +475,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   </FormItem>
                 )}
               />
-              {devOtp && (
-                <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
-                  <p className="text-sm text-yellow-800">Test Mode - OTP: <strong>{devOtp}</strong></p>
-                </div>
-              )}
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -500,7 +482,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   onClick={() => {
                     setShowOtpInput(false);
                     setPendingContact("");
-                    setDevOtp(undefined);
                   }}
                   className="flex-1 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
                   data-testid="button-back"
@@ -584,11 +565,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   </FormItem>
                 )}
               />
-              {devOtp && (
-                <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-md">
-                  <p className="text-sm text-yellow-800">Test Mode - OTP: <strong>{devOtp}</strong></p>
-                </div>
-              )}
               <Button
                 type="submit"
                 disabled={verifyResetOtpMutation.isPending}
