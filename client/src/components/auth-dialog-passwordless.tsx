@@ -96,6 +96,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const [mode, setMode] = useState<"login" | "register" | "forgot-password" | "verify-reset-otp" | "set-new-password">(defaultMode);
   const [authMethod, setAuthMethod] = useState<"phone" | "email">("email");
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [isEmailRegistrationOtp, setIsEmailRegistrationOtp] = useState(false);
   const [pendingContact, setPendingContact] = useState("");
   const [verifiedOtp, setVerifiedOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -291,9 +292,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
     onSuccess: (data: any) => {
       setPendingContact(data.email || data.contact);
       setShowOtpInput(true);
+      setIsEmailRegistrationOtp(true);
       otpForm.setValue("email", data.email || data.contact);
       toast({
-        title: "Account created!",
+        title: "Verification code sent!",
         description: "Check your email for the 6-digit code",
       });
     },
@@ -301,6 +303,20 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       toast({
         title: "Registration failed",
         description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const verifyEmailRegistrationOtpMutation = useMutation({
+    mutationFn: async (data: { email: string; otp: string }) => {
+      return await apiRequest("POST", "/api/auth/register/email/verify", data);
+    },
+    onSuccess: handleAuthSuccess,
+    onError: (error: any) => {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired code",
         variant: "destructive",
       });
     },
@@ -459,13 +475,19 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
 
         {showOtpInput ? (
           <Form {...otpForm}>
-            <form onSubmit={otpForm.handleSubmit((data) => verifyOtpMutation.mutate(data))} className="space-y-4">
+            <form onSubmit={otpForm.handleSubmit((data) => {
+              if (isEmailRegistrationOtp && data.email) {
+                verifyEmailRegistrationOtpMutation.mutate({ email: data.email, otp: data.otp });
+              } else {
+                verifyOtpMutation.mutate(data);
+              }
+            })} className="space-y-4">
               <FormField
                 control={otpForm.control}
                 name="otp"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-eth-brown">6-Digit OTP</FormLabel>
+                    <FormLabel className="text-eth-brown">6-Digit Verification Code</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -486,6 +508,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                   variant="outline"
                   onClick={() => {
                     setShowOtpInput(false);
+                    setIsEmailRegistrationOtp(false);
                     setPendingContact("");
                   }}
                   className="flex-1 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
@@ -495,11 +518,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                 </Button>
                 <Button
                   type="submit"
-                  disabled={verifyOtpMutation.isPending}
+                  disabled={verifyOtpMutation.isPending || verifyEmailRegistrationOtpMutation.isPending}
                   className="flex-1 bg-eth-brown hover:bg-eth-brown/90 text-white"
                   data-testid="button-verify-otp"
                 >
-                  {verifyOtpMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
+                  {(verifyOtpMutation.isPending || verifyEmailRegistrationOtpMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
                 </Button>
               </div>
             </form>

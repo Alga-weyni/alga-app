@@ -1794,10 +1794,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email Registration
+  // Email Registration - Step 1: Validate and send OTP
   app.post('/api/auth/register/email', authLimiter, async (req, res) => {
     try {
       const validatedData = registerEmailUserSchema.parse(req.body);
+      const clientIp = req.ip || 'unknown';
       
       // Check if email already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
@@ -1805,35 +1806,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      // Rate limit OTP requests
+      const rateLimit = checkOTPRequestRateLimit(validatedData.email);
+      if (!rateLimit.allowed) {
+        return res.status(429).json({ 
+          message: "Too many attempts. Please wait.",
+          retryAfter: rateLimit.retryAfter
+        });
+      }
+
+      // Generate 6-digit OTP
+      const otp = generateSecureOTP();
+      const hashedOtp = hashOTP(otp);
       
-      // Create user
-      const userId = randomBytes(16).toString('hex');
-      const user = await storage.createUser({
-        id: userId,
+      // Store registration data temporarily with hashed OTP (10 min expiry)
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      const pendingRegData = JSON.stringify({
         email: validatedData.email,
         password: hashedPassword,
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
+        otpHash: hashedOtp
+      });
+      
+      // Save pending registration with OTP
+      await storage.saveOtp(`register:${validatedData.email}`, pendingRegData, 10);
+      
+      // Send OTP via email
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Registration OTP for ${validatedData.email}: ${otp}`);
+      }
+      
+      // Always attempt to send email
+      sendOtpEmail(validatedData.email, otp, validatedData.firstName).catch(err => {
+        console.error('[REGISTER] Email delivery failed:', err);
+      });
+      
+      logSecurityEvent(null, 'REGISTRATION_OTP_SENT', { email: validatedData.email }, clientIp);
+      
+      res.json({ 
+        message: "A verification code has been sent to your email.",
+        email: validatedData.email,
+        requiresOtp: true,
+        expiresIn: 600
+      });
+    } catch (error: any) {
+      console.error("Error registering email user:", error);
+      res.status(400).json({ message: error.message || "Failed to register" });
+    }
+  });
+
+  // Email Registration - Step 2: Verify OTP and create account
+  app.post('/api/auth/register/email/verify', authLimiter, async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+      const clientIp = req.ip || 'unknown';
+      
+      if (!email || !otp) {
+        return res.status(400).json({ message: "Email and OTP are required" });
+      }
+
+      // Get pending registration data
+      const pendingData = await storage.getOtp(`register:${email}`);
+      if (!pendingData) {
+        logSecurityEvent(null, 'REGISTRATION_OTP_EXPIRED', { email }, clientIp);
+        return res.status(400).json({ message: "Registration expired. Please start again." });
+      }
+
+      const regData = JSON.parse(pendingData);
+      
+      // Verify OTP
+      const hashedInputOtp = hashOTP(otp);
+      if (hashedInputOtp !== regData.otpHash) {
+        logSecurityEvent(null, 'REGISTRATION_OTP_INVALID', { email }, clientIp);
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+
+      // Create user
+      const userId = randomBytes(16).toString('hex');
+      const user = await storage.createUser({
+        id: userId,
+        email: regData.email,
+        password: regData.password,
+        firstName: regData.firstName,
+        lastName: regData.lastName,
         role: 'guest',
       });
+      
+      // Clean up pending registration
+      await storage.deleteOtp(`register:${email}`);
+      
+      logSecurityEvent(user.id, 'REGISTRATION_COMPLETED', { email }, clientIp);
       
       // Log in user
       (req as any).loginUser(user, (err: any) => {
         if (err) {
-          return res.status(500).json({ message: "Failed to log in after registration" });
+          return res.status(500).json({ message: "Account created but login failed. Please sign in." });
         }
-        // INSA FIX #10: Sanitize user response to remove password hash
         res.json({ 
-          message: "Registration successful",
+          message: "Registration successful! Welcome to Alga.",
           user: sanitizeUserResponse(user),
           redirect: '/'
         });
       });
     } catch (error: any) {
-      console.error("Error registering email user:", error);
-      res.status(400).json({ message: error.message || "Failed to register" });
+      console.error("Error verifying email registration:", error);
+      res.status(400).json({ message: error.message || "Failed to verify" });
     }
   });
 
