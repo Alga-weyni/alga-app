@@ -939,19 +939,19 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                         )}
                       />
                     </div>
-                    <FormField
-                      control={emailRegisterForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="email" placeholder="abebe@example.com" className="bg-white border-eth-brown/20 text-eth-brown" data-testid="input-email-register" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-eth-brown">Email</label>
+                      <Input
+                        type="email"
+                        placeholder="abebe@example.com"
+                        className="bg-white border-eth-brown/20 text-eth-brown"
+                        data-testid="input-email-register"
+                        {...emailRegisterForm.register("email")}
+                      />
+                      {emailRegisterForm.formState.errors.email && (
+                        <p className="text-sm text-red-500">{emailRegisterForm.formState.errors.email.message}</p>
                       )}
-                    />
+                    </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-eth-brown">Password</label>
                       <div className="relative">
