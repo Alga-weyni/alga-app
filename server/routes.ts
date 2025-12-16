@@ -1504,16 +1504,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 5-minute expiration
       await storage.saveOtp(email, hashedOtp, 5);
       
-      // Send OTP via email (in production, always send; in dev, log to console)
-      if (process.env.NODE_ENV === 'production') {
-        sendOtpEmail(email, otp, firstName).catch(err => {
-          console.error('[2FA] Email delivery failed:', err);
-        });
-      } else {
-        console.log(`[2FA-DEV] Registration OTP for ${email}: ${otp}`);
-        // Still try to send email in development
-        sendOtpEmail(email, otp, firstName).catch(() => {});
+      // Send OTP via email - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Registration OTP for ${email}: ${otp}`);
       }
+      // Always attempt to send email regardless of mode
+      sendOtpEmail(email, otp, firstName).catch(err => {
+        console.error('[2FA] Email delivery failed:', err);
+      });
       
       logSecurityEvent(userId, 'OTP_GENERATED', { email, type: 'registration' }, clientIp);
       
@@ -1563,30 +1562,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 5-minute expiration
       await storage.saveOtp(email, hashedOtp, 5);
       
-      // Send OTP via email
-      if (process.env.NODE_ENV === 'production') {
-        sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
-          console.error('[2FA] Email delivery failed:', err);
-        });
-      } else {
-        console.log(`[2FA-DEV] Login OTP for ${email}: ${otp}`);
-        sendOtpEmail(email, otp, user.firstName || undefined).catch(() => {});
+      // Send OTP via email - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Login OTP for ${email}: ${otp}`);
       }
+      // Always attempt to send email regardless of mode
+      sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
+        console.error('[2FA] Email delivery failed:', err);
+      });
       
       logSecurityEvent(user.id, 'OTP_GENERATED', { email, type: 'login' }, clientIp);
       
-      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
-      const isTestAccount = email.endsWith('@test.alga.et');
-      if (isTestAccount) {
-        logSecurityEvent(user.id, 'TEST_MODE_OTP', { email }, clientIp);
-      }
-      
+      // PRODUCTION: Never expose OTP in API response
       res.json({ 
         message: "A 6-digit verification code has been sent to your email",
         email,
         contact: email,
-        expiresIn: 300,
-        ...(isTestAccount && { testOtp: otp })
+        expiresIn: 300
       });
     } catch (error: any) {
       console.error("Error in passwordless email login:", error);
@@ -1638,15 +1631,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 5-minute expiration
       await storage.saveOtp(validatedData.phoneNumber, hashedOtp, 5);
       
-      // Send OTP via SMS in production
-      if (process.env.NODE_ENV === 'production') {
-        try {
-          await smsService.sendOtp(validatedData.phoneNumber, otp);
-        } catch (smsError) {
-          console.error('[2FA] SMS delivery failed:', smsError);
-        }
-      } else {
-        console.log(`[2FA-DEV] Registration OTP for ${validatedData.phoneNumber}: ${otp}`);
+      // Send OTP via SMS - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Registration OTP for ${validatedData.phoneNumber}: ${otp}`);
+      }
+      // Always attempt to send SMS regardless of mode
+      try {
+        await smsService.sendOtp(validatedData.phoneNumber, otp);
+      } catch (smsError) {
+        console.error('[2FA] SMS delivery failed:', smsError);
       }
       
       logSecurityEvent(userId, 'PASSWORD_REGISTRATION', { phoneNumber: validatedData.phoneNumber }, clientIp);
@@ -1773,15 +1767,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 5-minute expiration
       await storage.saveOtp(validatedData.phoneNumber, hashedOtp, 5);
       
-      // Send OTP via SMS in production
-      if (process.env.NODE_ENV === 'production') {
-        try {
-          await smsService.sendOtp(validatedData.phoneNumber, otp);
-        } catch (smsError) {
-          console.error('[2FA] SMS delivery failed:', smsError);
-        }
-      } else {
-        console.log(`[2FA-DEV] Login OTP for ${validatedData.phoneNumber}: ${otp}`);
+      // Send OTP via SMS - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Login OTP for ${validatedData.phoneNumber}: ${otp}`);
+      }
+      // Always attempt to send SMS regardless of mode
+      try {
+        await smsService.sendOtp(validatedData.phoneNumber, otp);
+      } catch (smsError) {
+        console.error('[2FA] SMS delivery failed:', smsError);
       }
       
       logSecurityEvent(user.id, 'PASSWORD_VERIFIED_OTP_SENT', { phoneNumber: validatedData.phoneNumber }, clientIp);
@@ -1878,30 +1873,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 5-minute expiration
       await storage.saveOtp(validatedData.email, hashedOtp, 5);
       
-      // Send OTP via email
-      if (process.env.NODE_ENV === 'production') {
-        sendOtpEmail(validatedData.email, otp, user.firstName || undefined).catch(err => {
-          console.error('[2FA] Email delivery failed:', err);
-        });
-      } else {
-        console.log(`[2FA-DEV] Login OTP for ${validatedData.email}: ${otp}`);
-        sendOtpEmail(validatedData.email, otp, user.firstName || undefined).catch(() => {});
+      // Send OTP via email - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Login OTP for ${validatedData.email}: ${otp}`);
       }
+      // Always attempt to send email regardless of mode
+      sendOtpEmail(validatedData.email, otp, user.firstName || undefined).catch(err => {
+        console.error('[2FA] Email delivery failed:', err);
+      });
       
       logSecurityEvent(user.id, 'PASSWORD_VERIFIED_OTP_SENT', { email: validatedData.email }, clientIp);
       
-      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
-      const isTestAccount = validatedData.email.endsWith('@test.alga.et');
-      if (isTestAccount) {
-        logSecurityEvent(user.id, 'TEST_MODE_OTP', { email: validatedData.email }, clientIp);
-      }
-      
+      // PRODUCTION: Never expose OTP in API response
       res.json({ 
         message: "Password verified. A 6-digit verification code has been sent to your email.",
         email: validatedData.email,
         requiresOtp: true,
-        expiresIn: 300,
-        ...(isTestAccount && { testOtp: otp })
+        expiresIn: 300
       });
     } catch (error: any) {
       console.error("Error logging in with email:", error);
@@ -1947,29 +1936,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save HASHED OTP with 10-minute expiration for password reset
       await storage.saveOtp(email, hashedOtp, 10);
       
-      // Send OTP via email
-      if (process.env.NODE_ENV === 'production') {
-        sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
-          console.error('[PASSWORD_RESET] Email delivery failed:', err);
-        });
-      } else {
-        console.log(`[PASSWORD_RESET-DEV] OTP for ${email}: ${otp}`);
-        sendOtpEmail(email, otp, user.firstName || undefined).catch(() => {});
+      // Send OTP via email - always send in production mode
+      const otpMode = process.env.OTP_MODE || 'production';
+      if (otpMode === 'test') {
+        console.log(`[OTP-TEST] Password reset OTP for ${email}: ${otp}`);
       }
+      // Always attempt to send email regardless of mode
+      sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
+        console.error('[PASSWORD_RESET] Email delivery failed:', err);
+      });
       
       logSecurityEvent(user.id, 'PASSWORD_RESET_OTP_SENT', { email }, clientIp);
       
-      // INSA TEST MODE: Allow OTP visibility for @test.alga.et accounts only
-      const isTestAccount = email.endsWith('@test.alga.et');
-      if (isTestAccount) {
-        logSecurityEvent(user.id, 'TEST_MODE_PASSWORD_RESET_OTP', { email }, clientIp);
-      }
-      
+      // PRODUCTION: Never expose OTP in API response
       res.json({ 
         message: "If an account exists with this email, a reset code has been sent.",
         email,
-        expiresIn: 600,
-        ...(isTestAccount && { testOtp: otp })
+        expiresIn: 600
       });
     } catch (error: any) {
       console.error("Error requesting password reset:", error);
