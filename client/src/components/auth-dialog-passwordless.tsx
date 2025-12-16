@@ -942,11 +942,16 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                           <FormLabel className="text-eth-brown">Email</FormLabel>
                           <FormControl>
                             <Input 
-                              {...field} 
                               type="email"
                               placeholder="abebe@example.com" 
                               className="bg-white border-eth-brown/20 text-eth-brown" 
                               data-testid="input-email-register"
+                              autoComplete="email"
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              ref={field.ref}
                             />
                           </FormControl>
                           <FormMessage />
