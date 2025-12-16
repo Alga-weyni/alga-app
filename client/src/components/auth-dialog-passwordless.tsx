@@ -849,44 +849,42 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
               {mode === "login" ? (
                 <Form {...emailLoginForm}>
                   <form onSubmit={emailLoginForm.handleSubmit((data) => emailLoginMutation.mutate(data))} className="space-y-4">
-                    <FormField
-                      control={emailLoginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Email</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              type="email"
-                              placeholder="abebe@example.com" 
-                              className="bg-white border-eth-brown/20 text-eth-brown" 
-                              data-testid="input-email"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-eth-brown">Email</label>
+                      <Input
+                        type="email"
+                        placeholder="abebe@example.com"
+                        className="bg-white border-eth-brown/20 text-eth-brown"
+                        data-testid="input-email"
+                        {...emailLoginForm.register("email")}
+                      />
+                      {emailLoginForm.formState.errors.email && (
+                        <p className="text-sm text-red-500">{emailLoginForm.formState.errors.email.message}</p>
                       )}
-                    />
-                    <FormField
-                      control={emailLoginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-eth-brown">Password</FormLabel>
-                          <FormControl>
-                            <PasswordInput 
-                              field={field} 
-                              placeholder="Enter your password" 
-                              show={showPassword} 
-                              onToggle={() => setShowPassword(!showPassword)}
-                              testId="input-password-email"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-eth-brown">Password</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eth-brown/50" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          className="bg-white border-eth-brown/20 text-eth-brown pl-10 pr-10"
+                          data-testid="input-password-email"
+                          {...emailLoginForm.register("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-eth-brown/50 hover:text-eth-brown"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      {emailLoginForm.formState.errors.password && (
+                        <p className="text-sm text-red-500">{emailLoginForm.formState.errors.password.message}</p>
                       )}
-                    />
+                    </div>
                     <Button
                       type="submit"
                       disabled={emailLoginMutation.isPending}
