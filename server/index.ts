@@ -141,6 +141,18 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
     
+    // OTP Test Mode banner for INSA testers
+    const otpMode = process.env.OTP_MODE || 'production';
+    if (otpMode === 'test') {
+      console.log('');
+      console.log('╔════════════════════════════════════════════════════════════╗');
+      console.log('║  🔐 OTP TEST MODE ACTIVE                                   ║');
+      console.log('║  OTPs will be logged to console with [OTP-TEST] prefix     ║');
+      console.log('║  Look for: [OTP-TEST] Registration/Login OTP for <email>   ║');
+      console.log('╚════════════════════════════════════════════════════════════╝');
+      console.log('');
+    }
+    
     // Schedule daily signature integrity checks (INSA compliance)
     if (process.env.NODE_ENV === "production") {
       scheduleIntegrityChecks();

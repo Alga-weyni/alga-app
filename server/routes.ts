@@ -1507,7 +1507,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via email - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Registration OTP for ${email}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] PASSWORDLESS REGISTRATION OTP for ${email}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send email regardless of mode
       sendOtpEmail(email, otp, firstName).catch(err => {
@@ -1565,7 +1570,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via email - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Login OTP for ${email}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] PASSWORDLESS LOGIN OTP for ${email}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send email regardless of mode
       sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
@@ -1634,7 +1644,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via SMS - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Registration OTP for ${validatedData.phoneNumber}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] PHONE REGISTRATION OTP for ${validatedData.phoneNumber}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send SMS regardless of mode
       try {
@@ -1770,7 +1785,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via SMS - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Login OTP for ${validatedData.phoneNumber}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] PHONE LOGIN OTP for ${validatedData.phoneNumber}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send SMS regardless of mode
       try {
@@ -1836,7 +1856,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otpMode = process.env.OTP_MODE || 'production';
       console.log(`[REGISTER] Attempting to send OTP to ${validatedData.email}, OTP_MODE=${otpMode}`);
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Registration OTP for ${validatedData.email}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] REGISTRATION OTP for ${validatedData.email}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       
       // Always attempt to send email
@@ -1959,7 +1984,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via email - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Login OTP for ${validatedData.email}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] LOGIN OTP for ${validatedData.email}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send email regardless of mode
       sendOtpEmail(validatedData.email, otp, user.firstName || undefined).catch(err => {
@@ -2022,7 +2052,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send OTP via email - always send in production mode
       const otpMode = process.env.OTP_MODE || 'production';
       if (otpMode === 'test') {
-        console.log(`[OTP-TEST] Password reset OTP for ${email}: ${otp}`);
+        console.log('');
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log(`🔐 [OTP-TEST] PASSWORD RESET OTP for ${email}`);
+        console.log(`🔐 [OTP-TEST] CODE: ${otp}`);
+        console.log('🔐 ═══════════════════════════════════════════════════════════');
+        console.log('');
       }
       // Always attempt to send email regardless of mode
       sendOtpEmail(email, otp, user.firstName || undefined).catch(err => {
