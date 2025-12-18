@@ -1874,12 +1874,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(null, 'REGISTRATION_OTP_SENT', { email: validatedData.email }, clientIp);
       
-      res.json({ 
+      // In test mode, include OTP in response for INSA testers
+      const response: any = { 
         message: "A verification code has been sent to your email.",
         email: validatedData.email,
         requiresOtp: true,
         expiresIn: 600
-      });
+      };
+      
+      if (otpMode === 'test') {
+        response.testOtp = otp;
+        response.testMode = true;
+      }
+      
+      res.json(response);
     } catch (error: any) {
       console.error("Error registering email user:", error);
       res.status(400).json({ message: error.message || "Failed to register" });
@@ -1998,13 +2006,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(user.id, 'PASSWORD_VERIFIED_OTP_SENT', { email: validatedData.email }, clientIp);
       
-      // PRODUCTION: Never expose OTP in API response
-      res.json({ 
+      // In test mode, include OTP in response for INSA testers
+      const response: any = { 
         message: "Password verified. A 6-digit verification code has been sent to your email.",
         email: validatedData.email,
         requiresOtp: true,
         expiresIn: 300
-      });
+      };
+      
+      if (otpMode === 'test') {
+        response.testOtp = otp;
+        response.testMode = true;
+      }
+      
+      res.json(response);
     } catch (error: any) {
       console.error("Error logging in with email:", error);
       res.status(400).json({ message: error.message || "Failed to log in" });

@@ -97,6 +97,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
   const [authMethod, setAuthMethod] = useState<"phone" | "email">("email");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [isEmailRegistrationOtp, setIsEmailRegistrationOtp] = useState(false);
+  const [testOtp, setTestOtp] = useState<string | null>(null);
   const [pendingContact, setPendingContact] = useState("");
   const [verifiedOtp, setVerifiedOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -247,9 +248,15 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setPendingContact(data.email || data.contact);
       setShowOtpInput(true);
       otpForm.setValue("email", data.email || data.contact);
+      
+      // Store test OTP if in test mode
+      if (data.testOtp) {
+        setTestOtp(data.testOtp);
+      }
+      
       toast({
         title: "Password verified!",
-        description: "Check your email for the 6-digit code",
+        description: data.testOtp ? `TEST MODE - Your code is: ${data.testOtp}` : "Check your email for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -294,9 +301,15 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setShowOtpInput(true);
       setIsEmailRegistrationOtp(true);
       otpForm.setValue("email", data.email || data.contact);
+      
+      // Store test OTP if in test mode
+      if (data.testOtp) {
+        setTestOtp(data.testOtp);
+      }
+      
       toast({
         title: "Verification code sent!",
-        description: "Check your email for the 6-digit code",
+        description: data.testOtp ? `TEST MODE - Your code is: ${data.testOtp}` : "Check your email for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -482,6 +495,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                 verifyOtpMutation.mutate(data);
               }
             })} className="space-y-4">
+              {/* Test Mode OTP Display for INSA Testers */}
+              {testOtp && (
+                <div className="bg-amber-100 border-2 border-amber-500 rounded-lg p-4 text-center" data-testid="test-otp-display">
+                  <div className="text-amber-800 font-semibold text-sm mb-1">TEST MODE - INSA VERIFICATION</div>
+                  <div className="text-amber-900 font-bold text-3xl tracking-widest">{testOtp}</div>
+                  <div className="text-amber-700 text-xs mt-1">Enter this code below</div>
+                </div>
+              )}
               <FormField
                 control={otpForm.control}
                 name="otp"
@@ -510,6 +531,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
                     setShowOtpInput(false);
                     setIsEmailRegistrationOtp(false);
                     setPendingContact("");
+                    setTestOtp(null);
                   }}
                   className="flex-1 border-eth-brown text-eth-brown hover:bg-eth-brown hover:text-white"
                   data-testid="button-back"
