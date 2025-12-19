@@ -798,8 +798,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Try R2 first, then Object Storage, then local fallback
             const { isR2Configured, r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL } = await import('./lib/r2.js');
             
+            let uploadSuccess = false;
+            
+            // Try R2 first if configured
             if (isR2Configured && r2Client) {
-              // Upload to Cloudflare R2
               try {
                 const { PutObjectCommand } = await import('@aws-sdk/client-s3');
                 const { randomBytes } = await import('crypto');
@@ -827,12 +829,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   stats,
                 });
                 console.log('[Upload] Successfully uploaded to R2:', key);
+                uploadSuccess = true;
               } catch (r2Err) {
-                console.error('R2 upload failed:', r2Err);
-                throw r2Err; // Will be caught by outer try-catch for fallback
+                console.error('R2 upload failed, trying fallback:', r2Err);
               }
-            } else {
-              // Try Object Storage
+            }
+            
+            // Fallback to Object Storage if R2 failed or not configured
+            if (!uploadSuccess) {
               try {
                 const uploadURL = await objectStorageService.getObjectEntityUploadURL();
                 
@@ -862,24 +866,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   url: objectPath,
                   stats,
                 });
+                uploadSuccess = true;
               } catch (objectStorageErr) {
-                console.error('Object Storage upload failed:', objectStorageErr);
+                console.error('Object Storage upload failed, trying local:', objectStorageErr);
                 
-                // Fallback: save to local uploads folder (for development)
-                const localPath = path.join(process.cwd(), 'uploads', 'properties');
-                if (!fs.existsSync(localPath)) {
-                  fs.mkdirSync(localPath, { recursive: true });
+                // Final fallback: save to local uploads folder
+                try {
+                  const localPath = path.join(process.cwd(), 'uploads', 'properties');
+                  if (!fs.existsSync(localPath)) {
+                    fs.mkdirSync(localPath, { recursive: true });
+                  }
+                  fs.writeFileSync(path.join(localPath, file.filename), finalBuffer);
+                  
+                  const fileUrl = `/uploads/properties/${file.filename}`;
+                  registerUserUpload(req.user.id, fileUrl);
+                  logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: fileUrl, storage: 'local_fallback' }, req.ip || 'unknown');
+                  
+                  processedFiles.push({
+                    url: fileUrl,
+                    stats,
+                  });
+                  uploadSuccess = true;
+                } catch (localErr) {
+                  console.error('Local fallback also failed:', localErr);
                 }
-                fs.writeFileSync(path.join(localPath, file.filename), finalBuffer);
-                
-                const fileUrl = `/uploads/properties/${file.filename}`;
-                registerUserUpload(req.user.id, fileUrl);
-                logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: fileUrl, storage: 'local_fallback' }, req.ip || 'unknown');
-                
-                processedFiles.push({
-                  url: fileUrl,
-                  stats,
-                });
               }
             }
 
