@@ -105,6 +105,15 @@ function validateUserUploadedImage(userId: string, imageUrl: string): { valid: b
     return { valid: true };
   }
   
+  // Allow R2 URLs - these are secured by R2 credentials and only our server can upload to them
+  // The URL pattern is https://pub-{hash}.r2.dev/ or custom domain like https://cdn.alga.et/
+  if (imageUrl.includes('.r2.dev/') || 
+      imageUrl.includes('cdn.alga.et/') ||
+      imageUrl.includes('r2.cloudflarestorage.com/')) {
+    console.log(`[UPLOAD_AUDIT] R2 URL accepted: ${imageUrl} for user ${userId}`);
+    return { valid: true };
+  }
+  
   // Extract file path from URL
   let filePath = imageUrl;
   
