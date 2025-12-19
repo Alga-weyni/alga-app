@@ -829,7 +829,8 @@ router.post("/arifpay/initiate", async (req, res) => {
       errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
       notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
       successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
-      phone: (guest.phoneNumber || "0900000000").replace(/[^0-9]/g, '').slice(-10),
+      // Use guest's phone if available, otherwise leave empty for user to fill on ArifPay
+      phone: guest.phoneNumber ? guest.phoneNumber.replace(/[^0-9]/g, '').slice(-10) : "",
       email: guest.email || "guest@alga.et",
       nonce,
       expireDate: formattedExpireDate,
