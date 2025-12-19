@@ -1660,12 +1660,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(userId, 'PASSWORD_REGISTRATION', { phoneNumber: validatedData.phoneNumber }, clientIp);
       
-      // INSA COMPLIANCE: Never expose OTP in API response
+      // Return response - include OTP only in test mode for INSA testers
+      const otpModeForResponse = process.env.OTP_MODE || 'production';
       res.json({ 
         message: "Registration successful. A 6-digit verification code has been sent to your phone.",
         phoneNumber: validatedData.phoneNumber,
         requiresOtp: true,
-        expiresIn: 300
+        expiresIn: 300,
+        ...(otpModeForResponse === 'test' ? { testOtp: otp } : {})
       });
     } catch (error: any) {
       console.error("Error registering phone user:", error);
@@ -1801,12 +1803,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       logSecurityEvent(user.id, 'PASSWORD_VERIFIED_OTP_SENT', { phoneNumber: validatedData.phoneNumber }, clientIp);
       
-      // INSA COMPLIANCE: Never expose OTP in API response
+      // Return response - include OTP only in test mode for INSA testers
+      const otpModeForResponse = process.env.OTP_MODE || 'production';
       res.json({ 
         message: "Password verified. A 6-digit verification code has been sent to your phone.",
         phoneNumber: validatedData.phoneNumber,
         requiresOtp: true,
-        expiresIn: 300
+        expiresIn: 300,
+        ...(otpModeForResponse === 'test' ? { testOtp: otp } : {})
       });
     } catch (error: any) {
       console.error("Error logging in with phone:", error);

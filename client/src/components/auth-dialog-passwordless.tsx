@@ -226,9 +226,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setPendingContact(data.phoneNumber || data.contact);
       setShowOtpInput(true);
       otpForm.setValue("phoneNumber", data.phoneNumber || data.contact);
+      
+      if (data.testOtp) {
+        setTestOtp(data.testOtp);
+      }
+      
       toast({
         title: "Password verified!",
-        description: "Check your phone for the 6-digit code",
+        description: data.testOtp ? `TEST MODE - Your code is: ${data.testOtp}` : "Check your phone for the 6-digit code",
       });
     },
     onError: (error: any) => {
@@ -277,9 +282,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = "login", 
       setPendingContact(data.phoneNumber || data.contact);
       setShowOtpInput(true);
       otpForm.setValue("phoneNumber", data.phoneNumber || data.contact);
+      
+      if (data.testOtp) {
+        setTestOtp(data.testOtp);
+      }
+      
       toast({
         title: "Account created!",
-        description: "Check your phone for the 6-digit code",
+        description: data.testOtp ? `TEST MODE - Your code is: ${data.testOtp}` : "Check your phone for the 6-digit code",
       });
     },
     onError: (error: any) => {
