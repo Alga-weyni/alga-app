@@ -255,27 +255,50 @@ export default function DellalaListProperty() {
         throw new Error(errorData.message || "Failed to get upload URLs");
       }
 
-      const { uploads } = await signedUrlResponse.json();
+      const responseData = await signedUrlResponse.json();
+      let uploadedUrls: string[] = [];
       
-      // Step 2: Upload each file directly to R2 using signed URLs
-      const uploadedUrls: string[] = [];
-      
-      for (let i = 0; i < validFiles.length; i++) {
-        const file = validFiles[i];
-        const { uploadUrl, publicUrl } = uploads[i];
+      // Check if we should use local upload (R2 not configured)
+      if (responseData.useLocalUpload) {
+        const formData = new FormData();
+        validFiles.forEach(file => {
+          formData.append("images", file);
+        });
         
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
+        const uploadResponse = await fetch(getApiUrl("/api/upload/property-images"), {
+          method: "POST",
+          body: formData,
+          credentials: "include",
         });
         
         if (!uploadResponse.ok) {
-          console.error(`Failed to upload file ${file.name}:`, uploadResponse.status);
-          continue;
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || "Failed to upload images");
         }
         
-        uploadedUrls.push(publicUrl);
+        const uploadResult = await uploadResponse.json();
+        uploadedUrls = uploadResult.urls || [];
+      } else {
+        // Use R2 signed URL upload
+        const { uploads } = responseData;
+        
+        for (let i = 0; i < validFiles.length; i++) {
+          const file = validFiles[i];
+          const { uploadUrl, publicUrl } = uploads[i];
+          
+          const uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          
+          if (!uploadResponse.ok) {
+            console.error(`Failed to upload file ${file.name}:`, uploadResponse.status);
+            continue;
+          }
+          
+          uploadedUrls.push(publicUrl);
+        }
       }
       
       if (uploadedUrls.length === 0) {
@@ -340,17 +363,38 @@ export default function DellalaListProperty() {
         throw new Error(errorData.message || "Failed to get upload URL");
       }
 
-      const { uploadUrl, publicUrl } = await signedUrlResponse.json();
+      const responseData = await signedUrlResponse.json();
+      let publicUrl = "";
       
-      // Upload directly to R2
-      const uploadResponse = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      if (responseData.useLocalUpload) {
+        // Use multipart form upload
+        const formData = new FormData();
+        formData.append("images", file);
+        
+        const uploadResponse = await fetch(getApiUrl("/api/upload/property-images"), {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error("Upload failed");
+        }
+        
+        const uploadResult = await uploadResponse.json();
+        publicUrl = uploadResult.urls?.[0] || "";
+      } else {
+        // Upload directly to R2
+        const uploadResponse = await fetch(responseData.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
 
-      if (!uploadResponse.ok) {
-        throw new Error("Upload failed");
+        if (!uploadResponse.ok) {
+          throw new Error("Upload failed");
+        }
+        publicUrl = responseData.publicUrl;
       }
 
       setPropertyDeedUrl(publicUrl);

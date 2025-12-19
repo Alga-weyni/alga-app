@@ -711,12 +711,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==================== CLOUDFLARE R2 SIGNED URL UPLOAD ====================
-  // Generate signed URLs for direct browser-to-R2 uploads
+  // ==================== CLOUDFLARE R2 / LOCAL UPLOAD ====================
+  // Generate signed URLs for direct browser-to-R2 uploads, or use local storage fallback
   app.post('/api/upload-url', isAuthenticated, async (req: any, res) => {
     try {
-      const { generateSignedUploadUrl, generateMultipleSignedUrls } = await import('./services/imageUpload.service.js');
-      
+      const { isR2Configured } = await import('./lib/r2.js');
       const { folder, contentType, files } = req.body;
       const userId = String(req.user.id);
       
@@ -725,6 +724,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!validFolders.includes(folder)) {
         return res.status(400).json({ message: `Invalid folder. Must be one of: ${validFolders.join(', ')}` });
       }
+      
+      // If R2 is not configured, return local upload mode
+      if (!isR2Configured) {
+        console.log('[Upload] R2 not configured, using local upload mode');
+        return res.json({ 
+          useLocalUpload: true,
+          endpoint: '/api/upload/property-images',
+          message: 'Use multipart form upload to the provided endpoint'
+        });
+      }
+      
+      const { generateSignedUploadUrl, generateMultipleSignedUrls } = await import('./services/imageUpload.service.js');
       
       // Handle multiple files
       if (files && Array.isArray(files)) {
@@ -760,11 +771,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(result);
     } catch (error: any) {
-      console.error('R2 signed URL generation error:', error);
+      console.error('Upload URL generation error:', error);
       res.status(500).json({ message: error.message || 'Failed to generate upload URL' });
     }
   });
-  // ==================== END R2 SIGNED URL UPLOAD ====================
+  // ==================== END UPLOAD ====================
 
   // LEGACY: File upload endpoint (kept for backwards compatibility during migration)
   // Will be removed after R2 migration is complete

@@ -368,27 +368,52 @@ export default function HostDashboard() {
         throw new Error(errorData.message || 'Failed to get upload URLs');
       }
 
-      const { uploads } = await signedUrlResponse.json();
+      const responseData = await signedUrlResponse.json();
       
-      // Step 2: Upload each file directly to R2 using signed URLs
-      const uploadedUrls: string[] = [];
+      let uploadedUrls: string[] = [];
       
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const { uploadUrl, publicUrl } = uploads[i];
+      // Check if we should use local upload (R2 not configured)
+      if (responseData.useLocalUpload) {
+        // Use multipart form upload to local storage
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('images', file);
+        });
         
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file,
+        const uploadResponse = await fetch(getApiUrl('/api/upload/property-images'), {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
         });
         
         if (!uploadResponse.ok) {
-          console.error(`Failed to upload file ${file.name}:`, uploadResponse.status);
-          continue;
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to upload images');
         }
         
-        uploadedUrls.push(publicUrl);
+        const uploadResult = await uploadResponse.json();
+        uploadedUrls = uploadResult.urls || [];
+      } else {
+        // Use R2 signed URL upload
+        const { uploads } = responseData;
+        
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const { uploadUrl, publicUrl } = uploads[i];
+          
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file,
+          });
+          
+          if (!uploadResponse.ok) {
+            console.error(`Failed to upload file ${file.name}:`, uploadResponse.status);
+            continue;
+          }
+          
+          uploadedUrls.push(publicUrl);
+        }
       }
       
       if (uploadedUrls.length === 0) {

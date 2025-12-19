@@ -1,6 +1,6 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL } from '../lib/r2.js';
+import { r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL, isR2Configured } from '../lib/r2.js';
 import { randomBytes } from 'crypto';
 
 export interface SignedUploadUrlResult {
@@ -27,6 +27,10 @@ const SIGNED_URL_EXPIRY_SECONDS = 300; // 5 minutes
 export async function generateSignedUploadUrl(
   params: GenerateSignedUrlParams
 ): Promise<SignedUploadUrlResult> {
+  if (!isR2Configured || !r2Client) {
+    throw new Error('R2 storage is not configured. Please set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY environment variables.');
+  }
+
   const { folder, contentType, userId } = params;
 
   if (!ALLOWED_CONTENT_TYPES.includes(contentType)) {
