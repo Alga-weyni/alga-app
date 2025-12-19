@@ -777,7 +777,7 @@ router.post("/arifpay/initiate", async (req, res) => {
       });
     }
 
-    const { bookingId, amount, paymentMethods = ['TELEBIRR'] } = req.body;
+    const { bookingId, amount, paymentMethods = ['TELEBIRR'], phoneNumber } = req.body;
 
     if (!bookingId || !amount) {
       return res.status(400).json({
@@ -829,8 +829,8 @@ router.post("/arifpay/initiate", async (req, res) => {
       errorUrl: `${baseUrl}/booking/error?bookingId=${bookingId}`,
       notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
       successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
-      // Use guest's phone if available, otherwise use placeholder (user can edit on ArifPay checkout)
-      phone: guest.phoneNumber ? guest.phoneNumber.replace(/[^0-9]/g, '').slice(-10) : "0911111111",
+      // Use provided phone, or guest's stored phone, or placeholder as last resort
+      phone: (phoneNumber || guest.phoneNumber || "0911111111").replace(/[^0-9]/g, '').slice(-10),
       email: guest.email || "guest@alga.et",
       nonce,
       expireDate: formattedExpireDate,

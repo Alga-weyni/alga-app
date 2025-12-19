@@ -85,6 +85,7 @@ export default function PropertyDetails() {
   const [showStripeCheckout, setShowStripeCheckout] = useState(false);
   const [showChapaCheckout, setShowChapaCheckout] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const [paymentPhone, setPaymentPhone] = useState(user?.phoneNumber || "");
 
   const { data: property, isLoading } = useQuery<Property>({
     queryKey: [`/api/properties/${propertyId}`],
@@ -202,6 +203,7 @@ export default function PropertyDetails() {
         const paymentData = await apiRequest("POST", "/api/payment/arifpay/initiate", {
           bookingId: booking.id,
           amount: parseFloat(booking.totalPrice),
+          phoneNumber: paymentPhone || user?.phoneNumber,
         });
         
         if (paymentData.success && paymentData.paymentUrl) {
@@ -708,9 +710,27 @@ export default function PropertyDetails() {
                     </div>
                   )}
 
+                  {/* Phone number for payment */}
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700">
+                      Phone Number (for payment)
+                    </label>
+                    <Input
+                      type="tel"
+                      placeholder="09XXXXXXXX"
+                      value={paymentPhone}
+                      onChange={(e) => setPaymentPhone(e.target.value)}
+                      className="h-9 sm:h-10 text-sm"
+                      data-testid="input-payment-phone"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Enter your Telebirr/CBE Birr phone number
+                    </p>
+                  </div>
+
                   <Button 
                     className="w-full bg-eth-red hover:bg-red-700 h-10 sm:h-11 text-sm sm:text-base" 
-                    disabled={!bookingData.checkIn || !bookingData.checkOut || bookingMutation.isPending}
+                    disabled={!bookingData.checkIn || !bookingData.checkOut || !paymentPhone || bookingMutation.isPending}
                     onClick={handleDirectReserve}
                     data-testid="button-reserve"
                   >
