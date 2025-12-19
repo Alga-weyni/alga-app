@@ -725,51 +725,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: `Invalid folder. Must be one of: ${validFolders.join(', ')}` });
       }
       
-      // If R2 is not configured, return local upload mode
-      if (!isR2Configured) {
-        console.log('[Upload] R2 not configured, using local upload mode');
-        return res.json({ 
-          useLocalUpload: true,
-          endpoint: '/api/upload/property-images',
-          message: 'Use multipart form upload to the provided endpoint'
-        });
-      }
-      
-      const { generateSignedUploadUrl, generateMultipleSignedUrls } = await import('./services/imageUpload.service.js');
-      
-      // Handle multiple files
-      if (files && Array.isArray(files)) {
-        const results = await generateMultipleSignedUrls(folder, files, userId);
-        
-        // Register uploads for INSA security tracking
-        results.forEach(result => {
-          registerUserUpload(userId, result.publicUrl);
-        });
-        
-        logSecurityEvent(userId, 'R2_SIGNED_URLS_GENERATED', { 
-          folder, 
-          count: results.length 
-        }, req.ip || 'unknown');
-        
-        return res.json({ uploads: results });
-      }
-      
-      // Handle single file
-      if (!contentType) {
-        return res.status(400).json({ message: 'contentType is required' });
-      }
-      
-      const result = await generateSignedUploadUrl({ folder, contentType, userId });
-      
-      // Register upload for INSA security tracking
-      registerUserUpload(userId, result.publicUrl);
-      
-      logSecurityEvent(userId, 'R2_SIGNED_URL_GENERATED', { 
-        folder, 
-        key: result.key 
-      }, req.ip || 'unknown');
-      
-      res.json(result);
+      // Always use server-side uploads to avoid CORS issues with direct browser-to-R2 uploads
+      // The server will handle uploading to R2 or local storage
+      console.log('[Upload] Using server-side upload mode (R2 configured:', isR2Configured, ')');
+      return res.json({ 
+        useLocalUpload: true,
+        endpoint: '/api/upload/property-images',
+        message: 'Use multipart form upload to the provided endpoint',
+        storageBackend: isR2Configured ? 'r2' : 'local'
+      });
     } catch (error: any) {
       console.error('Upload URL generation error:', error);
       res.status(500).json({ message: error.message || 'Failed to generate upload URL' });
@@ -831,60 +795,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.warn('Image processing failed, using original:', processErr);
             }
 
-            // Upload to Object Storage
-            try {
-              const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-              
-              // Upload the processed image to Object Storage
-              const uploadResponse = await fetch(uploadURL, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': file.mimetype,
-                },
-                body: finalBuffer,
-              });
-
-              if (!uploadResponse.ok) {
-                throw new Error(`Upload failed: ${uploadResponse.status}`);
+            // Try R2 first, then Object Storage, then local fallback
+            const { isR2Configured, r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL } = await import('./lib/r2.js');
+            
+            if (isR2Configured && r2Client) {
+              // Upload to Cloudflare R2
+              try {
+                const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+                const { randomBytes } = await import('crypto');
+                
+                const uniqueId = randomBytes(16).toString('hex');
+                const timestamp = Date.now();
+                const extension = file.mimetype.split('/')[1] === 'jpeg' ? 'jpg' : file.mimetype.split('/')[1];
+                const key = `properties/${req.user.id}/${timestamp}-${uniqueId}.${extension}`;
+                
+                const command = new PutObjectCommand({
+                  Bucket: R2_BUCKET,
+                  Key: key,
+                  Body: finalBuffer,
+                  ContentType: file.mimetype,
+                });
+                
+                await r2Client.send(command);
+                
+                const publicUrl = `${R2_PUBLIC_BASE_URL}/${key}`;
+                registerUserUpload(req.user.id, publicUrl);
+                logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: publicUrl, storage: 'r2' }, req.ip || 'unknown');
+                
+                processedFiles.push({
+                  url: publicUrl,
+                  stats,
+                });
+                console.log('[Upload] Successfully uploaded to R2:', key);
+              } catch (r2Err) {
+                console.error('R2 upload failed:', r2Err);
+                throw r2Err; // Will be caught by outer try-catch for fallback
               }
+            } else {
+              // Try Object Storage
+              try {
+                const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+                
+                const uploadResponse = await fetch(uploadURL, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': file.mimetype,
+                  },
+                  body: finalBuffer,
+                });
 
-              // Normalize the path to /objects/uploads/uuid format
-              const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL.split('?')[0]);
-              
-              // Set ACL to public so images can be viewed
-              await objectStorageService.trySetObjectEntityAclPolicy(objectPath, {
-                owner: req.user.id,
-                visibility: 'public',
-              });
+                if (!uploadResponse.ok) {
+                  throw new Error(`Upload failed: ${uploadResponse.status}`);
+                }
 
-              const filePath = objectPath;
-              
-              // INSA FIX: Register this upload with the user's ID for validation
-              registerUserUpload(req.user.id, filePath);
-              logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath, storage: 'object_storage' }, req.ip || 'unknown');
-              
-              processedFiles.push({
-                url: filePath,
-                stats,
-              });
-            } catch (objectStorageErr) {
-              console.error('Object Storage upload failed:', objectStorageErr);
-              
-              // Fallback: save to local uploads folder (for development)
-              const localPath = path.join(process.cwd(), 'uploads', 'properties');
-              if (!fs.existsSync(localPath)) {
-                fs.mkdirSync(localPath, { recursive: true });
+                const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL.split('?')[0]);
+                
+                await objectStorageService.trySetObjectEntityAclPolicy(objectPath, {
+                  owner: req.user.id,
+                  visibility: 'public',
+                });
+
+                registerUserUpload(req.user.id, objectPath);
+                logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: objectPath, storage: 'object_storage' }, req.ip || 'unknown');
+                
+                processedFiles.push({
+                  url: objectPath,
+                  stats,
+                });
+              } catch (objectStorageErr) {
+                console.error('Object Storage upload failed:', objectStorageErr);
+                
+                // Fallback: save to local uploads folder (for development)
+                const localPath = path.join(process.cwd(), 'uploads', 'properties');
+                if (!fs.existsSync(localPath)) {
+                  fs.mkdirSync(localPath, { recursive: true });
+                }
+                fs.writeFileSync(path.join(localPath, file.filename), finalBuffer);
+                
+                const fileUrl = `/uploads/properties/${file.filename}`;
+                registerUserUpload(req.user.id, fileUrl);
+                logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: fileUrl, storage: 'local_fallback' }, req.ip || 'unknown');
+                
+                processedFiles.push({
+                  url: fileUrl,
+                  stats,
+                });
               }
-              fs.writeFileSync(path.join(localPath, file.filename), finalBuffer);
-              
-              const fileUrl = `/uploads/properties/${file.filename}`;
-              registerUserUpload(req.user.id, fileUrl);
-              logSecurityEvent(req.user.id, 'FILE_UPLOADED', { filePath: fileUrl, storage: 'local_fallback' }, req.ip || 'unknown');
-              
-              processedFiles.push({
-                url: fileUrl,
-                stats,
-              });
             }
 
             // Clean up temp file
