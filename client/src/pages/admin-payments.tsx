@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   CreditCard, 
@@ -72,6 +72,30 @@ interface PaymentStats {
   unreconciledCount: number;
 }
 
+interface BookingData {
+  id: number;
+  propertyId: number;
+  userId: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  totalPrice: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod?: string;
+  paymentRef?: string;
+  createdAt: string;
+  property?: {
+    title: string;
+    city: string;
+  };
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
 export default function AdminPayments() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -83,6 +107,7 @@ export default function AdminPayments() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [gatewayFilter, setGatewayFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [markingPaidId, setMarkingPaidId] = useState<number | null>(null);
 
   // Redirect if not admin
   if (user && user.role !== 'admin' && user.role !== 'operator') {
@@ -96,6 +121,41 @@ export default function AdminPayments() {
 
   const { data: stats } = useQuery<PaymentStats>({
     queryKey: ['/api/admin/payment-transactions/stats'],
+  });
+
+  // Fetch all bookings for admin
+  const { data: allBookings = [], isLoading: bookingsLoading } = useQuery<BookingData[]>({
+    queryKey: ['/api/admin/bookings'],
+  });
+
+  // Filter for pending payment bookings
+  const pendingPaymentBookings = allBookings.filter(b => b.paymentStatus === 'pending');
+
+  // Mark booking as paid mutation
+  const markAsPaidMutation = useMutation({
+    mutationFn: async (bookingId: number) => {
+      return apiRequest('PATCH', `/api/bookings/${bookingId}/payment`, {
+        paymentStatus: 'paid',
+        paymentReference: `ADMIN-VERIFIED-${Date.now()}`
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+      toast({
+        title: "Payment Confirmed",
+        description: "Booking has been marked as paid and confirmed.",
+      });
+      setMarkingPaidId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Mark as Paid",
+        description: error.message || "Could not update payment status",
+        variant: "destructive",
+      });
+      setMarkingPaidId(null);
+    },
   });
 
   const reconcileMutation = useMutation({
@@ -319,6 +379,145 @@ export default function AdminPayments() {
                 </Select>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Pending Bookings Section */}
+        <Card className="border-[#e5ddd5] mb-6">
+          <CardHeader className="bg-yellow-50 border-b border-yellow-200">
+            <CardTitle className="text-[#2d1810] flex items-center gap-2">
+              <Clock className="h-5 w-5 text-yellow-600" />
+              Pending Payment Bookings
+              {pendingPaymentBookings.length > 0 && (
+                <Badge className="bg-yellow-100 text-yellow-800 ml-2">{pendingPaymentBookings.length}</Badge>
+              )}
+            </CardTitle>
+            <CardDescription>Bookings awaiting payment confirmation - mark as paid when payment is verified</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {bookingsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="h-6 w-6 animate-spin text-[#8b7355]" />
+              </div>
+            ) : pendingPaymentBookings.length === 0 ? (
+              <div className="text-center py-8 text-[#5a4a42]">
+                <CheckCircle className="h-10 w-10 mx-auto mb-3 text-green-500 opacity-70" />
+                <p className="font-medium">All bookings are paid!</p>
+                <p className="text-sm mt-1">No pending payments at this time</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Booking ID</TableHead>
+                      <TableHead>Guest</TableHead>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Dates</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingPaymentBookings.map((booking) => (
+                      <TableRow key={booking.id} data-testid={`row-pending-booking-${booking.id}`}>
+                        <TableCell className="font-mono font-semibold" data-testid={`text-booking-id-${booking.id}`}>
+                          #{booking.id}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {booking.user?.firstName} {booking.user?.lastName}
+                            </div>
+                            <div className="text-xs text-gray-500">{booking.user?.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[150px] truncate" title={booking.property?.title}>
+                            {booking.property?.title || `Property #${booking.propertyId}`}
+                          </div>
+                          <div className="text-xs text-gray-500">{booking.property?.city}</div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div>{format(new Date(booking.checkIn), 'MMM d')}</div>
+                          <div className="text-xs text-gray-500">to {format(new Date(booking.checkOut), 'MMM d, yyyy')}</div>
+                        </TableCell>
+                        <TableCell className="font-semibold text-[#2d1810]" data-testid={`text-booking-amount-${booking.id}`}>
+                          {formatAmount(booking.totalPrice, 'ETB')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {booking.paymentStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                data-testid={`button-mark-paid-${booking.id}`}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Mark Paid
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Confirm Payment for Booking #{booking.id}</DialogTitle>
+                                <DialogDescription>
+                                  Are you sure you want to mark this booking as paid? This will:
+                                  <ul className="mt-2 ml-4 list-disc text-left">
+                                    <li>Set payment status to "paid"</li>
+                                    <li>Change booking status to "confirmed"</li>
+                                    <li>Allow guest to download receipt</li>
+                                    <li>Generate access code for guest</li>
+                                  </ul>
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Amount:</span>
+                                  <span className="font-semibold">{formatAmount(booking.totalPrice, 'ETB')}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Guest:</span>
+                                  <span>{booking.user?.firstName} {booking.user?.lastName}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Property:</span>
+                                  <span className="truncate max-w-[200px]">{booking.property?.title}</span>
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button variant="outline" onClick={() => setMarkingPaidId(null)}>
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => markAsPaidMutation.mutate(booking.id)}
+                                  disabled={markAsPaidMutation.isPending}
+                                  data-testid={`button-confirm-paid-${booking.id}`}
+                                >
+                                  {markAsPaidMutation.isPending ? (
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                  )}
+                                  Confirm Payment
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
