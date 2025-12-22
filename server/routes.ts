@@ -5427,6 +5427,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================
+  // ADMIN BOOKINGS ROUTES
+  // ============================================
+
+  // Get all bookings for admin with user and property data
+  app.get('/api/admin/bookings', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
+    try {
+      const allBookings = await db
+        .select({
+          id: bookings.id,
+          propertyId: bookings.propertyId,
+          guestId: bookings.guestId,
+          checkIn: bookings.checkIn,
+          checkOut: bookings.checkOut,
+          guests: bookings.guests,
+          totalPrice: bookings.totalPrice,
+          status: bookings.status,
+          paymentStatus: bookings.paymentStatus,
+          paymentMethod: bookings.paymentMethod,
+          paymentRef: bookings.paymentRef,
+          createdAt: bookings.createdAt,
+        })
+        .from(bookings)
+        .orderBy(desc(bookings.createdAt));
+      
+      // Fetch property and user data for each booking
+      const bookingsWithDetails = await Promise.all(
+        allBookings.map(async (booking) => {
+          const [property] = await db
+            .select({ title: properties.title, city: properties.city })
+            .from(properties)
+            .where(eq(properties.id, booking.propertyId))
+            .limit(1);
+          
+          const [user] = await db
+            .select({ firstName: users.firstName, lastName: users.lastName, email: users.email })
+            .from(users)
+            .where(eq(users.id, booking.guestId))
+            .limit(1);
+          
+          return {
+            ...booking,
+            userId: booking.guestId,
+            property: property || null,
+            user: user || null,
+          };
+        })
+      );
+      
+      res.json(bookingsWithDetails);
+    } catch (error) {
+      console.error("Error fetching admin bookings:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // ============================================
   // ADMIN PAYMENT TRANSACTIONS ROUTES
   // ============================================
 
