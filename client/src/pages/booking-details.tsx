@@ -90,6 +90,31 @@ export default function BookingDetails() {
     },
   });
 
+  // Admin: Mark booking as paid
+  const markAsPaidMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("PATCH", `/api/bookings/${id}/payment`, { 
+        paymentStatus: "paid",
+        paymentReference: `ADMIN-VERIFIED-${Date.now()}`
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/bookings/${id}`] });
+      toast({
+        title: "Payment confirmed",
+        description: "Booking has been marked as paid and confirmed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Unable to update payment status.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
@@ -447,6 +472,40 @@ export default function BookingDetails() {
                   </span>
                 </div>
               </div>
+              
+              {/* Admin: Mark as Paid button */}
+              {user?.role === 'admin' && booking.paymentStatus === 'pending' && (
+                <div className="pt-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        data-testid="button-mark-paid"
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Mark as Paid (Admin)
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Payment</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to mark this booking as paid? This will confirm the booking and generate an access code for the guest.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => markAsPaidMutation.mutate()}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Confirm Payment
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -741,9 +741,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePaymentStatus(id: number, paymentStatus: string): Promise<Booking> {
+    // When payment is marked as paid, also confirm the booking
+    const updateData: any = { paymentStatus, updatedAt: new Date() };
+    if (paymentStatus === 'paid') {
+      updateData.status = 'confirmed';
+    }
+    
     const [updatedBooking] = await db
       .update(bookings)
-      .set({ paymentStatus, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(bookings.id, id))
       .returning();
     return updatedBooking;
