@@ -85,7 +85,7 @@ export default function PropertyDetails() {
   const [showStripeCheckout, setShowStripeCheckout] = useState(false);
   const [showChapaCheckout, setShowChapaCheckout] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
-  const [paymentPhone, setPaymentPhone] = useState(user?.phoneNumber || "");
+  const [paymentPhone, setPaymentPhone] = useState(user?.phoneNumber || "251");
 
   const { data: property, isLoading } = useQuery<Property>({
     queryKey: [`/api/properties/${propertyId}`],
@@ -717,14 +717,14 @@ export default function PropertyDetails() {
                     </label>
                     <Input
                       type="tel"
-                      placeholder="09XXXXXXXX"
+                      placeholder="251911234567"
                       value={paymentPhone}
                       onChange={(e) => setPaymentPhone(e.target.value)}
                       className="h-9 sm:h-10 text-sm"
                       data-testid="input-payment-phone"
                     />
                     <p className="text-xs text-gray-500">
-                      Enter your Telebirr/CBE Birr phone number
+                      Enter your phone number with 251 prefix (e.g., 251911234567)
                     </p>
                   </div>
 
