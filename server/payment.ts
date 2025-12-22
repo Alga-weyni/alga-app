@@ -1075,6 +1075,72 @@ router.get("/arifpay/status/:sessionId", async (req, res) => {
   }
 });
 
+// Verify and update payment status by booking ID (called when user returns from payment)
+router.post("/arifpay/verify/:bookingId", async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    
+    // Find booking
+    const [booking] = await db.select()
+      .from(bookings)
+      .where(eq(bookings.id, parseInt(bookingId)))
+      .limit(1);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found"
+      });
+    }
+    
+    // Already paid - just return success
+    if (booking.paymentStatus === 'paid') {
+      return res.status(200).json({
+        success: true,
+        status: 'paid',
+        message: "Payment already confirmed"
+      });
+    }
+    
+    // If we have a payment ref, try to verify with ArifPay
+    if (booking.paymentRef && arifpay) {
+      try {
+        const isSandbox = process.env.NODE_ENV !== 'production';
+        const session = await arifpay.checkout.fetch(booking.paymentRef, { sandbox: isSandbox });
+        
+        const txn = session.transaction as any;
+        const txnStatus = txn?.status || txn?.transactionStatus;
+        
+        console.log(`[Arifpay] Verify booking #${bookingId} - Status: ${txnStatus}`);
+        
+        if (txnStatus === 'SUCCESS' || txnStatus === 'COMPLETED') {
+          await processArifpayResult(booking.id, 'SUCCESS', String(txn?.id || txn?.transactionId || ''));
+          
+          return res.status(200).json({
+            success: true,
+            status: 'paid',
+            message: "Payment verified and confirmed"
+          });
+        }
+      } catch (apiError: any) {
+        console.error(`[Arifpay] API verify error for booking #${bookingId}:`, apiError.message);
+      }
+    }
+    
+    return res.status(200).json({
+      success: true,
+      status: booking.paymentStatus || 'pending',
+      message: "Payment status checked"
+    });
+  } catch (err: any) {
+    console.error("[Arifpay] Verify booking error:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Failed to verify payment"
+    });
+  }
+});
+
 // Cancel Arifpay session
 router.post("/arifpay/cancel/:sessionId", async (req, res) => {
   try {

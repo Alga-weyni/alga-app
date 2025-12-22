@@ -20,7 +20,29 @@ export default function BookingSuccess() {
     if (orderId && bookingId) {
       confirmPayPalPayment(orderId, bookingId);
     }
+    
+    // For ArifPay, verify and update payment status
+    if (bookingId) {
+      verifyArifPayPayment(bookingId);
+    }
   }, []);
+
+  const verifyArifPayPayment = async (bookingId: string) => {
+    try {
+      const response = await fetch(getApiUrl(`/api/payment/arifpay/verify/${bookingId}`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("ArifPay verification result:", result);
+      }
+    } catch (error) {
+      console.error("Error verifying ArifPay payment:", error);
+    }
+  };
 
   // Fetch access code for this booking
   const { data: accessCode } = useQuery<AccessCode>({
