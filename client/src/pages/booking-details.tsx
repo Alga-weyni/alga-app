@@ -145,125 +145,231 @@ export default function BookingDetails() {
 
   const canCancel = booking?.status === "pending" || booking?.status === "confirmed";
 
+  // Helper function to convert number to words
+  const numberToWords = (num: number): string => {
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 
+      'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    
+    if (num === 0) return 'Zero';
+    
+    const convertLessThanThousand = (n: number): string => {
+      if (n === 0) return '';
+      if (n < 20) return ones[n];
+      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+      return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convertLessThanThousand(n % 100) : '');
+    };
+    
+    const intPart = Math.floor(num);
+    const decPart = Math.round((num - intPart) * 100);
+    
+    let result = '';
+    if (intPart >= 1000000) {
+      result += convertLessThanThousand(Math.floor(intPart / 1000000)) + ' Million ';
+      const remainder = intPart % 1000000;
+      if (remainder >= 1000) {
+        result += convertLessThanThousand(Math.floor(remainder / 1000)) + ' Thousand ';
+      }
+      if (remainder % 1000 > 0) {
+        result += convertLessThanThousand(remainder % 1000);
+      }
+    } else if (intPart >= 1000) {
+      result += convertLessThanThousand(Math.floor(intPart / 1000)) + ' Thousand ';
+      if (intPart % 1000 > 0) {
+        result += convertLessThanThousand(intPart % 1000);
+      }
+    } else {
+      result = convertLessThanThousand(intPart);
+    }
+    
+    if (decPart > 0) {
+      result += ' & ' + convertLessThanThousand(decPart) + ' cents';
+    }
+    
+    return result.trim();
+  };
+
   const generateReceipt = () => {
     if (!booking || !property) return;
     
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const marginLeft = 15;
+    const marginRight = pageWidth - 15;
+    const contentWidth = marginRight - marginLeft;
     
-    // Header
-    doc.setFillColor(45, 20, 5); // Dark brown
-    doc.rect(0, 0, pageWidth, 40, 'F');
+    // Colors
+    const primaryColor = { r: 139, g: 69, b: 19 }; // Brown color for Alga branding
+    const headerBg = { r: 45, g: 20, b: 5 }; // Dark brown
+    
+    // ============ HEADER ============
+    doc.setFillColor(headerBg.r, headerBg.g, headerBg.b);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("ALGA", pageWidth / 2, 20, { align: "center" });
-    doc.setFontSize(12);
+    doc.text("ALGA", pageWidth / 2, 15, { align: "center" });
+    doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
-    doc.text("Payment Receipt", pageWidth / 2, 30, { align: "center" });
+    doc.text("VAT Invoice / Customer Receipt", pageWidth / 2, 25, { align: "center" });
     
-    // Reset text color
+    // ============ COMPANY & CUSTOMER INFO ============
     doc.setTextColor(0, 0, 0);
+    let y = 45;
     
-    // Transaction Details
-    doc.setFontSize(14);
+    // Left column - Company Info
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("Transaction Details", 20, 55);
-    
-    doc.setFontSize(10);
+    doc.text("Company Address & Other Information", marginLeft, y);
     doc.setFont("helvetica", "normal");
-    const startY = 65;
-    const lineHeight = 8;
-    
-    const details = [
-      ["Transaction ID:", booking.paymentRef || `ALG-${booking.id}-${new Date(booking.createdAt || Date.now()).getTime()}`],
-      ["Date:", new Date(booking.createdAt || Date.now()).toLocaleString("en-US", { 
-        dateStyle: "full", 
-        timeStyle: "short" 
-      })],
-      ["Payment Method:", (booking.paymentMethod || "ArifPay").toUpperCase()],
-      ["Payment Status:", booking.paymentStatus?.toUpperCase() || "PENDING"],
-      ["Booking Status:", booking.status.toUpperCase()],
+    doc.setFontSize(8);
+    y += 6;
+    const companyInfo = [
+      ["Country:", "Ethiopia"],
+      ["City:", "Addis Ababa"],
+      ["Address:", "Bole Sub-City, Addis Ababa"],
+      ["Email:", "support@alga.et"],
+      ["Tel:", "+251-XX-XXX-XXXX"],
+      ["TIN:", "XXXXXXXXXX"],
+      ["VAT Registration No:", "ALGXXXXXX"],
+      ["VAT Registration Date:", "01/01/2024"],
     ];
-    
-    details.forEach((row, index) => {
+    companyInfo.forEach(([label, value]) => {
       doc.setFont("helvetica", "bold");
-      doc.text(row[0], 20, startY + (index * lineHeight));
+      doc.text(label, marginLeft, y);
       doc.setFont("helvetica", "normal");
-      doc.text(row[1], 80, startY + (index * lineHeight));
+      doc.text(value, marginLeft + 35, y);
+      y += 5;
     });
     
-    // Property Details
-    doc.setFontSize(14);
+    // Right column - Customer Info
+    y = 51;
+    const midPoint = pageWidth / 2 + 5;
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("Property Details", 20, startY + 50);
-    
-    doc.setFontSize(10);
+    doc.text("Customer Information", midPoint, 45);
     doc.setFont("helvetica", "normal");
-    const propY = startY + 60;
+    doc.setFontSize(8);
     
-    const propDetails = [
-      ["Property:", property.title],
-      ["Location:", `${property.location}, ${property.city}`],
+    const customerName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Guest' : 'Guest';
+    const customerInfo = [
+      ["Customer Name:", customerName],
+      ["City:", property.city || "-"],
+      ["Property:", property.title.substring(0, 25) + (property.title.length > 25 ? "..." : "")],
       ["Check-in:", formatDate(booking.checkIn)],
       ["Check-out:", formatDate(booking.checkOut)],
       ["Guests:", `${booking.guests} guest(s)`],
       ["Duration:", `${days} night(s)`],
     ];
-    
-    propDetails.forEach((row, index) => {
+    customerInfo.forEach(([label, value]) => {
       doc.setFont("helvetica", "bold");
-      doc.text(row[0], 20, propY + (index * lineHeight));
+      doc.text(label, midPoint, y);
       doc.setFont("helvetica", "normal");
-      doc.text(row[1], 80, propY + (index * lineHeight));
+      doc.text(value, midPoint + 30, y);
+      y += 5;
     });
     
-    // Payment Summary with Breakdown
+    // ============ PAYMENT / TRANSACTION INFORMATION ============
+    y = 95;
+    
+    // Section header with background
+    doc.setFillColor(headerBg.r, headerBg.g, headerBg.b);
+    doc.rect(marginLeft, y, contentWidth, 10, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Payment / Transaction Information", pageWidth / 2, y + 7, { align: "center" });
+    
+    // Reset colors
+    doc.setTextColor(0, 0, 0);
+    y += 15;
+    
+    // Transaction details table
+    const rowHeight = 9;
+    const labelWidth = 75;
+    
     const total = parseFloat(booking.totalPrice);
     const stayAmount = total / 1.175;
     const vatAmount = stayAmount * 0.15;
     const serviceCharge = stayAmount * 0.025;
     
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Payment Summary", 20, propY + 55);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const payY = propY + 65;
-    
-    const paymentDetails = [
-      ["Stay Amount:", `${stayAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
-      ["VAT (15%):", `${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
-      ["Service Charge (2.5%):", `${serviceCharge.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
-    ];
-    
-    paymentDetails.forEach((row, index) => {
-      doc.setFont("helvetica", "normal");
-      doc.text(row[0], 20, payY + (index * lineHeight));
-      doc.text(row[1], pageWidth - 20, payY + (index * lineHeight), { align: "right" });
+    const transactionDate = new Date(booking.createdAt || Date.now()).toLocaleString("en-US", {
+      month: "2-digit",
+      day: "2-digit", 
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
     });
     
-    // Total box
-    doc.setFillColor(240, 240, 240);
-    doc.rect(15, payY + 25, pageWidth - 30, 15, 'F');
+    const transactionId = booking.paymentRef || `ALG${booking.id}${Date.now().toString().slice(-6)}`;
     
-    doc.setFontSize(12);
+    const drawTableRow = (label: string, value: string, yPos: number, highlight = false) => {
+      if (highlight) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(marginLeft, yPos - 5, contentWidth, rowHeight, 'F');
+      }
+      doc.setDrawColor(200, 200, 200);
+      doc.line(marginLeft, yPos + 3, marginRight, yPos + 3);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(label, marginLeft + 3, yPos);
+      doc.setFont("helvetica", "bold");
+      doc.text(value, marginRight - 3, yPos, { align: "right" });
+    };
+    
+    const rows = [
+      ["Payer", customerName],
+      ["Property Owner", property.hostId ? `Host #${property.hostId}` : "ALGA Host"],
+      ["Payment Date & Time", transactionDate],
+      ["Reference No. (VAT Invoice No)", transactionId],
+      ["Reason / Type of service", `Accommodation booking via ALGA`],
+      ["Stay Amount", `${stayAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+      ["Service Charge (2.5%)", `${serviceCharge.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+      ["15% VAT", `${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+      ["Total amount paid", `${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+    ];
+    
+    rows.forEach((row, index) => {
+      const isLast = index === rows.length - 1;
+      drawTableRow(row[0], row[1], y, isLast);
+      y += rowHeight;
+    });
+    
+    // ============ AMOUNT IN WORDS ============
+    y += 10;
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("Total Amount:", 20, payY + 35);
-    doc.setFontSize(14);
-    doc.text(`${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`, pageWidth - 20, payY + 35, { align: "right" });
+    doc.text("Amount in Words:", marginLeft, y);
     
-    // Footer
+    doc.setDrawColor(100, 100, 100);
+    doc.rect(marginLeft + 35, y - 5, 120, 12, 'S');
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(`ETB ${numberToWords(total)}`, marginLeft + 38, y + 2);
+    
+    // ============ FOOTER ============
+    y += 25;
+    doc.setFillColor(headerBg.r, headerBg.g, headerBg.b);
+    doc.rect(marginLeft, y, contentWidth, 18, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("The hospitality you can always rely on.", pageWidth / 2, y + 8, { align: "center" });
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(128, 128, 128);
-    doc.text("Thank you for choosing Alga for your stay!", pageWidth / 2, payY + 55, { align: "center" });
-    doc.text("For support, contact: support@alga.et", pageWidth / 2, payY + 62, { align: "center" });
-    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, payY + 69, { align: "center" });
+    doc.text("\u00A9 2025 ALGA. All rights reserved.", pageWidth / 2, y + 14, { align: "center" });
+    
+    // Page number
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(9);
+    doc.text("1 / 1", pageWidth / 2, y + 30, { align: "center" });
     
     // Download
-    doc.save(`Alga-Receipt-Booking-${booking.id}.pdf`);
+    doc.save(`Alga-Receipt-${transactionId}.pdf`);
   };
 
   if (isLoading) {
