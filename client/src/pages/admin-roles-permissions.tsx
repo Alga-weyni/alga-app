@@ -91,6 +91,43 @@ const PERMISSIONS = {
       "Cannot verify users",
     ],
   },
+  dellala: {
+    name: "Agent (Dellala)",
+    icon: Briefcase,
+    color: "text-amber-600",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    permissions: [
+      "Refer properties and earn commissions",
+      "5% commission for 36 months",
+      "View referral dashboard",
+      "Track earnings and payouts",
+      "Withdraw to Telebirr/bank",
+    ],
+    restrictions: [
+      "Cannot manage properties directly",
+      "Cannot access admin features",
+      "Cannot verify users",
+    ],
+  },
+  service_provider: {
+    name: "Service Provider",
+    icon: Settings,
+    color: "text-teal-600",
+    bgColor: "bg-teal-50",
+    borderColor: "border-teal-200",
+    permissions: [
+      "List and manage services",
+      "Receive service bookings",
+      "View earnings dashboard",
+      "Respond to service requests",
+    ],
+    restrictions: [
+      "Cannot list properties",
+      "Cannot access admin features",
+      "Cannot verify users",
+    ],
+  },
   operator: {
     name: "Operator",
     icon: ShieldCheck,
@@ -343,6 +380,8 @@ export default function AdminRolesPermissions() {
                       <SelectItem value="all">All Roles</SelectItem>
                       <SelectItem value="guest">Tenant</SelectItem>
                       <SelectItem value="host">Guesthouse Owner</SelectItem>
+                      <SelectItem value="dellala">Agent (Dellala)</SelectItem>
+                      <SelectItem value="service_provider">Service Provider</SelectItem>
                       <SelectItem value="operator">Operator</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
@@ -458,11 +497,15 @@ export default function AdminRolesPermissions() {
                                   className="w-[160px]"
                                   data-testid={`select-role-${userData.id}`}
                                 >
-                                  <SelectValue />
+                                  <SelectValue>
+                                    {PERMISSIONS[userData.role as keyof typeof PERMISSIONS]?.name || userData.role}
+                                  </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="guest">Tenant</SelectItem>
                                   <SelectItem value="host">Guesthouse Owner</SelectItem>
+                                  <SelectItem value="dellala">Agent (Dellala)</SelectItem>
+                                  <SelectItem value="service_provider">Service Provider</SelectItem>
                                   <SelectItem value="operator">Operator</SelectItem>
                                   <SelectItem value="admin">Admin</SelectItem>
                                 </SelectContent>
