@@ -22,7 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Calendar, MapPin, Users, Home, CreditCard, FileText, XCircle, ArrowLeft, Star } from "lucide-react";
+import { Calendar, MapPin, Users, Home, CreditCard, FileText, XCircle, ArrowLeft, Star, Download, Receipt } from "lucide-react";
+import jsPDF from "jspdf";
 import { ReviewDialog } from "@/components/review-dialog";
 
 export default function BookingDetails() {
@@ -118,6 +119,101 @@ export default function BookingDetails() {
   };
 
   const canCancel = booking?.status === "pending" || booking?.status === "confirmed";
+
+  const generateReceipt = () => {
+    if (!booking || !property) return;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFillColor(45, 20, 5); // Dark brown
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.text("ALGA", pageWidth / 2, 20, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Payment Receipt", pageWidth / 2, 30, { align: "center" });
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
+    // Transaction Details
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Transaction Details", 20, 55);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const startY = 65;
+    const lineHeight = 8;
+    
+    const details = [
+      ["Transaction ID:", booking.paymentRef || `ALG-${booking.id}-${new Date(booking.createdAt || Date.now()).getTime()}`],
+      ["Date:", new Date(booking.createdAt || Date.now()).toLocaleString("en-US", { 
+        dateStyle: "full", 
+        timeStyle: "short" 
+      })],
+      ["Payment Method:", (booking.paymentMethod || "ArifPay").toUpperCase()],
+      ["Payment Status:", booking.paymentStatus?.toUpperCase() || "PENDING"],
+      ["Booking Status:", booking.status.toUpperCase()],
+    ];
+    
+    details.forEach((row, index) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(row[0], 20, startY + (index * lineHeight));
+      doc.setFont("helvetica", "normal");
+      doc.text(row[1], 80, startY + (index * lineHeight));
+    });
+    
+    // Property Details
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Property Details", 20, startY + 50);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const propY = startY + 60;
+    
+    const propDetails = [
+      ["Property:", property.title],
+      ["Location:", `${property.location}, ${property.city}`],
+      ["Check-in:", formatDate(booking.checkIn)],
+      ["Check-out:", formatDate(booking.checkOut)],
+      ["Guests:", `${booking.guests} guest(s)`],
+      ["Duration:", `${days} night(s)`],
+    ];
+    
+    propDetails.forEach((row, index) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(row[0], 20, propY + (index * lineHeight));
+      doc.setFont("helvetica", "normal");
+      doc.text(row[1], 80, propY + (index * lineHeight));
+    });
+    
+    // Payment Summary
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, propY + 55, pageWidth - 30, 25, 'F');
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Total Amount Paid:", 20, propY + 70);
+    doc.setFontSize(16);
+    doc.text(`${parseFloat(booking.totalPrice).toLocaleString()} ETB`, pageWidth - 20, propY + 70, { align: "right" });
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(128, 128, 128);
+    doc.text("Thank you for choosing Alga for your stay!", pageWidth / 2, propY + 95, { align: "center" });
+    doc.text("For support, contact: support@alga.et", pageWidth / 2, propY + 102, { align: "center" });
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, propY + 109, { align: "center" });
+    
+    // Download
+    doc.save(`Alga-Receipt-Booking-${booking.id}.pdf`);
+  };
 
   if (isLoading) {
     return (
@@ -286,6 +382,60 @@ export default function BookingDetails() {
                   {formatPrice(booking.totalPrice)}
                 </span>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Transaction Receipt */}
+          <Card data-testid="card-transaction-receipt">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5" />
+                Transaction Receipt
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Transaction ID</span>
+                  <span className="font-mono text-sm font-medium" data-testid="text-transaction-id">
+                    {booking.paymentRef || `ALG-${booking.id}`}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Transaction Date</span>
+                  <span className="text-sm font-medium" data-testid="text-transaction-date">
+                    {new Date(booking.createdAt || Date.now()).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                    })}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Payment Provider</span>
+                  <span className="text-sm font-medium capitalize" data-testid="text-payment-provider">
+                    {booking.paymentMethod || "ArifPay"}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Amount</span>
+                  <span className="text-lg font-bold text-foreground" data-testid="text-receipt-amount">
+                    {formatPrice(booking.totalPrice)}
+                  </span>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={generateReceipt}
+                className="w-full"
+                variant="outline"
+                data-testid="button-download-receipt"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download Receipt (PDF)
+              </Button>
             </CardContent>
           </Card>
 
