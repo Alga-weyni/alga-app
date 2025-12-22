@@ -830,7 +830,17 @@ router.post("/arifpay/initiate", async (req, res) => {
       notifyUrl: `${baseUrl}/api/payment/arifpay/webhook`,
       successUrl: `${baseUrl}/booking/success?bookingId=${bookingId}`,
       // Use provided phone, or guest's stored phone, or placeholder as last resort
-      phone: (phoneNumber || guest.phoneNumber || "0911111111").replace(/[^0-9]/g, '').slice(-10),
+      // ArifPay requires format "251XXXXXXXXX" (Ethiopian country code + 9 digits)
+      phone: (() => {
+        let phone = (phoneNumber || guest.phoneNumber || "0911111111").replace(/[^0-9]/g, '');
+        // Remove leading 0 if present and add 251 country code
+        if (phone.startsWith('0')) {
+          phone = '251' + phone.slice(1);
+        } else if (!phone.startsWith('251')) {
+          phone = '251' + phone;
+        }
+        return phone;
+      })(),
       email: guest.email || "guest@alga.et",
       nonce,
       expireDate: formattedExpireDate,
