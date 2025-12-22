@@ -193,23 +193,49 @@ export default function BookingDetails() {
       doc.text(row[1], 80, propY + (index * lineHeight));
     });
     
-    // Payment Summary
+    // Payment Summary with Breakdown
+    const total = parseFloat(booking.totalPrice);
+    const stayAmount = total / 1.175;
+    const vatAmount = stayAmount * 0.15;
+    const serviceCharge = stayAmount * 0.025;
+    
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Payment Summary", 20, propY + 55);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const payY = propY + 65;
+    
+    const paymentDetails = [
+      ["Stay Amount:", `${stayAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+      ["VAT (15%):", `${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+      ["Service Charge (2.5%):", `${serviceCharge.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`],
+    ];
+    
+    paymentDetails.forEach((row, index) => {
+      doc.setFont("helvetica", "normal");
+      doc.text(row[0], 20, payY + (index * lineHeight));
+      doc.text(row[1], pageWidth - 20, payY + (index * lineHeight), { align: "right" });
+    });
+    
+    // Total box
     doc.setFillColor(240, 240, 240);
-    doc.rect(15, propY + 55, pageWidth - 30, 25, 'F');
+    doc.rect(15, payY + 25, pageWidth - 30, 15, 'F');
     
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Total Amount Paid:", 20, propY + 70);
-    doc.setFontSize(16);
-    doc.text(`${parseFloat(booking.totalPrice).toLocaleString()} ETB`, pageWidth - 20, propY + 70, { align: "right" });
+    doc.text("Total Amount:", 20, payY + 35);
+    doc.setFontSize(14);
+    doc.text(`${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ETB`, pageWidth - 20, payY + 35, { align: "right" });
     
     // Footer
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(128, 128, 128);
-    doc.text("Thank you for choosing Alga for your stay!", pageWidth / 2, propY + 95, { align: "center" });
-    doc.text("For support, contact: support@alga.et", pageWidth / 2, propY + 102, { align: "center" });
-    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, propY + 109, { align: "center" });
+    doc.text("Thank you for choosing Alga for your stay!", pageWidth / 2, payY + 55, { align: "center" });
+    doc.text("For support, contact: support@alga.et", pageWidth / 2, payY + 62, { align: "center" });
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, payY + 69, { align: "center" });
     
     // Download
     doc.save(`Alga-Receipt-Booking-${booking.id}.pdf`);
@@ -376,11 +402,50 @@ export default function BookingDetails() {
                 </div>
               </div>
               <Separator />
-              <div className="flex items-center justify-between text-lg">
-                <span className="font-semibold text-foreground">Total Amount</span>
-                <span className="text-2xl font-bold text-foreground" data-testid="text-total-price">
-                  {formatPrice(booking.totalPrice)}
-                </span>
+              
+              {/* Price Breakdown */}
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                <h4 className="font-semibold text-foreground mb-2">Price Breakdown</h4>
+                
+                {/* Stay Amount */}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Stay Amount ({property ? `${formatPrice(property.pricePerNight)}/night × ${days} nights` : `${days} nights`})
+                  </span>
+                  <span className="text-sm font-medium" data-testid="text-stay-amount">
+                    {formatPrice((parseFloat(booking.totalPrice) / 1.175).toFixed(2))}
+                  </span>
+                </div>
+                
+                {/* VAT */}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    VAT (15%)
+                  </span>
+                  <span className="text-sm font-medium" data-testid="text-vat-amount">
+                    {formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.15).toFixed(2))}
+                  </span>
+                </div>
+                
+                {/* Service Charge */}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Service Charge (2.5%)
+                  </span>
+                  <span className="text-sm font-medium" data-testid="text-service-charge">
+                    {formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.025).toFixed(2))}
+                  </span>
+                </div>
+                
+                <Separator />
+                
+                {/* Total */}
+                <div className="flex justify-between items-center pt-1">
+                  <span className="font-semibold text-foreground">Total Amount</span>
+                  <span className="text-xl font-bold text-foreground" data-testid="text-total-price">
+                    {formatPrice(booking.totalPrice)}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -418,9 +483,25 @@ export default function BookingDetails() {
                     {booking.paymentMethod || "ArifPay"}
                   </span>
                 </div>
+              </div>
+              
+              {/* Receipt Breakdown */}
+              <div className="border rounded-lg p-4 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Stay Amount</span>
+                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175).toFixed(2))}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">VAT (15%)</span>
+                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.15).toFixed(2))}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Service Charge (2.5%)</span>
+                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.025).toFixed(2))}</span>
+                </div>
                 <Separator />
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Amount</span>
+                  <span className="font-semibold text-foreground">Total</span>
                   <span className="text-lg font-bold text-foreground" data-testid="text-receipt-amount">
                     {formatPrice(booking.totalPrice)}
                   </span>
