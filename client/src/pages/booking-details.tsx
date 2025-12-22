@@ -450,75 +450,77 @@ export default function BookingDetails() {
             </CardContent>
           </Card>
 
-          {/* Transaction Receipt */}
-          <Card data-testid="card-transaction-receipt">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Receipt className="h-5 w-5" />
-                Transaction Receipt
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Transaction ID</span>
-                  <span className="font-mono text-sm font-medium" data-testid="text-transaction-id">
-                    {booking.paymentRef || `ALG-${booking.id}`}
-                  </span>
+          {/* Transaction Receipt - Only show when payment is confirmed */}
+          {booking.paymentStatus === "paid" && (booking.status === "confirmed" || booking.status === "completed") && (
+            <Card data-testid="card-transaction-receipt">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="h-5 w-5" />
+                  Transaction Receipt
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Transaction ID</span>
+                    <span className="font-mono text-sm font-medium" data-testid="text-transaction-id">
+                      {booking.paymentRef || `ALG-${booking.id}`}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Transaction Date</span>
+                    <span className="text-sm font-medium" data-testid="text-transaction-date">
+                      {new Date(booking.createdAt || Date.now()).toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                      })}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Payment Provider</span>
+                    <span className="text-sm font-medium capitalize" data-testid="text-payment-provider">
+                      {booking.paymentMethod || "ArifPay"}
+                    </span>
+                  </div>
                 </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Transaction Date</span>
-                  <span className="text-sm font-medium" data-testid="text-transaction-date">
-                    {new Date(booking.createdAt || Date.now()).toLocaleString("en-US", {
-                      dateStyle: "medium",
-                      timeStyle: "short"
-                    })}
-                  </span>
+                
+                {/* Receipt Breakdown */}
+                <div className="border rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Stay Amount</span>
+                    <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175).toFixed(2))}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">VAT (15%)</span>
+                    <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.15).toFixed(2))}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Service Charge (2.5%)</span>
+                    <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.025).toFixed(2))}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-foreground">Total</span>
+                    <span className="text-lg font-bold text-foreground" data-testid="text-receipt-amount">
+                      {formatPrice(booking.totalPrice)}
+                    </span>
+                  </div>
                 </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Payment Provider</span>
-                  <span className="text-sm font-medium capitalize" data-testid="text-payment-provider">
-                    {booking.paymentMethod || "ArifPay"}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Receipt Breakdown */}
-              <div className="border rounded-lg p-4 space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Stay Amount</span>
-                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175).toFixed(2))}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">VAT (15%)</span>
-                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.15).toFixed(2))}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Service Charge (2.5%)</span>
-                  <span className="font-medium">{formatPrice((parseFloat(booking.totalPrice) / 1.175 * 0.025).toFixed(2))}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-foreground">Total</span>
-                  <span className="text-lg font-bold text-foreground" data-testid="text-receipt-amount">
-                    {formatPrice(booking.totalPrice)}
-                  </span>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={generateReceipt}
-                className="w-full"
-                variant="outline"
-                data-testid="button-download-receipt"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Download Receipt (PDF)
-              </Button>
-            </CardContent>
-          </Card>
+                
+                <Button 
+                  onClick={generateReceipt}
+                  className="w-full"
+                  variant="outline"
+                  data-testid="button-download-receipt"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Receipt (PDF)
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Special Requests */}
           {booking.specialRequests && (
