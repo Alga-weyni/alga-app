@@ -59,16 +59,12 @@ export default function BecomeAgent() {
     retry: false,
   });
 
-  // Redirect approved agents to their dashboard
+  // Redirect approved agents to their dashboard (silently)
   useEffect(() => {
     if (existingAgent?.agent?.status === 'approved') {
-      toast({
-        title: "Already Approved",
-        description: "You already have an approved agent account!",
-      });
       navigate("/dellala/dashboard", { replace: true });
     }
-  }, [existingAgent, navigate, toast]);
+  }, [existingAgent, navigate]);
 
   const form = useForm<AgentRegistrationForm>({
     resolver: zodResolver(agentRegistrationSchema),
