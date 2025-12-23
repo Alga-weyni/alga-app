@@ -6534,6 +6534,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Agent account not found" });
       }
 
+      // Only show property details for approved agents
+      if (agent.status !== 'approved') {
+        return res.status(403).json({ 
+          message: "Agent account pending approval",
+          status: agent.status 
+        });
+      }
+
       // Get the first property (in production, this would be linked to the agent)
       const [property] = await db
         .select()
