@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,23 @@ export default function BecomeAgent() {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [selectedDocType, setSelectedDocType] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if user already has an agent account
+  const { data: existingAgent } = useQuery<{ agent: { status: string } }>({
+    queryKey: ["/api/agent/dashboard"],
+    retry: false,
+  });
+
+  // Redirect approved agents to their dashboard
+  useEffect(() => {
+    if (existingAgent?.agent?.status === 'approved') {
+      toast({
+        title: "Already Approved",
+        description: "You already have an approved agent account!",
+      });
+      navigate("/dellala/dashboard", { replace: true });
+    }
+  }, [existingAgent, navigate, toast]);
 
   const form = useForm<AgentRegistrationForm>({
     resolver: zodResolver(agentRegistrationSchema),
