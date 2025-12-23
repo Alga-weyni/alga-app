@@ -183,7 +183,7 @@ function Router() {
         <Route path="/dellala/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><DellalaDashboard /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/dellala/list-property" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><DellalaListProperty /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/agent-dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><AgentDashboard /></ProtectedRoute></AnimatedRoute>} />
-        <Route path="/agent/success" element={<AnimatedRoute><ProtectedRoute requiredRoles={["agent"]}><AgentSuccess /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/agent/success" element={<AnimatedRoute><ProtectedRoute requireAuth={true}><AgentSuccess /></ProtectedRoute></AnimatedRoute>} />
         
         {/* Provider routes - service_provider role only */}
         <Route path="/provider/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["service_provider"]}><ProviderDashboard /></ProtectedRoute></AnimatedRoute>} />
