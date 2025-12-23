@@ -116,33 +116,70 @@ export default function BecomeAgent() {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(getApiUrl('/api/upload/id-document'), {
+      // Step 1: Get signed URL from R2
+      const signedUrlResponse = await fetch(getApiUrl('/api/upload/r2-signed-url'), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: formData,
+        body: JSON.stringify({
+          folder: 'id-documents',
+          contentType: file.type,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
+      if (!signedUrlResponse.ok) {
+        const error = await signedUrlResponse.json();
+        // If R2 is not configured, fall back to local upload
+        if (error.fallback) {
+          const formData = new FormData();
+          formData.append('image', file);
+          const localResponse = await fetch(getApiUrl('/api/upload/id-document'), {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+          });
+          if (!localResponse.ok) throw new Error('Upload failed');
+          const data = await localResponse.json();
+          setUploadedDocUrl(data.url);
+          setUploadedFileName(file.name);
+          form.setValue('idDocumentUrl', data.url);
+          form.setValue('idDocumentType', selectedDocType);
+          toast({
+            title: "Document Uploaded",
+            description: "Your ID document has been uploaded successfully. Admin will review it.",
+          });
+          return;
+        }
+        throw new Error(error.message || 'Failed to get upload URL');
       }
 
-      const data = await response.json();
-      setUploadedDocUrl(data.url);
+      const { uploadUrl, publicUrl } = await signedUrlResponse.json();
+
+      // Step 2: Upload directly to R2 using signed URL
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload to cloud storage');
+      }
+
+      // Step 3: Save the public URL
+      setUploadedDocUrl(publicUrl);
       setUploadedFileName(file.name);
-      form.setValue('idDocumentUrl', data.url);
+      form.setValue('idDocumentUrl', publicUrl);
       form.setValue('idDocumentType', selectedDocType);
 
       toast({
         title: "Document Uploaded",
         description: "Your ID document has been uploaded successfully. Admin will review it.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Upload Failed",
-        description: "Failed to upload document. Please try again.",
+        description: error.message || "Failed to upload document. Please try again.",
         variant: "destructive",
       });
     } finally {

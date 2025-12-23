@@ -963,6 +963,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === R2 SIGNED UPLOAD URL ENDPOINTS ===
+  // Get signed URL for uploading ID documents to Cloudflare R2 (alga-prod-assets bucket)
+  app.post('/api/upload/r2-signed-url', isAuthenticated, async (req: any, res) => {
+    try {
+      const { folder, contentType } = req.body;
+      
+      // Validate folder
+      const validFolders = ['properties', 'id-documents', 'profiles', 'services'];
+      if (!folder || !validFolders.includes(folder)) {
+        return res.status(400).json({ 
+          message: `Invalid folder. Must be one of: ${validFolders.join(', ')}` 
+        });
+      }
+      
+      // Validate content type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'application/pdf'];
+      if (!contentType || !allowedTypes.includes(contentType)) {
+        return res.status(400).json({ 
+          message: `Invalid content type. Must be one of: ${allowedTypes.join(', ')}` 
+        });
+      }
+      
+      // Import R2 service
+      const { generateSignedUploadUrl } = await import('./services/imageUpload.service.js');
+      
+      const result = await generateSignedUploadUrl({
+        folder: folder as 'properties' | 'id-documents' | 'profiles' | 'services',
+        contentType,
+        userId: req.user.id.toString(),
+      });
+      
+      // Log security event for ID document uploads
+      if (folder === 'id-documents') {
+        logSecurityEvent(req.user.id, 'ID_DOCUMENT_UPLOAD_INITIATED', { key: result.key }, req.ip || 'unknown');
+      }
+      
+      res.json({
+        uploadUrl: result.uploadUrl,
+        publicUrl: result.publicUrl,
+        key: result.key,
+      });
+    } catch (error: any) {
+      console.error('R2 signed URL error:', error);
+      
+      // If R2 is not configured, fall back to local storage info
+      if (error.message?.includes('R2 storage is not configured')) {
+        return res.status(503).json({ 
+          message: 'Cloud storage not configured. Please contact support.',
+          fallback: true
+        });
+      }
+      
+      res.status(500).json({ message: error.message || 'Failed to generate upload URL' });
+    }
+  });
+
   // === OBJECT STORAGE ENDPOINTS (Replit App Storage) ===
   // Referenced from blueprint:javascript_object_storage
   
