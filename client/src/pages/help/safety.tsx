@@ -86,12 +86,12 @@ export default function SafetyHelp() {
             </p>
 
             <div className="grid gap-3">
-              <a href="tel:+251943333555" className="block">
+              <a href="tel:+251945333555" className="block">
                 <div className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                   <Phone className="w-5 h-5 text-green-600" />
                   <div>
                     <p className="font-semibold" style={{ color: "#2d1405" }}>Emergency Hotline</p>
-                    <p className="text-sm" style={{ color: "#5a4a42" }}>+251 943 333 555 (24/7)</p>
+                    <p className="text-sm" style={{ color: "#5a4a42" }}>+251 945 333 555 (24/7)</p>
                   </div>
                 </div>
               </a>

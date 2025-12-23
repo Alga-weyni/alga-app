@@ -230,7 +230,7 @@ export default function BookingDetails() {
       ["City:", "Addis Ababa"],
       ["Address:", "Bole Sub-City, Addis Ababa"],
       ["Email:", "info@alga.et"],
-      ["Tel:", "+251 943 333 555"],
+      ["Tel:", "+251 945 333 555"],
       ["TIN:", "XXXXXXXXXX"],
       ["VAT Registration No:", "ALGXXXXXX"],
       ["VAT Registration Date:", "01/01/2024"],
