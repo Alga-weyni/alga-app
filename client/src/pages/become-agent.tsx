@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle } from "lucide-react";
+import { Loader2, TrendingUp, Clock, Banknote, QrCode, CheckCircle, Upload, FileText, X } from "lucide-react";
 import Header from "@/components/header";
 import { getApiUrl } from "@/lib/api-config";
 
@@ -31,6 +31,8 @@ const agentRegistrationSchema = z.object({
   paymentMethod: z.string().min(1, "Payment method is required"),
   paymentAccount: z.string().min(10, "Payment account is required"),
   idNumber: z.string().optional(),
+  idDocumentType: z.string().optional(),
+  idDocumentUrl: z.string().optional(),
   businessName: z.string().optional(),
   city: z.string().min(1, "City is required"),
   subCity: z.string().optional(),
@@ -44,6 +46,11 @@ export default function BecomeAgent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scannedId, setScannedId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedDocUrl, setUploadedDocUrl] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<AgentRegistrationForm>({
     resolver: zodResolver(agentRegistrationSchema),
@@ -53,11 +60,91 @@ export default function BecomeAgent() {
       paymentMethod: "",
       paymentAccount: "",
       idNumber: "",
+      idDocumentType: "",
+      idDocumentUrl: "",
       businessName: "",
       city: "",
       subCity: "",
     },
   });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!selectedDocType) {
+      toast({
+        title: "Select Document Type",
+        description: "Please select whether you're uploading a Passport or National ID first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a JPG, PNG, or PDF file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload a file smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(getApiUrl('/api/upload/id-document'), {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadedDocUrl(data.url);
+      setUploadedFileName(file.name);
+      form.setValue('idDocumentUrl', data.url);
+      form.setValue('idDocumentType', selectedDocType);
+
+      toast({
+        title: "Document Uploaded",
+        description: "Your ID document has been uploaded successfully. Admin will review it.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeUploadedDoc = () => {
+    setUploadedDocUrl(null);
+    setUploadedFileName(null);
+    form.setValue('idDocumentUrl', '');
+    form.setValue('idDocumentType', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const onSubmit = async (data: AgentRegistrationForm) => {
     setIsSubmitting(true);
@@ -313,6 +400,96 @@ export default function BecomeAgent() {
                 {isScanning && (
                   <div id="qr-reader" className="mt-2 max-w-sm mx-auto"></div>
                 )}
+              </div>
+
+              {/* ID Document Upload Section */}
+              <div className="border border-dashed border-medium-brown/30 dark:border-cream/30 rounded-lg p-4 bg-cream/20 dark:bg-gray-800/30">
+                <Label className="text-base font-medium mb-3 block">
+                  📄 Upload ID Document (Optional)
+                </Label>
+                <p className="text-sm text-medium-brown/70 dark:text-cream/60 mb-4">
+                  Upload a photo of your Passport or National ID. Admin will review it before approving your agent account.
+                </p>
+
+                <div className="space-y-3">
+                  {/* Document Type Selection */}
+                  <div>
+                    <Label htmlFor="docType" className="text-sm">Document Type</Label>
+                    <Select
+                      value={selectedDocType}
+                      onValueChange={(value) => setSelectedDocType(value)}
+                    >
+                      <SelectTrigger data-testid="select-docType" className="mt-1">
+                        <SelectValue placeholder="Select document type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="national_id">National ID</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* File Upload */}
+                  {!uploadedDocUrl ? (
+                    <div className="flex items-center gap-3">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg,application/pdf"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="id-document-upload"
+                        data-testid="input-id-document"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading || !selectedDocType}
+                        className="border-medium-brown text-medium-brown hover:bg-medium-brown/10 flex-1"
+                        data-testid="button-upload-id"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Upload Photo of ID
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                          {uploadedFileName}
+                        </p>
+                        <p className="text-xs text-green-600 dark:text-green-400">
+                          {selectedDocType === 'passport' ? 'Passport' : 'National ID'} - Uploaded successfully
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeUploadedDoc}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        data-testid="button-remove-doc"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-medium-brown/60 dark:text-cream/50">
+                    Accepted formats: JPG, PNG, PDF. Max size: 5MB
+                  </p>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
