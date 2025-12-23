@@ -46,8 +46,9 @@ interface PropertyWithOwner {
 export default function AgentSuccess() {
   const navigate = useNavigate();
 
-  const { data, isLoading } = useQuery<PropertyWithOwner>({
+  const { data, isLoading, isError } = useQuery<PropertyWithOwner>({
     queryKey: ["/api/agent/property-details"],
+    retry: false, // Don't retry on 403 errors
   });
 
   if (isLoading) {
@@ -65,7 +66,7 @@ export default function AgentSuccess() {
     );
   }
 
-  if (!data) {
+  if (!data || isError) {
     return (
       <>
         <Header />
