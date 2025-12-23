@@ -136,31 +136,48 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
 
     try {
       // Step 1: Get signed URL and upload image to R2
-      const signedUrlResponse = await fetch(getApiUrl('/api/upload-url'), {
+      let imageUrl: string;
+      
+      const signedUrlResponse = await fetch(getApiUrl('/api/upload/r2-signed-url'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder: 'id-documents', contentType: file.type }),
         credentials: 'include',
       });
       
-      if (!signedUrlResponse.ok) {
-        throw new Error('Failed to get upload URL');
+      if (signedUrlResponse.ok) {
+        const { uploadUrl, publicUrl } = await signedUrlResponse.json();
+        
+        // Upload directly to R2
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image to cloud storage');
+        }
+        
+        imageUrl = publicUrl;
+      } else {
+        // Fallback to local upload if R2 is not configured
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const localResponse = await fetch(getApiUrl('/api/upload/id-document'), {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        
+        if (!localResponse.ok) {
+          throw new Error('Failed to upload document');
+        }
+        
+        const localData = await localResponse.json();
+        imageUrl = localData.url;
       }
-      
-      const { uploadUrl, publicUrl } = await signedUrlResponse.json();
-      
-      // Upload directly to R2
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const imageUrl = publicUrl;
       
       // Step 2: Process with OCR
       setMessage("Reading document...");
