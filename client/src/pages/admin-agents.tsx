@@ -46,6 +46,9 @@ import {
   TrendingUp,
   Home,
   Filter,
+  FileText,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -59,6 +62,7 @@ interface Agent {
   subCity: string | null;
   businessName: string | null;
   idNumber: string | null;
+  idDocumentUrl: string | null;
   status: string;
   totalEarnings: string;
   totalProperties: number;
@@ -77,6 +81,8 @@ export default function AdminAgents() {
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
   const [verificationAction, setVerificationAction] = useState<"verify" | "reject">("verify");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState<{ url: string; name: string } | null>(null);
 
   const { data: agents, isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/admin/agents", { status: statusFilter !== "all" ? statusFilter : undefined, city: cityFilter !== "all" ? cityFilter : undefined }],
@@ -323,6 +329,7 @@ export default function AdminAgents() {
                     <TableHead>Agent</TableHead>
                     <TableHead>Contact</TableHead>
                     <TableHead>Location</TableHead>
+                    <TableHead>ID Document</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Properties</TableHead>
                     <TableHead>Earnings</TableHead>
@@ -333,7 +340,7 @@ export default function AdminAgents() {
                 <TableBody>
                   {filteredAgents.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-medium-brown dark:text-cream/60 py-12">
+                      <TableCell colSpan={9} className="text-center text-medium-brown dark:text-cream/60 py-12">
                         No agents found matching your filters
                       </TableCell>
                     </TableRow>
@@ -372,6 +379,27 @@ export default function AdminAgents() {
                               </p>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {agent.idDocumentUrl ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setViewingDocument({ url: agent.idDocumentUrl!, name: agent.fullName });
+                                setDocumentDialogOpen(true);
+                              }}
+                              className="text-blue-600 hover:text-blue-800"
+                              data-testid={`button-view-doc-${agent.id}`}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View ID
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-medium-brown/60 dark:text-cream/40">
+                              Not uploaded
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>{getStatusBadge(agent.status)}</TableCell>
                         <TableCell>
@@ -484,6 +512,67 @@ export default function AdminAgents() {
               {verifyMutation.isPending ? "Processing..." : (verificationAction === "verify" ? "Verify Agent" : "Reject Application")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ID Document View Dialog */}
+      <Dialog open={documentDialogOpen} onOpenChange={setDocumentDialogOpen}>
+        <DialogContent className="max-w-2xl" data-testid="dialog-document-view">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              ID Document - {viewingDocument?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Review this document before approving the agent application.
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewingDocument && (
+            <div className="space-y-4">
+              <div className="border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-800">
+                {viewingDocument.url.toLowerCase().endsWith('.pdf') ? (
+                  <div className="p-8 text-center">
+                    <FileText className="h-16 w-16 mx-auto text-medium-brown dark:text-cream/60 mb-4" />
+                    <p className="text-sm text-medium-brown dark:text-cream/60 mb-4">
+                      PDF document uploaded
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(viewingDocument.url, '_blank')}
+                      data-testid="button-open-pdf"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open PDF in New Tab
+                    </Button>
+                  </div>
+                ) : (
+                  <img 
+                    src={viewingDocument.url} 
+                    alt="ID Document"
+                    className="w-full h-auto max-h-[60vh] object-contain"
+                  />
+                )}
+              </div>
+
+              <div className="flex justify-between items-center">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(viewingDocument.url, '_blank')}
+                  data-testid="button-open-fullsize"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Full Size
+                </Button>
+                <Button
+                  onClick={() => setDocumentDialogOpen(false)}
+                  data-testid="button-close-document"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
