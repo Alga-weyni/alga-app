@@ -6391,13 +6391,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (existing.length > 0) {
         const existingAgent = existing[0];
-        // If they already have an approved agent account, update their role
+        // If they already have an approved agent account, just return it (don't change their role)
         if (existingAgent.status === 'approved') {
-          await storage.updateUserRole(userId, 'agent');
           return res.json({
             success: true,
             agent: existingAgent,
-            message: "You already have an approved agent account. Your role has been updated.",
+            message: "You already have an approved agent account. Visit the Agent Dashboard to manage your listings.",
           });
         } else if (existingAgent.status === 'pending') {
           return res.json({
@@ -6467,11 +6466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Agent account not found" });
       }
 
-      // AUTO-FIX: If user has an approved agent account but wrong role, fix it
-      if (agent.status === 'approved' && req.user.role !== 'agent') {
-        await storage.updateUserRole(userId, 'agent');
-        console.log(`[AUTO-FIX] Updated role to 'agent' for user ${userId}`);
-      }
+      // NOTE: Users keep their original role (guest/host) - agent status is tracked separately
+      // Agent functionality is available through the agent dashboard regardless of user role
 
       // Get agent performance
       const performance = await storage.getAgentPerformance(agent.id);
@@ -8334,10 +8330,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rejectionReason
       );
       
-      // Update user role if approved
-      if (status === 'approved') {
-        await storage.updateUserRole(updatedAgent.userId, 'agent');
-      }
+      // NOTE: Users keep their original role (guest/host) - agent status is tracked in agents table
+      // Agent functionality is available through the agent dashboard regardless of user role
       
       res.json(updatedAgent);
     } catch (error) {
