@@ -69,40 +69,40 @@ export default function AgentSuccess() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 px-4">
           <div className="max-w-2xl mx-auto space-y-6">
-            {/* Success Header */}
-            <Card className="border-green-500 dark:border-green-400 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            {/* Pending Approval Header */}
+            <Card className="border-amber-500 dark:border-amber-400 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
               <CardContent className="pt-8 pb-8">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4">
-                    <CheckCircle className="h-12 w-12 text-green-600" />
+                    <Calendar className="h-12 w-12 text-amber-600" />
                   </div>
                   <h1 className="text-4xl font-bold mb-3">
-                    🎉 Welcome, Dellala Agent!
+                    📋 Application Submitted!
                   </h1>
-                  <p className="text-xl text-green-50 mb-2">
-                    Your agent account is now active!
+                  <p className="text-xl text-amber-50 mb-2">
+                    Your agent application is pending review
                   </p>
-                  <p className="text-green-100">
-                    Start earning 5% commission on every booking for 36 months
+                  <p className="text-amber-100">
+                    An admin will verify your ID document and approve your account
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* How It Works */}
-            <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20">
+            {/* What Happens Next */}
+            <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-emerald-800 dark:text-emerald-200">
-                    <p className="font-semibold mb-2">💡 How to Start Earning</p>
+                  <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-800 dark:text-amber-200">
+                    <p className="font-semibold mb-2">📝 What Happens Next</p>
                     <ul className="space-y-2 ml-4 list-disc">
-                      <li>List properties by connecting property owners to Alga</li>
-                      <li>You earn <strong>5% commission</strong> on every booking</li>
-                      <li>Commission continues for <strong>36 months</strong> from the first booking</li>
-                      <li>Payments are sent automatically to your payment account</li>
+                      <li>Our team will review your submitted ID document</li>
+                      <li>Approval typically takes <strong>1-2 business days</strong></li>
+                      <li>You'll receive a notification once approved</li>
+                      <li>Then you can start listing properties and earning <strong>5% commission</strong></li>
                     </ul>
                   </div>
                 </div>
@@ -112,24 +112,25 @@ export default function AgentSuccess() {
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
-                onClick={() => navigate("/dellala/list-property")}
+                onClick={() => navigate("/")}
                 size="lg"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg py-6"
-                data-testid="button-list-property"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white text-lg py-6"
+                data-testid="button-browse-properties"
               >
                 <Home className="mr-2 h-5 w-5" />
-                List Your First Property
+                Browse Properties While You Wait
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               
               <Button
-                onClick={() => navigate("/dellala/dashboard")}
+                onClick={() => navigate("/my-alga")}
                 variant="outline"
                 size="lg"
                 className="w-full text-lg py-6"
-                data-testid="button-go-dashboard"
+                data-testid="button-go-my-alga"
               >
-                Go to Agent Dashboard
+                <User className="mr-2 h-5 w-5" />
+                Go to My Alga
               </Button>
             </div>
           </div>
