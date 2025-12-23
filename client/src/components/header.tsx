@@ -72,7 +72,7 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
 
   // Get "Me" path based on user role
   const getMePath = () => {
-    if (!user) return "/profile";
+    if (!user) return "/my-alga";
     
     switch (user.role) {
       case 'admin':
@@ -80,13 +80,13 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
       case 'operator':
         return '/operator/dashboard';
       case 'host':
-        return '/host/dashboard';
+        return '/my-alga'; // Hosts go to unified dashboard
       case 'agent':
-        return '/agent-dashboard';
+        return '/my-alga'; // Agents go to unified dashboard (agent dashboard accessed separately)
       case 'service_provider':
-        return '/provider/dashboard';
+        return '/my-alga'; // Service providers go to unified dashboard
       default:
-        return '/profile'; // Guest users go to profile
+        return '/my-alga'; // Guest users go to unified dashboard
     }
   };
 

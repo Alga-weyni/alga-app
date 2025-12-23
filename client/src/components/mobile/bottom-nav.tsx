@@ -24,13 +24,13 @@ export default function BottomNav() {
       case "operator":
         return "/operator/dashboard";
       case "host":
-        return "/host/dashboard";
+        return "/my-alga"; // Unified dashboard
       case "agent":
-        return "/agent-dashboard";
+        return "/my-alga"; // Unified dashboard (agent dashboard accessed separately)
       case "service_provider":
-        return "/provider/dashboard";
+        return "/my-alga"; // Unified dashboard
       default:
-        return "/profile"; // Guest users go to profile
+        return "/my-alga"; // Guest users go to unified dashboard
     }
   };
 
