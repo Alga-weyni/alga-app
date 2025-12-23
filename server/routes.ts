@@ -6372,6 +6372,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentAccount,
         telebirrAccount,
         idNumber,
+        idDocumentType,
+        idDocumentUrl,
         businessName,
         city,
         subCity,
@@ -6430,6 +6432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subCity: subCity || null,
           businessName: businessName || null,
           idNumber: idNumber || null,
+          idDocumentUrl: idDocumentUrl || null,  // Store uploaded ID document URL
           status: 'pending',  // Requires admin approval
           totalEarnings: '0.00',
           totalProperties: 0,
