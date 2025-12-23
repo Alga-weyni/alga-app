@@ -129,7 +129,7 @@ export default function TermsOfService() {
                       <li>Legal reference to Ethiopian proclamations</li>
                     </ul>
                     <p className="mt-2 leading-relaxed">
-                      Please contact: <a href="mailto:legal@alga.et" className="text-blue-600 dark:text-blue-400 underline">legal@alga.et</a>
+                      Please contact: <a href="mailto:info@alga.et" className="text-blue-600 dark:text-blue-400 underline">info@alga.et</a>
                     </p>
                   </div>
 
@@ -235,8 +235,8 @@ export default function TermsOfService() {
                 <div className="space-y-2 text-muted-foreground">
                   <p><strong>Alga One Member PLC</strong></p>
                   <p>TIN: 0101809194</p>
-                  <p>Email: <a href="mailto:legal@alga.et" className="text-blue-600 dark:text-blue-400 underline">legal@alga.et</a></p>
-                  <p>Support: <a href="mailto:support@alga.et" className="text-blue-600 dark:text-blue-400 underline">support@alga.et</a></p>
+                  <p>Email: <a href="mailto:info@alga.et" className="text-blue-600 dark:text-blue-400 underline">info@alga.et</a></p>
+                  <p>Support: <a href="mailto:info@alga.et" className="text-blue-600 dark:text-blue-400 underline">info@alga.et</a></p>
                 </div>
               </section>
 

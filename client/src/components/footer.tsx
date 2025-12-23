@@ -85,7 +85,7 @@ export default function Footer() {
               
               <div className="space-y-3">
                 <a 
-                  href="tel:+251996034044" 
+                  href="tel:+251943333555" 
                   className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-phone"
                 >
@@ -94,12 +94,12 @@ export default function Footer() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Phone</p>
-                    <p className="text-base font-medium">+251 996 034 044</p>
+                    <p className="text-base font-medium">+251 943 333 555</p>
                   </div>
                 </a>
                 
                 <a 
-                  href="mailto:hello@alga.et" 
+                  href="mailto:info@alga.et" 
                   className="group flex items-center gap-3 text-white/90 hover:text-white transition-all duration-300"
                   data-testid="link-email"
                 >
@@ -108,7 +108,7 @@ export default function Footer() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-white/60 uppercase tracking-wide">Email</p>
-                    <p className="text-base font-medium">hello@alga.et</p>
+                    <p className="text-base font-medium">info@alga.et</p>
                   </div>
                 </a>
               </div>
