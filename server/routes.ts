@@ -1935,8 +1935,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         otpHash: hashedOtp
       });
       
-      // Save pending registration with OTP
-      await storage.saveOtp(`register:${validatedData.email}`, pendingRegData, 10);
+      // Save pending registration with OTP (uses in-memory store for new users)
+      await storage.savePendingRegistration(`register:${validatedData.email}`, pendingRegData, 10);
       
       // Send OTP via email
       const otpMode = process.env.OTP_MODE || 'production';
@@ -1990,8 +1990,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email and OTP are required" });
       }
 
-      // Get pending registration data
-      const pendingData = await storage.getOtp(`register:${email}`);
+      // Get pending registration data (from in-memory store)
+      const pendingData = await storage.getPendingRegistration(`register:${email}`);
       if (!pendingData) {
         logSecurityEvent(null, 'REGISTRATION_OTP_EXPIRED', { email }, clientIp);
         return res.status(400).json({ message: "Registration expired. Please start again." });
@@ -2018,7 +2018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Clean up pending registration
-      await storage.deleteOtp(`register:${email}`);
+      await storage.deletePendingRegistration(`register:${email}`);
       
       logSecurityEvent(user.id, 'REGISTRATION_COMPLETED', { email }, clientIp);
       

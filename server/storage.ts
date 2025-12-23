@@ -68,6 +68,27 @@ import { db } from './db.js';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
 import { calculateBookingBreakdown } from './utils/booking.js';
 
+// In-memory store for pending registrations (users who don't exist yet)
+// This is separate from OTP storage which updates existing users
+interface PendingRegistration {
+  data: string;  // JSON stringified registration data
+  expiresAt: number;  // Unix timestamp
+}
+
+const pendingRegistrations = new Map<string, PendingRegistration>();
+
+// Clean up expired pending registrations periodically
+setInterval(() => {
+  const now = Date.now();
+  const keys = Array.from(pendingRegistrations.keys());
+  for (const key of keys) {
+    const value = pendingRegistrations.get(key);
+    if (value && value.expiresAt < now) {
+      pendingRegistrations.delete(key);
+    }
+  }
+}, 60000);  // Clean up every minute
+
 // Interface for storage operations
 export interface IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
@@ -77,12 +98,17 @@ export interface IStorage {
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   
-  // OTP operations (supports both phone and email)
+  // OTP operations (supports both phone and email - for EXISTING users only)
   saveOtp(contact: string, otp: string, expiryMinutes?: number): Promise<void>;
   getOtp(contact: string): Promise<string | null>;
   deleteOtp(contact: string): Promise<void>;
   verifyOtp(contact: string, otp: string): Promise<boolean>;
   markPhoneVerified(phoneNumber: string): Promise<User>;
+  
+  // Pending registration operations (for users who don't exist yet)
+  savePendingRegistration(key: string, data: string, expiryMinutes?: number): Promise<void>;
+  getPendingRegistration(key: string): Promise<string | null>;
+  deletePendingRegistration(key: string): Promise<void>;
   
   // User update operations
   updateUser(userId: string, updates: Partial<User>): Promise<User>;
@@ -472,6 +498,29 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.phoneNumber, phoneNumber))
       .returning();
     return user;
+  }
+
+  // Pending registration operations (in-memory storage for new users)
+  async savePendingRegistration(key: string, data: string, expiryMinutes: number = 10): Promise<void> {
+    const expiresAt = Date.now() + (expiryMinutes * 60 * 1000);
+    pendingRegistrations.set(key, { data, expiresAt });
+  }
+
+  async getPendingRegistration(key: string): Promise<string | null> {
+    const pending = pendingRegistrations.get(key);
+    if (!pending) return null;
+    
+    // Check expiration
+    if (pending.expiresAt < Date.now()) {
+      pendingRegistrations.delete(key);
+      return null;
+    }
+    
+    return pending.data;
+  }
+
+  async deletePendingRegistration(key: string): Promise<void> {
+    pendingRegistrations.delete(key);
   }
 
   async createUser(userData: UpsertUser): Promise<User> {
