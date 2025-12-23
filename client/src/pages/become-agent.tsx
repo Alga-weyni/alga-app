@@ -161,7 +161,19 @@ export default function BecomeAgent() {
         throw new Error(error.message || "Registration failed");
       }
 
-      // Use browser navigation for instant redirect to Agent Success page
+      const result = await response.json();
+      
+      // Check if agent is already approved - redirect to dashboard instead
+      if (result.agent?.status === 'approved') {
+        toast({
+          title: "✅ Already Approved",
+          description: "You already have an approved agent account!",
+        });
+        window.location.href = "/dellala/dashboard";
+        return;
+      }
+
+      // New registration or pending - show success/pending page
       window.location.href = "/agent/success";
     } catch (error: any) {
       toast({
