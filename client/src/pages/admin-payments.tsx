@@ -130,6 +130,21 @@ export default function AdminPayments() {
 
   // Filter for pending payment bookings
   const pendingPaymentBookings = allBookings.filter(b => b.paymentStatus === 'pending');
+  const paidBookings = allBookings.filter(b => b.paymentStatus === 'paid');
+  
+  // Calculate booking-based stats (in addition to transaction stats)
+  const bookingStats = {
+    totalBookings: allBookings.length,
+    totalBookingAmount: allBookings.reduce((sum, b) => sum + parseFloat(b.totalPrice || '0'), 0),
+    pendingPaymentCount: pendingPaymentBookings.length,
+    pendingPaymentAmount: pendingPaymentBookings.reduce((sum, b) => sum + parseFloat(b.totalPrice || '0'), 0),
+    paidCount: paidBookings.length,
+    paidAmount: paidBookings.reduce((sum, b) => sum + parseFloat(b.totalPrice || '0'), 0),
+  };
+
+  // State for viewing booking details
+  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
+  const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
 
   // Mark booking as paid mutation
   const markAsPaidMutation = useMutation({
@@ -261,15 +276,15 @@ export default function AdminPayments() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Booking-based payments */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           <Card className="border-[#e5ddd5]">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-[#8b7355]" />
                 <div>
-                  <p className="text-xs text-[#5a4a42]">Total</p>
-                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-total-transactions">{stats?.totalTransactions || 0}</p>
+                  <p className="text-xs text-[#5a4a42]">Total Bookings</p>
+                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-total-transactions">{bookingStats.totalBookings}</p>
                 </div>
               </div>
             </CardContent>
@@ -279,8 +294,8 @@ export default function AdminPayments() {
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="text-xs text-[#5a4a42]">Total Amount</p>
-                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-total-amount">{formatAmount(String(stats?.totalAmount || 0), 'ETB')}</p>
+                  <p className="text-xs text-[#5a4a42]">Total Revenue</p>
+                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-total-amount">{formatAmount(String(bookingStats.paidAmount), 'ETB')}</p>
                 </div>
               </div>
             </CardContent>
@@ -290,8 +305,19 @@ export default function AdminPayments() {
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-yellow-600" />
                 <div>
-                  <p className="text-xs text-[#5a4a42]">Pending</p>
-                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-pending-count">{stats?.pendingCount || 0}</p>
+                  <p className="text-xs text-[#5a4a42]">Pending Payments</p>
+                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-pending-count">{bookingStats.pendingPaymentCount}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-[#e5ddd5]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <p className="text-xs text-[#5a4a42]">Pending Amount</p>
+                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-pending-amount">{formatAmount(String(bookingStats.pendingPaymentAmount), 'ETB')}</p>
                 </div>
               </div>
             </CardContent>
@@ -301,19 +327,8 @@ export default function AdminPayments() {
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="text-xs text-[#5a4a42]">Completed</p>
-                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-completed-count">{stats?.completedCount || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-[#e5ddd5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-red-600" />
-                <div>
-                  <p className="text-xs text-[#5a4a42]">Failed</p>
-                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-failed-count">{stats?.failedCount || 0}</p>
+                  <p className="text-xs text-[#5a4a42]">Paid Bookings</p>
+                  <p className="text-xl font-bold text-[#2d1810]" data-testid="text-completed-count">{bookingStats.paidCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -453,17 +468,30 @@ export default function AdminPayments() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                size="sm" 
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                                data-testid={`button-mark-paid-${booking.id}`}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Mark Paid
-                              </Button>
-                            </DialogTrigger>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setBookingDetailsOpen(true);
+                              }}
+                              data-testid={`button-view-details-${booking.id}`}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Details
+                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  data-testid={`button-mark-paid-${booking.id}`}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Mark Paid
+                                </Button>
+                              </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
                                 <DialogTitle>Confirm Payment for Booking #{booking.id}</DialogTitle>
@@ -510,7 +538,8 @@ export default function AdminPayments() {
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
-                          </Dialog>
+                            </Dialog>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -673,6 +702,138 @@ export default function AdminPayments() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Booking Details Dialog */}
+        <Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCheck className="h-5 w-5 text-[#8b7355]" />
+                Booking #{selectedBooking?.id} - Payment Details
+              </DialogTitle>
+              <DialogDescription>
+                Review all booking and payment information before confirming payment
+              </DialogDescription>
+            </DialogHeader>
+            {selectedBooking && (
+              <div className="space-y-4">
+                {/* Guest Information */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <span className="text-lg">👤</span> Guest Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-blue-700">Name:</span>
+                      <p className="font-medium">{selectedBooking.user?.firstName} {selectedBooking.user?.lastName}</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">Email:</span>
+                      <p className="font-medium">{selectedBooking.user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Information */}
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                    <span className="text-lg">🏠</span> Property
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-green-700">Property:</span>
+                      <p className="font-medium">{selectedBooking.property?.title || `Property #${selectedBooking.propertyId}`}</p>
+                    </div>
+                    <div>
+                      <span className="text-green-700">Location:</span>
+                      <p className="font-medium">{selectedBooking.property?.city || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booking Details */}
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" /> Booking Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-purple-700">Check-in:</span>
+                      <p className="font-medium">{format(new Date(selectedBooking.checkIn), 'MMM d, yyyy')}</p>
+                    </div>
+                    <div>
+                      <span className="text-purple-700">Check-out:</span>
+                      <p className="font-medium">{format(new Date(selectedBooking.checkOut), 'MMM d, yyyy')}</p>
+                    </div>
+                    <div>
+                      <span className="text-purple-700">Guests:</span>
+                      <p className="font-medium">{selectedBooking.guests} guest(s)</p>
+                    </div>
+                    <div>
+                      <span className="text-purple-700">Booking Status:</span>
+                      <p className="font-medium">{selectedBooking.status}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Information */}
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h4 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" /> Payment Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-yellow-700">Total Amount:</span>
+                      <p className="font-bold text-lg text-[#2d1810]">{formatAmount(selectedBooking.totalPrice, 'ETB')}</p>
+                    </div>
+                    <div>
+                      <span className="text-yellow-700">Payment Status:</span>
+                      <Badge className={selectedBooking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                        {selectedBooking.paymentStatus}
+                      </Badge>
+                    </div>
+                    {selectedBooking.paymentMethod && (
+                      <div>
+                        <span className="text-yellow-700">Payment Method:</span>
+                        <p className="font-medium">{selectedBooking.paymentMethod}</p>
+                      </div>
+                    )}
+                    {selectedBooking.paymentRef && (
+                      <div>
+                        <span className="text-yellow-700">Payment Reference:</span>
+                        <p className="font-mono text-xs">{selectedBooking.paymentRef}</p>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-yellow-700">Booked On:</span>
+                      <p className="font-medium">{format(new Date(selectedBooking.createdAt), 'MMM d, yyyy h:mm a')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setBookingDetailsOpen(false)}>
+                Close
+              </Button>
+              {selectedBooking?.paymentStatus === 'pending' && (
+                <Button 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    if (selectedBooking) {
+                      markAsPaidMutation.mutate(selectedBooking.id);
+                      setBookingDetailsOpen(false);
+                    }
+                  }}
+                  disabled={markAsPaidMutation.isPending}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Mark as Paid
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
