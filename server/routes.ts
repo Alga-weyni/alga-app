@@ -2902,6 +2902,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let documentType: string = 'other';
       let country: string | null = null;
       
+      // Handle photo upload for admin review (no OCR data)
+      if (scanMethod === "photo" && scanData === "photo_upload" && imageUrl) {
+        // Direct photo upload - store for admin review without OCR extraction
+        const user = await storage.getUser(userId);
+        if (user) {
+          // Generate a temporary reference ID for tracking
+          const tempRefId = `PENDING-${Date.now()}-${userId.substring(0, 8)}`;
+          
+          await storage.upsertUser({
+            ...user,
+            idVerified: false,  // Not verified yet - pending admin review
+            idDocumentUrl: imageUrl,
+            idDocumentType: 'pending_review',
+            idNumber: tempRefId,  // Temporary reference for admin to identify
+          });
+          
+          // Log security event
+          logSecurityEvent(userId, 'ID_DOCUMENT_SUBMITTED_FOR_REVIEW', { imageUrl }, req.ip || 'unknown');
+        }
+        
+        return res.json({
+          success: true,
+          message: "Document uploaded successfully! An admin will review and verify your ID within 24 hours.",
+          verified: false,
+          pendingReview: true,
+          idNumber: `PENDING-${Date.now()}`,
+          documentType: 'pending_review',
+          scanMethod,
+          timestamp,
+        });
+      }
+      
       // Parse data based on scan method
       if (scanMethod === "qr") {
         // QR code scan - Ethiopian Digital ID (supports both 12-digit and 15-digit IDs)

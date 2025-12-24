@@ -120,10 +120,31 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !tesseractWorker) {
+    if (!file) {
       toast({
         title: "Error",
-        description: "Please select an image and wait for OCR to initialize",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a JPG, PNG, WebP, or PDF file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload a file smaller than 10MB.",
         variant: "destructive",
       });
       return;
@@ -149,6 +170,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         const { uploadUrl, publicUrl } = await signedUrlResponse.json();
         
         // Upload directly to R2
+        setProgress("Uploading to cloud...");
         const uploadResponse = await fetch(uploadUrl, {
           method: 'PUT',
           headers: { 'Content-Type': file.type },
@@ -165,6 +187,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         const formData = new FormData();
         formData.append('image', file);
         
+        setProgress("Uploading...");
         const localResponse = await fetch(getApiUrl('/api/upload/id-document'), {
           method: 'POST',
           credentials: 'include',
@@ -179,19 +202,15 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
         imageUrl = localData.url;
       }
       
-      // Step 2: Process with OCR
-      setMessage("Reading document...");
-      setProgress("Processing...");
-      const {
-        data: { text },
-      } = await tesseractWorker.recognize(file);
-
-      // Step 3: Verify with both OCR text and image URL
-      await verifyDocument(text, "photo", imageUrl);
-    } catch (error) {
-      console.error("OCR Error:", error);
+      // Step 2: Submit document for admin review (skip OCR - admin will review manually)
+      setMessage("Submitting for review...");
+      setProgress("Almost done...");
+      
+      await verifyDocument("photo_upload", "photo", imageUrl);
+    } catch (error: any) {
+      console.error("Upload Error:", error);
       setStatus("error");
-      setMessage("❌ Could not process document. Please try again.");
+      setMessage(`❌ ${error.message || "Could not upload document. Please try again."}`);
     } finally {
       setProgress("");
     }
@@ -218,13 +237,23 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
 
       if (responseData.success) {
         setStatus("success");
-        setMessage("✅ Document verified successfully!");
-        setResult(responseData);
         
-        toast({
-          title: "Verified!",
-          description: `Document verified: ${responseData.idNumber}`,
-        });
+        // Handle pending review vs immediate verification
+        if (responseData.pendingReview) {
+          setMessage("✅ Document uploaded! Admin will review within 24 hours.");
+          toast({
+            title: "Document Submitted!",
+            description: "Your ID document has been uploaded. An admin will verify it within 24 hours.",
+          });
+        } else {
+          setMessage("✅ Document verified successfully!");
+          toast({
+            title: "Verified!",
+            description: `Document verified: ${responseData.idNumber}`,
+          });
+        }
+        
+        setResult(responseData);
 
         if (onVerified) {
           onVerified(responseData);
