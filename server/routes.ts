@@ -4397,14 +4397,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // INSA FIX: For 'paid' status, require verified gateway callback (except for admin override)
+      // INSA FIX: For 'paid' status, require verified gateway callback (except for admin/operator override)
       if (paymentStatus === 'paid') {
         // Check if payment was verified through gateway callback
         const bookingRef = existingBooking.bookingReference;
         const gatewayVerification = bookingRef ? isPaymentVerified(bookingRef) : null;
         
-        if (userRole !== 'admin') {
-          // Non-admin users MUST have gateway verification OR provide payment reference
+        // Admin and Operator can mark payments as paid without gateway verification (manual verification)
+        if (!['admin', 'operator'].includes(userRole)) {
+          // Non-admin/operator users MUST have gateway verification OR provide payment reference
           if (!gatewayVerification && !paymentReference) {
             logSecurityEvent(userId, 'PAYMENT_MARKED_PAID_WITHOUT_VERIFICATION', { 
               bookingId: id,
