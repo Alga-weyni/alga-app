@@ -156,51 +156,26 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
     setProgress("Uploading...");
 
     try {
-      // Step 1: Get signed URL and upload image to R2
+      // Upload document using local storage endpoint (more reliable)
       let imageUrl: string;
       
-      const signedUrlResponse = await fetch(getApiUrl('/api/upload/r2-signed-url'), {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      setProgress("Uploading document...");
+      const uploadResponse = await fetch(getApiUrl('/api/upload/id-document'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder: 'id-documents', contentType: file.type }),
         credentials: 'include',
+        body: formData,
       });
       
-      if (signedUrlResponse.ok) {
-        const { uploadUrl, publicUrl } = await signedUrlResponse.json();
-        
-        // Upload directly to R2
-        setProgress("Uploading to cloud...");
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file,
-        });
-        
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload image to cloud storage');
-        }
-        
-        imageUrl = publicUrl;
-      } else {
-        // Fallback to local upload if R2 is not configured
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        setProgress("Uploading...");
-        const localResponse = await fetch(getApiUrl('/api/upload/id-document'), {
-          method: 'POST',
-          credentials: 'include',
-          body: formData,
-        });
-        
-        if (!localResponse.ok) {
-          throw new Error('Failed to upload document');
-        }
-        
-        const localData = await localResponse.json();
-        imageUrl = localData.url;
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload document. Please try again.');
       }
+      
+      const uploadData = await uploadResponse.json();
+      imageUrl = uploadData.url;
       
       // Step 2: Submit document for admin review (skip OCR - admin will review manually)
       setMessage("Submitting for review...");
