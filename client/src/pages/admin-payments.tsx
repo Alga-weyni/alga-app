@@ -108,6 +108,7 @@ export default function AdminPayments() {
   const [gatewayFilter, setGatewayFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [markingPaidId, setMarkingPaidId] = useState<number | null>(null);
+  const [revenueDetailsOpen, setRevenueDetailsOpen] = useState(false);
 
   // Redirect if not admin
   if (user && user.role !== 'admin' && user.role !== 'operator') {
@@ -295,7 +296,11 @@ export default function AdminPayments() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-[#e5ddd5]">
+          <Card 
+            className="border-[#e5ddd5] cursor-pointer hover:border-green-400 hover:shadow-md transition-all"
+            onClick={() => setRevenueDetailsOpen(true)}
+            data-testid="card-total-revenue"
+          >
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-600" />
@@ -763,6 +768,113 @@ export default function AdminPayments() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setBookingDetailsOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revenue Details Dialog */}
+        <Dialog open={revenueDetailsOpen} onOpenChange={setRevenueDetailsOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-green-600" />
+                Revenue Breakdown
+              </DialogTitle>
+              <DialogDescription>
+                Detailed breakdown of all paid bookings and revenue
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <p className="text-xs text-green-700">Total Revenue</p>
+                  <p className="text-2xl font-bold text-green-800">{formatAmount(String(bookingStats.paidAmount), 'ETB')}</p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-700">Paid Bookings</p>
+                  <p className="text-2xl font-bold text-blue-800">{bookingStats.paidCount}</p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <p className="text-xs text-yellow-700">Pending Revenue</p>
+                  <p className="text-2xl font-bold text-yellow-800">{formatAmount(String(bookingStats.pendingPaymentAmount), 'ETB')}</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <p className="text-xs text-purple-700">Average Booking</p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {bookingStats.paidCount > 0 
+                      ? formatAmount(String(bookingStats.paidAmount / bookingStats.paidCount), 'ETB')
+                      : 'ETB 0.00'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Paid Bookings List */}
+              <div className="border rounded-lg">
+                <div className="bg-green-50 px-4 py-3 border-b">
+                  <h3 className="font-semibold text-green-800 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Paid Bookings ({bookingStats.paidCount})
+                  </h3>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Booking ID</TableHead>
+                        <TableHead>Guest</TableHead>
+                        <TableHead>Property</TableHead>
+                        <TableHead>Dates</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allBookings
+                        .filter((b: BookingData) => b.paymentStatus === 'paid')
+                        .map((booking: BookingData) => (
+                          <TableRow key={booking.id}>
+                            <TableCell className="font-mono text-sm">#{booking.id}</TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{booking.user?.firstName} {booking.user?.lastName}</p>
+                                <p className="text-xs text-gray-500">{booking.user?.email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium truncate max-w-[150px]">{booking.property?.title}</p>
+                                <p className="text-xs text-gray-500">{booking.property?.city}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <p className="text-sm">
+                                {format(new Date(booking.checkIn), 'MMM d')} - {format(new Date(booking.checkOut), 'MMM d, yyyy')}
+                              </p>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold text-green-700">
+                              {formatAmount(booking.totalPrice, 'ETB')}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      {allBookings.filter((b: BookingData) => b.paymentStatus === 'paid').length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                            No paid bookings yet
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRevenueDetailsOpen(false)}>
                 Close
               </Button>
             </DialogFooter>
