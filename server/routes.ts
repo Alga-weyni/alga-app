@@ -4666,6 +4666,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const { idData } = req.body;
+      
+      console.log('[HOST-REQUEST] Received host request:', { userId, idData: JSON.stringify(idData) });
 
       // Check if user is already a host
       const user = await storage.getUser(userId);
@@ -4703,6 +4705,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the imageUrl from idData or from user's stored idDocumentUrl
       const documentUrl = idData?.imageUrl || user.idDocumentUrl || '/placeholder-scanned-id';
       
+      console.log('[HOST-REQUEST] Creating verification document with URL:', documentUrl);
+      console.log('[HOST-REQUEST] idData.imageUrl:', idData?.imageUrl);
+      console.log('[HOST-REQUEST] user.idDocumentUrl:', user.idDocumentUrl);
+      
       const verificationDoc = {
         userId,
         documentType: 'national_id',
@@ -4710,7 +4716,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending',
       };
 
-      await storage.createVerificationDocument(verificationDoc);
+      const createdDoc = await storage.createVerificationDocument(verificationDoc);
+      console.log('[HOST-REQUEST] Created verification document:', createdDoc);
 
       res.json({ 
         message: "Host application submitted successfully. Your verification is pending review.",
