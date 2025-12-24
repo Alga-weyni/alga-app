@@ -23,6 +23,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
   const [result, setResult] = useState<any>(null);
   const [scanMethod, setScanMethod] = useState<"qr" | "photo">("qr");
   const [progress, setProgress] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Initialize Tesseract for OCR
@@ -177,6 +178,9 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
       const uploadData = await uploadResponse.json();
       imageUrl = uploadData.url;
       
+      // Save the uploaded image URL for display
+      setUploadedImageUrl(imageUrl);
+      
       // Step 2: Submit document for admin review (skip OCR - admin will review manually)
       setMessage("Submitting for review...");
       setProgress("Almost done...");
@@ -254,6 +258,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
     setStatus("idle");
     setMessage("Choose verification method");
     setResult(null);
+    setUploadedImageUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -381,58 +386,84 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle className="w-6 h-6 text-green-500" />
               <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">
-                Document Verified!
+                {result.pendingReview ? "Document Uploaded!" : "Document Verified!"}
               </h3>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">ID Number</p>
-                <p className="font-mono font-semibold text-gray-900 dark:text-white">
-                  {result.idNumber}
+            {/* Show uploaded image preview */}
+            {uploadedImageUrl && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Uploaded Document:</p>
+                <div className="relative aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border">
+                  <img 
+                    src={uploadedImageUrl} 
+                    alt="Uploaded ID Document" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Show pending review message or verification details */}
+            {result.pendingReview ? (
+              <div className="text-center py-4">
+                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                  Your document has been submitted for review.
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  An admin will verify your ID within 24 hours. You'll receive a notification once approved.
                 </p>
               </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">First Name</p>
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {result.firstName || result.fullName?.split(' ')[0] || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Middle Name <span className="text-gray-400">(optional)</span></p>
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {result.middleName || "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Last Name</p>
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {result.lastName || result.fullName?.split(' ').slice(1).join(' ') || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Date of Birth</p>
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {result.dateOfBirth || result.dob || "N/A"}
-                </p>
-              </div>
-              {result.expiryDate && (
+            ) : (
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Expiry Date</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {result.expiryDate}
+                  <p className="text-gray-500 dark:text-gray-400">ID Number</p>
+                  <p className="font-mono font-semibold text-gray-900 dark:text-white">
+                    {result.idNumber}
                   </p>
                 </div>
-              )}
-              {result.nationality && (
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Nationality</p>
+                  <p className="text-gray-500 dark:text-gray-400">First Name</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {result.nationality}
+                    {result.firstName || result.fullName?.split(' ')[0] || "N/A"}
                   </p>
                 </div>
-              )}
-            </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Middle Name <span className="text-gray-400">(optional)</span></p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {result.middleName || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Last Name</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {result.lastName || result.fullName?.split(' ').slice(1).join(' ') || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Date of Birth</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {result.dateOfBirth || result.dob || "N/A"}
+                  </p>
+                </div>
+                {result.expiryDate && (
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">Expiry Date</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {result.expiryDate}
+                    </p>
+                  </div>
+                )}
+                {result.nationality && (
+                  <div>
+                    <p className="text-gray-500 dark:text-gray-400">Nationality</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {result.nationality}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <Button 
@@ -442,7 +473,7 @@ export default function UniversalIDScanner({ onVerified, userType = "auto" }: Un
             size="lg"
             data-testid="button-verify-another"
           >
-            Verify Another Document
+            {result.pendingReview ? "Upload Another Document" : "Verify Another Document"}
           </Button>
         </div>
       )}
