@@ -383,16 +383,16 @@ export default function AdminDashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => handleTabChange('documents')}
+          className="cursor-pointer hover:shadow-lg transition-shadow border-green-200 bg-gradient-to-br from-green-50 to-white"
+          onClick={() => navigate('/admin/id-verification')}
           data-testid="card-documents"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Verifications</CardTitle>
-            <FileCheck className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">ID Verification</CardTitle>
+            <FileCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.pendingDocuments || 0}</div>
+            <div className="text-2xl font-bold text-green-700">{stats?.pendingDocuments || 0}</div>
             <p className="text-xs text-muted-foreground">
               Documents awaiting review
             </p>

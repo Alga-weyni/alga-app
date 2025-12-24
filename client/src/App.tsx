@@ -32,6 +32,7 @@ import AdminLemlemInsights from "@/pages/admin-lemlem-insights";
 import AdminAIControl from "@/pages/admin-ai-control";
 import AdminRolesPermissions from "@/pages/admin-roles-permissions";
 import AdminAgents from "@/pages/admin-agents";
+import AdminIdVerification from "@/pages/admin-id-verification";
 import LemlemOperationsDashboard from "@/pages/admin/LemlemOperationsDashboard";
 import LemlemOps from "@/pages/admin/LemlemOps";
 import LemlemValidationMetrics from "@/pages/admin/LemlemValidationMetrics";
@@ -162,6 +163,7 @@ function Router() {
         <Route path="/admin/ai-control" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminAIControl /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/roles-permissions" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminRolesPermissions /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/agents" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminAgents /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/id-verification" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin", "operator"]}><AdminIdVerification /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/lemlem-ops" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemOps /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/lemlem-validation" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemValidationMetrics /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/lemlem-dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><LemlemOperationsDashboard /></ProtectedRoute></AnimatedRoute>} />
