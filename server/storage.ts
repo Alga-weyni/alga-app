@@ -1147,6 +1147,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPendingVerificationDocuments(): Promise<any[]> {
+    // Return all verification documents (admin can filter by status on frontend)
     return await db
       .select({
         id: verificationDocuments.id,
@@ -1155,17 +1156,18 @@ export class DatabaseStorage implements IStorage {
         documentUrl: verificationDocuments.documentUrl,
         status: verificationDocuments.status,
         createdAt: verificationDocuments.createdAt,
+        rejectionReason: verificationDocuments.rejectionReason,
         user: {
           id: users.id,
           email: users.email,
           firstName: users.firstName,
           lastName: users.lastName,
-          phoneNumber: users.phoneNumber
+          phoneNumber: users.phoneNumber,
+          idDocumentUrl: users.idDocumentUrl,
         }
       })
       .from(verificationDocuments)
       .leftJoin(users, eq(verificationDocuments.userId, users.id))
-      .where(eq(verificationDocuments.status, 'pending'))
       .orderBy(desc(verificationDocuments.createdAt));
   }
 

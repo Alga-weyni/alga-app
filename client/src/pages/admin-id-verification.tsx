@@ -60,12 +60,14 @@ interface PendingDocument {
   documentUrl: string;
   status: string;
   createdAt: string;
+  rejectionReason?: string | null;
   user: {
     id: string;
     email: string;
     firstName: string | null;
     lastName: string | null;
     phoneNumber: string | null;
+    idDocumentUrl?: string | null;
   };
 }
 
@@ -279,16 +281,21 @@ export default function AdminIdVerification() {
   };
 
   const openImageViewer = (imageUrl: string) => {
-    const fullUrl = imageUrl.startsWith('http') ? imageUrl : getImageUrl(imageUrl);
+    if (!imageUrl) return;
+    let fullUrl = imageUrl;
+    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/uploads/')) {
+      fullUrl = getImageUrl(imageUrl);
+    }
     setViewingImage(fullUrl);
     setImageDialogOpen(true);
   };
 
-  const getDocumentImageUrl = (url: string): string => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    if (url.startsWith('/uploads/')) return url;
-    return getImageUrl(url);
+  const getDocumentImageUrl = (url: string, fallbackUrl?: string | null): string => {
+    const effectiveUrl = url && url !== '/placeholder-scanned-id' ? url : fallbackUrl;
+    if (!effectiveUrl) return '';
+    if (effectiveUrl.startsWith('http')) return effectiveUrl;
+    if (effectiveUrl.startsWith('/uploads/')) return effectiveUrl;
+    return getImageUrl(effectiveUrl);
   };
 
   const pendingHostDocs = documents?.filter(d => d.status === 'pending').length || 0;
@@ -301,14 +308,15 @@ export default function AdminIdVerification() {
     statusFilter === 'all' || p.verificationStatus === statusFilter
   ) || [];
 
-  const DocumentImage = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
+  const DocumentImage = ({ url, fallbackUrl, alt, className }: { url: string; fallbackUrl?: string | null; alt: string; className?: string }) => {
     const [hasError, setHasError] = useState(false);
-    const imageUrl = getDocumentImageUrl(url);
+    const imageUrl = getDocumentImageUrl(url, fallbackUrl);
 
-    if (!url || hasError) {
+    if (!imageUrl || hasError) {
       return (
         <div className={`flex items-center justify-center bg-gray-200 dark:bg-gray-700 ${className}`}>
           <ImageIcon className="w-8 h-8 text-gray-400" />
+          <span className="ml-2 text-xs text-gray-500">No image</span>
         </div>
       );
     }
@@ -468,10 +476,11 @@ export default function AdminIdVerification() {
                       >
                         <div 
                           className="w-full lg:w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden cursor-pointer relative group flex-shrink-0 border-2 border-dashed border-gray-300"
-                          onClick={() => openImageViewer(document.documentUrl)}
+                          onClick={() => openImageViewer(getDocumentImageUrl(document.documentUrl, document.user?.idDocumentUrl))}
                         >
                           <DocumentImage 
-                            url={document.documentUrl} 
+                            url={document.documentUrl}
+                            fallbackUrl={document.user?.idDocumentUrl}
                             alt="ID Document"
                             className="w-full h-full object-contain"
                           />
@@ -516,7 +525,7 @@ export default function AdminIdVerification() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => openImageViewer(document.documentUrl)}
+                            onClick={() => openImageViewer(getDocumentImageUrl(document.documentUrl, document.user?.idDocumentUrl))}
                             data-testid={`button-view-document-${document.id}`}
                           >
                             <Eye className="w-4 h-4 mr-1" />
@@ -730,10 +739,11 @@ export default function AdminIdVerification() {
               <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div 
                   className="w-full md:w-64 h-64 bg-gray-100 rounded-lg overflow-hidden cursor-pointer border"
-                  onClick={() => openImageViewer(selectedDocument.documentUrl)}
+                  onClick={() => openImageViewer(getDocumentImageUrl(selectedDocument.documentUrl, selectedDocument.user?.idDocumentUrl))}
                 >
                   <DocumentImage 
-                    url={selectedDocument.documentUrl} 
+                    url={selectedDocument.documentUrl}
+                    fallbackUrl={selectedDocument.user?.idDocumentUrl}
                     alt="ID Document"
                     className="w-full h-full object-contain"
                   />

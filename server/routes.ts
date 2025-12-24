@@ -2929,6 +2929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pendingReview: true,
           idNumber: `PENDING-${Date.now()}`,
           documentType: 'pending_review',
+          imageUrl: imageUrl,
           scanMethod,
           timestamp,
         });
@@ -4699,10 +4700,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create a verification document request (this will be reviewed by operator/admin)
+      // Get the imageUrl from idData or from user's stored idDocumentUrl
+      const documentUrl = idData?.imageUrl || user.idDocumentUrl || '/placeholder-scanned-id';
+      
       const verificationDoc = {
         userId,
         documentType: 'national_id',
-        documentUrl: '/placeholder-scanned-id', // Placeholder since ID was scanned
+        documentUrl: documentUrl,
         status: 'pending',
       };
 
