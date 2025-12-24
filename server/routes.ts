@@ -4353,6 +4353,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const userRole = req.user.role;
       
+      console.log('[PAYMENT-UPDATE] Request received:', { id, paymentStatus, paymentReference, userId, userRole });
+      
       // Validate paymentStatus is provided and valid
       if (!paymentStatus || typeof paymentStatus !== 'string') {
         return res.status(400).json({ message: "Payment status is required", code: 'INVALID_PAYMENT_STATUS' });

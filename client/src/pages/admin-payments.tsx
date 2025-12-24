@@ -149,12 +149,16 @@ export default function AdminPayments() {
   // Mark booking as paid mutation
   const markAsPaidMutation = useMutation({
     mutationFn: async (bookingId: number) => {
-      return apiRequest('PATCH', `/api/bookings/${bookingId}/payment`, {
+      console.log('[MARK-PAID] Attempting to mark booking as paid:', bookingId);
+      const response = await apiRequest('PATCH', `/api/bookings/${bookingId}/payment`, {
         paymentStatus: 'paid',
         paymentReference: `ADMIN-VERIFIED-${Date.now()}`
       });
+      console.log('[MARK-PAID] Response:', response);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[MARK-PAID] Success:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
       queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
       toast({
@@ -162,11 +166,13 @@ export default function AdminPayments() {
         description: "Booking has been marked as paid and confirmed.",
       });
       setMarkingPaidId(null);
+      setBookingDetailsOpen(false);
     },
     onError: (error: any) => {
+      console.error('[MARK-PAID] Error:', error);
       toast({
         title: "Failed to Mark as Paid",
-        description: error.message || "Could not update payment status",
+        description: error.message || "Could not update payment status. Please check console for details.",
         variant: "destructive",
       });
       setMarkingPaidId(null);
