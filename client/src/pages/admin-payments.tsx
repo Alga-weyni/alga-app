@@ -474,78 +474,18 @@ export default function AdminPayments() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedBooking(booking);
-                                setBookingDetailsOpen(true);
-                              }}
-                              data-testid={`button-view-details-${booking.id}`}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Details
-                            </Button>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                  data-testid={`button-mark-paid-${booking.id}`}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Mark Paid
-                                </Button>
-                              </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Confirm Payment for Booking #{booking.id}</DialogTitle>
-                                <DialogDescription>
-                                  Are you sure you want to mark this booking as paid? This will:
-                                  <ul className="mt-2 ml-4 list-disc text-left">
-                                    <li>Set payment status to "paid"</li>
-                                    <li>Change booking status to "confirmed"</li>
-                                    <li>Allow guest to download receipt</li>
-                                    <li>Generate access code for guest</li>
-                                  </ul>
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Amount:</span>
-                                  <span className="font-semibold">{formatAmount(booking.totalPrice, 'ETB')}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Guest:</span>
-                                  <span>{booking.user?.firstName} {booking.user?.lastName}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Property:</span>
-                                  <span className="truncate max-w-[200px]">{booking.property?.title}</span>
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button variant="outline" onClick={() => setMarkingPaidId(null)}>
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  className="bg-green-600 hover:bg-green-700"
-                                  onClick={() => markAsPaidMutation.mutate(booking.id)}
-                                  disabled={markAsPaidMutation.isPending}
-                                  data-testid={`button-confirm-paid-${booking.id}`}
-                                >
-                                  {markAsPaidMutation.isPending ? (
-                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                  ) : (
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                  )}
-                                  Confirm Payment
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                            </Dialog>
-                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedBooking(booking);
+                              setBookingDetailsOpen(true);
+                            }}
+                            data-testid={`button-view-details-${booking.id}`}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Details
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -821,25 +761,10 @@ export default function AdminPayments() {
                 </div>
               </div>
             )}
-            <DialogFooter className="gap-2">
+            <DialogFooter>
               <Button variant="outline" onClick={() => setBookingDetailsOpen(false)}>
                 Close
               </Button>
-              {selectedBooking?.paymentStatus === 'pending' && (
-                <Button 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    if (selectedBooking) {
-                      markAsPaidMutation.mutate(selectedBooking.id);
-                      setBookingDetailsOpen(false);
-                    }
-                  }}
-                  disabled={markAsPaidMutation.isPending}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Mark as Paid
-                </Button>
-              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
