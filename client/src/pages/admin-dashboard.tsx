@@ -213,6 +213,7 @@ export default function AdminDashboard() {
     paymentStatus: string;
     paymentMethod?: string;
     paymentRef?: string;
+    guestPhone?: string;
     createdAt: string;
     property?: {
       title: string;
@@ -245,6 +246,7 @@ export default function AdminDashboard() {
       booking.id.toString().includes(revenueSearch) ||
       booking.user?.firstName?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
       booking.user?.lastName?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
+      booking.guestPhone?.includes(revenueSearch) ||
       booking.user?.phoneNumber?.includes(revenueSearch) ||
       booking.paymentRef?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
       booking.property?.title?.toLowerCase().includes(revenueSearch.toLowerCase());
@@ -273,7 +275,7 @@ export default function AdminDashboard() {
       'Booking ID': b.id,
       'Transaction ID': b.paymentRef || 'N/A',
       'Guest': `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.trim(),
-      'Phone': b.user?.phoneNumber || 'N/A',
+      'Phone': b.guestPhone || b.user?.phoneNumber || 'N/A',
       'Property': b.property?.title || 'N/A',
       'Amount': parseFloat(b.totalPrice),
       'Currency': 'ETB',
@@ -2060,7 +2062,7 @@ export default function AdminDashboard() {
                           {booking.paymentRef || 'N/A'}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {booking.user?.phoneNumber || 'N/A'}
+                          {booking.guestPhone || booking.user?.phoneNumber || 'N/A'}
                         </TableCell>
                         <TableCell>
                           <div>

@@ -197,6 +197,7 @@ export const bookings = pgTable("bookings", {
   paymentStatus: varchar("payment_status").default("pending").notNull(), // pending, paid, failed, refunded
   paymentVerified: boolean("payment_verified").default(false).notNull(), // INSA Fix #4: Server-side payment verification flag
   paymentRef: varchar("payment_ref"), // Transaction ID from payment provider (Telebirr/PayPal)
+  guestPhone: varchar("guest_phone", { length: 20 }), // Phone number used for payment
   specialRequests: text("special_requests"),
   // Commission & Tax Breakdown (ERCA Compliance)
   algaCommission: decimal("alga_commission", { precision: 10, scale: 2 }),

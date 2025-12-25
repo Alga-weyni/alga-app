@@ -906,12 +906,23 @@ router.post("/arifpay/initiate", async (req, res) => {
       throw new Error(apiError?.msg || apiError?.message || apiError?.error || createErr?.message || 'ArifPay API error');
     }
 
-    // Update booking with payment reference
+    // Update booking with payment reference and guest phone
+    const guestPhone = (() => {
+      let phone = (phoneNumber || guest.phoneNumber || "").replace(/[^0-9]/g, '');
+      if (phone.startsWith('0')) {
+        phone = '251' + phone.slice(1);
+      } else if (phone && !phone.startsWith('251')) {
+        phone = '251' + phone;
+      }
+      return phone || null;
+    })();
+    
     await db.update(bookings)
       .set({ 
         paymentStatus: "pending", 
         paymentRef: session.sessionId || nonce,
         paymentMethod: "arifpay",
+        guestPhone: guestPhone,
         updatedAt: new Date()
       })
       .where(eq(bookings.id, bookingId));
