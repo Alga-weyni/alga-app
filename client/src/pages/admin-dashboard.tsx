@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -234,6 +235,8 @@ export default function AdminDashboard() {
   const [revenueSearch, setRevenueSearch] = useState('');
   const [revenueStatusFilter, setRevenueStatusFilter] = useState('all');
   const [revenuePage, setRevenuePage] = useState(1);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const revenuePerPage = 10;
 
   // Filter and paginate bookings
@@ -248,7 +251,12 @@ export default function AdminDashboard() {
     
     const matchesStatus = revenueStatusFilter === 'all' || booking.paymentStatus === revenueStatusFilter;
     
-    return matchesSearch && matchesStatus;
+    // Date filter
+    const bookingDate = new Date(booking.createdAt);
+    const matchesDateFrom = !dateFrom || bookingDate >= new Date(dateFrom);
+    const matchesDateTo = !dateTo || bookingDate <= new Date(dateTo + 'T23:59:59');
+    
+    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo;
   });
 
   const paginatedBookings = filteredBookings.slice(
@@ -258,27 +266,39 @@ export default function AdminDashboard() {
 
   const totalRevenuePages = Math.ceil(filteredBookings.length / revenuePerPage);
 
-  // Export transactions to CSV
-  const exportToCSV = () => {
-    const headers = ['Date', 'Booking ID', 'Transaction ID', 'Guest', 'Phone', 'Property', 'Amount', 'Currency', 'Status'];
-    const rows = filteredBookings.map(b => [
-      format(new Date(b.createdAt), 'MM/dd/yyyy, h:mm:ss a'),
-      b.id,
-      b.paymentRef || 'N/A',
-      `${b.user?.firstName || ''} ${b.user?.lastName || ''}`,
-      b.user?.phoneNumber || 'N/A',
-      b.property?.title || 'N/A',
-      b.totalPrice,
-      'ETB',
-      b.paymentStatus
-    ]);
+  // Export transactions to Excel
+  const exportToExcel = () => {
+    const data = filteredBookings.map(b => ({
+      'Date': format(new Date(b.createdAt), 'MM/dd/yyyy h:mm:ss a'),
+      'Booking ID': b.id,
+      'Transaction ID': b.paymentRef || 'N/A',
+      'Guest': `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.trim(),
+      'Phone': b.user?.phoneNumber || 'N/A',
+      'Property': b.property?.title || 'N/A',
+      'Amount': parseFloat(b.totalPrice),
+      'Currency': 'ETB',
+      'Status': b.paymentStatus === 'paid' ? 'Success' : b.paymentStatus === 'pending' ? 'Pending' : 'Failed'
+    }));
     
-    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `alga-transactions-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    link.click();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    
+    // Set column widths for better readability
+    worksheet['!cols'] = [
+      { wch: 22 },  // Date
+      { wch: 12 },  // Booking ID
+      { wch: 18 },  // Transaction ID
+      { wch: 20 },  // Guest
+      { wch: 15 },  // Phone
+      { wch: 25 },  // Property
+      { wch: 12 },  // Amount
+      { wch: 10 },  // Currency
+      { wch: 10 }   // Status
+    ];
+    
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+    
+    XLSX.writeFile(workbook, `alga-transactions-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   };
 
   // Update user role mutation
@@ -1905,50 +1925,85 @@ export default function AdminDashboard() {
             </div>
             <Button 
               variant="outline" 
-              onClick={exportToCSV}
+              onClick={exportToExcel}
               className="flex items-center gap-2"
-              data-testid="button-export-csv"
+              data-testid="button-export-excel"
             >
               <Download className="h-4 w-4" />
-              EXPORT
+              EXPORT (.xlsx)
             </Button>
           </DialogHeader>
           
           <div className="space-y-4">
             {/* Search and Filter Row */}
-            <div className="flex flex-wrap gap-3 items-center p-4 bg-gray-50 rounded-lg border">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by ID, Name, Phone, or Transaction ID..."
-                  value={revenueSearch}
-                  onChange={(e) => {
-                    setRevenueSearch(e.target.value);
-                    setRevenuePage(1);
-                  }}
-                  className="pl-10"
-                  data-testid="input-revenue-search"
-                />
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex flex-wrap gap-3 items-center">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by ID, Name, Phone, or Transaction ID..."
+                    value={revenueSearch}
+                    onChange={(e) => {
+                      setRevenueSearch(e.target.value);
+                      setRevenuePage(1);
+                    }}
+                    className="pl-10"
+                    data-testid="input-revenue-search"
+                  />
+                </div>
+                <Select value={revenueStatusFilter} onValueChange={(v) => { setRevenueStatusFilter(v); setRevenuePage(1); }}>
+                  <SelectTrigger className="w-[150px]" data-testid="select-revenue-status">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="default" 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => setRevenuePage(1)}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  SEARCH
+                </Button>
               </div>
-              <Select value={revenueStatusFilter} onValueChange={(v) => { setRevenueStatusFilter(v); setRevenuePage(1); }}>
-                <SelectTrigger className="w-[150px]" data-testid="select-revenue-status">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                variant="default" 
-                className="bg-green-600 hover:bg-green-700"
-                onClick={() => setRevenuePage(1)}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                SEARCH
-              </Button>
+              
+              {/* Date Filter Row */}
+              <div className="flex flex-wrap gap-3 items-center">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm text-gray-600 whitespace-nowrap">From:</Label>
+                  <Input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => { setDateFrom(e.target.value); setRevenuePage(1); }}
+                    className="w-[160px]"
+                    data-testid="input-date-from"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm text-gray-600 whitespace-nowrap">To:</Label>
+                  <Input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => { setDateTo(e.target.value); setRevenuePage(1); }}
+                    className="w-[160px]"
+                    data-testid="input-date-to"
+                  />
+                </div>
+                {(dateFrom || dateTo) && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => { setDateFrom(''); setDateTo(''); setRevenuePage(1); }}
+                  >
+                    Clear Dates
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Summary Cards */}
