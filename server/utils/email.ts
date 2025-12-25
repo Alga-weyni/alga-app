@@ -47,7 +47,7 @@ async function getCredentials(): Promise<{apiKey: string, email: string}> {
         }
       }
     );
-    const data = await response.json();
+    const data = await response.json() as { items?: Array<{ settings?: { api_key?: string; from_email?: string } }> };
     connectionSettings = data.items?.[0];
     console.log('[EMAIL] Connector response:', { hasItems: !!data.items, itemCount: data.items?.length });
 
