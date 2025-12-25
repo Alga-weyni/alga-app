@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    INSA Security Configuration: Data Extraction Rules for Android 12+ (API 31+)
+    Addresses: CWE-530 - Exposure of Backup File to an Unauthorized Control Sphere
+    
+    This file explicitly disables all cloud and device-to-device transfer backups
+    to prevent unauthorized data extraction via ADB or backup services.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+    </device-transfer>
+</data-extraction-rules>
