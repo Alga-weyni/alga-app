@@ -1,5 +1,8 @@
 ext {
-    minSdkVersion = 23
+    // INSA SECURITY FIX: Raised from API 23 to API 26 (Android 8.0)
+    // Addresses OWASP MASVS-ARCH-1 and reduces attack surface by
+    // requiring modern security features: TLS 1.3, runtime permissions, kernel mitigations
+    minSdkVersion = 26
     compileSdkVersion = 35
     targetSdkVersion = 35
     androidxActivityVersion = '1.9.2'
