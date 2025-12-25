@@ -2364,13 +2364,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin routes for user role management
   // INSA FIX #10: All user data must be sanitized before returning to client
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Use requireAdmin middleware for consistent authorization
+  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const users = await storage.getAllUsers();
       // INSA FIX: Sanitize ALL users to remove password hashes
       const safeUsers = sanitizeUsersResponse(users);
@@ -2381,41 +2377,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:userId/role', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Valid roles constant for validation
+  const VALID_ROLES = ['guest', 'host', 'agent', 'operator', 'admin', 'service_provider'] as const;
+  
+  app.patch('/api/admin/users/:userId/role', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const { userId } = req.params;
       const { role } = req.body;
       
+      // INSA RBAC FIX: Input validation at API layer
+      if (!role || typeof role !== 'string') {
+        return res.status(400).json({ message: "Role is required and must be a string" });
+      }
+      
+      if (!VALID_ROLES.includes(role as any)) {
+        return res.status(400).json({ 
+          message: `Invalid role. Valid roles are: ${VALID_ROLES.join(', ')}`,
+          code: 'INVALID_ROLE'
+        });
+      }
+      
+      // INSA RBAC FIX: Prevent self-demotion (admin cannot demote themselves)
+      if (userId === req.user.id && role !== 'admin') {
+        return res.status(400).json({ 
+          message: "Cannot demote your own admin account",
+          code: 'SELF_DEMOTION_BLOCKED'
+        });
+      }
+      
+      // Log security event for role changes
+      const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket?.remoteAddress || 'unknown';
+      logSecurityEvent(req.user.id, 'USER_ROLE_CHANGED', {
+        targetUserId: userId,
+        newRole: role,
+        changedBy: req.user.id
+      }, ipAddress);
+      
       const updatedUser = await storage.updateUserRole(userId, role);
+      
       // INSA FIX: Sanitize user response
       res.json(sanitizeUserResponse(updatedUser));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating user role:", error);
-      res.status(500).json({ message: "Failed to update user role" });
+      res.status(500).json({ message: error.message || "Failed to update user role" });
     }
   });
 
-  app.patch('/api/admin/users/:userId/status', isAuthenticated, async (req: any, res) => {
+  // INSA FIX: Valid status values
+  const VALID_USER_STATUSES = ['active', 'suspended', 'banned'] as const;
+  
+  app.patch('/api/admin/users/:userId/status', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const { userId } = req.params;
       const { status } = req.body;
+      
+      // INSA RBAC FIX: Input validation
+      if (!status || typeof status !== 'string') {
+        return res.status(400).json({ message: "Status is required and must be a string" });
+      }
+      
+      if (!VALID_USER_STATUSES.includes(status as any)) {
+        return res.status(400).json({ 
+          message: `Invalid status. Valid statuses are: ${VALID_USER_STATUSES.join(', ')}`,
+          code: 'INVALID_STATUS'
+        });
+      }
+      
+      // Log security event
+      const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket?.remoteAddress || 'unknown';
+      logSecurityEvent(req.user.id, 'USER_STATUS_CHANGED', {
+        targetUserId: userId,
+        newStatus: status,
+        changedBy: req.user.id
+      }, ipAddress);
       
       const updatedUser = await storage.updateUserStatus(userId, status);
       // INSA FIX: Sanitize user response
       res.json(sanitizeUserResponse(updatedUser));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating user status:", error);
-      res.status(500).json({ message: "Failed to update user status" });
+      res.status(500).json({ message: error.message || "Failed to update user status" });
     }
   });
 

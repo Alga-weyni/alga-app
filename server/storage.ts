@@ -1078,12 +1078,25 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(users.createdAt));
   }
 
+  // INSA RBAC FIX: Valid roles for strict validation
+  private static readonly VALID_ROLES = ['guest', 'host', 'agent', 'operator', 'admin', 'service_provider'] as const;
+  
   async updateUserRole(userId: string, role: string): Promise<User> {
+    // INSA RBAC FIX: Strict role validation to prevent privilege escalation
+    if (!DatabaseStorage.VALID_ROLES.includes(role as any)) {
+      throw new Error(`Invalid role: ${role}. Valid roles are: ${DatabaseStorage.VALID_ROLES.join(', ')}`);
+    }
+    
     const [updatedUser] = await db
       .update(users)
       .set({ role, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
+    
+    if (!updatedUser) {
+      throw new Error(`User not found: ${userId}`);
+    }
+    
     return updatedUser;
   }
 
