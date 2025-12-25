@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,9 @@ import {
   LogOut,
   Briefcase,
   Sparkles,
-  BarChart3
+  BarChart3,
+  DollarSign,
+  TrendingUp
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -130,6 +133,7 @@ export default function AdminDashboard() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [revenueDetailsOpen, setRevenueDetailsOpen] = useState(false);
   const { toast } = useToast();
   
   // Get active tab from URL search params, default to 'overview'
@@ -190,6 +194,36 @@ export default function AdminDashboard() {
   // Fetch system statistics
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
+  });
+
+  // Fetch bookings for revenue details
+  interface BookingData {
+    id: number;
+    propertyId: number;
+    userId: string;
+    checkIn: string;
+    checkOut: string;
+    guests: number;
+    totalPrice: string;
+    status: string;
+    paymentStatus: string;
+    paymentMethod?: string;
+    paymentRef?: string;
+    createdAt: string;
+    property?: {
+      title: string;
+      city: string;
+    };
+    user?: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  }
+
+  const { data: allBookings = [] } = useQuery<BookingData[]>({
+    queryKey: ['/api/admin/bookings'],
+    enabled: revenueDetailsOpen,
   });
 
   // Update user role mutation
@@ -419,8 +453,8 @@ export default function AdminDashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => handleTabChange('overview')}
+          className="cursor-pointer hover:shadow-lg hover:border-green-400 transition-all"
+          onClick={() => setRevenueDetailsOpen(true)}
           data-testid="card-revenue"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -1800,6 +1834,112 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Revenue Details Dialog */}
+      <Dialog open={revenueDetailsOpen} onOpenChange={setRevenueDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              Revenue Breakdown
+            </DialogTitle>
+            <DialogDescription>
+              Detailed breakdown of all paid bookings and revenue
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <p className="text-xs text-green-700">Total Revenue</p>
+                <p className="text-2xl font-bold text-green-800">{stats?.totalRevenue || 0} ETB</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-xs text-blue-700">This Month</p>
+                <p className="text-2xl font-bold text-blue-800">+{stats?.monthlyRevenue || 0} ETB</p>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                <p className="text-xs text-yellow-700">Paid Bookings</p>
+                <p className="text-2xl font-bold text-yellow-800">
+                  {allBookings.filter((b) => b.paymentStatus === 'paid').length}
+                </p>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <p className="text-xs text-purple-700">Pending Payments</p>
+                <p className="text-2xl font-bold text-purple-800">
+                  {allBookings.filter((b) => b.paymentStatus === 'pending').length}
+                </p>
+              </div>
+            </div>
+
+            {/* Paid Bookings List */}
+            <div className="border rounded-lg">
+              <div className="bg-green-50 px-4 py-3 border-b">
+                <h3 className="font-semibold text-green-800 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Paid Bookings ({allBookings.filter((b) => b.paymentStatus === 'paid').length})
+                </h3>
+              </div>
+              <div className="max-h-[300px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Booking ID</TableHead>
+                      <TableHead>Guest</TableHead>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Dates</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allBookings
+                      .filter((b) => b.paymentStatus === 'paid')
+                      .map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell className="font-mono text-sm">#{booking.id}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{booking.user?.firstName} {booking.user?.lastName}</p>
+                              <p className="text-xs text-gray-500">{booking.user?.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium truncate max-w-[150px]">{booking.property?.title}</p>
+                              <p className="text-xs text-gray-500">{booking.property?.city}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm">
+                              {format(new Date(booking.checkIn), 'MMM d')} - {format(new Date(booking.checkOut), 'MMM d, yyyy')}
+                            </p>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-green-700">
+                            {parseFloat(booking.totalPrice).toLocaleString()} ETB
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    {allBookings.filter((b) => b.paymentStatus === 'paid').length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                          No paid bookings yet
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRevenueDetailsOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </>
   );
