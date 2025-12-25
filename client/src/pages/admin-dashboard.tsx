@@ -38,7 +38,10 @@ import {
   Sparkles,
   BarChart3,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  Download,
+  Search,
+  Phone
 } from "lucide-react";
 
 interface VerificationDocument {
@@ -218,6 +221,7 @@ export default function AdminDashboard() {
       firstName: string;
       lastName: string;
       email: string;
+      phoneNumber?: string;
     };
   }
 
@@ -225,6 +229,57 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/bookings'],
     enabled: revenueDetailsOpen,
   });
+
+  // Revenue dialog search and filter states
+  const [revenueSearch, setRevenueSearch] = useState('');
+  const [revenueStatusFilter, setRevenueStatusFilter] = useState('all');
+  const [revenuePage, setRevenuePage] = useState(1);
+  const revenuePerPage = 10;
+
+  // Filter and paginate bookings
+  const filteredBookings = allBookings.filter((booking) => {
+    const matchesSearch = revenueSearch === '' || 
+      booking.id.toString().includes(revenueSearch) ||
+      booking.user?.firstName?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
+      booking.user?.lastName?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
+      booking.user?.phoneNumber?.includes(revenueSearch) ||
+      booking.paymentRef?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
+      booking.property?.title?.toLowerCase().includes(revenueSearch.toLowerCase());
+    
+    const matchesStatus = revenueStatusFilter === 'all' || booking.paymentStatus === revenueStatusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const paginatedBookings = filteredBookings.slice(
+    (revenuePage - 1) * revenuePerPage,
+    revenuePage * revenuePerPage
+  );
+
+  const totalRevenuePages = Math.ceil(filteredBookings.length / revenuePerPage);
+
+  // Export transactions to CSV
+  const exportToCSV = () => {
+    const headers = ['Date', 'Booking ID', 'Transaction ID', 'Guest', 'Phone', 'Property', 'Amount', 'Currency', 'Status'];
+    const rows = filteredBookings.map(b => [
+      format(new Date(b.createdAt), 'MM/dd/yyyy, h:mm:ss a'),
+      b.id,
+      b.paymentRef || 'N/A',
+      `${b.user?.firstName || ''} ${b.user?.lastName || ''}`,
+      b.user?.phoneNumber || 'N/A',
+      b.property?.title || 'N/A',
+      b.totalPrice,
+      'ETB',
+      b.paymentStatus
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `alga-transactions-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
+  };
 
   // Update user role mutation
   const updateUserRoleMutation = useMutation({
@@ -1835,20 +1890,67 @@ export default function AdminDashboard() {
         </Dialog>
       )}
 
-      {/* Revenue Details Dialog */}
+      {/* Revenue Details Dialog - ArifPay Style */}
       <Dialog open={revenueDetailsOpen} onOpenChange={setRevenueDetailsOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              Revenue Breakdown
-            </DialogTitle>
-            <DialogDescription>
-              Detailed breakdown of all paid bookings and revenue
-            </DialogDescription>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <div>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <DollarSign className="h-5 w-5 text-green-600" />
+                Transactions Detail
+              </DialogTitle>
+              <DialogDescription>
+                Complete transaction history with search and export
+              </DialogDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={exportToCSV}
+              className="flex items-center gap-2"
+              data-testid="button-export-csv"
+            >
+              <Download className="h-4 w-4" />
+              EXPORT
+            </Button>
           </DialogHeader>
           
           <div className="space-y-4">
+            {/* Search and Filter Row */}
+            <div className="flex flex-wrap gap-3 items-center p-4 bg-gray-50 rounded-lg border">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by ID, Name, Phone, or Transaction ID..."
+                  value={revenueSearch}
+                  onChange={(e) => {
+                    setRevenueSearch(e.target.value);
+                    setRevenuePage(1);
+                  }}
+                  className="pl-10"
+                  data-testid="input-revenue-search"
+                />
+              </div>
+              <Select value={revenueStatusFilter} onValueChange={(v) => { setRevenueStatusFilter(v); setRevenuePage(1); }}>
+                <SelectTrigger className="w-[150px]" data-testid="select-revenue-status">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="default" 
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => setRevenuePage(1)}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                SEARCH
+              </Button>
+            </div>
+
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
@@ -1873,62 +1975,104 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Paid Bookings List */}
-            <div className="border rounded-lg">
-              <div className="bg-green-50 px-4 py-3 border-b">
-                <h3 className="font-semibold text-green-800 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Paid Bookings ({allBookings.filter((b) => b.paymentStatus === 'paid').length})
-                </h3>
-              </div>
-              <div className="max-h-[300px] overflow-y-auto">
+            {/* Transactions Table */}
+            <div className="border rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-[#1a3a4a] text-white">
                     <TableRow>
-                      <TableHead>Booking ID</TableHead>
-                      <TableHead>Guest</TableHead>
-                      <TableHead>Property</TableHead>
-                      <TableHead>Dates</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="text-white font-semibold">Date</TableHead>
+                      <TableHead className="text-white font-semibold">Booking ID</TableHead>
+                      <TableHead className="text-white font-semibold">Transaction ID</TableHead>
+                      <TableHead className="text-white font-semibold">Phone</TableHead>
+                      <TableHead className="text-white font-semibold">Guest</TableHead>
+                      <TableHead className="text-white font-semibold">Currency</TableHead>
+                      <TableHead className="text-white font-semibold">Amount</TableHead>
+                      <TableHead className="text-white font-semibold">Type</TableHead>
+                      <TableHead className="text-white font-semibold">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {allBookings
-                      .filter((b) => b.paymentStatus === 'paid')
-                      .map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell className="font-mono text-sm">#{booking.id}</TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{booking.user?.firstName} {booking.user?.lastName}</p>
-                              <p className="text-xs text-gray-500">{booking.user?.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium truncate max-w-[150px]">{booking.property?.title}</p>
-                              <p className="text-xs text-gray-500">{booking.property?.city}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-sm">
-                              {format(new Date(booking.checkIn), 'MMM d')} - {format(new Date(booking.checkOut), 'MMM d, yyyy')}
-                            </p>
-                          </TableCell>
-                          <TableCell className="text-right font-semibold text-green-700">
-                            {parseFloat(booking.totalPrice).toLocaleString()} ETB
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    {allBookings.filter((b) => b.paymentStatus === 'paid').length === 0 && (
+                    {paginatedBookings.map((booking) => (
+                      <TableRow key={booking.id} className="hover:bg-gray-50">
+                        <TableCell className="text-sm">
+                          {format(new Date(booking.createdAt), 'MM/dd/yyyy, h:mm:ss a')}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm font-medium">
+                          #{booking.id}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-blue-600">
+                          {booking.paymentRef || 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {booking.user?.phoneNumber || 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-sm">{booking.user?.firstName} {booking.user?.lastName}</p>
+                            <p className="text-xs text-gray-500">{booking.user?.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm font-medium">ETB</TableCell>
+                        <TableCell className="text-sm font-semibold">
+                          {parseFloat(booking.totalPrice).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-sm">Booking</TableCell>
+                        <TableCell>
+                          <Badge 
+                            className={
+                              booking.paymentStatus === 'paid' 
+                                ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                                : booking.paymentStatus === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                : 'bg-red-100 text-red-800 hover:bg-red-100'
+                            }
+                          >
+                            {booking.paymentStatus === 'paid' ? 'Success' : 
+                             booking.paymentStatus === 'pending' ? 'Pending' : 'Failed'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {paginatedBookings.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                          No paid bookings yet
+                        <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                          No transactions found
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
+              </div>
+              
+              {/* Pagination */}
+              <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+                <div className="text-sm text-gray-600">
+                  Rows per page: {revenuePerPage}
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-600">
+                    {((revenuePage - 1) * revenuePerPage) + 1}-{Math.min(revenuePage * revenuePerPage, filteredBookings.length)} of {filteredBookings.length}
+                  </span>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setRevenuePage(p => Math.max(1, p - 1))}
+                      disabled={revenuePage === 1}
+                    >
+                      &lt;
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setRevenuePage(p => Math.min(totalRevenuePages, p + 1))}
+                      disabled={revenuePage >= totalRevenuePages}
+                    >
+                      &gt;
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
