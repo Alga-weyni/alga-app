@@ -1818,10 +1818,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (err) {
           return res.status(500).json({ message: "Failed to log in after verification" });
         }
+        // INSA SECURITY FIX: Don't expose role-based redirect in API response
+        // Client should determine redirect based on authenticated user's role
+        // This prevents role information leakage in API responses
         res.json({ 
           message: "Verification successful",
-          user: safeUser,
-          redirect: user.role === 'admin' ? '/admin/dashboard' : user.role === 'operator' ? '/operator/dashboard' : user.role === 'host' ? '/host/dashboard' : user.role === 'agent' ? '/agent-dashboard' : user.role === 'service_provider' ? '/provider/dashboard' : '/properties'
+          user: safeUser
+          // redirect removed - client handles routing based on user.role from session
         });
       });
     } catch (error: any) {
@@ -3130,14 +3133,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin statistics
-  app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Admin statistics - use middleware for consistent authorization
+  app.get('/api/admin/stats', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
       const stats = await storage.getAdminStats();
       res.json(stats);
     } catch (error) {
@@ -3146,14 +3144,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Manual Split-Payment Trigger (for testing)
-  app.post('/api/admin/trigger-split/:bookingId', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Admin: Manual Split-Payment Trigger - use middleware
+  app.post('/api/admin/trigger-split/:bookingId', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const userRole = req.user.role || 'guest';
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const bookingId = parseInt(req.params.bookingId);
       
       const splitResult = await storage.processAutoPaymentSplit(bookingId);
@@ -5079,30 +5072,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all service providers with filters
+  // INSA SECURITY FIX: Get all service providers - PUBLIC endpoint only shows VERIFIED providers
+  // Non-verified/pending/rejected providers must NOT be exposed to public
   app.get('/api/service-providers', async (req: any, res) => {
     try {
-      const { city, serviceType, verificationStatus, includeAll } = req.query;
+      const { city, serviceType } = req.query;
       const filters: any = {};
       
       if (city) filters.city = city as string;
       if (serviceType) filters.serviceType = serviceType as string;
-      if (verificationStatus) filters.verificationStatus = verificationStatus as string;
       
-      // Admin/operators can see all providers including inactive ones
-      if (includeAll === 'true' && req.user && (req.user.role === 'admin' || req.user.role === 'operator')) {
-        filters.includeInactive = true;
-      }
+      // INSA FIX: Public endpoint ONLY returns verified providers
+      // This prevents exposure of pending/rejected applications
+      filters.verificationStatus = 'verified';
+      filters.isActive = true;
       
       const providers = await storage.getAllServiceProviders(filters);
-      res.json(providers);
+      
+      // INSA FIX: Strip sensitive fields from public response
+      const sanitizedProviders = providers.map((p: any) => ({
+        id: p.id,
+        businessName: p.businessName,
+        serviceType: p.serviceType,
+        description: p.description,
+        city: p.city,
+        hourlyRate: p.hourlyRate,
+        rating: p.rating,
+        totalReviews: p.totalReviews,
+        availability: p.availability,
+        portfolioImages: p.portfolioImages,
+        // DO NOT expose: userId, verificationStatus, rejectionReason, idDocumentUrl, etc.
+      }));
+      
+      res.json(sanitizedProviders);
     } catch (error) {
       console.error("Error fetching service providers:", error);
       res.status(500).json({ message: "Failed to fetch service providers" });
     }
   });
 
-  // Get service provider by ID
+  // INSA SECURITY FIX: Get service provider by ID - PUBLIC endpoint only shows VERIFIED providers
   app.get('/api/service-providers/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -5112,7 +5121,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Service provider not found" });
       }
       
-      res.json(provider);
+      // INSA FIX: Only return verified providers to public
+      if (provider.verificationStatus !== 'verified') {
+        return res.status(404).json({ message: "Service provider not found" });
+      }
+      
+      // INSA FIX: Strip sensitive fields from public response
+      const sanitizedProvider = {
+        id: provider.id,
+        businessName: provider.businessName,
+        serviceType: provider.serviceType,
+        description: provider.description,
+        city: provider.city,
+        hourlyRate: provider.hourlyRate,
+        rating: provider.rating,
+        totalReviews: provider.totalReviews,
+        availability: provider.availability,
+        portfolioImages: provider.portfolioImages,
+        specialties: provider.specialties,
+        // DO NOT expose: userId, verificationStatus, rejectionReason, idDocumentUrl, etc.
+      };
+      
+      res.json(sanitizedProvider);
     } catch (error) {
       console.error("Error fetching service provider:", error);
       res.status(500).json({ message: "Failed to fetch service provider" });
@@ -5984,13 +6014,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ADMIN: SERVICE PROVIDER VERIFICATION
   // ============================================
 
-  // Get all service providers for admin review
-  app.get('/api/admin/service-providers', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Get all service providers for admin review - use middleware
+  app.get('/api/admin/service-providers', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
     try {
-      if (req.user.role !== 'admin' && req.user.role !== 'operator') {
-        return res.status(403).json({ message: "Access denied. Admin or Operator role required." });
-      }
-      
+      // Admin/operator can see ALL providers including pending/rejected
       const providers = await storage.getAllServiceProviders();
       res.json(providers);
     } catch (error) {
@@ -5999,13 +6026,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify service provider (admin/operator)
-  app.patch('/api/admin/service-providers/:id/verify', isAuthenticated, async (req: any, res) => {
+  // INSA RBAC FIX: Verify service provider (admin/operator) - use middleware
+  app.patch('/api/admin/service-providers/:id/verify', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
     try {
-      if (req.user.role !== 'admin' && req.user.role !== 'operator') {
-        return res.status(403).json({ message: "Access denied. Admin or Operator role required." });
-      }
-      
       const id = parseInt(req.params.id);
       const { status, rejectionReason } = req.body;
       
