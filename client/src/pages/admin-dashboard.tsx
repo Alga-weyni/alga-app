@@ -227,9 +227,11 @@ export default function AdminDashboard() {
     };
   }
 
-  const { data: allBookings = [] } = useQuery<BookingData[]>({
+  const { data: allBookings = [], isError: bookingsError, isLoading: bookingsLoading, refetch: refetchBookings } = useQuery<BookingData[]>({
     queryKey: ['/api/admin/bookings'],
     enabled: revenueDetailsOpen,
+    retry: 2,
+    staleTime: 0,
   });
 
   // Revenue dialog search and filter states
@@ -2050,7 +2052,28 @@ export default function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedBookings.map((booking) => (
+                    {bookingsLoading && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                          Loading transactions...
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {bookingsError && !bookingsLoading && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8">
+                          <p className="text-red-500 mb-2">Failed to load transactions</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => refetchBookings()}
+                          >
+                            Try Again
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {!bookingsLoading && !bookingsError && paginatedBookings.map((booking) => (
                       <TableRow key={booking.id} className="hover:bg-gray-50">
                         <TableCell className="text-sm">
                           {format(new Date(booking.createdAt), 'MM/dd/yyyy, h:mm:ss a')}
@@ -2091,7 +2114,7 @@ export default function AdminDashboard() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {paginatedBookings.length === 0 && (
+                    {!bookingsLoading && !bookingsError && paginatedBookings.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                           No transactions found
