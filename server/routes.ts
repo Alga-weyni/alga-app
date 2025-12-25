@@ -5548,6 +5548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentStatus: bookings.paymentStatus,
           paymentMethod: bookings.paymentMethod,
           paymentRef: bookings.paymentRef,
+          guestPhone: bookings.guestPhone,
           createdAt: bookings.createdAt,
         })
         .from(bookings)
@@ -5563,7 +5564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .limit(1);
           
           const [user] = await db
-            .select({ firstName: users.firstName, lastName: users.lastName, email: users.email })
+            .select({ firstName: users.firstName, lastName: users.lastName, email: users.email, phoneNumber: users.phoneNumber })
             .from(users)
             .where(eq(users.id, booking.guestId))
             .limit(1);
