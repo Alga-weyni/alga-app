@@ -5535,24 +5535,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all bookings for admin with user and property data
   app.get('/api/admin/bookings', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
     try {
-      const allBookings = await db
-        .select({
-          id: bookings.id,
-          propertyId: bookings.propertyId,
-          guestId: bookings.guestId,
-          checkIn: bookings.checkIn,
-          checkOut: bookings.checkOut,
-          guests: bookings.guests,
-          totalPrice: bookings.totalPrice,
-          status: bookings.status,
-          paymentStatus: bookings.paymentStatus,
-          paymentMethod: bookings.paymentMethod,
-          paymentRef: bookings.paymentRef,
-          guestPhone: bookings.guestPhone,
-          createdAt: bookings.createdAt,
-        })
-        .from(bookings)
-        .orderBy(desc(bookings.createdAt));
+      // Try query with guestPhone column, fallback if column doesn't exist
+      let allBookings: any[];
+      try {
+        allBookings = await db
+          .select({
+            id: bookings.id,
+            propertyId: bookings.propertyId,
+            guestId: bookings.guestId,
+            checkIn: bookings.checkIn,
+            checkOut: bookings.checkOut,
+            guests: bookings.guests,
+            totalPrice: bookings.totalPrice,
+            status: bookings.status,
+            paymentStatus: bookings.paymentStatus,
+            paymentMethod: bookings.paymentMethod,
+            paymentRef: bookings.paymentRef,
+            guestPhone: bookings.guestPhone,
+            createdAt: bookings.createdAt,
+          })
+          .from(bookings)
+          .orderBy(desc(bookings.createdAt));
+      } catch (columnError: any) {
+        // Fallback query without guestPhone if column doesn't exist in production
+        console.log("Fallback query without guestPhone column");
+        allBookings = await db
+          .select({
+            id: bookings.id,
+            propertyId: bookings.propertyId,
+            guestId: bookings.guestId,
+            checkIn: bookings.checkIn,
+            checkOut: bookings.checkOut,
+            guests: bookings.guests,
+            totalPrice: bookings.totalPrice,
+            status: bookings.status,
+            paymentStatus: bookings.paymentStatus,
+            paymentMethod: bookings.paymentMethod,
+            paymentRef: bookings.paymentRef,
+            createdAt: bookings.createdAt,
+          })
+          .from(bookings)
+          .orderBy(desc(bookings.createdAt));
+        // Add null guestPhone to each result
+        allBookings = allBookings.map(b => ({ ...b, guestPhone: null }));
+      }
       
       // Fetch property and user data for each booking
       const bookingsWithDetails = await Promise.all(
