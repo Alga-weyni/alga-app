@@ -1,0 +1,23 @@
+become-provider:1 Access to XMLHttpRequest at 'https://alga-prod-assets.732aa2d37ad6d6269010b6383e8035f8.r2.cloudflarestorage.com/uploads/053b3495-0be2-4934-b47d-a0a3e654f0b9/1766747687301-9eb2b824745166b40b89f235f8003951?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=5a45cdce352666761ff50c3c1e408a5d%2F20251226%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20251226T111447Z&X-Amz-Expires=900&X-Amz-Signature=38cc15815cb4000cfee3bbd636dbf2b4e4a1c1d1aae0d2a17d1d80e758fe56d7&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject' from origin 'https://app.alga.et' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+index-CEzAIQPh.js:743 [Uppy] [14:14:47] Unknown error
+error @ index-CEzAIQPh.js:743
+log @ index-CEzAIQPh.js:748
+(anonymous) @ index-CEzAIQPh.js:748
+i @ index-CEzAIQPh.js:743
+e.emit @ index-CEzAIQPh.js:743
+emit @ index-CEzAIQPh.js:743
+o @ index-CEzAIQPh.js:767
+(anonymous) @ index-CEzAIQPh.js:767
+Promise.then
+Dhe @ index-CEzAIQPh.js:767
+start @ index-CEzAIQPh.js:767
+(anonymous) @ index-CEzAIQPh.js:767
+Fhe @ index-CEzAIQPh.js:767
+(anonymous) @ index-CEzAIQPh.js:767
+(anonymous) @ index-CEzAIQPh.js:767
+E2 @ index-CEzAIQPh.js:748
+await in E2
+upload @ index-CEzAIQPh.js:748
+(anonymous) @ index-CEzAIQPh.js:757
+(anonymous) @ index-CEzAIQPh.js:743Understand this error
+index-CEzAIQPh.js:767  PUT https://alga-prod-assets.732aa2d37ad6d6269010b6383e8035f8.r2.cloudflarestorage.com/uploads/053b3495-0be2-4934-b47d-a0a3e654f0b9/1766747687301-9eb2b824745166b40b89f235f8003951?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=5a45cdce352666761ff50c3c1e408a5d%2F20251226%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20251226T111447Z&X-Amz-Expires=900&X-Amz-Signature=38cc15815cb4000cfee3bbd636dbf2b4e4a1c1d1aae0d2a17d1d80e758fe56d7&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject net::ERR_FAILED
