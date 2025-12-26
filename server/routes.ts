@@ -5004,12 +5004,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/service-provider-applications', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { businessName, serviceType, city, description, phoneNumber } = req.body;
+      const { businessName, serviceType, city, description, phoneNumber, idDocumentUrl, portfolioImages } = req.body;
 
       // Validate required fields (description is optional)
       if (!businessName || !serviceType || !city) {
         return res.status(400).json({ 
           message: "Missing required fields: businessName, serviceType, city" 
+        });
+      }
+
+      // Validate national ID upload (required for all providers)
+      if (!idDocumentUrl) {
+        return res.status(400).json({ 
+          message: "National ID document is required for verification" 
         });
       }
 
@@ -5024,6 +5031,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pricingModel: "hourly" as const, // Default pricing model
         basePrice: "0.00", // Default - will be set during verification
         verificationStatus: "pending",
+        idDocumentUrl, // National ID for admin verification
+        portfolioImages: portfolioImages || [], // Work samples for self_care providers
       };
 
       const newProvider = await storage.createServiceProvider(providerData);

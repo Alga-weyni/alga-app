@@ -67,6 +67,7 @@ export default function BecomeProvider() {
     description: "",
     phoneNumber: user?.phoneNumber || "",
     portfolioImages: [] as string[],
+    idDocumentUrl: "", // National ID upload - required for all providers
   });
 
   // Auto-show form if category is selected from URL
@@ -111,6 +112,7 @@ export default function BecomeProvider() {
         description: "",
         phoneNumber: user?.phoneNumber || "",
         portfolioImages: [],
+        idDocumentUrl: "",
       });
       
       // Redirect to My Services after 3 seconds
@@ -182,6 +184,16 @@ export default function BecomeProvider() {
       return;
     }
 
+    // Validate national ID upload
+    if (!formData.idDocumentUrl) {
+      toast({
+        title: "National ID Required",
+        description: "Please upload your national ID document for verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     applicationMutation.mutate(formData);
   };
 
@@ -226,6 +238,28 @@ export default function BecomeProvider() {
     setFormData(prev => ({
       ...prev,
       portfolioImages: prev.portfolioImages.filter((_, i) => i !== index),
+    }));
+  };
+
+  // National ID upload handler
+  const handleIdUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (!result.successful || result.successful.length === 0) return;
+    
+    const uploadedUrl = (result.successful[0] as any).uploadURL;
+    setFormData(prev => ({
+      ...prev,
+      idDocumentUrl: uploadedUrl,
+    }));
+    toast({
+      title: "ID Uploaded Successfully",
+      description: "Your national ID has been uploaded for verification.",
+    });
+  };
+
+  const handleRemoveId = () => {
+    setFormData(prev => ({
+      ...prev,
+      idDocumentUrl: "",
     }));
   };
 
@@ -457,6 +491,60 @@ export default function BecomeProvider() {
                         data-testid="input-phone"
                         required
                       />
+                    </div>
+
+                    {/* National ID Upload - Required for all providers */}
+                    <div>
+                      <Label className="text-eth-brown font-medium flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-green-600" />
+                        National ID Document *
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1 mb-3">
+                        Upload a clear photo of your Ethiopian National ID (Kebele ID) for verification
+                      </p>
+                      
+                      {!formData.idDocumentUrl ? (
+                        <div className="mt-2">
+                          <ObjectUploader
+                            maxNumberOfFiles={1}
+                            maxFileSize={10485760}
+                            onGetUploadParameters={handleGetUploadParameters}
+                            onComplete={handleIdUploadComplete}
+                            buttonClassName="w-full bg-green-700 hover:bg-green-800 text-white"
+                          >
+                            <div className="flex items-center gap-2 justify-center">
+                              <Upload className="h-4 w-4" />
+                              <span>Upload National ID</span>
+                            </div>
+                          </ObjectUploader>
+                        </div>
+                      ) : (
+                        <div className="mt-2 relative">
+                          <div className="border-2 border-green-500 rounded-lg p-3 bg-green-50">
+                            <div className="flex items-center gap-3">
+                              <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-green-800">ID Document Uploaded</p>
+                                <p className="text-xs text-green-600">Ready for verification</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemoveId}
+                                className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                data-testid="button-remove-id"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                            <img 
+                              src={formData.idDocumentUrl} 
+                              alt="National ID"
+                              className="mt-3 w-full h-32 object-cover rounded-lg border border-green-300"
+                              data-testid="image-national-id"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div>
