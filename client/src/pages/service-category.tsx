@@ -65,7 +65,7 @@ export default function ServiceCategory() {
       const params = new URLSearchParams();
       if (type) params.append("serviceType", type);
       if (cityFilter !== "all") params.append("city", cityFilter);
-      params.append("verificationStatus", "approved");
+      // Note: Backend already filters to only return verified providers by default
       
       const response = await fetch(getApiUrl(`/api/service-providers?${params}`), {
         credentials: 'include'
