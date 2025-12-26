@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { getApiUrl } from "@/lib/api-config";
@@ -39,6 +39,15 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+import {
   CheckCircle,
   XCircle,
   Clock,
@@ -73,8 +82,18 @@ interface Agent {
   rejectionReason: string | null;
 }
 
+interface AgentsResponse {
+  agents: Agent[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export default function AdminAgents() {
   const { toast } = useToast();
+  const [page, setPage] = useState(1);
+  const limit = 15;
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [cityFilter, setCityFilter] = useState<string>("all");
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -84,8 +103,27 @@ export default function AdminAgents() {
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [viewingDocument, setViewingDocument] = useState<{ url: string; name: string } | null>(null);
 
-  const { data: agents, isLoading } = useQuery<Agent[]>({
-    queryKey: ["/api/admin/agents", { status: statusFilter !== "all" ? statusFilter : undefined, city: cityFilter !== "all" ? cityFilter : undefined }],
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, cityFilter]);
+
+  const { data, isLoading } = useQuery<AgentsResponse>({
+    queryKey: ["/api/admin/agents", page, statusFilter, cityFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (cityFilter !== "all") params.append("city", cityFilter);
+      
+      const response = await fetch(`/api/admin/agents?${params.toString()}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch agents');
+      }
+      return response.json();
+    },
   });
 
   const verifyMutation = useMutation({
@@ -163,17 +201,81 @@ export default function AdminAgents() {
     );
   };
 
-  const filteredAgents = agents || [];
+  const agents = data?.agents || [];
+  const total = data?.total || 0;
+  const totalPages = data?.totalPages || 1;
+  
   const stats = {
-    total: filteredAgents.length,
-    verified: filteredAgents.filter(a => a.status === "verified").length,
-    pending: filteredAgents.filter(a => a.status === "pending").length,
-    rejected: filteredAgents.filter(a => a.status === "rejected").length,
-    totalEarnings: filteredAgents.reduce((sum, a) => sum + parseFloat(a.totalEarnings || "0"), 0),
-    totalProperties: filteredAgents.reduce((sum, a) => sum + (a.totalProperties || 0), 0),
+    total: total,
+    verified: agents.filter(a => a.status === "verified").length,
+    pending: agents.filter(a => a.status === "pending").length,
+    rejected: agents.filter(a => a.status === "rejected").length,
+    totalEarnings: agents.reduce((sum, a) => sum + parseFloat(a.totalEarnings || "0"), 0),
+    totalProperties: agents.reduce((sum, a) => sum + (a.totalProperties || 0), 0),
   };
 
-  const cities = ["all", ...Array.from(new Set(filteredAgents.map(a => a.city)))];
+  const cities = ["all", ...Array.from(new Set(agents.map(a => a.city)))];
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages: (number | "ellipsis")[] = [];
+    
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+
+    return (
+      <Pagination className="mt-6" data-testid="pagination-container">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => page > 1 && setPage(page - 1)}
+              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-prev"
+            />
+          </PaginationItem>
+          {pages.map((p, index) => (
+            <PaginationItem key={index}>
+              {p === "ellipsis" ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => setPage(p)}
+                  isActive={page === p}
+                  className="cursor-pointer"
+                  data-testid={`button-pagination-${p}`}
+                >
+                  {p}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => page < totalPages && setPage(page + 1)}
+              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-next"
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -318,7 +420,7 @@ export default function AdminAgents() {
           <CardHeader>
             <CardTitle>Agent Applications</CardTitle>
             <CardDescription>
-              {filteredAgents.length} agents found
+              {total} agents found {totalPages > 1 && `(Page ${page} of ${totalPages})`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -338,14 +440,14 @@ export default function AdminAgents() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAgents.length === 0 ? (
+                  {agents.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center text-medium-brown dark:text-cream/60 py-12">
                         No agents found matching your filters
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAgents.map((agent) => (
+                    agents.map((agent) => (
                       <TableRow key={agent.id} data-testid={`row-agent-${agent.id}`}>
                         <TableCell>
                           <div>
@@ -455,6 +557,7 @@ export default function AdminAgents() {
                 </TableBody>
               </Table>
             </div>
+            {renderPagination()}
           </CardContent>
         </Card>
       </div>

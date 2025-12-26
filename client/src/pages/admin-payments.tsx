@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -16,6 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { 
   CreditCard, 
   CheckCircle, 
@@ -72,6 +81,14 @@ interface PaymentStats {
   unreconciledCount: number;
 }
 
+interface TransactionsResponse {
+  transactions: PaymentTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 interface BookingData {
   id: number;
   propertyId: number;
@@ -109,6 +126,8 @@ export default function AdminPayments() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [markingPaidId, setMarkingPaidId] = useState<number | null>(null);
   const [revenueDetailsOpen, setRevenueDetailsOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const limit = 15;
 
   // Redirect if not admin
   if (user && user.role !== 'admin' && user.role !== 'operator') {
@@ -116,9 +135,33 @@ export default function AdminPayments() {
     return null;
   }
 
-  const { data: transactions = [], isLoading } = useQuery<PaymentTransaction[]>({
-    queryKey: ['/api/admin/payment-transactions'],
+  const { data: transactionsData, isLoading } = useQuery<TransactionsResponse>({
+    queryKey: ['/api/admin/payment-transactions', page, statusFilter, gatewayFilter, typeFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        status: statusFilter,
+        gateway: gatewayFilter,
+        type: typeFilter,
+      });
+      const response = await fetch(`/api/admin/payment-transactions?${params}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+      return response.json();
+    },
   });
+
+  const transactions = transactionsData?.transactions || [];
+  const totalPages = transactionsData?.totalPages || 1;
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, gatewayFilter, typeFilter]);
 
   const { data: stats } = useQuery<PaymentStats>({
     queryKey: ['/api/admin/payment-transactions/stats'],
@@ -204,12 +247,67 @@ export default function AdminPayments() {
     },
   });
 
-  const filteredTransactions = transactions.filter(t => {
-    if (statusFilter !== "all" && t.status !== statusFilter) return false;
-    if (gatewayFilter !== "all" && t.paymentGateway !== gatewayFilter) return false;
-    if (typeFilter !== "all" && t.transactionType !== typeFilter) return false;
-    return true;
-  });
+  // Pagination helper function
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages: (number | "ellipsis")[] = [];
+    
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+
+    return (
+      <Pagination className="mt-6" data-testid="pagination-container">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => page > 1 && setPage(page - 1)}
+              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-prev"
+            />
+          </PaginationItem>
+          {pages.map((p, index) => (
+            <PaginationItem key={index}>
+              {p === "ellipsis" ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => setPage(p)}
+                  isActive={page === p}
+                  className="cursor-pointer"
+                  data-testid={`button-pagination-${p}`}
+                >
+                  {p}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => page < totalPages && setPage(page + 1)}
+              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-next"
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -512,7 +610,7 @@ export default function AdminPayments() {
               <div className="flex items-center justify-center py-12">
                 <RefreshCw className="h-8 w-8 animate-spin text-[#8b7355]" />
               </div>
-            ) : filteredTransactions.length === 0 ? (
+            ) : transactions.length === 0 ? (
               <div className="text-center py-12 text-[#5a4a42]">
                 <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No transactions found</p>
@@ -533,7 +631,7 @@ export default function AdminPayments() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTransactions.map((transaction) => (
+                    {transactions.map((transaction) => (
                       <TableRow key={transaction.id} data-testid={`row-transaction-${transaction.id}`}>
                         <TableCell className="font-mono text-sm" data-testid={`text-txn-id-${transaction.id}`}>
                           {transaction.transactionId.substring(0, 12)}...
@@ -583,6 +681,7 @@ export default function AdminPayments() {
                     ))}
                   </TableBody>
                 </Table>
+                {renderPagination()}
               </div>
             )}
           </CardContent>

@@ -5885,14 +5885,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ADMIN PAYMENT TRANSACTIONS ROUTES
   // ============================================
 
-  // Get all payment transactions for admin
+  // Get all payment transactions for admin (with pagination and filters)
   app.get('/api/admin/payment-transactions', isAuthenticated, isAdminOrOperator, async (req: any, res) => {
     try {
-      const transactions = await db
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 15;
+      const status = req.query.status as string;
+      const gateway = req.query.gateway as string;
+      const type = req.query.type as string;
+      const offset = (page - 1) * limit;
+
+      // Build filter conditions
+      const conditions = [];
+      if (status && status !== 'all') {
+        conditions.push(eq(paymentTransactions.status, status));
+      }
+      if (gateway && gateway !== 'all') {
+        conditions.push(eq(paymentTransactions.paymentGateway, gateway));
+      }
+      if (type && type !== 'all') {
+        conditions.push(eq(paymentTransactions.transactionType, type));
+      }
+
+      // Get total count with filters
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      
+      const countResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(paymentTransactions)
+        .where(whereClause);
+      const total = Number(countResult[0]?.count || 0);
+      const totalPages = Math.ceil(total / limit);
+
+      // Get paginated transactions with filters
+      let query = db
         .select()
         .from(paymentTransactions)
-        .orderBy(desc(paymentTransactions.createdAt));
-      res.json(transactions);
+        .orderBy(desc(paymentTransactions.createdAt))
+        .limit(limit)
+        .offset(offset);
+      
+      if (whereClause) {
+        query = query.where(whereClause) as typeof query;
+      }
+
+      const transactions = await query;
+
+      res.json({
+        transactions,
+        total,
+        page,
+        limit,
+        totalPages,
+      });
     } catch (error) {
       console.error("Error fetching payment transactions:", error);
       res.status(500).json({ message: "Failed to fetch payment transactions" });
@@ -8679,20 +8724,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== DELLALA AGENT MANAGEMENT ROUTES ====================
   
-  // Get all agents (admin only)
+  // Get all agents (admin only) - with pagination
   app.get('/api/admin/agents', isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const { status, city } = req.query;
+      const { status, city, page, limit } = req.query;
       const filters: any = {};
       
       if (status) filters.status = status as string;
       if (city) filters.city = city as string;
       
-      const agents = await storage.getAllAgents(filters);
+      const allAgents = await storage.getAllAgents(filters);
       
       // Enrich with user data
       const enrichedAgents = await Promise.all(
-        agents.map(async (agent) => {
+        allAgents.map(async (agent) => {
           const user = await storage.getUser(agent.userId);
           return {
             ...agent,
@@ -8705,7 +8750,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
-      res.json(enrichedAgents);
+      // Apply pagination
+      const pageNum = parseInt(page as string) || 1;
+      const limitNum = parseInt(limit as string) || 15;
+      const total = enrichedAgents.length;
+      const totalPages = Math.ceil(total / limitNum);
+      const startIndex = (pageNum - 1) * limitNum;
+      const paginatedAgents = enrichedAgents.slice(startIndex, startIndex + limitNum);
+      
+      res.json({
+        agents: paginatedAgents,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages,
+      });
     } catch (error) {
       console.error("Error fetching agents:", error);
       res.status(500).json({ message: "Failed to fetch agents" });
