@@ -225,6 +225,7 @@ function shouldAllowCredentials(path: string): boolean {
     '/api/delala',
     // Upload endpoints require authentication
     '/api/upload',
+    '/api/objects',
     // Settlement endpoints require authentication
     '/api/settlement'
   ];
