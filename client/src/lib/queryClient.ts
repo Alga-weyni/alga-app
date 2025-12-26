@@ -71,16 +71,36 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const fullUrl = getApiUrl(queryKey[0] as string);
     
-    const res = await fetch(fullUrl, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(fullUrl, {
+        credentials: "include",
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      
+      const text = await res.text();
+      if (!text) {
+        console.warn('[QueryFn] Empty response for:', fullUrl);
+        return [];
+      }
+      
+      try {
+        return JSON.parse(text);
+      } catch (parseError) {
+        console.error('[QueryFn] JSON parse error for:', fullUrl, text.substring(0, 100));
+        throw new Error('Invalid response from server');
+      }
+    } catch (error) {
+      console.error('[QueryFn] Request failed for:', fullUrl, error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
@@ -89,8 +109,18 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes - allows refetch on hard refresh
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep cache longer
+      retry: (failureCount, error) => {
+        // Retry up to 3 times for network errors, not for 4xx errors
+        if (failureCount >= 3) return false;
+        const message = (error as Error)?.message || '';
+        // Don't retry for client errors (4xx)
+        if (message.startsWith('4')) return false;
+        // Retry for network/server errors
+        return true;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     },
     mutations: {
       retry: false,
