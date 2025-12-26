@@ -209,7 +209,24 @@ function shouldAllowCredentials(path: string): boolean {
     '/api/user',
     '/api/me',
     '/api/otp',
-    '/api/session'
+    '/api/session',
+    // Service provider applications require authentication
+    '/api/service-provider',
+    '/api/service-providers',
+    // Bookings and payments require authentication
+    '/api/bookings',
+    '/api/payments',
+    // Admin and operator endpoints require authentication
+    '/api/admin',
+    '/api/operator',
+    // Property management requires authentication
+    '/api/properties',
+    // Delala agent endpoints require authentication
+    '/api/delala',
+    // Upload endpoints require authentication
+    '/api/upload',
+    // Settlement endpoints require authentication
+    '/api/settlement'
   ];
   
   return credentialPaths.some(p => path.startsWith(p));
