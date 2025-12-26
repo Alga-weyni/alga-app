@@ -1052,14 +1052,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get presigned URL for uploading files to Object Storage
-  app.post('/api/objects/upload', isAuthenticated, async (req, res) => {
+  // Get presigned URL for uploading files to R2 Object Storage
+  app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
     try {
-      const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      res.json({ uploadURL });
+      const { isR2Configured, r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL } = await import('./lib/r2.js');
+      
+      if (!isR2Configured || !r2Client) {
+        console.error('R2 not configured for presigned URL generation');
+        return res.status(500).json({ error: 'Storage not configured' });
+      }
+      
+      const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+      const { randomBytes } = await import('crypto');
+      
+      const uniqueId = randomBytes(16).toString('hex');
+      const timestamp = Date.now();
+      const key = `uploads/${req.user.id}/${timestamp}-${uniqueId}`;
+      
+      const command = new PutObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: key,
+        ContentType: 'image/jpeg', // Will be overwritten by actual content type
+      });
+      
+      // Generate presigned URL valid for 15 minutes
+      const uploadURL = await getSignedUrl(r2Client, command, { expiresIn: 900 });
+      
+      // Return both the upload URL and the final public URL
+      const publicUrl = `${R2_PUBLIC_BASE_URL}/${key}`;
+      
+      res.json({ uploadURL, publicUrl, key });
     } catch (error: any) {
-      console.error('Error generating upload URL:', error);
+      console.error('Error generating R2 upload URL:', error);
       res.status(500).json({ error: error.message || 'Failed to generate upload URL' });
     }
   });

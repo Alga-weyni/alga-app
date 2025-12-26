@@ -197,15 +197,22 @@ export default function BecomeProvider() {
     applicationMutation.mutate(formData);
   };
 
+  // Track public URLs for uploaded files (presigned URLs are different from public URLs)
+  const uploadedPublicUrls = useRef<Map<string, string>>(new Map());
+
   // Image upload handlers for Self Care providers
-  const handleGetUploadParameters = async () => {
+  const handleGetUploadParameters = async (file: any) => {
     try {
       const response = await fetch(getApiUrl('/api/objects/upload'), {
         method: 'POST',
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to get upload URL');
-      const { uploadURL } = await response.json();
+      const { uploadURL, publicUrl } = await response.json();
+      
+      // Store the mapping from file ID to public URL
+      uploadedPublicUrls.current.set(file.id, publicUrl);
+      
       return {
         method: 'PUT' as const,
         url: uploadURL,
@@ -223,14 +230,18 @@ export default function BecomeProvider() {
   const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (!result.successful) return;
     
-    const uploadedUrls = result.successful.map((file: any) => file.uploadURL);
+    // Get public URLs from our stored mapping
+    const publicUrls = result.successful.map((file: any) => {
+      return uploadedPublicUrls.current.get(file.id) || '';
+    }).filter(url => url);
+    
     setFormData(prev => ({
       ...prev,
-      portfolioImages: [...prev.portfolioImages, ...uploadedUrls],
+      portfolioImages: [...prev.portfolioImages, ...publicUrls],
     }));
     toast({
       title: "Images Uploaded",
-      description: `Successfully uploaded ${uploadedUrls.length} image(s).`,
+      description: `Successfully uploaded ${publicUrls.length} image(s).`,
     });
   };
 
@@ -245,15 +256,20 @@ export default function BecomeProvider() {
   const handleIdUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (!result.successful || result.successful.length === 0) return;
     
-    const uploadedUrl = (result.successful[0] as any).uploadURL;
-    setFormData(prev => ({
-      ...prev,
-      idDocumentUrl: uploadedUrl,
-    }));
-    toast({
-      title: "ID Uploaded Successfully",
-      description: "Your national ID has been uploaded for verification.",
-    });
+    // Get public URL from our stored mapping
+    const file = result.successful[0] as any;
+    const publicUrl = uploadedPublicUrls.current.get(file.id) || '';
+    
+    if (publicUrl) {
+      setFormData(prev => ({
+        ...prev,
+        idDocumentUrl: publicUrl,
+      }));
+      toast({
+        title: "ID Uploaded Successfully",
+        description: "Your national ID has been uploaded for verification.",
+      });
+    }
   };
 
   const handleRemoveId = () => {
