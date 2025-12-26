@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, Building2, MapPin, Mail, Phone, DollarSign } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, MapPin, Mail, Phone, DollarSign, FileCheck, Image } from "lucide-react";
 
 type ServiceProvider = {
   id: number;
@@ -25,6 +25,8 @@ type ServiceProvider = {
   basePrice: string;
   verificationStatus: string;
   rejectionReason?: string;
+  idDocumentUrl?: string; // National ID for verification
+  portfolioImages?: string[]; // Work samples
   user?: {
     firstName: string;
     lastName: string;
@@ -201,6 +203,58 @@ export default function AdminServiceProviders() {
                 <span data-testid={`text-phone-${provider.id}`}>{provider.user.phoneNumber}</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* National ID Document for Verification */}
+        {provider.idDocumentUrl && (
+          <div className="pt-2 border-t border-[#e5ddd5]">
+            <div className="flex items-center gap-2 text-sm font-medium text-[#2d1405] mb-2">
+              <FileCheck className="h-4 w-4 text-green-600" />
+              National ID Document
+            </div>
+            <a 
+              href={provider.idDocumentUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+              data-testid={`link-id-document-${provider.id}`}
+            >
+              <img 
+                src={provider.idDocumentUrl} 
+                alt="National ID"
+                className="w-full h-32 object-cover rounded-lg border-2 border-green-200 hover:border-green-400 transition-colors cursor-pointer"
+                data-testid={`image-id-document-${provider.id}`}
+              />
+            </a>
+            <p className="text-xs text-[#8b7a72] mt-1">Click to view full size</p>
+          </div>
+        )}
+
+        {/* Portfolio Images for Self Care Providers */}
+        {provider.portfolioImages && provider.portfolioImages.length > 0 && (
+          <div className="pt-2 border-t border-[#e5ddd5]">
+            <div className="flex items-center gap-2 text-sm font-medium text-[#2d1405] mb-2">
+              <Image className="h-4 w-4 text-purple-600" />
+              Work Samples ({provider.portfolioImages.length})
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {provider.portfolioImages.slice(0, 3).map((img, idx) => (
+                <a 
+                  key={idx}
+                  href={img} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <img 
+                    src={img} 
+                    alt={`Work sample ${idx + 1}`}
+                    className="w-full h-16 object-cover rounded border hover:border-purple-400 transition-colors cursor-pointer"
+                    data-testid={`image-portfolio-${provider.id}-${idx}`}
+                  />
+                </a>
+              ))}
+            </div>
           </div>
         )}
 
