@@ -2395,10 +2395,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // INSA RBAC FIX: Use requireAdmin middleware for consistent authorization
   app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      const users = await storage.getAllUsers();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 15;
+      const role = req.query.role as string;
+      const status = req.query.status as string;
+      const search = req.query.search as string;
+      const offset = (page - 1) * limit;
+      
+      // Build conditions for filtering
+      const conditions: any[] = [];
+      
+      if (role && role !== 'all') {
+        // Map 'delala' to 'agent' for the filter
+        const mappedRole = role === 'delala' ? 'agent' : role;
+        conditions.push(eq(users.role, mappedRole));
+      }
+      
+      if (status && status !== 'all') {
+        if (status === 'unverified') {
+          conditions.push(eq(users.idVerified, false));
+        } else {
+          conditions.push(eq(users.status, status));
+        }
+      }
+      
+      // Get all users first for search filtering (search needs OR logic across multiple fields)
+      let allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      
+      // Apply role and status filters
+      if (conditions.length > 0) {
+        allUsers = await db.select().from(users).where(and(...conditions)).orderBy(desc(users.createdAt));
+      }
+      
+      // Apply search filter (client-side for OR logic across multiple fields)
+      if (search && search.trim()) {
+        const searchLower = search.toLowerCase().trim();
+        allUsers = allUsers.filter(u => 
+          (u.firstName && u.firstName.toLowerCase().includes(searchLower)) ||
+          (u.lastName && u.lastName.toLowerCase().includes(searchLower)) ||
+          (u.email && u.email.toLowerCase().includes(searchLower)) ||
+          (u.phoneNumber && u.phoneNumber.includes(searchLower))
+        );
+      }
+      
+      const total = allUsers.length;
+      const totalPages = Math.ceil(total / limit);
+      
+      // Paginate
+      const paginatedUsers = allUsers.slice(offset, offset + limit);
+      
+      // Get bookings and properties count for each user
+      const usersWithCounts = await Promise.all(paginatedUsers.map(async (user) => {
+        const userBookings = await db.select().from(bookings).where(eq(bookings.userId, user.id));
+        const userProperties = await db.select().from(properties).where(eq(properties.hostId, user.id));
+        const userDocuments = await db.select().from(verificationDocuments).where(eq(verificationDocuments.userId, user.id));
+        
+        return {
+          ...user,
+          bookingsCount: userBookings.length,
+          propertiesCount: userProperties.length,
+          hasIdDocuments: userDocuments.length > 0,
+          idDocuments: userDocuments
+        };
+      }));
+      
       // INSA FIX: Sanitize ALL users to remove password hashes
-      const safeUsers = sanitizeUsersResponse(users);
-      res.json(safeUsers);
+      const safeUsers = usersWithCounts.map(u => {
+        const { password, otp, ...safe } = u;
+        return safe;
+      });
+      
+      res.json({
+        users: safeUsers,
+        total,
+        page,
+        limit,
+        totalPages
+      });
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
@@ -2592,7 +2665,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const allProperties = await db.select({ city: properties.city }).from(properties);
-      const uniqueCities = [...new Set(allProperties.map(p => p.city).filter(Boolean))].sort();
+      const citySet = new Set(allProperties.map(p => p.city).filter(Boolean));
+      const uniqueCities = Array.from(citySet).sort();
       
       res.json({ cities: uniqueCities });
     } catch (error) {

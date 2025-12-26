@@ -40,6 +40,7 @@ import ReportsArchive from "@/pages/admin/ReportsArchive";
 import SignatureDashboard from "@/pages/admin/SignatureDashboard";
 import AdminPayments from "@/pages/admin-payments";
 import AdminProperties from "@/pages/admin-properties";
+import AdminUsers from "@/pages/admin-users";
 import INSACompliancePage from "@/pages/insa-compliance";
 import OperatorDashboard from "@/pages/operator-dashboard";
 import AgentProgram from "@/pages/agent-program";
@@ -172,6 +173,7 @@ function Router() {
         <Route path="/admin/signatures" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><SignatureDashboard /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/payments" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin", "operator"]}><AdminPayments /></ProtectedRoute></AnimatedRoute>} />
         <Route path="/admin/properties" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin", "operator"]}><AdminProperties /></ProtectedRoute></AnimatedRoute>} />
+        <Route path="/admin/users" element={<AnimatedRoute><ProtectedRoute requiredRoles={["admin"]}><AdminUsers /></ProtectedRoute></AnimatedRoute>} />
         
         {/* Operator routes - operator only */}
         <Route path="/operator/dashboard" element={<AnimatedRoute><ProtectedRoute requiredRoles={["operator"]}><OperatorDashboard /></ProtectedRoute></AnimatedRoute>} />
