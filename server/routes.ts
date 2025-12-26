@@ -2488,13 +2488,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin property verification routes
+  // Admin property verification routes with pagination, filtering, and search
   app.get('/api/admin/properties', isAuthenticated, async (req: any, res) => {
     try {
       const userRole = req.user.role || 'guest';
       if (!['admin', 'operator'].includes(userRole)) {
         return res.status(403).json({ message: "Admin or operator access required" });
       }
+      
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const status = req.query.status as string;
+      const type = req.query.type as string; // 'direct' or 'delala'
+      const search = req.query.search as string;
+      const city = req.query.city as string;
+      const offset = (page - 1) * limit;
       
       // Get all properties with host and agent information
       const propertiesWithDetails = await db
@@ -2510,8 +2518,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .leftJoin(agents, eq(agentProperties.agentId, agents.id))
         .orderBy(desc(properties.createdAt));
 
-      // Format the response
-      const formattedProperties = propertiesWithDetails.map(({ property, host, agentProperty, agent }) => ({
+      // Format the response with referral code
+      let formattedProperties = propertiesWithDetails.map(({ property, host, agentProperty, agent }) => ({
         ...property,
         host: host ? {
           id: host.id,
@@ -2520,6 +2528,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: host.lastName,
           phoneNumber: host.phoneNumber,
         } : null,
+        agent: agent ? {
+          id: agent.id,
+          fullName: agent.fullName,
+          phoneNumber: agent.phoneNumber,
+          referralCode: agent.referralCode,
+        } : null,
+        referralCode: agent?.referralCode || null,
         agentInfo: agent ? {
           id: agent.id,
           fullName: agent.fullName,
@@ -2529,10 +2544,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null,
       }));
 
-      res.json(formattedProperties);
+      // Apply filters
+      if (status && status !== 'all') {
+        formattedProperties = formattedProperties.filter(p => p.status === status);
+      }
+      
+      if (type === 'direct') {
+        formattedProperties = formattedProperties.filter(p => !p.referralCode);
+      } else if (type === 'delala') {
+        formattedProperties = formattedProperties.filter(p => p.referralCode);
+      }
+      
+      if (search) {
+        const searchLower = search.toLowerCase();
+        formattedProperties = formattedProperties.filter(p => 
+          p.title.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (city && city !== 'all') {
+        formattedProperties = formattedProperties.filter(p => p.city === city);
+      }
+      
+      const total = formattedProperties.length;
+      const totalPages = Math.ceil(total / limit);
+      const paginatedProperties = formattedProperties.slice(offset, offset + limit);
+
+      res.json({
+        properties: paginatedProperties,
+        total,
+        page,
+        limit,
+        totalPages,
+      });
     } catch (error) {
       console.error("Error fetching properties for verification:", error);
       res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
+  // Get unique cities for filter dropdown
+  app.get('/api/admin/properties/cities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.user.role || 'guest';
+      if (!['admin', 'operator'].includes(userRole)) {
+        return res.status(403).json({ message: "Admin or operator access required" });
+      }
+      
+      const allProperties = await db.select({ city: properties.city }).from(properties);
+      const uniqueCities = [...new Set(allProperties.map(p => p.city).filter(Boolean))].sort();
+      
+      res.json({ cities: uniqueCities });
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      res.status(500).json({ message: "Failed to fetch cities" });
     }
   });
 
