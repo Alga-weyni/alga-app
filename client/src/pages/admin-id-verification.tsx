@@ -37,6 +37,15 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+import {
   CheckCircle,
   XCircle,
   Clock,
@@ -92,10 +101,20 @@ interface ServiceProvider {
   };
 }
 
+interface DocumentsResponse {
+  documents: PendingDocument[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export default function AdminIdVerification() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"hosts" | "providers">("hosts");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(15);
   const [selectedDocument, setSelectedDocument] = useState<PendingDocument | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
@@ -104,13 +123,32 @@ export default function AdminIdVerification() {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
 
-  const { data: documents, isLoading: isLoadingDocs } = useQuery<PendingDocument[]>({
-    queryKey: ["/api/operator/pending-documents"],
+  const { data: documentsData, isLoading: isLoadingDocs } = useQuery<DocumentsResponse>({
+    queryKey: ["/api/operator/pending-documents", page, statusFilter],
+    queryFn: async () => {
+      const response = await fetch(getApiUrl(`/api/operator/pending-documents?page=${page}&limit=${limit}&status=${statusFilter}`), {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents');
+      }
+      return response.json();
+    },
   });
 
   const { data: serviceProviders, isLoading: isLoadingProviders } = useQuery<ServiceProvider[]>({
     queryKey: ["/api/admin/service-providers"],
   });
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const handleTabChange = (value: "hosts" | "providers") => {
+    setActiveTab(value);
+    setPage(1);
+  };
 
   const approveMutation = useMutation({
     mutationFn: async (documentId: number) => {
@@ -298,15 +336,80 @@ export default function AdminIdVerification() {
     return getImageUrl(effectiveUrl);
   };
 
-  const pendingHostDocs = documents?.filter(d => d.status === 'pending').length || 0;
+  const documents = documentsData?.documents || [];
+  const totalPages = documentsData?.totalPages || 1;
+  const totalDocuments = documentsData?.total || 0;
+  
+  const pendingHostDocs = totalDocuments;
   const pendingProviders = serviceProviders?.filter(p => p.verificationStatus === 'pending').length || 0;
   const approvedHostDocs = documents?.filter(d => d.status === 'approved').length || 0;
   const approvedProviders = serviceProviders?.filter(p => p.verificationStatus === 'approved').length || 0;
 
-  const filteredDocs = documents?.filter(doc => statusFilter === 'all' || doc.status === statusFilter) || [];
+  const filteredDocs = documents;
   const filteredProviders = serviceProviders?.filter(p => 
     statusFilter === 'all' || p.verificationStatus === statusFilter
   ) || [];
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages: (number | "ellipsis")[] = [];
+    
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+
+    return (
+      <Pagination className="mt-6" data-testid="pagination-container">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => page > 1 && setPage(page - 1)}
+              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-prev"
+            />
+          </PaginationItem>
+          {pages.map((p, index) => (
+            <PaginationItem key={index}>
+              {p === "ellipsis" ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  onClick={() => setPage(p)}
+                  isActive={page === p}
+                  className="cursor-pointer"
+                  data-testid={`button-pagination-${p}`}
+                >
+                  {p}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => page < totalPages && setPage(page + 1)}
+              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-next"
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
 
   const DocumentImage = ({ url, fallbackUrl, alt, className }: { url: string; fallbackUrl?: string | null; alt: string; className?: string }) => {
     const [hasError, setHasError] = useState(false);
@@ -416,7 +519,7 @@ export default function AdminIdVerification() {
                   Review uploaded ID documents for host and service provider applications
                 </CardDescription>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -430,7 +533,7 @@ export default function AdminIdVerification() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "hosts" | "providers")}>
+            <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as "hosts" | "providers")}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="hosts" className="flex items-center gap-2">
                   <Home className="w-4 h-4" />
@@ -568,6 +671,7 @@ export default function AdminIdVerification() {
                     </p>
                   </div>
                 )}
+                {renderPagination()}
               </TabsContent>
 
               <TabsContent value="providers">

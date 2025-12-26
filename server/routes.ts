@@ -2446,7 +2446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get bookings and properties count for each user
       const usersWithCounts = await Promise.all(paginatedUsers.map(async (user) => {
-        const userBookings = await db.select().from(bookings).where(eq(bookings.userId, user.id));
+        const userBookings = await db.select().from(bookings).where(eq(bookings.guestId, user.id));
         const userProperties = await db.select().from(properties).where(eq(properties.hostId, user.id));
         const userDocuments = await db.select().from(verificationDocuments).where(eq(verificationDocuments.userId, user.id));
         
@@ -3337,8 +3337,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Operator access required" });
       }
       
-      const documents = await storage.getPendingVerificationDocuments();
-      res.json(documents);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 15;
+      const status = req.query.status as string || 'pending';
+      
+      const allDocuments = await storage.getPendingVerificationDocuments();
+      
+      // Filter by status
+      const filteredDocuments = status === 'all' 
+        ? allDocuments 
+        : allDocuments.filter((doc: any) => doc.status === status);
+      
+      const total = filteredDocuments.length;
+      const totalPages = Math.ceil(total / limit);
+      const offset = (page - 1) * limit;
+      const paginatedDocuments = filteredDocuments.slice(offset, offset + limit);
+      
+      res.json({
+        documents: paginatedDocuments,
+        total,
+        page,
+        limit,
+        totalPages,
+      });
     } catch (error) {
       console.error("Error fetching pending documents:", error);
       res.status(500).json({ message: "Failed to fetch pending documents" });
