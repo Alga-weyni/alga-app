@@ -184,14 +184,16 @@ export default function AdminDashboard() {
   });
 
   // Fetch users for management (handles both paginated and array response)
+  // Fetch all users by setting a high limit for client-side pagination
   const { data: usersData, isLoading: usersLoading } = useQuery<any>({
-    queryKey: ['/api/admin/users'],
+    queryKey: ['/api/admin/users?limit=1000'],
   });
   const users: UserType[] = Array.isArray(usersData) ? usersData : (usersData?.users || []);
 
   // Fetch properties for verification (handles both paginated and array response)
+  // Fetch all properties by setting a high limit for client-side pagination
   const { data: propertiesData, isLoading: propertiesLoading } = useQuery<any>({
-    queryKey: ['/api/admin/properties'],
+    queryKey: ['/api/admin/properties?limit=1000'],
   });
   const properties: Property[] = Array.isArray(propertiesData) ? propertiesData : (propertiesData?.properties || []);
 
