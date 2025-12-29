@@ -143,8 +143,7 @@ export default function AdminDashboard() {
   
   // Pagination state for each tab
   const [usersPage, setUsersPage] = useState(1);
-  const [propertiesPage, setPropertiesPage] = useState(1);
-  const [documentsPage, setDocumentsPage] = useState(1);
+    const [documentsPage, setDocumentsPage] = useState(1);
   const [agentsPage, setAgentsPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
@@ -211,11 +210,7 @@ export default function AdminDashboard() {
     return users.slice(start, start + ITEMS_PER_PAGE);
   }, [users, usersPage]);
 
-  const paginatedProperties = useMemo(() => {
-    const start = (propertiesPage - 1) * ITEMS_PER_PAGE;
-    return properties.slice(start, start + ITEMS_PER_PAGE);
-  }, [properties, propertiesPage]);
-
+  
   const paginatedDocuments = useMemo(() => {
     const start = (documentsPage - 1) * ITEMS_PER_PAGE;
     return documents.slice(start, start + ITEMS_PER_PAGE);
@@ -1141,12 +1136,6 @@ export default function AdminDashboard() {
                   )}
                 </TableBody>
               </Table>
-              <SimplePagination
-                page={propertiesPage}
-                limit={ITEMS_PER_PAGE}
-                total={properties.length}
-                onPageChange={setPropertiesPage}
-              />
             </CardContent>
           </Card>
         </TabsContent>
