@@ -175,15 +175,17 @@ export default function AdminDashboard() {
     },
   });
 
-  // Fetch users for management
-  const { data: users = [], isLoading: usersLoading } = useQuery<UserType[]>({
+  // Fetch users for management (handles both paginated and array response)
+  const { data: usersData, isLoading: usersLoading } = useQuery<any>({
     queryKey: ['/api/admin/users'],
   });
+  const users: UserType[] = Array.isArray(usersData) ? usersData : (usersData?.users || []);
 
-  // Fetch properties for verification
-  const { data: properties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
+  // Fetch properties for verification (handles both paginated and array response)
+  const { data: propertiesData, isLoading: propertiesLoading } = useQuery<any>({
     queryKey: ['/api/admin/properties'],
   });
+  const properties: Property[] = Array.isArray(propertiesData) ? propertiesData : (propertiesData?.properties || []);
 
   // Fetch verification documents
   const { data: documents = [], isLoading: documentsLoading } = useQuery<VerificationDocument[]>({
@@ -361,10 +363,11 @@ export default function AdminDashboard() {
     },
   });
 
-  // Fetch dellala agents
-  const { data: agents = [], isLoading: agentsLoading } = useQuery<Agent[]>({
+  // Fetch dellala agents (handles both paginated and array response)
+  const { data: agentsData, isLoading: agentsLoading } = useQuery<any>({
     queryKey: ['/api/admin/agents'],
   });
+  const agents: Agent[] = Array.isArray(agentsData) ? agentsData : (agentsData?.agents || []);
 
   // Verify agent mutation
   const verifyAgentMutation = useMutation({
