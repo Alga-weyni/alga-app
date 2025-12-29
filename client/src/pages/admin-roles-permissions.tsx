@@ -595,16 +595,17 @@ export default function AdminRolesPermissions() {
               </CardContent>
             </Card>
 
-            {/* Pagination - Always visible */}
-            <SimplePagination
-              page={page}
-              limit={limit}
-              total={total}
-              onPageChange={setPage}
-            />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Pagination - Fixed at bottom, outside all containers */}
+      <SimplePagination
+        page={page}
+        limit={limit}
+        total={total}
+        onPageChange={setPage}
+      />
 
       <Footer />
     </div>
