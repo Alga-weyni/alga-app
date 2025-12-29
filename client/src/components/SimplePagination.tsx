@@ -15,36 +15,43 @@ export function SimplePagination({ page, limit, total, onPageChange }: SimplePag
 
   return (
     <div 
-      className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#f5e6d3] to-[#faf5f0] border-2 border-[#b8860b] rounded-xl mt-6 shadow-md"
+      className="sticky bottom-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#d4a574] to-[#b8860b] border-t-4 border-[#8B4513] rounded-t-xl shadow-2xl mt-8"
       data-testid="pagination-container"
     >
-      <div className="text-sm font-medium text-[#5c4033]" data-testid="text-rows-per-page">
-        Rows per page: <span className="font-bold text-[#2d1405]">{limit}</span>
+      <div className="flex items-center gap-4">
+        <span className="text-white font-bold text-base" data-testid="text-page-indicator">
+          Page {page} of {totalPages}
+        </span>
+        <span className="text-white/80 text-sm hidden sm:inline" data-testid="text-rows-per-page">
+          ({limit} per page)
+        </span>
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-[#5c4033]" data-testid="text-page-info">
-          <span className="font-bold text-[#2d1405]">{startItem}-{endItem}</span> of <span className="font-bold text-[#2d1405]">{total}</span>
+        <span className="text-white font-medium text-sm hidden sm:inline" data-testid="text-page-info">
+          Showing <span className="font-bold">{startItem}-{endItem}</span> of <span className="font-bold">{total}</span>
         </span>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            className="h-9 w-9 bg-white border-2 border-[#d4a574] hover:bg-[#f5e6d3] hover:border-[#b8860b] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="h-10 px-4 bg-white text-[#8B4513] border-2 border-white hover:bg-[#f5e6d3] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             data-testid="button-pagination-prev"
           >
-            <ChevronLeft className="h-5 w-5 text-[#5c4033]" />
+            <ChevronLeft className="h-5 w-5 mr-1" />
+            Prev
           </Button>
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="h-9 w-9 bg-[#b8860b] text-white border-2 border-[#b8860b] hover:bg-[#9a7209] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="h-10 px-4 bg-[#2d1405] text-white border-2 border-[#2d1405] hover:bg-[#4a2409] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             data-testid="button-pagination-next"
           >
-            <ChevronRight className="h-5 w-5" />
+            Next
+            <ChevronRight className="h-5 w-5 ml-1" />
           </Button>
         </div>
       </div>
