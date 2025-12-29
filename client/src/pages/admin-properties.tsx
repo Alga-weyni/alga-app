@@ -14,15 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination";
+import { SimplePagination } from "@/components/SimplePagination";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { BackButton } from "@/components/back-button";
@@ -296,66 +288,6 @@ export default function AdminProperties() {
     delala: properties.filter(p => p.referralCode).length,
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages: (number | "ellipsis")[] = [];
-    
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-      if (currentPage > 3) {
-        pages.push("ellipsis");
-      }
-      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-      if (currentPage < totalPages - 2) {
-        pages.push("ellipsis");
-      }
-      if (!pages.includes(totalPages)) pages.push(totalPages);
-    }
-
-    return (
-      <Pagination className="mt-6" data-testid="pagination-container">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-prev"
-            />
-          </PaginationItem>
-          {pages.map((page, index) => (
-            <PaginationItem key={index}>
-              {page === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                  className="cursor-pointer"
-                  data-testid={`button-pagination-${page}`}
-                >
-                  {page}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-next"
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
 
   const renderPropertyRow = (property: AdminProperty) => (
     <TableRow key={property.id} data-testid={`row-property-${property.id}`}>
@@ -585,7 +517,12 @@ export default function AdminProperties() {
             </CardContent>
           </Card>
 
-          {renderPagination()}
+          <SimplePagination
+            page={currentPage}
+            limit={ITEMS_PER_PAGE}
+            total={data?.total || 0}
+            onPageChange={setCurrentPage}
+          />
 
           <div className="text-sm text-gray-500 text-center">
             Showing {properties.length} of {total} properties

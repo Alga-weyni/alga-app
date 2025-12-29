@@ -36,15 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination";
+import { SimplePagination } from "@/components/SimplePagination";
 import {
   CheckCircle,
   XCircle,
@@ -350,66 +342,6 @@ export default function AdminIdVerification() {
     statusFilter === 'all' || p.verificationStatus === statusFilter
   ) || [];
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages: (number | "ellipsis")[] = [];
-    
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-      if (page > 3) {
-        pages.push("ellipsis");
-      }
-      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-      if (page < totalPages - 2) {
-        pages.push("ellipsis");
-      }
-      if (!pages.includes(totalPages)) pages.push(totalPages);
-    }
-
-    return (
-      <Pagination className="mt-6" data-testid="pagination-container">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => page > 1 && setPage(page - 1)}
-              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-prev"
-            />
-          </PaginationItem>
-          {pages.map((p, index) => (
-            <PaginationItem key={index}>
-              {p === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  onClick={() => setPage(p)}
-                  isActive={page === p}
-                  className="cursor-pointer"
-                  data-testid={`button-pagination-${p}`}
-                >
-                  {p}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => page < totalPages && setPage(page + 1)}
-              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-next"
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
 
   const DocumentImage = ({ url, fallbackUrl, alt, className }: { url: string; fallbackUrl?: string | null; alt: string; className?: string }) => {
     const [hasError, setHasError] = useState(false);
@@ -671,7 +603,12 @@ export default function AdminIdVerification() {
                     </p>
                   </div>
                 )}
-                {renderPagination()}
+                <SimplePagination
+                  page={page}
+                  limit={limit}
+                  total={totalDocuments}
+                  onPageChange={setPage}
+                />
               </TabsContent>
 
               <TabsContent value="providers">

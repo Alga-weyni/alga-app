@@ -16,15 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination";
+import { SimplePagination } from "@/components/SimplePagination";
 import { 
   CreditCard, 
   CheckCircle, 
@@ -247,67 +239,6 @@ export default function AdminPayments() {
     },
   });
 
-  // Pagination helper function
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages: (number | "ellipsis")[] = [];
-    
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-      if (page > 3) {
-        pages.push("ellipsis");
-      }
-      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-      if (page < totalPages - 2) {
-        pages.push("ellipsis");
-      }
-      if (!pages.includes(totalPages)) pages.push(totalPages);
-    }
-
-    return (
-      <Pagination className="mt-6" data-testid="pagination-container">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => page > 1 && setPage(page - 1)}
-              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-prev"
-            />
-          </PaginationItem>
-          {pages.map((p, index) => (
-            <PaginationItem key={index}>
-              {p === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  onClick={() => setPage(p)}
-                  isActive={page === p}
-                  className="cursor-pointer"
-                  data-testid={`button-pagination-${p}`}
-                >
-                  {p}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => page < totalPages && setPage(page + 1)}
-              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-next"
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -681,7 +612,12 @@ export default function AdminPayments() {
                     ))}
                   </TableBody>
                 </Table>
-                {renderPagination()}
+                <SimplePagination
+                  page={page}
+                  limit={limit}
+                  total={transactionsData?.total || 0}
+                  onPageChange={setPage}
+                />
               </div>
             )}
           </CardContent>

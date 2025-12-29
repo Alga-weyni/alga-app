@@ -11,14 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { SimplePagination } from "@/components/SimplePagination";
 import { useToast } from "@/hooks/use-toast";
 import { BackButton } from "@/components/back-button";
 import {
@@ -320,55 +313,6 @@ export default function AdminRolesPermissions() {
     }
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const showPages = 5;
-    let startPage = Math.max(1, page - Math.floor(showPages / 2));
-    let endPage = Math.min(totalPages, startPage + showPages - 1);
-
-    if (endPage - startPage + 1 < showPages) {
-      startPage = Math.max(1, endPage - showPages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return (
-      <Pagination data-testid="pagination-container">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setPage(Math.max(1, page - 1))}
-              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-prev"
-            />
-          </PaginationItem>
-          {pages.map((p) => (
-            <PaginationItem key={p}>
-              <PaginationLink
-                onClick={() => setPage(p)}
-                isActive={p === page}
-                className="cursor-pointer"
-                data-testid={`button-pagination-${p}`}
-              >
-                {p}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => setPage(Math.min(totalPages, page + 1))}
-              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              data-testid="button-pagination-next"
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
 
   if (isLoading) {
     return (
@@ -649,7 +593,12 @@ export default function AdminRolesPermissions() {
                 </Table>
 
                 <div className="mt-6 flex justify-center">
-                  {renderPagination()}
+                  <SimplePagination
+                    page={page}
+                    limit={limit}
+                    total={total}
+                    onPageChange={setPage}
+                  />
                 </div>
               </CardContent>
             </Card>
