@@ -143,7 +143,8 @@ export default function AdminDashboard() {
   
   // Pagination state for each tab
   const [usersPage, setUsersPage] = useState(1);
-    const [documentsPage, setDocumentsPage] = useState(1);
+  const [propertiesPage, setPropertiesPage] = useState(1);
+  const [documentsPage, setDocumentsPage] = useState(1);
   const [agentsPage, setAgentsPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
   
@@ -210,7 +211,11 @@ export default function AdminDashboard() {
     return users.slice(start, start + ITEMS_PER_PAGE);
   }, [users, usersPage]);
 
-  
+  const paginatedProperties = useMemo(() => {
+    const start = (propertiesPage - 1) * ITEMS_PER_PAGE;
+    return properties.slice(start, start + ITEMS_PER_PAGE);
+  }, [properties, propertiesPage]);
+
   const paginatedDocuments = useMemo(() => {
     const start = (documentsPage - 1) * ITEMS_PER_PAGE;
     return documents.slice(start, start + ITEMS_PER_PAGE);
@@ -927,7 +932,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-purple-600" />
-                Dellala Properties ({properties.filter((p: any) => p.agentInfo).length})
+                Dellala Properties ({paginatedProperties.filter((p: any) => p.agentInfo).length})
               </CardTitle>
               <CardDescription>
                 Properties brought in by Dellala agents - verify ownership and listings
@@ -946,8 +951,8 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {properties.filter((p: any) => p.agentInfo).length > 0 ? (
-                    properties.filter((p: any) => p.agentInfo).map((property: any) => (
+                  {paginatedProperties.filter((p: any) => p.agentInfo).length > 0 ? (
+                    paginatedProperties.filter((p: any) => p.agentInfo).map((property: any) => (
                       <TableRow key={property.id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
@@ -1044,7 +1049,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-blue-600" />
-                Direct Properties ({properties.filter((p: any) => !p.agentInfo).length})
+                Direct Properties ({paginatedProperties.filter((p: any) => !p.agentInfo).length})
               </CardTitle>
               <CardDescription>
                 Properties listed directly by hosts
@@ -1062,8 +1067,8 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {properties.filter((p: any) => !p.agentInfo).length > 0 ? (
-                    properties.filter((p: any) => !p.agentInfo).map((property: any) => (
+                  {paginatedProperties.filter((p: any) => !p.agentInfo).length > 0 ? (
+                    paginatedProperties.filter((p: any) => !p.agentInfo).map((property: any) => (
                       <TableRow key={property.id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
@@ -1138,6 +1143,13 @@ export default function AdminDashboard() {
               </Table>
             </CardContent>
           </Card>
+          
+          <SimplePagination
+            page={propertiesPage}
+            limit={ITEMS_PER_PAGE}
+            total={properties.length}
+            onPageChange={setPropertiesPage}
+          />
         </TabsContent>
 
         {/* ID Verification Tab */}
