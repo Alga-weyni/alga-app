@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { useLocation } from "react-router-dom";
@@ -17,6 +17,7 @@ import { HowItWorks } from "@/components/how-it-works";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -46,12 +47,15 @@ interface Filters {
   sort?: string;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export default function Properties() {
   const location = useLocation();
   const [filters, setFilters] = useState<Filters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -105,6 +109,18 @@ export default function Properties() {
   });
 
   const favoriteIds = new Set((favorites || []).map(fav => fav.id));
+
+  // Pagination logic
+  const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
+  const paginatedProperties = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return properties.slice(start, start + ITEMS_PER_PAGE);
+  }, [properties, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   const updateFilter = (key: keyof Filters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -459,7 +475,7 @@ export default function Properties() {
             ) : (
               <>
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                  {properties.map((property, index) => (
+                  {paginatedProperties.map((property, index) => (
                     <div 
                       key={property.id}
                       className="animate-fade-in hover:scale-105 transition-all"
@@ -477,7 +493,77 @@ export default function Properties() {
                   ))}
                 </div>
                 
-                <p className="text-center text-sm text-eth-brown/40 mt-12 italic">
+                {/* Attractive Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex flex-col items-center gap-4 mt-10 mb-6">
+                    {/* Page info */}
+                    <p className="text-sm text-eth-brown/60">
+                      Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, properties.length)} of {properties.length} stays
+                    </p>
+                    
+                    {/* Pagination controls */}
+                    <div className="flex items-center gap-2">
+                      {/* Previous button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="h-10 px-3 border-eth-brown/30 text-eth-brown hover:bg-eth-cream disabled:opacity-40"
+                        data-testid="button-prev-page"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* Page numbers */}
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                          // Show first, last, current, and adjacent pages
+                          const showPage = page === 1 || page === totalPages || 
+                            (page >= currentPage - 1 && page <= currentPage + 1);
+                          const showEllipsis = page === currentPage - 2 || page === currentPage + 2;
+                          
+                          if (showEllipsis && page !== 1 && page !== totalPages) {
+                            return <span key={page} className="px-1 text-eth-brown/40">...</span>;
+                          }
+                          
+                          if (!showPage) return null;
+                          
+                          return (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(page)}
+                              className={`h-10 w-10 p-0 font-semibold ${
+                                currentPage === page 
+                                  ? "bg-eth-brown text-white hover:bg-eth-brown/90 shadow-md" 
+                                  : "border-eth-brown/30 text-eth-brown hover:bg-eth-cream"
+                              }`}
+                              data-testid={`button-page-${page}`}
+                            >
+                              {page}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Next button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="h-10 px-3 border-eth-brown/30 text-eth-brown hover:bg-eth-cream disabled:opacity-40"
+                        data-testid="button-next-page"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-center text-sm text-eth-brown/40 mt-8 italic">
                   Verified Ethiopian stays curated by Alga
                 </p>
               </>
