@@ -603,12 +603,6 @@ export default function AdminIdVerification() {
                     </p>
                   </div>
                 )}
-                <SimplePagination
-                  page={page}
-                  limit={limit}
-                  total={totalDocuments}
-                  onPageChange={setPage}
-                />
               </TabsContent>
 
               <TabsContent value="providers">
@@ -745,6 +739,14 @@ export default function AdminIdVerification() {
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Pagination - Always visible at bottom */}
+        <SimplePagination
+          page={page}
+          limit={limit}
+          total={totalDocuments}
+          onPageChange={setPage}
+        />
       </div>
 
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
