@@ -47,7 +47,7 @@ interface Filters {
   sort?: string;
 }
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 3;
 
 export default function Properties() {
   const location = useLocation();
