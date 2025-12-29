@@ -9,11 +9,9 @@ interface SimplePaginationProps {
 }
 
 export function SimplePagination({ page, limit, total, onPageChange }: SimplePaginationProps) {
-  const totalPages = Math.ceil(total / limit);
-  const startItem = (page - 1) * limit + 1;
+  const totalPages = Math.ceil(total / limit) || 1;
+  const startItem = total > 0 ? (page - 1) * limit + 1 : 0;
   const endItem = Math.min(page * limit, total);
-
-  if (total === 0) return null;
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-[#faf5f0] border border-[#d4a574] rounded-lg mt-4" data-testid="pagination-container">
