@@ -2589,7 +2589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .leftJoin(users, eq(properties.hostId, users.id))
         .leftJoin(agentProperties, eq(agentProperties.propertyId, properties.id))
         .leftJoin(agents, eq(agentProperties.agentId, agents.id))
-        .orderBy(desc(properties.createdAt));
+        .orderBy(properties.createdAt);
 
       // Format the response with referral code
       let formattedProperties = propertiesWithDetails.map(({ property, host, agentProperty, agent }) => ({
