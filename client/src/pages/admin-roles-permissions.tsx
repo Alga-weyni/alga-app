@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { BackButton } from "@/components/back-button";
 import {
@@ -40,6 +48,18 @@ interface UserData {
   phoneVerified: boolean;
   idVerified: boolean;
   profileImageUrl?: string;
+}
+
+interface UsersResponse {
+  users: UserData[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+interface RoleCounts {
+  [key: string]: number;
 }
 
 const PERMISSIONS = {
@@ -182,6 +202,13 @@ export default function AdminRolesPermissions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const limit = 15;
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, roleFilter, statusFilter]);
 
   // Redirect if not admin
   if (user && user.role !== "admin") {
@@ -194,10 +221,61 @@ export default function AdminRolesPermissions() {
     return null;
   }
 
-  // Fetch all users
-  const { data: users = [], isLoading } = useQuery<UserData[]>({
-    queryKey: ["/api/admin/users"],
+  // Fetch role counts for the overview tab (without pagination)
+  const { data: roleCountsData } = useQuery<RoleCounts>({
+    queryKey: ["/api/admin/users/role-counts"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/users?limit=10000", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch users for role counts");
+      }
+      const data = await response.json();
+      const users = Array.isArray(data) ? data : data.users || [];
+      const counts: RoleCounts = {};
+      users.forEach((u: UserData) => {
+        counts[u.role] = (counts[u.role] || 0) + 1;
+      });
+      return counts;
+    },
   });
+
+  // Fetch paginated users for the Manage Users tab
+  const { data: usersData, isLoading } = useQuery<UsersResponse | UserData[]>({
+    queryKey: ["/api/admin/users", page, limit, searchQuery, roleFilter, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", limit.toString());
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
+      }
+      if (roleFilter !== "all") {
+        params.append("role", roleFilter);
+      }
+      if (statusFilter !== "all") {
+        params.append("status", statusFilter);
+      }
+      const response = await fetch(`/api/admin/users?${params.toString()}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      return response.json();
+    },
+  });
+
+  // Handle both array and paginated object responses
+  const users: UserData[] = usersData
+    ? Array.isArray(usersData)
+      ? usersData
+      : usersData.users || []
+    : [];
+
+  const totalPages = usersData && !Array.isArray(usersData) ? usersData.totalPages : 1;
+  const total = usersData && !Array.isArray(usersData) ? usersData.total : users.length;
 
   // Update user role mutation
   const updateUserRoleMutation = useMutation({
@@ -227,22 +305,6 @@ export default function AdminRolesPermissions() {
     },
   });
 
-  // Filter users
-  const filteredUsers = users.filter((u) => {
-    const searchLower = searchQuery.toLowerCase();
-    const matchesSearch =
-      searchQuery === "" ||
-      (u.email && u.email.toLowerCase().includes(searchLower)) ||
-      (u.firstName && u.firstName.toLowerCase().includes(searchLower)) ||
-      (u.lastName && u.lastName.toLowerCase().includes(searchLower)) ||
-      (u.phoneNumber && u.phoneNumber.includes(searchQuery));
-
-    const matchesRole = roleFilter === "all" || u.role === roleFilter;
-    const matchesStatus = statusFilter === "all" || u.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin":
@@ -256,6 +318,56 @@ export default function AdminRolesPermissions() {
       default:
         return "outline";
     }
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const showPages = 5;
+    let startPage = Math.max(1, page - Math.floor(showPages / 2));
+    let endPage = Math.min(totalPages, startPage + showPages - 1);
+
+    if (endPage - startPage + 1 < showPages) {
+      startPage = Math.max(1, endPage - showPages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <Pagination data-testid="pagination-container">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => setPage(Math.max(1, page - 1))}
+              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-prev"
+            />
+          </PaginationItem>
+          {pages.map((p) => (
+            <PaginationItem key={p}>
+              <PaginationLink
+                onClick={() => setPage(p)}
+                isActive={p === page}
+                className="cursor-pointer"
+                data-testid={`button-pagination-${p}`}
+              >
+                {p}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              data-testid="button-pagination-next"
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
   };
 
   if (isLoading) {
@@ -295,7 +407,7 @@ export default function AdminRolesPermissions() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(PERMISSIONS).map(([roleKey, roleData]) => {
                 const Icon = roleData.icon;
-                const userCount = users.filter((u) => u.role === roleKey).length;
+                const userCount = roleCountsData?.[roleKey] || 0;
 
                 return (
                   <Card
@@ -402,7 +514,7 @@ export default function AdminRolesPermissions() {
                 </div>
 
                 <div className="mt-4 text-sm text-gray-600">
-                  Showing {filteredUsers.length} of {users.length} users
+                  Showing {users.length} of {total} users
                 </div>
               </CardContent>
             </Card>
@@ -425,14 +537,14 @@ export default function AdminRolesPermissions() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.length === 0 ? (
+                    {users.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                           No users found matching your filters
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredUsers.map((userData) => (
+                      users.map((userData) => (
                         <TableRow key={userData.id} data-testid={`row-user-${userData.id}`}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -535,6 +647,10 @@ export default function AdminRolesPermissions() {
                     )}
                   </TableBody>
                 </Table>
+
+                <div className="mt-6 flex justify-center">
+                  {renderPagination()}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
