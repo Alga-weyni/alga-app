@@ -1002,30 +1002,30 @@ export default function AdminDashboard() {
                             </Button>
                             
                             {property.status === 'pending' && (
-                              <>
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => 
-                                    verifyPropertyMutation.mutate({ 
-                                      propertyId: property.id, 
-                                      status: 'active' 
-                                    })
-                                  }
-                                  data-testid={`button-approve-property-${property.id}`}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                                
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => setSelectedProperty(property)}
-                                  data-testid={`button-reject-property-${property.id}`}
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => 
+                                  verifyPropertyMutation.mutate({ 
+                                    propertyId: property.id, 
+                                    status: 'active' 
+                                  })
+                                }
+                                data-testid={`button-approve-property-${property.id}`}
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                            )}
+                            
+                            {(property.status === 'pending' || property.status === 'active') && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setSelectedProperty(property)}
+                                data-testid={`button-reject-property-${property.id}`}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
                             )}
                           </div>
                         </TableCell>
@@ -1104,28 +1104,28 @@ export default function AdminDashboard() {
                             </Button>
                             
                             {property.status === 'pending' && (
-                              <>
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => 
-                                    verifyPropertyMutation.mutate({ 
-                                      propertyId: property.id, 
-                                      status: 'active' 
-                                    })
-                                  }
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                                
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => setSelectedProperty(property)}
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => 
+                                  verifyPropertyMutation.mutate({ 
+                                    propertyId: property.id, 
+                                    status: 'active' 
+                                  })
+                                }
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                            )}
+                            
+                            {(property.status === 'pending' || property.status === 'active') && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setSelectedProperty(property)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
                             )}
                           </div>
                         </TableCell>
@@ -1206,7 +1206,6 @@ export default function AdminDashboard() {
                           </Button>
                           
                           {doc.status === 'pending' && (
-                            <>
                               <Button
                                 variant="default"
                                 size="sm"
@@ -1219,7 +1218,9 @@ export default function AdminDashboard() {
                               >
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
-                              
+                            )}
+                            
+                            {(doc.status === 'pending' || doc.status === 'approved') && (
                               <Button
                                 variant="destructive"
                                 size="sm"
@@ -1227,8 +1228,7 @@ export default function AdminDashboard() {
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
-                            </>
-                          )}
+                            )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1915,14 +1915,14 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* Actions for Pending Agents */}
-              {selectedAgent.status === 'pending' && (
+              {/* Actions for Pending and Approved Agents */}
+              {(selectedAgent.status === 'pending' || selectedAgent.status === 'approved') && (
                 <div className="space-y-4 border-t pt-4">
                   <div>
                     <Label htmlFor="agent-rejection-reason">Rejection Reason (Optional)</Label>
                     <Textarea
                       id="agent-rejection-reason"
-                      placeholder="Provide a reason if rejecting this agent application..."
+                      placeholder="Provide a reason if rejecting this agent..."
                       className="mt-2"
                       data-testid="textarea-agent-rejection-reason"
                     />
@@ -1952,19 +1952,21 @@ export default function AdminDashboard() {
                       <XCircle className="h-4 w-4 mr-2" />
                       {verifyAgentMutation.isPending ? "Rejecting..." : "Reject"}
                     </Button>
-                    <Button
-                      onClick={() => {
-                        verifyAgentMutation.mutate({
-                          agentId: selectedAgent.id,
-                          status: 'approved'
-                        });
-                      }}
-                      disabled={verifyAgentMutation.isPending}
-                      data-testid="button-approve-agent"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      {verifyAgentMutation.isPending ? "Approving..." : "Approve Agent"}
-                    </Button>
+                    {selectedAgent.status === 'pending' && (
+                      <Button
+                        onClick={() => {
+                          verifyAgentMutation.mutate({
+                            agentId: selectedAgent.id,
+                            status: 'approved'
+                          });
+                        }}
+                        disabled={verifyAgentMutation.isPending}
+                        data-testid="button-approve-agent"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        {verifyAgentMutation.isPending ? "Approving..." : "Approve Agent"}
+                      </Button>
+                    )}
                   </DialogFooter>
                 </div>
               )}
