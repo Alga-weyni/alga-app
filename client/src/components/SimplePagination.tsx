@@ -15,42 +15,68 @@ export function SimplePagination({ page, limit, total, onPageChange }: SimplePag
 
   return (
     <div 
-      className="sticky bottom-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#d4a574] to-[#b8860b] border-t-4 border-[#8B4513] rounded-t-xl shadow-2xl mt-8"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 99999,
+        backgroundColor: '#ff0000',
+        padding: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.5)'
+      }}
       data-testid="pagination-container"
     >
-      <div className="flex items-center gap-4">
-        <span className="text-white font-bold text-base" data-testid="text-page-indicator">
-          Page {page} of {totalPages}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }} data-testid="text-page-indicator">
+          PAGINATION: Page {page} of {totalPages}
         </span>
-        <span className="text-white/80 text-sm hidden sm:inline" data-testid="text-rows-per-page">
+        <span style={{ color: 'yellow', fontSize: '14px' }} data-testid="text-rows-per-page">
           ({limit} per page)
         </span>
       </div>
-      <div className="flex items-center gap-4">
-        <span className="text-white font-medium text-sm hidden sm:inline" data-testid="text-page-info">
-          Showing <span className="font-bold">{startItem}-{endItem}</span> of <span className="font-bold">{total}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }} data-testid="text-page-info">
+          Showing {startItem}-{endItem} of {total}
         </span>
-        <div className="flex gap-2">
+        <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             variant="outline"
             size="sm"
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            className="h-10 px-4 bg-white text-[#8B4513] border-2 border-white hover:bg-[#f5e6d3] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={{ 
+              height: '44px', 
+              padding: '0 20px', 
+              backgroundColor: 'white', 
+              color: 'black',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}
             data-testid="button-pagination-prev"
           >
             <ChevronLeft className="h-5 w-5 mr-1" />
-            Prev
+            PREV
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="h-10 px-4 bg-[#2d1405] text-white border-2 border-[#2d1405] hover:bg-[#4a2409] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            style={{ 
+              height: '44px', 
+              padding: '0 20px', 
+              backgroundColor: 'black', 
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}
             data-testid="button-pagination-next"
           >
-            Next
+            NEXT
             <ChevronRight className="h-5 w-5 ml-1" />
           </Button>
         </div>
