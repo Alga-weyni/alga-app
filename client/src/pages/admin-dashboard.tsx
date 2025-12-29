@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type User as UserType, type Property } from "@shared/schema";
 import { BackButton } from "@/components/back-button";
 import Header from "@/components/header";
+import { SimplePagination } from "@/components/SimplePagination";
 import { 
   Users, 
   User,
@@ -140,6 +141,13 @@ export default function AdminDashboard() {
   const [revenueDetailsOpen, setRevenueDetailsOpen] = useState(false);
   const { toast } = useToast();
   
+  // Pagination state for each tab
+  const [usersPage, setUsersPage] = useState(1);
+  const [propertiesPage, setPropertiesPage] = useState(1);
+  const [documentsPage, setDocumentsPage] = useState(1);
+  const [agentsPage, setAgentsPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+  
   // Get active tab from URL search params, default to 'overview'
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'overview';
@@ -197,6 +205,23 @@ export default function AdminDashboard() {
     queryKey: ['/api/service-providers'],
   });
 
+  // Paginated data slices
+  const paginatedUsers = useMemo(() => {
+    const start = (usersPage - 1) * ITEMS_PER_PAGE;
+    return users.slice(start, start + ITEMS_PER_PAGE);
+  }, [users, usersPage]);
+
+  const paginatedProperties = useMemo(() => {
+    const start = (propertiesPage - 1) * ITEMS_PER_PAGE;
+    return properties.slice(start, start + ITEMS_PER_PAGE);
+  }, [properties, propertiesPage]);
+
+  const paginatedDocuments = useMemo(() => {
+    const start = (documentsPage - 1) * ITEMS_PER_PAGE;
+    return documents.slice(start, start + ITEMS_PER_PAGE);
+  }, [documents, documentsPage]);
+
+  
   // Fetch system statistics
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
@@ -368,6 +393,12 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/agents'],
   });
   const agents: Agent[] = Array.isArray(agentsData) ? agentsData : (agentsData?.agents || []);
+
+  // Paginated agents
+  const paginatedAgents = useMemo(() => {
+    const start = (agentsPage - 1) * ITEMS_PER_PAGE;
+    return agents.slice(start, start + ITEMS_PER_PAGE);
+  }, [agents, agentsPage]);
 
   // Verify agent mutation
   const verifyAgentMutation = useMutation({
@@ -808,7 +839,7 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user: any) => (
+                  {paginatedUsers.map((user: any) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -884,6 +915,12 @@ export default function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+              <SimplePagination
+                page={usersPage}
+                limit={ITEMS_PER_PAGE}
+                total={users.length}
+                onPageChange={setUsersPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -1104,6 +1141,12 @@ export default function AdminDashboard() {
                   )}
                 </TableBody>
               </Table>
+              <SimplePagination
+                page={propertiesPage}
+                limit={ITEMS_PER_PAGE}
+                total={properties.length}
+                onPageChange={setPropertiesPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -1129,7 +1172,7 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {documents.map((doc: any) => (
+                  {paginatedDocuments.map((doc: any) => (
                     <TableRow key={doc.id}>
                       <TableCell>
                         <div>
@@ -1191,6 +1234,12 @@ export default function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+              <SimplePagination
+                page={documentsPage}
+                limit={ITEMS_PER_PAGE}
+                total={documents.length}
+                onPageChange={setDocumentsPage}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -1239,7 +1288,7 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {agents.map((agent) => (
+                        {paginatedAgents.map((agent) => (
                           <TableRow key={agent.id}>
                             <TableCell>
                               <div>
@@ -1284,6 +1333,12 @@ export default function AdminDashboard() {
                         ))}
                       </TableBody>
                     </Table>
+                    <SimplePagination
+                      page={agentsPage}
+                      limit={ITEMS_PER_PAGE}
+                      total={agents.length}
+                      onPageChange={setAgentsPage}
+                    />
                   </div>
                 </div>
               )}
