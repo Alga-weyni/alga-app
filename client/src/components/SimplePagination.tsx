@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SimplePaginationProps {
   page: number;
@@ -21,64 +20,73 @@ export function SimplePagination({ page, limit, total, onPageChange }: SimplePag
         left: 0,
         right: 0,
         zIndex: 99999,
-        backgroundColor: '#ff0000',
-        padding: '20px',
+        background: 'linear-gradient(to right, #c41e3a, #8b0000)',
+        padding: '12px 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.5)'
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.3)',
+        borderTop: '3px solid #ffd700'
       }}
       data-testid="pagination-container"
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }} data-testid="text-page-indicator">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }} data-testid="text-page-indicator">
           PAGINATION: Page {page} of {totalPages}
         </span>
-        <span style={{ color: 'yellow', fontSize: '14px' }} data-testid="text-rows-per-page">
+        <span style={{ color: '#ffd700', fontSize: '14px' }} data-testid="text-rows-per-page">
           ({limit} per page)
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }} data-testid="text-page-info">
+        <span style={{ color: 'white', fontSize: '14px' }} data-testid="text-page-info">
           Showing {startItem}-{endItem} of {total}
         </span>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
             style={{ 
-              height: '44px', 
-              padding: '0 20px', 
-              backgroundColor: 'white', 
-              color: 'black',
+              height: '40px', 
+              padding: '0 16px', 
+              backgroundColor: page === 1 ? '#666' : '#ffd700', 
+              color: page === 1 ? '#999' : '#000',
               fontWeight: 'bold',
-              fontSize: '16px'
+              fontSize: '14px',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: page === 1 ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
             }}
             data-testid="button-pagination-prev"
           >
-            <ChevronLeft className="h-5 w-5 mr-1" />
+            <ChevronLeft style={{ width: '18px', height: '18px' }} />
             PREV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
+          </button>
+          <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
             style={{ 
-              height: '44px', 
-              padding: '0 20px', 
-              backgroundColor: 'black', 
-              color: 'white',
+              height: '40px', 
+              padding: '0 16px', 
+              backgroundColor: page >= totalPages ? '#666' : '#228b22', 
+              color: page >= totalPages ? '#999' : 'white',
               fontWeight: 'bold',
-              fontSize: '16px'
+              fontSize: '14px',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
             }}
             data-testid="button-pagination-next"
           >
             NEXT
-            <ChevronRight className="h-5 w-5 ml-1" />
-          </Button>
+            <ChevronRight style={{ width: '18px', height: '18px' }} />
+          </button>
         </div>
       </div>
     </div>
