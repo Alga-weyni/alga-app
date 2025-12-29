@@ -599,13 +599,37 @@ export default function AdminRolesPermissions() {
         </Tabs>
       </div>
 
-      {/* Pagination - Fixed at bottom, outside all containers */}
-      <SimplePagination
-        page={page}
-        limit={limit}
-        total={total}
-        onPageChange={setPage}
-      />
+      {/* TEST: Direct inline pagination to diagnose mounting */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 99999,
+          backgroundColor: '#ff0000',
+          padding: '20px',
+          textAlign: 'center',
+          color: 'white',
+          fontSize: '20px',
+          fontWeight: 'bold',
+        }}
+        data-testid="test-pagination-bar"
+      >
+        🔴 PAGINATION TEST - Page {page} of {Math.ceil(total / limit) || 1} - Total: {total} users 🔴
+        <button 
+          onClick={() => setPage(Math.max(1, page - 1))}
+          style={{ marginLeft: '20px', padding: '10px 20px', fontSize: '16px' }}
+        >
+          ← PREV
+        </button>
+        <button 
+          onClick={() => setPage(page + 1)}
+          style={{ marginLeft: '10px', padding: '10px 20px', fontSize: '16px' }}
+        >
+          NEXT →
+        </button>
+      </div>
 
       <Footer />
     </div>
