@@ -1780,6 +1780,61 @@ export default function AdminDashboard() {
         </Dialog>
       )}
 
+      {/* Property Rejection Dialog */}
+      {selectedProperty && (
+        <Dialog open={!!selectedProperty} onOpenChange={() => setSelectedProperty(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Home className="h-5 w-5 mr-2 text-eth-brown" />
+                Reject Property
+              </DialogTitle>
+              <DialogDescription>
+                Provide a reason for rejecting "{selectedProperty.title}"
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="property-rejection-reason">Rejection Reason</Label>
+                <Textarea
+                  id="property-rejection-reason"
+                  placeholder="Enter the reason for rejecting this property..."
+                  className="mt-2"
+                  data-testid="textarea-property-rejection-reason"
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedProperty(null)}
+                  data-testid="button-cancel-property-reject"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    const reason = (document.getElementById('property-rejection-reason') as HTMLTextAreaElement)?.value;
+                    verifyPropertyMutation.mutate({
+                      propertyId: selectedProperty.id,
+                      status: 'rejected',
+                      reason
+                    });
+                    setSelectedProperty(null);
+                  }}
+                  data-testid="button-confirm-property-reject"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Reject Property
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Agent Approval Dialog */}
       {selectedAgent && (
         <Dialog open={!!selectedAgent} onOpenChange={() => setSelectedAgent(null)}>
