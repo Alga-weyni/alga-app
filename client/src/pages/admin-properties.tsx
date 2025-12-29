@@ -517,17 +517,19 @@ export default function AdminProperties() {
             </CardContent>
           </Card>
 
-          <SimplePagination
-            page={currentPage}
-            limit={ITEMS_PER_PAGE}
-            total={data?.total || 0}
-            onPageChange={setCurrentPage}
-          />
-
-          <div className="text-sm text-gray-500 text-center">
-            Showing {properties.length} of {total} properties
-          </div>
         </Tabs>
+
+        {/* Pagination - Always visible */}
+        <SimplePagination
+          page={currentPage}
+          limit={ITEMS_PER_PAGE}
+          total={data?.total || 0}
+          onPageChange={setCurrentPage}
+        />
+        
+        <div className="text-sm text-gray-500 text-center mt-2">
+          Showing {properties.length} of {total} properties
+        </div>
 
         <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-property-details">

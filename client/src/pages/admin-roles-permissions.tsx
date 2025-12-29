@@ -592,16 +592,16 @@ export default function AdminRolesPermissions() {
                   </TableBody>
                 </Table>
 
-                <div className="mt-6 flex justify-center">
-                  <SimplePagination
-                    page={page}
-                    limit={limit}
-                    total={total}
-                    onPageChange={setPage}
-                  />
-                </div>
               </CardContent>
             </Card>
+
+            {/* Pagination - Always visible */}
+            <SimplePagination
+              page={page}
+              limit={limit}
+              total={total}
+              onPageChange={setPage}
+            />
           </TabsContent>
         </Tabs>
       </div>

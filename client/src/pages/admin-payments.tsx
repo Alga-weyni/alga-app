@@ -612,16 +612,18 @@ export default function AdminPayments() {
                     ))}
                   </TableBody>
                 </Table>
-                <SimplePagination
-                  page={page}
-                  limit={limit}
-                  total={transactionsData?.total || 0}
-                  onPageChange={setPage}
-                />
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination - Always visible */}
+        <SimplePagination
+          page={page}
+          limit={limit}
+          total={transactionsData?.total || 0}
+          onPageChange={setPage}
+        />
 
         {/* Transaction Details Dialog */}
         <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>

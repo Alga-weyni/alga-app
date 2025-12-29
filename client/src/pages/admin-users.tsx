@@ -466,16 +466,16 @@ export default function AdminUsers() {
               </div>
             )}
 
-            <div className="mt-6 flex justify-center">
-              <SimplePagination
-                page={currentPage}
-                limit={ITEMS_PER_PAGE}
-                total={data?.total || 0}
-                onPageChange={setCurrentPage}
-              />
-            </div>
           </CardContent>
         </Card>
+
+        {/* Pagination - Always visible */}
+        <SimplePagination
+          page={currentPage}
+          limit={ITEMS_PER_PAGE}
+          total={data?.total || 0}
+          onPageChange={setCurrentPage}
+        />
       </main>
 
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>

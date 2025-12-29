@@ -489,14 +489,16 @@ export default function AdminAgents() {
                 </TableBody>
               </Table>
             </div>
-            <SimplePagination
-              page={page}
-              limit={limit}
-              total={total}
-              onPageChange={setPage}
-            />
           </CardContent>
         </Card>
+
+        {/* Pagination - Always visible */}
+        <SimplePagination
+          page={page}
+          limit={limit}
+          total={total}
+          onPageChange={setPage}
+        />
       </div>
 
       {/* Verification Dialog */}
