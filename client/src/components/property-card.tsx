@@ -54,7 +54,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
     e.preventDefault();
     e.stopPropagation(); // Prevent card click
     if (!isAuthenticated) {
-      window.location.href = getApiUrl("/api/login");
+      // Do nothing for non-signed-in users
       return;
     }
     favoriteMutation.mutate();
