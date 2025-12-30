@@ -22,6 +22,7 @@ import {
   dashboardAccessLogs,
   integrityAlerts,
   userOnboarding,
+  notifications,
   type User,
   type UpsertUser,
   type Property,
@@ -63,6 +64,8 @@ import {
   type DashboardAccessLog,
   type InsertDashboardAccessLog,
   type IntegrityAlert,
+  type Notification,
+  type InsertNotification,
 } from '../shared/schema.js';
 import { db } from './db.js';
 import { eq, and, desc, asc, sql, ilike, gte, lte, inArray } from "drizzle-orm";
@@ -337,6 +340,13 @@ export interface IStorage {
   getOnboardingStatus(userId: string): Promise<any | undefined>;
   trackOnboardingStep(userId: string, step: string, value: boolean): Promise<void>;
   completeOnboarding(userId: string): Promise<void>;
+  
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  markNotificationAsRead(id: number, userId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2603,6 +2613,43 @@ export class DatabaseStorage implements IStorage {
         stepComplete: true,
       })
       .where(eq(userOnboarding.userId, userId));
+  }
+  
+  // Notification Operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [created] = await db.insert(notifications).values(notification).returning();
+    return created;
+  }
+  
+  async getUserNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+  }
+  
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+    return Number(result[0]?.count || 0);
+  }
+  
+  async markNotificationAsRead(id: number, userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+  }
+  
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
   }
 }
 
