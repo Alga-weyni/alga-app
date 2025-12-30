@@ -95,7 +95,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer" 
+      className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer h-full flex flex-col" 
       data-testid={`card-property-${property.id}`}
       onClick={handleCardClick}
     >
@@ -128,7 +128,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
           </Button>
         </div>
 
-        <CardContent className="p-2.5 sm:p-5">
+        <CardContent className="p-2.5 sm:p-5 flex-1 flex flex-col">
           <div className="flex items-center justify-between mb-1.5 sm:mb-2">
             <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2">
               {getTypeLabel(property.type)}
@@ -189,7 +189,7 @@ function PropertyCard({ property, isFavorite = false }: PropertyCardProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-auto">
             <div>
               <span className="text-sm sm:text-lg font-bold text-neutral-dark" data-testid={`text-price-${property.id}`}>
                 {formatPrice(property.pricePerNight)}
