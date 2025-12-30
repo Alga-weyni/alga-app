@@ -148,7 +148,7 @@ export default function PropertyDetails() {
   // Handle favorite click
   const handleFavoriteClick = () => {
     if (!isAuthenticated) {
-      window.location.href = getApiUrl("/api/login");
+      // Do nothing for unauthenticated users
       return;
     }
     favoriteMutation.mutate();
