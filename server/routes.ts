@@ -4234,6 +4234,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const booking = await storage.createBooking(bookingData);
       
+      // Create notification for host
+      const property = await storage.getProperty(propertyId);
+      if (property) {
+        const guest = await storage.getUser(userId);
+        const guestName = guest?.firstName ? `${guest.firstName}` : 'A guest';
+        await storage.createNotification({
+          userId: property.hostId,
+          type: 'booking_new',
+          title: 'New Booking Request',
+          message: `${guestName} has booked "${property.title}" for ${pricing.nights} night${pricing.nights > 1 ? 's' : ''} (ETB ${pricing.total.toLocaleString()})`,
+          relatedId: booking.id,
+          relatedType: 'booking',
+          isRead: false,
+        });
+      }
+      
       // Log security event
       await logSecurityEvent(userId, 'BOOKING_CREATED', { 
         bookingId: booking.id, 
@@ -4276,6 +4292,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch bookings" });
     }
   });
+
+  // ==================== NOTIFICATION ROUTES ====================
+  // Get user notifications
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const notifications = await storage.getUserNotifications(userId, limit);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Get unread notification count
+  app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Mark all notifications as read
+  app.patch('/api/notifications/read-all', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+  // ==================== END NOTIFICATION ROUTES ====================
 
   // ==================== INSA FIX: SECURE BOOKING REFERENCE ENDPOINTS ====================
   // These endpoints use the unpredictable booking reference instead of sequential IDs
