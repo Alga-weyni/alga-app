@@ -24,6 +24,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth-dialog-passwordless";
 import { isMobileApp } from "@/utils/platform";
+import NotificationBell from "@/components/notification-bell";
 
 interface HeaderProps {
   hideNavigation?: boolean;
@@ -281,7 +282,10 @@ export default function Header({ hideNavigation = false }: HeaderProps) {
           )}
 
           {/* User Menu - Desktop */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-2">
+            {isAuthenticated && (user?.role === 'host' || user?.role === 'admin' || user?.role === 'operator') && (
+              <NotificationBell />
+            )}
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
