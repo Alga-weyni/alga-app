@@ -295,6 +295,16 @@ export default function PropertyDetails() {
       return;
     }
 
+    // Validate phone number is required and properly formatted
+    if (!paymentPhone || paymentPhone.length < 10) {
+      toast({
+        title: "Phone number required",
+        description: "Please enter a valid phone number with 251 prefix (e.g., 251911234567)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const days = Math.ceil(
       (new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()) / 
       (1000 * 60 * 60 * 24)
@@ -713,7 +723,7 @@ export default function PropertyDetails() {
                   {/* Phone number for payment */}
                   <div className="space-y-2">
                     <label className="text-xs sm:text-sm font-medium text-gray-700">
-                      Phone Number (for payment)
+                      Phone Number (for payment) <span className="text-eth-red">*</span>
                     </label>
                     <Input
                       type="tel"
