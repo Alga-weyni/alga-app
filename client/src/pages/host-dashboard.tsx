@@ -605,6 +605,28 @@ export default function HostDashboard() {
           </TabsList>
 
           <TabsContent value="properties" className="space-y-6">
+            {/* Property Status Summary */}
+            {properties.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-700">{properties.filter(p => p.status === 'active').length}</p>
+                  <p className="text-xs text-green-600">Approved</p>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-yellow-700">{properties.filter(p => p.status === 'pending').length}</p>
+                  <p className="text-xs text-yellow-600">Pending</p>
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-red-700">{properties.filter(p => p.status === 'rejected').length}</p>
+                  <p className="text-xs text-red-600">Rejected</p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-blue-700">{allBookings.filter((b: Booking) => b.status === 'confirmed').length}</p>
+                  <p className="text-xs text-blue-600">Booked</p>
+                </div>
+              </div>
+            )}
+            
             {propertiesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -638,8 +660,22 @@ export default function HostDashboard() {
                     />
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant={property.isActive ? "default" : "secondary"}>
-                          {property.isActive ? "Active" : "Inactive"}
+                        <Badge 
+                          variant="outline"
+                          className={
+                            property.status === 'active' 
+                              ? 'bg-green-100 text-green-800 border-green-300' 
+                              : property.status === 'pending' 
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                                : property.status === 'rejected'
+                                  ? 'bg-red-100 text-red-800 border-red-300'
+                                  : 'bg-gray-100 text-gray-800 border-gray-300'
+                          }
+                        >
+                          {property.status === 'active' ? 'Approved' : 
+                           property.status === 'pending' ? 'Pending Review' :
+                           property.status === 'rejected' ? 'Rejected' : 
+                           property.status?.charAt(0).toUpperCase() + property.status?.slice(1)}
                         </Badge>
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 fill-eth-yellow text-eth-yellow" />
