@@ -4301,7 +4301,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 50;
       const notifications = await storage.getUserNotifications(userId, limit);
       res.json(notifications);
-    } catch (error) {
+    } catch (error: any) {
+      // Gracefully handle missing table (e.g., production database not migrated yet)
+      if (error?.message?.includes('does not exist') || error?.cause?.message?.includes('does not exist')) {
+        console.log("Notifications table not found - returning empty array");
+        return res.json([]);
+      }
       console.error("Error fetching notifications:", error);
       res.status(500).json({ message: "Failed to fetch notifications" });
     }
@@ -4313,7 +4318,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const count = await storage.getUnreadNotificationCount(userId);
       res.json({ count });
-    } catch (error) {
+    } catch (error: any) {
+      // Gracefully handle missing table
+      if (error?.message?.includes('does not exist') || error?.cause?.message?.includes('does not exist')) {
+        console.log("Notifications table not found - returning count 0");
+        return res.json({ count: 0 });
+      }
       console.error("Error fetching unread count:", error);
       res.status(500).json({ message: "Failed to fetch unread count" });
     }
@@ -4326,7 +4336,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const notificationId = parseInt(req.params.id);
       await storage.markNotificationAsRead(notificationId, userId);
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
+      // Gracefully handle missing table
+      if (error?.message?.includes('does not exist') || error?.cause?.message?.includes('does not exist')) {
+        return res.json({ success: true });
+      }
       console.error("Error marking notification as read:", error);
       res.status(500).json({ message: "Failed to mark notification as read" });
     }
@@ -4338,7 +4352,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       await storage.markAllNotificationsAsRead(userId);
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
+      // Gracefully handle missing table
+      if (error?.message?.includes('does not exist') || error?.cause?.message?.includes('does not exist')) {
+        return res.json({ success: true });
+      }
       console.error("Error marking all notifications as read:", error);
       res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
