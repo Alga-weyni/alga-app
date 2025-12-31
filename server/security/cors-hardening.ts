@@ -227,7 +227,15 @@ function shouldAllowCredentials(path: string): boolean {
     '/api/upload',
     '/api/objects',
     // Settlement endpoints require authentication
-    '/api/settlement'
+    '/api/settlement',
+    // Host dashboard endpoints require authentication
+    '/api/host',
+    // Notifications require authentication
+    '/api/notifications',
+    // Favorites require authentication
+    '/api/favorites',
+    // Reviews require authentication for posting
+    '/api/reviews'
   ];
   
   return credentialPaths.some(p => path.startsWith(p));
