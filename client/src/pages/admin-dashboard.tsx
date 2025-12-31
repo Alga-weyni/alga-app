@@ -188,24 +188,41 @@ export default function AdminDashboard() {
   const { data: usersData, isLoading: usersLoading } = useQuery<any>({
     queryKey: ['/api/admin/users?limit=1000'],
   });
-  const users: UserType[] = Array.isArray(usersData) ? usersData : (usersData?.users || []);
+  const users: UserType[] = useMemo(() => {
+    if (Array.isArray(usersData)) return usersData;
+    if (usersData?.users && Array.isArray(usersData.users)) return usersData.users;
+    return [];
+  }, [usersData]);
 
   // Fetch properties for verification (handles both paginated and array response)
   // Fetch all properties by setting a high limit for client-side pagination
   const { data: propertiesData, isLoading: propertiesLoading } = useQuery<any>({
     queryKey: ['/api/admin/properties?limit=1000'],
   });
-  const properties: Property[] = Array.isArray(propertiesData) ? propertiesData : (propertiesData?.properties || []);
+  const properties: Property[] = useMemo(() => {
+    if (Array.isArray(propertiesData)) return propertiesData;
+    if (propertiesData?.properties && Array.isArray(propertiesData.properties)) return propertiesData.properties;
+    return [];
+  }, [propertiesData]);
 
   // Fetch verification documents
-  const { data: documents = [], isLoading: documentsLoading } = useQuery<VerificationDocument[]>({
+  const { data: documentsData, isLoading: documentsLoading } = useQuery<any>({
     queryKey: ['/api/admin/verification-documents'],
   });
+  const documents: VerificationDocument[] = useMemo(() => {
+    if (Array.isArray(documentsData)) return documentsData;
+    return [];
+  }, [documentsData]);
 
   // Fetch service providers
-  const { data: serviceProviders = [] } = useQuery<any[]>({
+  const { data: serviceProvidersData } = useQuery<any>({
     queryKey: ['/api/service-providers'],
   });
+  const serviceProviders: any[] = useMemo(() => {
+    if (Array.isArray(serviceProvidersData)) return serviceProvidersData;
+    if (serviceProvidersData?.providers && Array.isArray(serviceProvidersData.providers)) return serviceProvidersData.providers;
+    return [];
+  }, [serviceProvidersData]);
 
   // Paginated data slices
   const paginatedUsers = useMemo(() => {
@@ -256,12 +273,17 @@ export default function AdminDashboard() {
     };
   }
 
-  const { data: allBookings = [], isError: bookingsError, isLoading: bookingsLoading, refetch: refetchBookings } = useQuery<BookingData[]>({
+  const { data: bookingsData, isError: bookingsError, isLoading: bookingsLoading, refetch: refetchBookings } = useQuery<any>({
     queryKey: ['/api/admin/bookings'],
     enabled: revenueDetailsOpen,
     retry: 2,
     staleTime: 0,
   });
+  const allBookings: BookingData[] = useMemo(() => {
+    if (Array.isArray(bookingsData)) return bookingsData;
+    if (bookingsData?.bookings && Array.isArray(bookingsData.bookings)) return bookingsData.bookings;
+    return [];
+  }, [bookingsData]);
 
   // Revenue dialog search and filter states
   const [revenueSearch, setRevenueSearch] = useState('');
@@ -272,7 +294,7 @@ export default function AdminDashboard() {
   const revenuePerPage = 10;
 
   // Filter and paginate bookings
-  const filteredBookings = allBookings.filter((booking) => {
+  const filteredBookings = (allBookings || []).filter((booking) => {
     const matchesSearch = revenueSearch === '' || 
       booking.id.toString().includes(revenueSearch) ||
       booking.user?.firstName?.toLowerCase().includes(revenueSearch.toLowerCase()) ||
@@ -394,7 +416,11 @@ export default function AdminDashboard() {
   const { data: agentsData, isLoading: agentsLoading } = useQuery<any>({
     queryKey: ['/api/admin/agents'],
   });
-  const agents: Agent[] = Array.isArray(agentsData) ? agentsData : (agentsData?.agents || []);
+  const agents: Agent[] = useMemo(() => {
+    if (Array.isArray(agentsData)) return agentsData;
+    if (agentsData?.agents && Array.isArray(agentsData.agents)) return agentsData.agents;
+    return [];
+  }, [agentsData]);
 
   // Paginated agents
   const paginatedAgents = useMemo(() => {
