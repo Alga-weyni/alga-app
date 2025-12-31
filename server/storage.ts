@@ -730,7 +730,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(properties)
-      .where(and(eq(properties.hostId, hostId), eq(properties.isActive, true)))
+      .where(eq(properties.hostId, hostId))
       .orderBy(desc(properties.createdAt));
   }
 
