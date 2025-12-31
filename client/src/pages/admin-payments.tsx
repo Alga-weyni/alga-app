@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -160,13 +160,18 @@ export default function AdminPayments() {
   });
 
   // Fetch all bookings for admin
-  const { data: allBookings = [], isLoading: bookingsLoading } = useQuery<BookingData[]>({
+  const { data: bookingsData, isLoading: bookingsLoading } = useQuery<any>({
     queryKey: ['/api/admin/bookings'],
   });
+  const allBookings: BookingData[] = useMemo(() => {
+    if (Array.isArray(bookingsData)) return bookingsData;
+    if (bookingsData?.bookings && Array.isArray(bookingsData.bookings)) return bookingsData.bookings;
+    return [];
+  }, [bookingsData]);
 
   // Filter for pending payment bookings
-  const pendingPaymentBookings = allBookings.filter(b => b.paymentStatus === 'pending');
-  const paidBookings = allBookings.filter(b => b.paymentStatus === 'paid');
+  const pendingPaymentBookings = (allBookings || []).filter(b => b.paymentStatus === 'pending');
+  const paidBookings = (allBookings || []).filter(b => b.paymentStatus === 'paid');
   
   // Calculate booking-based stats (in addition to transaction stats)
   const bookingStats = {

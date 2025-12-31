@@ -276,16 +276,16 @@ export default function AdminProperties() {
     setCurrentPage(1);
   };
 
-  const properties = data?.properties || [];
+  const properties = Array.isArray(data?.properties) ? data.properties : [];
   const totalPages = data?.totalPages || 1;
   const total = data?.total || 0;
-  const cities = allPropertiesData?.cities || [];
+  const cities = Array.isArray(allPropertiesData?.cities) ? allPropertiesData.cities : [];
 
   const stats = {
     total: total,
-    pending: properties.filter(p => p.status === "pending").length,
-    approved: properties.filter(p => p.status === "active" || p.status === "approved").length,
-    delala: properties.filter(p => p.referralCode).length,
+    pending: (properties || []).filter(p => p.status === "pending").length,
+    approved: (properties || []).filter(p => p.status === "active" || p.status === "approved").length,
+    delala: (properties || []).filter(p => p.referralCode).length,
   };
 
 

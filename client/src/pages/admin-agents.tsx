@@ -193,20 +193,20 @@ export default function AdminAgents() {
     );
   };
 
-  const agents = data?.agents || [];
+  const agents = Array.isArray(data?.agents) ? data.agents : [];
   const total = data?.total || 0;
   const totalPages = data?.totalPages || 1;
   
   const stats = {
     total: total,
-    verified: agents.filter(a => a.status === "verified").length,
-    pending: agents.filter(a => a.status === "pending").length,
-    rejected: agents.filter(a => a.status === "rejected").length,
-    totalEarnings: agents.reduce((sum, a) => sum + parseFloat(a.totalEarnings || "0"), 0),
-    totalProperties: agents.reduce((sum, a) => sum + (a.totalProperties || 0), 0),
+    verified: (agents || []).filter(a => a.status === "verified").length,
+    pending: (agents || []).filter(a => a.status === "pending").length,
+    rejected: (agents || []).filter(a => a.status === "rejected").length,
+    totalEarnings: (agents || []).reduce((sum, a) => sum + parseFloat(a.totalEarnings || "0"), 0),
+    totalProperties: (agents || []).reduce((sum, a) => sum + (a.totalProperties || 0), 0),
   };
 
-  const cities = ["all", ...Array.from(new Set(agents.map(a => a.city)))];
+  const cities = ["all", ...Array.from(new Set((agents || []).map(a => a.city)))];
 
 
   if (isLoading) {

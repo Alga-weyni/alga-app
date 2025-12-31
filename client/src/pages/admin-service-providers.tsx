@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -56,7 +56,7 @@ export default function AdminServiceProviders() {
   };
 
   // Fetch all service providers (including inactive for admin)
-  const { data: allProviders = [], isLoading } = useQuery<ServiceProvider[]>({
+  const { data: providersData, isLoading } = useQuery<any>({
     queryKey: ['/api/service-providers', 'includeAll'],
     queryFn: async () => {
       const response = await fetch('/api/service-providers?includeAll=true', {
@@ -66,10 +66,15 @@ export default function AdminServiceProviders() {
       return response.json();
     },
   });
+  const allProviders: ServiceProvider[] = useMemo(() => {
+    if (Array.isArray(providersData)) return providersData;
+    if (providersData?.providers && Array.isArray(providersData.providers)) return providersData.providers;
+    return [];
+  }, [providersData]);
 
-  const pendingProviders = allProviders.filter(p => p.verificationStatus === 'pending');
-  const verifiedProviders = allProviders.filter(p => p.verificationStatus === 'verified');
-  const rejectedProviders = allProviders.filter(p => p.verificationStatus === 'rejected');
+  const pendingProviders = (allProviders || []).filter(p => p.verificationStatus === 'pending');
+  const verifiedProviders = (allProviders || []).filter(p => p.verificationStatus === 'verified');
+  const rejectedProviders = (allProviders || []).filter(p => p.verificationStatus === 'rejected');
 
   // Approve mutation
   const approveMutation = useMutation({

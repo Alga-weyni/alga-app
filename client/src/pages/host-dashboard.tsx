@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -179,14 +179,24 @@ export default function HostDashboard() {
   });
 
   // Fetch host properties
-  const { data: properties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
+  const { data: propertiesData, isLoading: propertiesLoading } = useQuery<any>({
     queryKey: ["/api/host/properties"],
   });
+  const properties: Property[] = useMemo(() => {
+    if (Array.isArray(propertiesData)) return propertiesData;
+    if (propertiesData?.properties && Array.isArray(propertiesData.properties)) return propertiesData.properties;
+    return [];
+  }, [propertiesData]);
 
   // Fetch all bookings for host properties
-  const { data: allBookings = [], isLoading: bookingsLoading } = useQuery<Booking[]>({
+  const { data: bookingsData, isLoading: bookingsLoading } = useQuery<any>({
     queryKey: ["/api/bookings"],
   });
+  const allBookings: Booking[] = useMemo(() => {
+    if (Array.isArray(bookingsData)) return bookingsData;
+    if (bookingsData?.bookings && Array.isArray(bookingsData.bookings)) return bookingsData.bookings;
+    return [];
+  }, [bookingsData]);
 
   // Fetch host dashboard stats
   const { data: hostStats, isLoading: statsLoading } = useQuery<{
