@@ -3718,7 +3718,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/host/properties', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log(`[HOST PROPERTIES] Fetching for user: ${userId}, role: ${req.user.role}`);
       const properties = await storage.getPropertiesByHost(userId);
+      console.log(`[HOST PROPERTIES] Found ${properties.length} properties for user ${userId}`);
       res.json(properties);
     } catch (error) {
       console.error("Error fetching host properties:", error);
