@@ -2617,7 +2617,7 @@ export class DatabaseStorage implements IStorage {
   
   // Notification Operations
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const [created] = await db.insert(notifications).values({
+    const notificationData = {
       userId: notification.userId,
       type: notification.type,
       title: notification.title,
@@ -2625,7 +2625,8 @@ export class DatabaseStorage implements IStorage {
       relatedId: notification.relatedId,
       relatedType: notification.relatedType,
       isRead: notification.isRead ?? false,
-    }).returning();
+    } as typeof notifications.$inferInsert;
+    const [created] = await db.insert(notifications).values(notificationData).returning();
     return created;
   }
   
