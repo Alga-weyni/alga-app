@@ -1,0 +1,15 @@
+server/storage.ts:2620:61 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<...>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ userId?: string; title?: string; type?: string; message?: string; relatedId?: unknown; relatedType?: string; isRead?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<string, any>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }'.
+      Property 'userId' is optional in type '{ userId?: string; title?: string; type?: string; message?: string; relatedId?: unknown; relatedType?: string; isRead?: unknown; }' but required in type '{ userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<string, any>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }'.
+  Overload 2 of 2, '(values: { userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<...>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type '{ userId?: string; title?: string; type?: string; message?: string; relatedId?: unknown; relatedType?: string; isRead?: unknown; }' is not assignable to parameter of type '{ userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<string, any>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }[]'.
+      Type '{ userId?: string; title?: string; type?: string; message?: string; relatedId?: unknown; relatedType?: string; isRead?: unknown; }' is missing the following properties from type '{ userId: string | SQL<unknown> | Placeholder<string, any>; title: string | SQL<unknown> | Placeholder<string, any>; type: string | SQL<unknown> | Placeholder<string, any>; ... 5 more ...; isRead?: boolean | ... 1 more ... | Placeholder<...>; }[]': length, pop, push, concat, and 29 more.
+
+2620     const [created] = await db.insert(notifications).values(notification).returning();
+                                                                 ~~~~~~~~~~~~
+
+
+
+Found 1 error in server/storage.ts:2620
+
