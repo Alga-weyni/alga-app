@@ -342,7 +342,7 @@ export interface IStorage {
   completeOnboarding(userId: string): Promise<void>;
   
   // Notifications
-  createNotification(notification: InsertNotification): Promise<Notification>;
+  createNotification(notification: InsertNotification): Promise<Notification | null>;
   getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
   getUnreadNotificationCount(userId: string): Promise<number>;
   markNotificationAsRead(id: number, userId: string): Promise<void>;
@@ -2616,18 +2616,28 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Notification Operations
-  async createNotification(notification: InsertNotification): Promise<Notification> {
-    const notificationData = {
-      userId: notification.userId,
-      type: notification.type,
-      title: notification.title,
-      message: notification.message,
-      relatedId: notification.relatedId,
-      relatedType: notification.relatedType,
-      isRead: notification.isRead ?? false,
-    } as typeof notifications.$inferInsert;
-    const [created] = await db.insert(notifications).values(notificationData).returning();
-    return created;
+  async createNotification(notification: InsertNotification): Promise<Notification | null> {
+    try {
+      const notificationData = {
+        userId: notification.userId,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        relatedId: notification.relatedId,
+        relatedType: notification.relatedType,
+        isRead: notification.isRead ?? false,
+      } as typeof notifications.$inferInsert;
+      const [created] = await db.insert(notifications).values(notificationData).returning();
+      return created;
+    } catch (error: any) {
+      // Gracefully handle missing table (production database not migrated yet)
+      if (error?.message?.includes('does not exist') || error?.cause?.message?.includes('does not exist')) {
+        console.log("Notifications table not found - skipping notification creation");
+        return null;
+      }
+      console.error("Failed to create notification:", error);
+      return null;
+    }
   }
   
   async getUserNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
