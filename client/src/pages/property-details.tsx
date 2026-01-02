@@ -295,11 +295,12 @@ export default function PropertyDetails() {
       return;
     }
 
-    // Validate phone number is required and properly formatted
-    if (!paymentPhone || paymentPhone.length < 10) {
+    // Validate phone number is required and properly formatted (Ethiopian format: 251 + 9 digits = 12 chars)
+    const cleanPhone = paymentPhone.replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length < 12 || !cleanPhone.startsWith('251')) {
       toast({
         title: "Phone number required",
-        description: "Please enter a valid phone number with 251 prefix (e.g., 251911234567)",
+        description: "Please enter a valid Ethiopian phone number starting with 251 (e.g., 251911234567)",
         variant: "destructive",
       });
       return;
@@ -720,27 +721,38 @@ export default function PropertyDetails() {
                     </div>
                   )}
 
-                  {/* Phone number for payment */}
+                  {/* Phone number for payment - REQUIRED */}
                   <div className="space-y-2">
                     <label className="text-xs sm:text-sm font-medium text-gray-700">
-                      Phone Number (for payment) <span className="text-eth-red">*</span>
+                      Phone Number (for payment) <span className="text-eth-red font-bold">*Required</span>
                     </label>
                     <Input
                       type="tel"
                       placeholder="251911234567"
                       value={paymentPhone}
                       onChange={(e) => setPaymentPhone(e.target.value)}
-                      className="h-9 sm:h-10 text-sm"
+                      className={`h-9 sm:h-10 text-sm ${
+                        paymentPhone.length > 0 && paymentPhone.length < 12 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : paymentPhone.length >= 12 
+                            ? 'border-green-500 focus:ring-green-500' 
+                            : ''
+                      }`}
+                      required
+                      minLength={12}
+                      maxLength={15}
                       data-testid="input-payment-phone"
                     />
-                    <p className="text-xs text-gray-500">
-                      Enter your phone number with 251 prefix (e.g., 251911234567)
+                    <p className={`text-xs ${paymentPhone.length > 0 && paymentPhone.length < 12 ? 'text-red-500' : 'text-gray-500'}`}>
+                      {paymentPhone.length > 0 && paymentPhone.length < 12 
+                        ? `Enter at least 12 digits (${paymentPhone.length}/12)` 
+                        : 'Ethiopian format: 251 + 9 digits (e.g., 251911234567)'}
                     </p>
                   </div>
 
                   <Button 
                     className="w-full bg-eth-red hover:bg-red-700 h-10 sm:h-11 text-sm sm:text-base" 
-                    disabled={!bookingData.checkIn || !bookingData.checkOut || !paymentPhone || bookingMutation.isPending}
+                    disabled={!bookingData.checkIn || !bookingData.checkOut || !paymentPhone || paymentPhone.length < 12 || bookingMutation.isPending}
                     onClick={handleDirectReserve}
                     data-testid="button-reserve"
                   >
