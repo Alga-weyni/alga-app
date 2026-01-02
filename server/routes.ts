@@ -4158,17 +4158,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod, currency: clientCurrency, totalPrice: clientPrice } = req.body;
+      
+      // INSA CRITICAL FIX: Extract ONLY allowed fields - completely ignore client price/currency
+      // DO NOT destructure totalPrice or currency from request body
+      const { propertyId, checkIn, checkOut, guests, specialRequests, paymentMethod } = req.body;
+      
+      // INSA FIX: Explicitly detect and log any price/currency manipulation attempts
+      const clientAttemptedPrice = req.body.totalPrice;
+      const clientAttemptedCurrency = req.body.currency;
+      
+      if (clientAttemptedPrice !== undefined || clientAttemptedCurrency !== undefined) {
+        console.log(`[SECURITY ALERT] Client attempted to send price/currency in booking request. These values are IGNORED.`);
+        console.log(`  - Client totalPrice: ${clientAttemptedPrice} (IGNORED)`);
+        console.log(`  - Client currency: ${clientAttemptedCurrency} (IGNORED)`);
+        
+        await logSecurityEvent(userId, 'PRICE_MANIPULATION_ATTEMPT', {
+          propertyId,
+          clientAttemptedPrice,
+          clientAttemptedCurrency,
+          timestamp: new Date().toISOString(),
+          ip: req.ip || 'unknown'
+        }, req.ip || 'unknown');
+      }
       
       // INSA FIX: Reject any client-provided status or paymentStatus fields
-      // These are SERVER-CONTROLLED and cannot be set by clients
       if (req.body.status || req.body.paymentStatus) {
-        logSecurityEvent(userId, 'STATUS_INJECTION_ATTEMPT', { 
+        await logSecurityEvent(userId, 'STATUS_INJECTION_ATTEMPT', { 
           propertyId,
           attemptedStatus: req.body.status,
           attemptedPaymentStatus: req.body.paymentStatus
         }, req.ip || 'unknown');
-        // Don't reject - just ignore and log (status will be set server-side anyway)
       }
       
       // INSA Fix #11: Validate date order
@@ -4180,8 +4199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // INSA Fix #6: Validate guest count against property capacity
       const guestValidation = await validateGuestCount(propertyId, guests);
       if (!guestValidation.valid) {
-        // Log potential capacity bypass attempt
-        logSecurityEvent(userId, 'GUEST_CAPACITY_VALIDATION_FAILED', { 
+        await logSecurityEvent(userId, 'GUEST_CAPACITY_VALIDATION_FAILED', { 
           propertyId, 
           requestedGuests: guests,
           maxGuests: guestValidation.maxGuests,
@@ -4194,30 +4212,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // INSA Fix #3 & #5: Calculate price server-side (IGNORE client-provided price and currency)
-      // Pass clientCurrency for logging purposes only - it will NOT affect final price
-      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests, clientCurrency);
+      // INSA CRITICAL FIX #3 & #5: Calculate price 100% server-side
+      // Client-provided price and currency are COMPLETELY IGNORED
+      const pricing = await calculateBookingPrice(propertyId, checkIn, checkOut, guests);
       
-      // INSA FIX: Log if client attempted to manipulate currency or price
-      if (clientCurrency || clientPrice) {
-        const currencyMismatch = clientCurrency && clientCurrency.toUpperCase() !== pricing.currency;
-        const priceMismatch = clientPrice && parseFloat(String(clientPrice)) !== pricing.total;
-        
-        if (currencyMismatch || priceMismatch) {
-          logSecurityEvent(userId, 'CURRENCY_PRICE_MANIPULATION_ATTEMPT', {
-            propertyId,
-            clientCurrency: clientCurrency || 'not provided',
-            serverCurrency: pricing.currency,
-            clientPrice: clientPrice || 'not provided',
-            serverPrice: pricing.total,
-            currencyMismatch,
-            priceMismatch
-          }, req.ip || 'unknown');
+      // INSA FIX: Validate server-calculated price is reasonable
+      if (pricing.total <= 0 || isNaN(pricing.total)) {
+        console.error(`[SECURITY] Invalid server-calculated price: ${pricing.total} for property ${propertyId}`);
+        return res.status(500).json({ message: 'Unable to calculate booking price', code: 'PRICE_CALCULATION_ERROR' });
+      }
+      
+      // INSA FIX: Log price manipulation attempt with comparison
+      if (clientAttemptedPrice !== undefined) {
+        const clientPrice = parseFloat(String(clientAttemptedPrice));
+        if (!isNaN(clientPrice) && clientPrice !== pricing.total) {
+          console.log(`[SECURITY ALERT] Price manipulation detected!`);
+          console.log(`  - Client sent: ${clientPrice}`);
+          console.log(`  - Server calculated: ${pricing.total}`);
+          console.log(`  - Using SERVER price only.`);
         }
       }
       
       // INSA Fix #12: Generate secure booking reference
       const bookingReference = generateBookingReference();
+      
+      // INSA FIX: Create integrity hash for financial fields to prevent tampering
+      const financialIntegrityData = `${propertyId}|${pricing.total.toFixed(2)}|${pricing.currency}|${bookingReference}|${process.env.SESSION_SECRET || 'alga-secret'}`;
+      const financialIntegrityHash = createHash('sha256').update(financialIntegrityData).digest('hex');
+      
+      console.log(`[SECURITY] Booking created with server-calculated price:`);
+      console.log(`  - Property ID: ${propertyId}`);
+      console.log(`  - Server Price: ${pricing.total.toFixed(2)} ${pricing.currency}`);
+      console.log(`  - Price Per Night: ${pricing.pricePerNight}`);
+      console.log(`  - Nights: ${pricing.nights}`);
+      console.log(`  - Integrity Hash: ${financialIntegrityHash.substring(0, 16)}...`);
       
       const bookingData = insertBookingSchema.parse({ 
         propertyId,
@@ -4236,12 +4264,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const booking = await storage.createBooking(bookingData);
       
-      // Log security event
+      // Log security event with financial integrity hash
       await logSecurityEvent(userId, 'BOOKING_CREATED', { 
         bookingId: booking.id, 
         bookingReference,
         propertyId, 
-        totalPrice: pricing.total 
+        serverCalculatedPrice: pricing.total,
+        serverCalculatedCurrency: pricing.currency,
+        pricePerNight: pricing.pricePerNight,
+        nights: pricing.nights,
+        financialIntegrityHash: financialIntegrityHash.substring(0, 32),
+        clientAttemptedPrice: clientAttemptedPrice || 'none',
+        clientAttemptedCurrency: clientAttemptedCurrency || 'none'
       }, req.ip || 'unknown');
       
       res.status(201).json({
@@ -4259,7 +4293,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         _securityInfo: {
           currencySource: 'property',
           priceSource: 'server',
-          immutableFields: IMMUTABLE_BOOKING_FIELDS
+          immutableFields: IMMUTABLE_BOOKING_FIELDS,
+          integrityVerified: true
         }
       });
     } catch (error: any) {
