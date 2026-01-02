@@ -216,6 +216,7 @@ function shouldAllowCredentials(path: string): boolean {
     // Bookings and payments require authentication
     '/api/bookings',
     '/api/payments',
+    '/api/payment',
     // Admin and operator endpoints require authentication
     '/api/admin',
     '/api/operator',
