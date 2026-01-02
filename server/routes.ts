@@ -4236,20 +4236,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const booking = await storage.createBooking(bookingData);
       
-      // Create notification for host
-      const property = await storage.getProperty(propertyId);
-      if (property) {
-        const guest = await storage.getUser(userId);
-        const guestName = guest?.firstName ? `${guest.firstName}` : 'A guest';
-        await storage.createNotification({
-          userId: property.hostId,
-          type: 'booking_new',
-          title: 'New Booking Request',
-          message: `${guestName} has booked "${property.title}" for ${pricing.nights} night${pricing.nights > 1 ? 's' : ''} (ETB ${pricing.total.toLocaleString()})`,
-          relatedId: booking.id,
-          relatedType: 'booking',
-          isRead: false,
-        });
+      // Create notification for host (non-blocking - don't fail booking if notification fails)
+      try {
+        const property = await storage.getProperty(propertyId);
+        if (property) {
+          const guest = await storage.getUser(userId);
+          const guestName = guest?.firstName ? `${guest.firstName}` : 'A guest';
+          await storage.createNotification({
+            userId: property.hostId,
+            type: 'booking_new',
+            title: 'New Booking Request',
+            message: `${guestName} has booked "${property.title}" for ${pricing.nights} night${pricing.nights > 1 ? 's' : ''} (ETB ${pricing.total.toLocaleString()})`,
+            relatedId: booking.id,
+            relatedType: 'booking',
+            isRead: false,
+          });
+        }
+      } catch (notificationError) {
+        console.error("Failed to create booking notification (non-critical):", notificationError);
       }
       
       // Log security event
@@ -4280,7 +4284,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error creating booking:", error);
-      res.status(500).json({ message: error.message || "Failed to create booking" });
+      console.error("Booking error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack?.split('\n').slice(0, 5),
+      });
+      
+      // Return more helpful error message
+      let errorMessage = "Failed to create booking";
+      if (error.name === 'ZodError') {
+        errorMessage = "Invalid booking data: " + error.errors?.map((e: any) => e.message).join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      res.status(500).json({ message: errorMessage });
     }
   });
 

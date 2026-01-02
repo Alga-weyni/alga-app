@@ -226,10 +226,12 @@ export default function PropertyDetails() {
         navigate(`/bookings/${booking.id}`);
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Booking error:", error);
+      const errorMessage = error?.message || error?.data?.message || "Unable to create booking. Please try again.";
       toast({
         title: "Booking failed",
-        description: "Unable to create booking. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
