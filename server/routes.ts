@@ -590,31 +590,47 @@ async function calculateBookingPrice(propertyId: number, checkIn: Date | string,
 // Validate guest count against property capacity - Fix #6
 // INSA STRENGTHENED: Explicit type validation to prevent bypass attacks
 async function validateGuestCount(propertyId: number, guests: any): Promise<{ valid: boolean; error?: string; maxGuests?: number }> {
+  console.log(`[SECURITY] Validating guest count: propertyId=${propertyId}, guests=${guests}, type=${typeof guests}`);
+  
   // INSA FIX: Strict integer validation - prevent type coercion attacks
   const guestCount = parseInt(String(guests), 10);
   if (isNaN(guestCount)) {
+    console.log(`[SECURITY] Guest validation FAILED: invalid number`);
     return { valid: false, error: 'Guest count must be a valid number' };
+  }
+  
+  // INSA FIX: Absolute maximum sanity check FIRST - before any DB lookup
+  if (guestCount > 50) {
+    console.log(`[SECURITY] Guest validation FAILED: exceeds absolute max (50), requested ${guestCount}`);
+    return { valid: false, error: 'Invalid guest count - exceeds reasonable limits (max 50)', maxGuests: 50 };
+  }
+  
+  // INSA FIX: Minimum guest validation
+  if (guestCount <= 0) {
+    console.log(`[SECURITY] Guest validation FAILED: must be at least 1`);
+    return { valid: false, error: 'Guest count must be at least 1' };
   }
   
   const property = await db.select().from(properties).where(eq(properties.id, propertyId)).limit(1);
   if (!property || property.length === 0) {
+    console.log(`[SECURITY] Guest validation FAILED: property not found`);
     return { valid: false, error: 'Property not found' };
   }
-  const maxGuests = property[0].maxGuests;
   
-  // INSA FIX: Strict range validation
-  if (guestCount <= 0) {
-    return { valid: false, error: 'Guest count must be at least 1', maxGuests };
+  // INSA FIX: Handle null/undefined maxGuests - default to a safe limit
+  const maxGuests = property[0].maxGuests;
+  const effectiveMaxGuests = (maxGuests && maxGuests > 0) ? maxGuests : 10; // Default to 10 if not set
+  
+  console.log(`[SECURITY] Property ${propertyId} maxGuests=${maxGuests}, effectiveMax=${effectiveMaxGuests}, requested=${guestCount}`);
+  
+  // INSA FIX: Strict capacity validation
+  if (guestCount > effectiveMaxGuests) {
+    console.log(`[SECURITY] Guest capacity EXCEEDED: requested ${guestCount}, max ${effectiveMaxGuests}, property ${propertyId}`);
+    return { valid: false, error: `Guest count (${guestCount}) exceeds maximum capacity of ${effectiveMaxGuests}`, maxGuests: effectiveMaxGuests };
   }
-  if (guestCount > maxGuests) {
-    console.log(`[SECURITY] Guest capacity exceeded: requested ${guestCount}, max ${maxGuests}, property ${propertyId}`);
-    return { valid: false, error: `Guest count (${guestCount}) exceeds maximum capacity of ${maxGuests}`, maxGuests };
-  }
-  if (guestCount > 100) {
-    // Absolute maximum sanity check
-    return { valid: false, error: 'Invalid guest count - exceeds reasonable limits', maxGuests };
-  }
-  return { valid: true, maxGuests };
+  
+  console.log(`[SECURITY] Guest validation PASSED: ${guestCount} <= ${effectiveMaxGuests}`);
+  return { valid: true, maxGuests: effectiveMaxGuests };
 }
 
 // Security: Rate limiting for authentication endpoints
