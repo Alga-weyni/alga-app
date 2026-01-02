@@ -4236,26 +4236,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const booking = await storage.createBooking(bookingData);
       
-      // Create notification for host (non-blocking - don't fail booking if notification fails)
-      try {
-        const property = await storage.getProperty(propertyId);
-        if (property) {
-          const guest = await storage.getUser(userId);
-          const guestName = guest?.firstName ? `${guest.firstName}` : 'A guest';
-          await storage.createNotification({
-            userId: property.hostId,
-            type: 'booking_new',
-            title: 'New Booking Request',
-            message: `${guestName} has booked "${property.title}" for ${pricing.nights} night${pricing.nights > 1 ? 's' : ''} (ETB ${pricing.total.toLocaleString()})`,
-            relatedId: booking.id,
-            relatedType: 'booking',
-            isRead: false,
-          });
-        }
-      } catch (notificationError) {
-        console.error("Failed to create booking notification (non-critical):", notificationError);
-      }
-      
       // Log security event
       await logSecurityEvent(userId, 'BOOKING_CREATED', { 
         bookingId: booking.id, 
