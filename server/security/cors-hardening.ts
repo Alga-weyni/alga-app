@@ -19,7 +19,10 @@ const ALLOWED_ORIGINS: Set<string> = new Set([
   'https://app.alga.et',
   'https://alga.et',
   'https://www.alga.et',
-  // Capacitor mobile apps (Android with https scheme)
+  // Render deployment
+  'https://alga.onrender.com',
+  // Capacitor mobile apps - BOTH http and https for Android
+  'http://localhost',
   'https://localhost',
   // Capacitor mobile apps (iOS)
   'capacitor://localhost',
@@ -78,6 +81,11 @@ function getClientIP(req: Request): string {
 }
 
 function isValidOrigin(origin: string): boolean {
+  // Handle null origin from mobile apps (Capacitor WebView)
+  if (origin === 'null') {
+    return true;
+  }
+  
   if (ALLOWED_ORIGINS.has(origin)) {
     return true;
   }
