@@ -254,6 +254,7 @@ function generateBookingReference(): string {
 
 // INSA FIX #10: Sanitize user object to remove ALL sensitive fields
 // CRITICAL: Password hashes must NEVER be returned to clients
+// INSA RBAC FIX: Minimize role exposure to prevent client-side manipulation
 const SENSITIVE_USER_FIELDS = [
   'password',           // Password hash - NEVER expose
   'otp',                // One-time password - NEVER expose
@@ -263,16 +264,38 @@ const SENSITIVE_USER_FIELDS = [
   'resetTokenExpiry',   // Reset token expiration
 ];
 
+// INSA RBAC FIX: Minimal user response for login/auth
+// Only include essential fields - role info verified server-side via /api/auth/role-check
 function sanitizeUserResponse(user: any): any {
   if (!user) return null;
   
-  // Create a shallow copy and delete sensitive fields
-  const safeUser = { ...user };
-  SENSITIVE_USER_FIELDS.forEach(field => {
-    delete safeUser[field];
-  });
-  
-  return safeUser;
+  // INSA RBAC FIX: Return only essential user fields
+  // Client should NOT trust these for UI decisions - must verify via role-check endpoint
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phoneNumber: user.phoneNumber,
+    phoneVerified: user.phoneVerified,
+    emailVerified: user.emailVerified,
+    profilePicture: user.profilePicture,
+    faydaVerified: user.faydaVerified,
+    idVerified: user.idVerified,
+    nationalIdNumber: user.nationalIdNumber,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    // Role exposed for basic routing only - must be verified server-side for sensitive actions
+    role: user.role,
+    // Host/service provider status for their own dashboard access
+    isHost: user.isHost,
+    isServiceProvider: user.isServiceProvider,
+    // Delala status for agent dashboard
+    isDelala: user.isDelala,
+    // Preferences
+    preferredCurrency: user.preferredCurrency,
+    preferredLanguage: user.preferredLanguage,
+  };
 }
 
 // Sanitize multiple users (for admin endpoints)
@@ -1346,6 +1369,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // INSA RBAC FIX: Secure role verification endpoint
+  // Client MUST call this to verify admin/operator access before showing admin UI
+  // This prevents client-side role manipulation from granting UI access
+  app.get('/api/auth/role-check', isAuthenticated, async (req: any, res) => {
+    try {
+      // Fetch fresh user from database to prevent session manipulation
+      const freshUser = await storage.getUser(req.user.id);
+      
+      if (!freshUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Return verified role information from database, not session
+      const roleCheck = {
+        userId: freshUser.id,
+        role: freshUser.role,
+        isAdmin: freshUser.role === 'admin',
+        isOperator: freshUser.role === 'operator',
+        isAdminOrOperator: ['admin', 'operator'].includes(freshUser.role || ''),
+        isHost: freshUser.isHost === true,
+        isDelala: freshUser.isDelala === true,
+        isServiceProvider: freshUser.isServiceProvider === true,
+        // Timestamp for client to verify freshness
+        verifiedAt: new Date().toISOString(),
+      };
+      
+      res.json(roleCheck);
+    } catch (error) {
+      console.error("Error checking role:", error);
+      res.status(500).json({ message: "Failed to verify role" });
     }
   });
 
