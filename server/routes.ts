@@ -96,17 +96,47 @@ function registerUserUpload(userId: string, filePath: string): void {
 
 // Validate that an image URL was uploaded by the specified user
 // INSA FIX: Strict validation - NO backwards compatibility bypass
+// INSA AUDIT 2026-01-05: Strengthened to block ALL arbitrary file references
 function validateUserUploadedImage(userId: string, imageUrl: string): { valid: boolean; reason?: string } {
   const now = Date.now();
   
-  // INSA FIX: Detect and block path traversal attacks
-  if (imageUrl.includes('..') || imageUrl.includes('%2e%2e') || imageUrl.includes('%2E%2E')) {
+  // INSA FIX: Reject empty or null URLs
+  if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+    return { valid: false, reason: 'Empty or invalid image URL' };
+  }
+  
+  // INSA FIX: Detect and block path traversal attacks (multiple encodings)
+  const pathTraversalPatterns = ['..', '%2e%2e', '%2E%2E', '..%2f', '%2f..', '..\\', '..%5c', '%5c..'];
+  if (pathTraversalPatterns.some(pattern => imageUrl.toLowerCase().includes(pattern.toLowerCase()))) {
     console.log(`[SECURITY ALERT] Path traversal attempt blocked: ${imageUrl} by user ${userId}`);
     logSecurityEvent(userId, 'PATH_TRAVERSAL_ATTEMPT', { imageUrl }, 'system');
     return { valid: false, reason: 'Invalid file path - path traversal detected' };
   }
   
-  // Allow only specific trusted external URLs
+  // INSA FIX: FIRST check - Block ALL dangerous system paths BEFORE any other checks
+  // This catches /var/www/html/, /test/folder/, etc. regardless of format
+  const dangerousPathPatterns = [
+    '/var/', '/etc/', '/tmp/', '/root/', '/home/', '/test/', '/opt/',
+    '/usr/', '/bin/', '/sbin/', '/lib/', '/www/', '/html/', '/htdocs/',
+    '/public_html/', '/private/', '/data/', '/backup/', '/log/', '/logs/'
+  ];
+  const lowerUrl = imageUrl.toLowerCase();
+  for (const pattern of dangerousPathPatterns) {
+    if (lowerUrl.includes(pattern)) {
+      console.log(`[SECURITY ALERT] BLOCKED dangerous path: "${imageUrl}" contains "${pattern}" - user ${userId}`);
+      logSecurityEvent(userId, 'DANGEROUS_PATH_BLOCKED', { imageUrl, matchedPattern: pattern }, 'system');
+      return { valid: false, reason: 'Invalid file path - unauthorized system location' };
+    }
+  }
+  
+  // INSA FIX: Block paths that start with / but aren't our expected patterns
+  if (imageUrl.startsWith('/') && !imageUrl.startsWith('/uploads/') && !imageUrl.startsWith('/objects/')) {
+    console.log(`[SECURITY ALERT] BLOCKED arbitrary path: "${imageUrl}" - not an allowed prefix - user ${userId}`);
+    logSecurityEvent(userId, 'ARBITRARY_PATH_BLOCKED', { imageUrl }, 'system');
+    return { valid: false, reason: 'Invalid file path - must use /uploads/ or /objects/ prefix' };
+  }
+  
+  // Allow only specific trusted external URLs (must start with https://)
   const trustedExternalDomains = [
     'https://images.unsplash.com',
     'https://picsum.photos',
@@ -116,8 +146,7 @@ function validateUserUploadedImage(userId: string, imageUrl: string): { valid: b
     return { valid: true };
   }
   
-  // Allow R2 URLs - ONLY if they match our specific R2 bucket pattern
-  // Must start with our known R2 patterns (not just contain them)
+  // Allow R2 URLs - ONLY if they match our specific R2 bucket pattern exactly
   const r2Patterns = [
     /^https:\/\/pub-[a-f0-9]+\.r2\.dev\//,
     /^https:\/\/cdn\.alga\.et\//,
@@ -128,54 +157,42 @@ function validateUserUploadedImage(userId: string, imageUrl: string): { valid: b
     return { valid: true };
   }
   
-  // INSA FIX: Block arbitrary /var/, /test/, /etc/ paths
-  const dangerousPathPatterns = ['/var/', '/etc/', '/tmp/', '/root/', '/home/', '/test/', '/opt/'];
-  if (dangerousPathPatterns.some(pattern => imageUrl.toLowerCase().includes(pattern))) {
-    console.log(`[SECURITY ALERT] Dangerous path blocked: ${imageUrl} by user ${userId}`);
-    logSecurityEvent(userId, 'DANGEROUS_PATH_ATTEMPT', { imageUrl }, 'system');
-    return { valid: false, reason: 'Invalid file path - unauthorized location' };
-  }
-  
-  // Extract file path from URL
+  // Extract file path from URL - ONLY for /uploads/ and /objects/
   let filePath = imageUrl;
-  
-  // Handle full URLs with domain
   if (imageUrl.includes('/uploads/')) {
     filePath = imageUrl.substring(imageUrl.indexOf('/uploads/'));
   } else if (imageUrl.includes('/objects/')) {
     filePath = imageUrl.substring(imageUrl.indexOf('/objects/'));
   }
   
-  // INSA FIX: Strict file path validation - must match expected patterns
-  const validPathPattern = /^\/(uploads|objects)\/properties\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|gif|webp)$/i;
+  // INSA FIX: Strict file path validation - must match EXACT expected patterns
+  // Pattern: /uploads/properties/TIMESTAMP-HASH.extension or /objects/properties/TIMESTAMP-HASH.extension
+  const validPathPattern = /^\/(uploads|objects)\/properties\/\d{13}-[a-f0-9]{12}\.(jpg|jpeg|png|gif|webp)$/i;
   if (!validPathPattern.test(filePath)) {
-    // Check if it's a valid timestamp-based upload path
-    const timestampPattern = /^\/(uploads|objects)\/properties\/\d+[a-zA-Z0-9_-]*\.(jpg|jpeg|png|gif|webp)$/i;
-    if (!timestampPattern.test(filePath)) {
-      console.log(`[SECURITY ALERT] Invalid file path pattern: ${filePath} by user ${userId}`);
-      logSecurityEvent(userId, 'INVALID_FILE_PATH_PATTERN', { imageUrl, filePath }, 'system');
-      return { valid: false, reason: 'Invalid file path pattern' };
-    }
+    console.log(`[SECURITY ALERT] BLOCKED invalid path pattern: "${filePath}" - user ${userId}`);
+    logSecurityEvent(userId, 'INVALID_FILE_PATH_PATTERN', { imageUrl, filePath }, 'system');
+    return { valid: false, reason: 'Invalid file path pattern - must be uploaded through the app' };
   }
   
-  // Check if file was uploaded by this user
+  // INSA FIX: Check if file was uploaded by this user in current session
   const record = userUploadedFiles.get(filePath);
   
   if (!record) {
-    // INSA FIX: NO backwards compatibility - file MUST be in upload records
-    console.log(`[SECURITY ALERT] Untracked file reference BLOCKED: ${filePath} by user ${userId}`);
-    logSecurityEvent(userId, 'UNTRACKED_FILE_REFERENCE', { filePath }, 'system');
-    return { valid: false, reason: 'File was not uploaded through proper channels' };
+    // ABSOLUTELY NO backwards compatibility - file MUST be in upload records
+    console.log(`[SECURITY ALERT] BLOCKED untracked file: "${filePath}" - user ${userId} - file not in upload registry`);
+    logSecurityEvent(userId, 'UNTRACKED_FILE_BLOCKED', { filePath }, 'system');
+    return { valid: false, reason: 'File was not uploaded through proper channels - please re-upload' };
   }
   
   if (record.expiresAt < now) {
     userUploadedFiles.delete(filePath);
+    console.log(`[SECURITY ALERT] BLOCKED expired upload: "${filePath}" - user ${userId}`);
     return { valid: false, reason: 'Upload session expired - please re-upload the file' };
   }
   
   if (record.userId !== userId) {
-    console.log(`[SECURITY ALERT] User ${userId} tried to reference file owned by ${record.userId}: ${filePath}`);
-    logSecurityEvent(userId, 'UNAUTHORIZED_FILE_REFERENCE', { filePath, actualOwner: record.userId }, 'system');
+    console.log(`[SECURITY ALERT] BLOCKED cross-user file access: User ${userId} tried to use file owned by ${record.userId}: "${filePath}"`);
+    logSecurityEvent(userId, 'CROSS_USER_FILE_BLOCKED', { filePath, actualOwner: record.userId }, 'system');
     return { valid: false, reason: 'File was not uploaded by your account' };
   }
   
