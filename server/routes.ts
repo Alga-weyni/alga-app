@@ -1391,9 +1391,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAdmin: freshUser.role === 'admin',
         isOperator: freshUser.role === 'operator',
         isAdminOrOperator: ['admin', 'operator'].includes(freshUser.role || ''),
-        isHost: freshUser.isHost === true,
-        isDelala: freshUser.isDelala === true,
-        isServiceProvider: freshUser.isServiceProvider === true,
+        isHost: (freshUser as any).isHost === true,
+        isDelala: (freshUser as any).isDelala === true,
+        isServiceProvider: (freshUser as any).isServiceProvider === true,
         // Timestamp for client to verify freshness
         verifiedAt: new Date().toISOString(),
       };

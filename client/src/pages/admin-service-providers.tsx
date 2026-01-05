@@ -55,17 +55,42 @@ export default function AdminServiceProviders() {
     }
   };
 
-  // Fetch all service providers (including inactive for admin)
-  const { data: providersData, isLoading } = useQuery<any>({
-    queryKey: ['/api/service-providers', 'includeAll'],
+  // INSA RBAC FIX: Use protected admin endpoint instead of public endpoint
+  // This ensures only admins/operators can see pending/rejected providers
+  const { data: providersData, isLoading, error: fetchError } = useQuery<any>({
+    queryKey: ['/api/admin/service-providers'],
     queryFn: async () => {
-      const response = await fetch('/api/service-providers?includeAll=true', {
+      const response = await fetch('/api/admin/service-providers', {
         credentials: 'include',
       });
+      if (response.status === 403) {
+        throw new Error('Access denied. Admin or operator role required.');
+      }
       if (!response.ok) throw new Error('Failed to fetch providers');
       return response.json();
     },
   });
+  
+  // INSA RBAC FIX: Show access denied message for non-admin users
+  if (fetchError?.message?.includes('Access denied')) {
+    return (
+      <div className="container mx-auto px-4 py-8" data-testid="access-denied">
+        <Card className="max-w-md mx-auto border-red-300 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-700">Access Denied</CardTitle>
+            <CardDescription className="text-red-600">
+              You do not have permission to view this page. Admin or operator role is required.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button onClick={() => navigate('/')} variant="outline">
+              Return to Home
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
   const allProviders: ServiceProvider[] = useMemo(() => {
     if (Array.isArray(providersData)) return providersData;
     if (providersData?.providers && Array.isArray(providersData.providers)) return providersData.providers;
